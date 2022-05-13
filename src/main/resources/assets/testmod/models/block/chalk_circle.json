@@ -1,0 +1,14 @@
+{
+  "textures" : {
+    "basetex" : "testmod:blocks/chalk_circle"
+  },
+  "elements" : [
+    {
+      "from" : [1,0,1],
+      "to" : [15, 0.001, 15],
+      "faces" : {
+        "up" : {"uv" : [1,1,15,15], "texture": "basetex"}
+      }
+    }
+  ]
+}

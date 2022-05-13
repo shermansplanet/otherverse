@@ -18,4 +18,7 @@ public class ItemInit {
     public static final RegistryObject<Item> CALCITE = ITEMS.register("calcite",
             () -> new BlockItem(BlockInit.CALCITE_BLOCK.get(),
                     new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
+
+    public static final RegistryObject<Item> SELF = ITEMS.register("self",
+            () -> new Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 }

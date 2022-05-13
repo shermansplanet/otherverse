@@ -1,5 +1,6 @@
 {
     "item.testmod.chalk": "Chalk",
     "block.testmod.chalk_line": "Chalk",
-    "block.testmod.calcite": "Calcite"
+    "block.testmod.calcite": "Calcite",
+    "death.attack.testmod_self": "%1$s was drained of Self"
 }

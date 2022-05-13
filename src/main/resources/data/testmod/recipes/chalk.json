@@ -6,6 +6,7 @@
     }
   ],
   "result": {
-    "item": "testmod:chalk"
+    "item": "testmod:chalk",
+    "count" : 4
   }
 }
