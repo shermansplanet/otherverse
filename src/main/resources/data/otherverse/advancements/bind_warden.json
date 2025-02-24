@@ -1,0 +1,20 @@
+{
+  "parent":"otherverse:bind",
+  "display":{
+    "icon":{
+      "item": "otherverse:spirit_dark"
+    },
+    "title": "Who's the Warden Now?",
+    "description": "Bind the Warden",
+    "frame": "challenge"
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "bind_warden"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

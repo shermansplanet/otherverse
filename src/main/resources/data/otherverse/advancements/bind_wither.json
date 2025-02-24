@@ -1,0 +1,20 @@
+{
+  "parent":"otherverse:bind",
+  "display":{
+    "icon":{
+      "item": "otherverse:spirit_nether"
+    },
+    "title": "Wither Mark",
+    "description": "Bind the Wither",
+    "frame": "challenge"
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "bind_wither"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

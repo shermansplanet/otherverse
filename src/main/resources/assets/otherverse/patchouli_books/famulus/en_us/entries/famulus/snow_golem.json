@@ -1,0 +1,12 @@
+{
+    "name": "Snow Golem",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'snow_golem'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A snow golem Familiar will protect you from cold damage. If you have blue ice in your inventory, you will freeze any water or lava beneath your feet. You will heal in cold biomes, but will slowly melt in hot biomes unless you have snow blocks in your inventory, in which case one of those will melt instead."
+        }
+    ]
+}

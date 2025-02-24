@@ -1,0 +1,38 @@
+{
+  "temperature": 0,
+  "downfall": 0.4,
+  "precipitation": "snow",
+  "effects": {
+    "sky_color": 0,
+    "fog_color": 1842204,
+    "water_color": 16777215,
+    "water_fog_color": 0,
+    "grass_color": 0,
+    "ambient_sound": "minecraft:ambient.basalt_deltas.loop",
+    "mood_sound": {
+      "sound": "minecraft:ambient.soul_sand_valley.mood",
+      "tick_delay": 100,
+      "block_search_extent": 8,
+      "offset": 4
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "otherverse:typhlotic_shark",
+        "weight": 100,
+        "minCount": 1,
+        "maxCount": 2
+      }
+    ]
+  },
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [
+      "otherverse:fear_bones"
+    ],
+    [],
+    []
+  ]
+}

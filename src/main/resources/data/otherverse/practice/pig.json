@@ -1,0 +1,14 @@
+{
+	"other" : "minecraft:pig",
+	"spirit" : "food",
+	"healing" : {
+		"minecraft:carrot" : 3
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:rotten_flesh",
+			"health" : 9,
+			"output" : "minecraft:porkchop"
+		}
+	]
+}

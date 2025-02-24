@@ -1,0 +1,19 @@
+{
+  "parent":"otherverse:bind",
+  "display":{
+    "icon":{
+      "item": "otherverse:contract"
+    },
+    "title": "First Contract",
+    "description": "Make a contract."
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "contract"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

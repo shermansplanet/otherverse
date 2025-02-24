@@ -1,0 +1,19 @@
+{
+	"other" : "minecraft:wither_skeleton",
+	"healing" : {
+		"minecraft:soul_sand" : 1,
+		"minecraft:soul_soil" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:skeleton_skull",
+			"health" : 27,
+			"output" : "minecraft:wither_skeleton_skull"
+		},
+		{
+			"input" : "minecraft:rose_bush",
+			"health" : 3,
+			"output" : "minecraft:wither_rose"
+		}
+	]
+}

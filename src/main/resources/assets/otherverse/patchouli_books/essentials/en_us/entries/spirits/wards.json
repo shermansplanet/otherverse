@@ -1,0 +1,16 @@
+{
+    "name": "Wards",
+    "sortnum": 5,
+    "icon": "minecraft:iron_helmet{hallow:{spirit_type:'protection'}}",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Protection spirits have a special use: if you place a block that's a hallow for protection spirits, it will prevent any mobs (creepers, endermen, etc.) from breaking blocks nearby."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The diameter of the ward is equal to the hallow's capacity, centered on the hallow. Each time blocks would be broken by a mob inside the ward, the hallow will instead lose nine protection spirits."
+        }
+    ]
+}

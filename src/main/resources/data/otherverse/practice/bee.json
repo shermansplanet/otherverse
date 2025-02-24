@@ -1,0 +1,21 @@
+{
+	"other" : "minecraft:bee",
+	"binding" : {
+		"minecraft:cobweb" : 7
+	},
+	"healing" : {
+		"!flowers" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:slime_block",
+			"health" : 3,
+			"output" : "minecraft:honey_block"
+		},
+		{
+			"input" : "minecraft:glass_bottle",
+			"health" : 3,
+			"output" : "minecraft:honey_bottle"
+		}
+	]
+}

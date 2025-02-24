@@ -1,0 +1,195 @@
+package com.shermansplanet.otherverse.spirits;
+
+import com.google.common.collect.Maps;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.ClientEvents;
+import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.diagrams.IBlockRenderGetter;
+import com.shermansplanet.otherverse.familiar.MobRetexturer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.model.MultiVariant;
+import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+import org.slf4j.Logger;
+
+import java.util.*;
+import java.util.function.Function;
+
+@Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+public class PlacedHallowRenderer {
+    private static final Map<BlockState, HashMap<String, Pair<BakedModel, RenderType>>> modelByStateCache = Maps.newIdentityHashMap();
+    private static final RenderStateShard.LightmapStateShard LIGHTMAP = new RenderStateShard.LightmapStateShard(true);
+    private static final RenderStateShard.ShaderStateShard RENDERTYPE_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeCutoutShader);
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    @SubscribeEvent
+    public static void renderTick(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) return;
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) return;
+        renderHallows(player, event);
+    }
+
+    private static void renderHallows(LocalPlayer player, RenderLevelStageEvent event) {
+        var levelData = DiagramManager.getOrCreateLevelData(player.level);
+        var poseStack = event.getPoseStack();
+        var camera = event.getCamera();
+        poseStack.pushPose();
+        var s = 0.9999f;
+        poseStack.scale(s, s, s);
+        poseStack.translate(-camera.getPosition().x(), -camera.getPosition().y(), -camera.getPosition().z());
+        var multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        var renderDist = 64 * 64;
+        for (BlockPos pos : levelData.getAllPlacedItemPositions()) {
+            if (player.position().distanceToSqr(new Vec3(pos.getX(), pos.getY(), pos.getZ())) > renderDist) continue;
+            poseStack.pushPose();
+            poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
+            var bs = player.level.getBlockState(pos);
+            renderSingleBlock((IBlockRenderGetter) Minecraft.getInstance().getBlockRenderer(), bs, poseStack, multiBufferSource,
+                    255, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout(),
+                    levelData.getPlacedItemTag(pos).getString("spirit_type"));
+            poseStack.popPose();
+        }
+        poseStack.popPose();
+    }
+
+    private static void renderSingleBlock(IBlockRenderGetter blockRenderGetter, BlockState p_110913_, PoseStack p_110914_, MultiBufferSource p_110915_, int p_110916_, int p_110917_, net.minecraftforge.client.model.data.ModelData modelData, net.minecraft.client.renderer.RenderType renderType, String spiritName) {
+        RenderShape rendershape = p_110913_.getRenderShape();
+        if (rendershape != RenderShape.INVISIBLE) {
+            switch (rendershape) {
+                case MODEL:
+                    var modelAndRender = getBlockModel(p_110913_, spiritName);
+                    int i = blockRenderGetter.getBlockColors().getColor(p_110913_, null, null, 0);
+                    float f = (float) (i >> 16 & 255) / 255.0F;
+                    float f1 = (float) (i >> 8 & 255) / 255.0F;
+                    float f2 = (float) (i & 255) / 255.0F;
+                    for (net.minecraft.client.renderer.RenderType rt : modelAndRender.getFirst().getRenderTypes(p_110913_, RandomSource.create(42), modelData))
+                        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(p_110914_.last(), p_110915_.getBuffer(modelAndRender.getSecond()), p_110913_, modelAndRender.getFirst(), f, f1, f2, p_110916_, p_110917_, modelData, rt);
+                    break;
+                case ENTITYBLOCK_ANIMATED:
+                    ItemStack stack = new ItemStack(p_110913_.getBlock());
+                    net.minecraftforge.client.extensions.common.IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, p_110914_, p_110915_, p_110916_, p_110917_);
+            }
+
+        }
+    }
+
+    private static Pair<BakedModel, RenderType> getBlockModel(BlockState state, String spiritType) {
+        var cachedForState = modelByStateCache.computeIfAbsent(state, x -> new HashMap<>());
+        var cachedModel = cachedForState.get(spiritType);
+        if (cachedModel != null) return cachedModel;
+
+        var bakery = Minecraft.getInstance().getModelManager().getModelBakery();
+        var blockKey = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        var modelLocation = BlockModelShaper.stateToModelLocation(state);
+
+        var model = bakery.getModel(modelLocation);
+
+        var set = new HashSet<Pair<String, String>>();
+        var materials = model.getMaterials(bakery::getModel, set);
+
+        List<ResourceLocation> locations = new ArrayList<>();
+        for (var m : materials) {
+            locations.add(new ResourceLocation(m.texture().getNamespace(),
+                    "textures/" + m.texture().getPath() + ".png"));
+        }
+
+        if (locations.isEmpty()) {
+            LOGGER.warn("Couldn't find texture for " + blockKey);
+            return null;
+        }
+        var primaryTex = MobRetexturer.makeSpiritVariant(locations, spiritType);
+
+        if (primaryTex == null) {
+            LOGGER.warn("Couldn't make texture for " + blockKey);
+            return null;
+        }
+
+        for (int i = 0; i < locations.size(); i++) {
+            var loc = locations.get(i);
+            loc = new ResourceLocation(loc.getNamespace(),
+                    loc.getPath().substring(9, loc.getPath().length() - 4));
+            HallowTextureManager.offsetsByMaterial.put(loc, Pair.of(locations.size(), i));
+        }
+
+        ClientEvents.HALLOW_TEXTURE_MANAGER.quietReload();
+
+        Function<Material, TextureAtlasSprite> func = x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex, x, new HashMap<>());
+
+        var newLoc = new ModelResourceLocation(Otherverse.MODID,
+                modelLocation.getNamespace() + "_" + modelLocation.getPath() + "_hallow_" + spiritType, modelLocation.getVariant());
+        BakedModel m = model instanceof MultiVariant mv ? bakeMultiVariant(mv, bakery, func) :
+                model.bake(bakery, func, BlockModelRotation.X0_Y0, newLoc);
+
+        var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
+        RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false,
+                RenderType.CompositeState.builder()
+                        .setLightmapState(LIGHTMAP)
+                        .setShaderState(RENDERTYPE_CUTOUT_SHADER)
+                        .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
+                        .createCompositeState(true));
+
+        var pair = Pair.of(m, rt);
+        cachedForState.put(spiritType, pair);
+        return pair;
+    }
+
+    private static BakedModel bakeMultiVariant(MultiVariant mv, ModelBakery bakery, Function<Material, TextureAtlasSprite> p_111851_) {
+        if (mv.getVariants().isEmpty()) {
+            return null;
+        } else {
+            WeightedBakedModel.Builder weightedbakedmodel$builder = new WeightedBakedModel.Builder();
+
+            for (Variant variant : mv.getVariants()) {
+                BakedModel bakedmodel = forceBake(bakery, variant.getModelLocation(), variant, p_111851_);
+                weightedbakedmodel$builder.add(bakedmodel, variant.getWeight());
+            }
+
+            return weightedbakedmodel$builder.build();
+        }
+    }
+
+    private static BakedModel forceBake(ModelBakery bakery, ResourceLocation p_119350_, ModelState p_119351_, java.util.function.Function<Material, net.minecraft.client.renderer.texture.TextureAtlasSprite> sprites) {
+        UnbakedModel unbakedmodel = bakery.getModel(p_119350_);
+        if (unbakedmodel instanceof BlockModel) {
+            BlockModel blockmodel = (BlockModel)unbakedmodel;
+            if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
+                return ((IModelGetter)bakery).getItemModelGenerator().generateBlockModel(sprites, blockmodel).bake(bakery, blockmodel, sprites, p_119351_, p_119350_, false);
+            }
+        }else if(unbakedmodel instanceof MultiVariant mv){
+            return bakeMultiVariant(mv, bakery, sprites);
+        }
+
+        return unbakedmodel.bake(bakery, sprites, p_119351_, p_119350_);
+    }
+
+
+}

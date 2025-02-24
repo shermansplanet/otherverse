@@ -1,0 +1,26 @@
+{
+	"other" : "minecraft:skeleton",
+	"binding" : {
+		"otherverse:spirit_light" : 1
+	},
+	"healing" : {
+		"minecraft:milk_bucket" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:stick",
+			"health" : 9,
+			"output" : "minecraft:bone"
+		},
+		{
+			"input" : "minecraft:bone_block",
+			"health" : 18,
+			"output" : "minecraft:skeleton_skull"
+		},
+		{
+			"input" : "minecraft:stone",
+			"health" : 1,
+			"output" : "minecraft:calcite"
+		}
+	]
+}

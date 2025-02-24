@@ -1,0 +1,31 @@
+{
+    "name": "Action: Take",
+    "icon": "minecraft:hopper",
+    "category": "otherverse:contracts",
+    "sortnum": 5,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:hopper"
+            },
+            "title" : "Take",
+            "text": "A hopper item denotes the \"take\" action, which by default means picking up loose items.$(br2)Filters in $(bold)item foci$() determine what a mob can pick up. If there are no such filters, it picks up anything."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Block Foci Filters",
+            "text": "A blank $(bold)block focus$() tells the mob to take items from that world position.$(br2)A container block (barrel, furnace, etc.) in a block focus tells the mob to take items from containers of that type.$(br2)Non-container blocks tell the mob to take items that have been dropped on top of that block type."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_8.png"],
+            "text": "\"Take items from barrels.\""
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_9.png"],
+            "text": "\"Pick up gunpowder from cobbled deepslate.\""
+        }
+    ]
+}

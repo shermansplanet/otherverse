@@ -1,0 +1,12 @@
+{
+    "name": "Phantom",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'phantom'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A phantom Familiar allows you to fly as though you had elytra. If you sleep, you will lose this ability until the next sunset."
+        }
+    ]
+}

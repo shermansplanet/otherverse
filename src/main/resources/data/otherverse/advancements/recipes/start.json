@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_item": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:book"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "otherverse:essentials_nature"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_the_other_recipe": {
+      "conditions": {
+        "recipe": "otherverse:essentials_fortune"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_item",
+      "has_the_recipe",
+      "has_the_other_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "otherverse:essentials_nature",
+      "otherverse:essentials_fortune"
+    ]
+  }
+}

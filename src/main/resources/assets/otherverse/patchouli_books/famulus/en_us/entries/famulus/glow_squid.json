@@ -1,0 +1,12 @@
+{
+    "name": "Glow Squid",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'glow_squid'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A glow squid Familiar will give you night vision and highlight all mobs around you as long as you have any glow squid ink in your inventory."
+        }
+    ]
+}

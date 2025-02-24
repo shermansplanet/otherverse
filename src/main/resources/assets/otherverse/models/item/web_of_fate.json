@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "otherverse:block/web_of_fate_cropped"
+  }
+}

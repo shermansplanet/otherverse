@@ -1,0 +1,12 @@
+{
+    "name": "Ender Dragon",
+    "sortnum": 7,
+    "icon": "minecraft:dragon_egg",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "The Ender Dragon is prohibitively difficult to get into a binding diagram. However, you can put its egg in a diagram that could bind the dragon, and additionally influence the egg with 8 end crystals in block foci. The egg will then hatch into a bound dragon. Remember to draw this diagram on dragon-proof blocks!"
+        }
+    ]
+}

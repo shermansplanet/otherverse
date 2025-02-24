@@ -1,0 +1,16 @@
+{
+    "name": "Amounts",
+    "icon": "minecraft:wheat_seeds",
+    "category": "otherverse:contracts",
+    "sortnum": 15,
+    "pages": [
+        {
+            "type": "patchouli:text",        
+            "text": "If you crouch while placing any kind of seeds in a diagram, you can place up to a full stack in a single item focus.$(br2)This lets the spirits know that the seeds represent a quantity, rather than the concept of seeds."
+        },
+        {
+            "type": "patchouli:text",        
+            "text": "If such a quantity is influencing an action in a contract, it specifies that the mob must put or take exactly that number of items.$(br2)Two quantities instead define a range of permissible amounts."
+        }
+    ]
+}

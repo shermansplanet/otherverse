@@ -1,0 +1,12 @@
+{
+    "name": "Strider",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'strider'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A strider Familiar will make lava heal you and let you run quickly in its surface, but will slow you down in cold biomes."
+        }
+    ]
+}

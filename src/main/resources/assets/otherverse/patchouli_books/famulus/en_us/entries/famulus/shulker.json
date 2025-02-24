@@ -1,0 +1,12 @@
+{
+    "name": "Shulker",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'shulker'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A shulker Familiar allows you to shrug off the levitation effect by crouching. This replaces the levitation with slow falling. A shulker that is told to follow you will teleport to nearby surfaces if possible."
+        }
+    ]
+}

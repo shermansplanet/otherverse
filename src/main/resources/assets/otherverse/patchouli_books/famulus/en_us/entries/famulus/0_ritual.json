@@ -1,0 +1,16 @@
+{
+    "name": "Performing the Ritual",
+    "sortnum": 0,
+    "icon": "otherverse:familiar_name_tag",
+    "category": "otherverse:famulus_general",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "To perform the Famulus ritual, name a bound mob with a Familiar Nametag. For the ritual to succeed, the mob must be influenced by an amount of your Self equal to half its health."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:familiar_name_tag"
+        }
+    ]
+}

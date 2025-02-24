@@ -1,0 +1,16 @@
+{
+    "name": "Wither",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'wither'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A wither Familiar will give you slow creative flight, regeneration, immunity to withering, and the ability to hurl wither skulls as dangerous projectiles by right-clicking while holding one."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "It's difficult to keep such a power in check, and your concentration falters when you sleep. Wherever you wake, everything around you shall wither."
+        }
+    ]
+}

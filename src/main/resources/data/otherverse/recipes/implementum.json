@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+      "a!b",
+      "!c!",
+      "d!e"
+  ],
+  "key": {
+      "!": {"item": "minecraft:book"},
+      "a": {"item": "minecraft:stone_axe"},
+      "b": {"item": "minecraft:stone_sword"},
+      "c": {"item": "minecraft:stone_pickaxe"},
+      "d": {"item": "minecraft:stone_shovel"},
+      "e": {"item": "minecraft:stone_hoe"}
+  },
+  "result": {
+    "item": "patchouli:guide_book",
+    "nbt": {
+        "patchouli:book": "otherverse:implementum"
+    },
+    "count" : 1
+  }
+}

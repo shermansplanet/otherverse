@@ -1,0 +1,12 @@
+{
+    "name": "Heaviness",
+    "sortnum": 4,
+    "icon": "otherverse:spirit_earth",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Earths spirits can be transfused into an empty glass bottle to make a $(bold)Potion of Heaviness$().$(br2)The splash version of this is very useful when trying to bind flying mobs."
+        }
+    ]
+}

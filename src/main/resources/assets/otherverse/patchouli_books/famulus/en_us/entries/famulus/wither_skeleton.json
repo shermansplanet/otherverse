@@ -1,0 +1,12 @@
+{
+    "name": "Wither Skeleton",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'wither_skeleton'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A wither skeleton Familiar allows you to inflict the wither effect whenever you hit an enemy using a stone sword. If the sword is your Implement, the effect will be much more potent and long-lasting."
+        }
+    ]
+}

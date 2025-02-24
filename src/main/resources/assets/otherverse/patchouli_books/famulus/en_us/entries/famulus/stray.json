@@ -1,0 +1,12 @@
+{
+    "name": "Stray",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'stray'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A stray Familiar will make all your attacks inflict slowdown."
+        }
+    ]
+}

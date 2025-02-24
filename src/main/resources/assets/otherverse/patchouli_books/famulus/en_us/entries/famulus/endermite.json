@@ -1,0 +1,12 @@
+{
+    "name": "Endermite",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'endermite'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If there's an ender pearl in your inventory, an endermite Familiar will grant you a swarm of endermites that follow you and attack whatever you attack. These endermites despawn if you get too far away."
+        }
+    ]
+}

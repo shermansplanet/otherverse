@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#minecraft:is_ocean",
+  "features": "otherverse:salt_crystals",
+  "step": "vegetal_decoration"
+}

@@ -1,0 +1,24 @@
+{
+	"other" : "minecraft:cow",
+	"spirit" : "food",
+	"healing" : {
+		"minecraft:wheat" : 3
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:rotten_flesh",
+			"health" : 9,
+			"output" : "minecraft:beef"
+		},
+		{
+			"input" : "minecraft:paper",
+			"health" : 9,
+			"output" : "minecraft:leather"
+		},
+		{
+			"input" : "minecraft:bucket",
+			"health" : 3,
+			"output" : "minecraft:milk_bucket"
+		}
+	]
+}

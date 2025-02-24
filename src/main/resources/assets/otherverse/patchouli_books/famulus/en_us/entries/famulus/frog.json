@@ -1,0 +1,12 @@
+{
+    "name": "Frog",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'frog'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A frog Familiar will let you jump VERY high without fall damage, but only from dripleaves and lily pads."
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "name": "Ranges",
+    "icon": "minecraft:glass",
+    "category": "otherverse:contracts",
+    "sortnum": 20,
+    "pages": [
+        {
+            "type": "patchouli:text",        
+            "text": "If an action is influenced by a glass block item which in turn is influenced by exactly two empty or $(l:otherverse:contracts/12_webs)Fated$() block foci, those two influences will become the corners of a 3D range in which to perform the action."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/endermine.png"],
+            "text": "Very useful for mining an area."
+        }
+    ]
+}

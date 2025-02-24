@@ -1,0 +1,12 @@
+{
+    "name": "Squid",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'squid'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A squid Familiar will give you a brief burst of extreme speed when your health drops below a third of its total. It will also fish for you like a fish Familiar, except instead of yielding only non-fish items, it will yield only fish."
+        }
+    ]
+}

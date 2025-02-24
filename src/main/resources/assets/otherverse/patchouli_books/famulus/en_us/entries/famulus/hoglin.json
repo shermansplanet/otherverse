@@ -1,0 +1,12 @@
+{
+    "name": "Hoglin",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'hoglin'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A hoglin Familiar gives you much better knockback resistance, and your attacks will toss enemies up in the air - the stronger the attack, the higher they are tossed."
+        }
+    ]
+}

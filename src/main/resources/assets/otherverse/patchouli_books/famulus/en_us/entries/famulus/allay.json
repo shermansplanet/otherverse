@@ -1,0 +1,16 @@
+{
+    "name": "Allay",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'allay'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Like many flying mobs, an allay Familiar will give you a lesser version of creative flight. But its main benefit is that you can harness its natural affinity for contracts, especially simple ones for moving items."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If you press the Familiar key while looking at a block and holding a piece of paper, the paper will become a contract to take items from that block. If you press it again while holding the contract and looking at another block, it will add a clause to put items in/on the second block. If you are holding an item in your off-hand, the contract will filter for that item type."
+        }
+    ]
+}

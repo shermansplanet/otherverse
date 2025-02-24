@@ -1,0 +1,16 @@
+{
+	"other" : "minecraft:iron_golem",
+	"spirit" : "technology",
+	"healing" : {
+		"minecraft:carved_pumpkin" : 2,
+		"minecraft:jack_o_lantern" : 6
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:stone",
+			"mob" : "minecraft:iron_golem",
+			"health" : 66,
+			"output" : "minecraft:iron_ore"
+		}
+	]
+}

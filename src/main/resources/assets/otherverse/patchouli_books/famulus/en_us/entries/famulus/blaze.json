@@ -1,0 +1,12 @@
+{
+    "name": "Blaze",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'blaze'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A blaze Familiar will grant you fire resistance and limited flight. If you use flint and steel on empty air, it will shoot a blaze's fireball (much more rapidly, if it's your Implement)."
+        }
+    ]
+}

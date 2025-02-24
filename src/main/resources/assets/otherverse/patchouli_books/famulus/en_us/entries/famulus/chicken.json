@@ -1,0 +1,12 @@
+{
+    "name": "Chicken",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'chicken'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A chicken Familiar will make you fall slowly unless you're crouching. Also, every egg you throw will result in a chicken, but these chickens will disappear once you get too far away."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Fox",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'fox'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "When you let a fox Familiar deal a killing blow, it will grant you invisibility, jump boost, night vision, and immunity to fall damage. The duration of the effects will be longer for more powerful targets."
+        }
+    ]
+}

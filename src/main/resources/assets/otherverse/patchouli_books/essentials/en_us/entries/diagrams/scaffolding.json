@@ -1,0 +1,18 @@
+{
+    "name": "Slate Scaffolding",
+    "sortnum": 25,
+    "icon": "otherverse:slate_scaffolding",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "title": "Slate Scaffolding",
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:slate_scaffolding",
+            "text": "Slate scaffolding can be placed on chalk marks and vice versa, allowing one to stack diagrams in compact layers. It will also keep water from washing away chalk. An item in an item focus on slate scaffolding will \"fall through\" into an empty item focus directly below it."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/scaffolding.png"]
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+	"other" : "minecraft:dolphin",
+	"binding" : {
+		"minecraft:pufferfish" : 13
+	},
+	"healing" : {
+		"minecraft:salmon" : 3,
+		"minecraft:cod" : 3
+	}
+}

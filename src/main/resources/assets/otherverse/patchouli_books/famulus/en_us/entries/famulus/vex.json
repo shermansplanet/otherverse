@@ -1,0 +1,12 @@
+{
+    "name": "Vex",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'vex'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A vex Familiar is a transient thing, only persisting for a few minutes before expiring and requiring Self to revive. However, when you do call it back from death, it will bring some friends with it. It will also give you slower creative flight."
+        }
+    ]
+}

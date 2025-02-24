@@ -1,0 +1,16 @@
+{
+    "name": "Creeper",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'creeper'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A creeper Familiar allows you to throw TNT as if it were a snowball or chicken egg. It will explode when it hits something."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "You're also immune to explosions, and lightning powers you up.$(br2)Creepers will still seek you out and explode next to you, but they'll explode into clouds of random positive potion effects instead of destroying blocks."
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "name": "Implement: Bucket",
+    "sortnum": 70,
+    "icon": "minecraft:bucket",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"item" : "minecraft:bucket"},
+            "title" : "Empty Bucket",
+            "text": "An Empty Bucket Implement will increase the capacity of any hallows you create by one third. The updated capacities will be reflected in JEI.$(br2)The block underneath the hallow at its creation will still multiply that base number as usual."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "A Bucket Implement is a universal hallow, which can accept spirits of any type when empty. It also picks up fluids as spirits. Like any hallow, it can be used on blocks to transfuse them or hallow-blocks to transfer spirits.$(br2)As noted in the Block Implement section, a lava bucket Implement will place lava as if it were a block Implement, and will not confer the hallow capacity bonus."
+        }
+    ]
+}

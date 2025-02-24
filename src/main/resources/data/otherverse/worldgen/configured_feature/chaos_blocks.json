@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:simple_block",
+  "config":{
+    "to_place": {
+      "type": "weighted_state_provider",
+      "entries": [
+        {"data" : {"Name" : "minecraft:cracked_deepslate_bricks"}, "weight": 4},
+        {"data" : {"Name" : "minecraft:cracked_deepslate_tiles"}, "weight": 1},
+        {"data" : {"Name" : "minecraft:deepslate_tiles"}, "weight": 1},
+        {"data" : {"Name" : "minecraft:polished_deepslate"}, "weight": 1},
+        {"data" : {"Name" : "minecraft:deepslate"}, "weight": 1},
+        {"data" : {"Name" : "minecraft:chiseled_deepslate"}, "weight": 1}
+      ]
+    }
+  }
+}

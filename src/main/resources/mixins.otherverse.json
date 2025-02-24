@@ -1,0 +1,48 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "com.shermansplanet.otherverse.mixin",
+  "mixins": [
+    "BlockPlaceInjector",
+    "WitherBossInjector",
+    "AllayInjector",
+    "LivingEntityInjector",
+    "GrindstoneMenuInjector",
+    "ContainerInjector",
+    "ItemStackInjector",
+    "BucketItemInjector",
+    "BlockItemInjector",
+    "CreeperInjector",
+    "ThrownEggInjector",
+    "AbstractChestedHorseInjector",
+    "HorseInventoryMenuInjector",
+    "MobInjector",
+    "EnderDragonInjector",
+    "DragonSittingScanningPhaseInjector",
+    "VibrationListenerInjector",
+    "HttpTextureInjector",
+    "ShulkerInjector",
+    "PlayerInjector",
+    "BeaconBlockEntityInjector",
+    "ArmorDyeRecipeInjector",
+    "LevelChunkInjector"
+  ],
+  "server":[
+    "ServerLevelInjector",
+  ],
+  "client":[
+    "ModelBakeryInjector",
+    "NetherEffectsInjector",
+    "HorseInventoryScreenInjector",
+    "AbstractClientPlayerInjector",
+    "ClientLevelInjector",
+    "ClientDataInjector",
+    "ItemRendererInjector",
+    "BlockRenderDispatcherInjector"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "mixins.otherverse.refmap.json"
+}

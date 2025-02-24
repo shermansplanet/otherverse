@@ -1,0 +1,22 @@
+{
+    "name": "Mob Transfusion",
+    "sortnum": 2,
+    "icon": "otherverse:self",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Much like spirits, bound mobs can be drained of health to transfuse whatever their binding focus is influencing. These recipes can be found in the same JEI category as spirit transfusion. Note that certain recipes require more health than a single mob of that type can provide, necessitating multiple bound mobs influencing one item."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/binding_3.png"],
+            "border": true,
+            "text": "Two chickens turn wheat into feathers."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "A binding will stop draining a mob before it dies. Bound mobs can also be $(italic)healed$() by consuming certain influences. These can be seen in the bindings section of JEI, indicated by red hearts instead of black chains. Note that some mobs can drain the health of certain other bound mobs to heal."
+        }
+    ]
+}

@@ -1,0 +1,9 @@
+{
+	"other" : "minecraft:strider",
+	"binding" : {
+		"minecraft:air" : 3
+	},
+	"healing" : {
+		"minecraft:warped_fungus" : 1
+	}
+}

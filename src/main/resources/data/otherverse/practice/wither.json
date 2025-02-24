@@ -1,0 +1,24 @@
+{
+	"other" : "minecraft:wither",
+	"binding" : {
+		"entity.minecraft.cow" : 45,
+		"minecraft:milk_bucket" : 15
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:diamond",
+			"health" : 297,
+			"output" : "minecraft:nether_star"
+		},
+		{
+			"input" : "minecraft:sand",
+			"health" : 27,
+			"output" : "minecraft:soul_sand"
+		},
+		{
+			"input" : "minecraft:dirt",
+			"health" : 27,
+			"output" : "minecraft:soul_soil"
+		}
+	]
+}

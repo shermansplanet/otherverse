@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+      {"item": "otherverse:salt"},
+      {"item": "otherverse:sulfur"},
+      {"item": "otherverse:quicksilver"}
+  ],
+  "result": {
+    "item": "otherverse:cinnabar",
+    "count" : 1
+  }
+}

@@ -1,0 +1,18 @@
+{
+    "name": "Implementum",
+    "icon": "minecraft:netherite_pickaxe",
+    "category": "otherverse:rituals",
+    "sortnum": 1,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title" : "Implementum",
+            "text": "The Implementum ritual gives you an $(bold)Implement:$() a magical tool that you will never lose.$(br2)It is the easiest of the three rituals to perform, but be wary of performing it too early: your Implement is with you forever, and a netherite pickaxe is a better Implement than a stone one."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:implementum",
+            "text": "More information about possible Implements and how they affect you can be found in the Implementum book."
+        }
+    ]
+}

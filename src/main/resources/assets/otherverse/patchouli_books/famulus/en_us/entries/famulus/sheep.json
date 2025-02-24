@@ -1,0 +1,12 @@
+{
+    "name": "Sheep",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'sheep'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If a sheep Familiar of a given color is not holding anything, it will frequently produce dye of that color and start holding it. Consider giving it a contract to deposit items somewhere."
+        }
+    ]
+}

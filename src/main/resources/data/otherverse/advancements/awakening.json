@@ -1,0 +1,46 @@
+{
+  "display":{
+    "icon":{
+      "item": "patchouli:guide_book",
+      "nbt": "{\"patchouli:book\": \"otherverse:essentials\"}"
+    },
+    "title": "Pact Magic",
+    "description": "Obtain Essentials, a trove of necessary knowledge for any Practitioner.",
+    "background":"otherverse:textures/block/royal_bricks.png"
+  },
+  "criteria":{
+    "obtain":{
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "count": {
+              "min": 1,
+              "max": 64
+            },
+            "item": "patchouli:guide_book",
+            "nbt": "{\"patchouli:book\": \"otherverse:essentials\"}"
+          }
+        ]
+      }
+    }
+  },
+  "requirements":[["obtain"]],
+  "rewards": {
+    "recipes": [
+      "otherverse:cinnabar_2",
+      "otherverse:cinnabar_block",
+      "otherverse:cinnabar",
+      "otherverse:demesnes",
+      "otherverse:demesne_beacon",
+      "otherverse:escape_rope",
+      "otherverse:familiar_name_tag",
+      "otherverse:famulus",
+      "otherverse:implementum",
+      "otherverse:quicksilver",
+      "otherverse:slate_scaffolding",
+      "otherverse:spawn_altar",
+      "otherverse:spindle"
+    ]
+  }
+}

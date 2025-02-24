@@ -1,0 +1,31 @@
+{
+  "feature": "otherverse:stonebrick_slabs",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 64
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:biome"
+    },
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "any_of",
+        "predicates": [
+          {"type": "solid", "offset": [1,0,0]},
+          {"type": "solid", "offset": [-1,0,0]},
+          {"type": "solid", "offset": [0,0,1]},
+          {"type": "solid", "offset": [0,0,-1]}
+        ]
+      }
+    }
+  ]
+}

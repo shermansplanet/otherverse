@@ -1,6 +1,19 @@
 {
   "replace": false,
   "values": [
-    "testmod:calcite"
+    "otherverse:anti_purpur_block",
+    "otherverse:blandesite",
+    "otherverse:blandstone",
+    "otherverse:burgundy_tiles",
+    "otherverse:chiseled_plumstone",
+    "otherverse:fools_emerald",
+    "otherverse:forbidden_candy_block",
+    "otherverse:ghostly_netherrack",
+    "otherverse:pastel_quartz_bricks",
+    "otherverse:plum_bricks",
+    "otherverse:royal_bricks",
+    "otherverse:skin_coral_block",
+    "otherverse:salt_crystals",
+    "otherverse:sulfur_ore"
   ]
 }

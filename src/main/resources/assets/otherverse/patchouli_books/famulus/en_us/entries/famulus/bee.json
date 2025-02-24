@@ -1,0 +1,16 @@
+{
+    "name": "Bee",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'bee'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A bee Familiar will grant you limited flight. Plus, if there's a honey bottle in your inventory, you will accumulate a swarm of bees that follow you and attack whatever you attack. These bees despawn if you get too far away."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Also, wild bees will not get angry at you for breaking or harvesting from their hives, even without smoke."
+        }
+    ]
+}

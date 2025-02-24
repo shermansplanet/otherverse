@@ -1,0 +1,21 @@
+{
+  "parent":"otherverse:awakening",
+  "display":{
+    "icon":{
+      "item": "patchouli:guide_book",
+      "nbt": "{\"patchouli:book\": \"otherverse:demesnes\"}"
+    },
+    "title": "Demesnes",
+    "description": "Make a successful Demesne Claim.",
+    "frame": "goal"
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "demesnes"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

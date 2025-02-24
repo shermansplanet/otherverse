@@ -1,0 +1,12 @@
+{
+    "name": "Ravager",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'ravager'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A ravager Familiar will grant you incredible strength and resistance in combat, but will summon a raid to any village you visit."
+        }
+    ]
+}

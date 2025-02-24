@@ -1,0 +1,11 @@
+{
+	"other" : "minecraft:blaze",
+	"spirit": "fire",
+	"transfusion" : [
+		{
+			"input" : "minecraft:stick",
+			"health" : 27,
+			"output" : "minecraft:blaze_rod"
+		}
+	]
+}

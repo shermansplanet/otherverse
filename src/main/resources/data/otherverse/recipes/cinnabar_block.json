@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "###",
+        "###",
+        "###"
+    ],
+    "key": {
+        "#": {
+            "item": "otherverse:cinnabar"
+        }
+    },
+    "result": {
+        "item": "otherverse:cinnabar_block",
+        "count" : 1
+    }
+}

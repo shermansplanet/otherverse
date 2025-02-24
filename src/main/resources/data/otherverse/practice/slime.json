@@ -1,0 +1,15 @@
+{
+	"other" : "minecraft:slime",
+	"transfusion" : [
+		{
+			"input" : "minecraft:clay_ball",
+			"health" : 3,
+			"output" : "minecraft:slime_ball"
+		},
+		{
+			"input" : "minecraft:clay",
+			"health" : 9,
+			"output" : "minecraft:slime_block"
+		}
+	]
+}

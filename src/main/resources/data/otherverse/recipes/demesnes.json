@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+      "b!b",
+      "!a!",
+      "b!b"
+  ],
+  "key": {
+      "!": {"item": "minecraft:book"},
+      "a": {"tag": "minecraft:doors"},
+      "b": {"tag": "forge:fences"}
+  },
+  "result": {
+    "item": "patchouli:guide_book",
+    "nbt": {
+        "patchouli:book": "otherverse:demesnes"
+    },
+    "count" : 1
+  }
+}

@@ -1,0 +1,28 @@
+{
+    "name": "Making Diagrams",
+    "icon": "otherverse:chalk",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+              "item": "otherverse:charcoal_stick"
+            },
+            "text": "By placing a torch in water, you can get a $(bold)charcoal stick$(), which you can use on the ground to draw $(bold)diagrams$(). Water will wash these marks away."
+        },
+        {
+            "title": "Chalk",
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:chalk",
+            "text": "Once you find calcite, you'll want to upgrade to $(bold)chalk$(). Chalk will last much longer than a charcoal stick, and can by crafted with dye to draw different colored marks."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/chalk_1.png"]
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Chalk marks will \"connect\" to adjacent chalk marks much like redstone, but this is a purely visual effect. $(bold) All that matters is which spots have chalk and which don't.$()$(br2)This determines a diagram's $(bold)foci$() and how they $(bold)influence$() each other."
+        }
+    ]
+}

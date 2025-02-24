@@ -1,0 +1,12 @@
+{
+    "name": "Goat",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'goat'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "With a goat Familiar, you can play a goat horn to give all nearby players a damage boost. Your melee attacks will also do extra knockback proportional to their damage, and will transfer all your velocity to your target (this can even be used to make a grounded enemy take fall damage, if you hit them right before you land)."
+        }
+    ]
+}

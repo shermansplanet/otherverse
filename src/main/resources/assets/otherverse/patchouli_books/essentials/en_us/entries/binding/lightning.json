@@ -1,0 +1,17 @@
+{
+    "name": "Lightning",
+    "sortnum": 6,
+    "icon": "minecraft:lightning_rod",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If 33 power is influencing a lightning rod which is influencing a bound mob, lightning will strike that mob.$(br2)It's helpful to have the bound mob in water if you don't want it to burn to death."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/lightning.png"],
+            "border": true
+        }
+    ]
+}

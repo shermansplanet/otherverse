@@ -1,0 +1,16 @@
+{
+    "name": "Comparators",
+    "icon": "minecraft:comparator",
+    "category": "otherverse:contracts",
+    "sortnum": 22,
+    "pages": [
+        {
+            "type": "patchouli:text",        
+            "text": "If an action is influenced by a comparator, all of the comparator's influences will act as item filters for the action. However, extra data will be taken into account: block state for block influences, and NBT data for item influences."
+        },
+        {
+            "type": "patchouli:text",        
+            "text": "Some actions interpret block and item foci differently, but when interpreted through a comparator, block foci are treated as item foci.$(br2)For instance, a pickaxe influenced by a comparator influenced by a fully grown wheat block will create a contract that tells a mob to only break fully grown wheat."
+        }
+    ]
+}

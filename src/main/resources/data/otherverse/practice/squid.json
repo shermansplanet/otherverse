@@ -1,0 +1,14 @@
+{
+	"other" : "minecraft:squid",
+	"healing" : {
+		"entity.minecraft.cod" : 1,
+		"entity.minecraft.salmon" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:kelp",
+			"health" : 3,
+			"output" : "minecraft:ink_sac"
+		}
+	]
+}

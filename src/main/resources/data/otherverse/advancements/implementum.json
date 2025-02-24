@@ -1,0 +1,21 @@
+{
+  "parent":"otherverse:awakening",
+  "display":{
+    "icon":{
+      "item": "patchouli:guide_book",
+      "nbt": "{\"patchouli:book\": \"otherverse:implementum\"}"
+    },
+    "title": "Implementum",
+    "description": "Bond yourself to an Implement.",
+    "frame": "goal"
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "implementum"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

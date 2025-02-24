@@ -1,0 +1,12 @@
+{
+    "name": "Drowned",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'drowned'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you have a drowned Familiar, drowning will heal instead of damage you, and you will become powered up for a minute afterwards."
+        }
+    ]
+}

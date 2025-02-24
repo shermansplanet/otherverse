@@ -1,0 +1,10 @@
+{
+  "multipart": [
+    {   "when": {"demesne" : "false"},
+        "apply": { "model": "otherverse:block/familiar_crown"}
+    },
+    {   "when": {"demesne" : "true"},
+        "apply": { "model": "otherverse:block/demesne_crown"}
+    }
+  ]
+}

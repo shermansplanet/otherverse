@@ -1,0 +1,20 @@
+{
+    "name": "Implement: Block",
+    "sortnum": 20,
+    "icon": "minecraft:stone",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:stone"
+            },
+            "title" : "Block",
+            "text": "Certain blocks can be Implements. You can use a block Implement to place copies of that block some number of times before the Implement needs to be refilled using your Self.$(br2)In addition, you will find it much easier to break blocks of that type."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "When viewing a block's spiritual composition in JEI, Implement-eligible blocks will be annotated with a red number beneath a block icon indicating how many of that block can be placed between refills.$(br2)A lava bucket Implement will place lava as if it were a block Implement."
+        }
+    ]
+}

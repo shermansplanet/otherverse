@@ -1,0 +1,12 @@
+{
+    "name": "Polar Bear",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'polar_bear'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A polar bear Familiar will protect you from cold damage, and give you a speed and damage boost in cold biomes."
+        }
+    ]
+}

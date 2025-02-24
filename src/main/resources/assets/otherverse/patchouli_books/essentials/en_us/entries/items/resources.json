@@ -1,0 +1,32 @@
+{
+    "name": "Dimensional Primes",
+    "sortnum": 1,
+    "icon": "otherverse:cinnabar",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Salt, sulfur, and quicksilver are substances that are naturally attuned to their home dimensions: the Overworld, Nether, and End respectively. Their primary use is for $(l:otherverse:binding/fleshbinding)fleshbinding$()."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/resources_1.png"],
+            "text": "Salt can be found on the ocean floor in the Overworld."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/resources_2.png"],
+            "text": "Sulfur can be found as an ore in the Nether."
+        },
+        {
+            "type": "patchouli:smelting",
+            "recipe": "otherverse:quicksilver",
+            "text": "Quicksilver is only found in trace amounts in the End, but fortunately, Endermen naturally concentrate it in their pearls."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:cinnabar",
+            "text": "The three Primes can be combined into cinnabar, which can be used to craft Spawn Altars. Cinnabar blocks can be used to $(l:otherverse:binding/fleshbinding)easily transport bound mobs$()."
+        }
+    ]
+}

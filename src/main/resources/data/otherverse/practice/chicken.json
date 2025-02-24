@@ -1,0 +1,14 @@
+{
+	"other" : "minecraft:chicken",
+	"spirit" : "food",
+	"healing" : {
+		"minecraft:wheat_seeds" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:wheat",
+			"health" : 6,
+			"output" : "minecraft:feather"
+		}
+	]
+}

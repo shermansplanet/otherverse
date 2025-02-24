@@ -1,0 +1,21 @@
+{
+  "parent":"otherverse:bind",
+  "display":{
+    "icon":{
+      "item": "minecraft:bone"
+    },
+    "title": "Karma",
+    "description": "Die by the hand of a mob you bound.",
+    "frame": "challenge",
+    "hidden": true
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "karma"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

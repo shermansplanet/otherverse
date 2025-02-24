@@ -1,0 +1,20 @@
+{
+    "name": "Action: Go",
+    "icon": "minecraft:rail",
+    "category": "otherverse:contracts",
+    "sortnum": 4,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:rail"
+            },
+            "title" : "Go",
+            "text": "A rail item denotes the \"go\" action.$(br2)Filters in item or block foci denote blocks towards which the mob will try to navigate.$(br2)An empty block focus denotes that focus's position in the world."
+        },
+        {
+            "type": "patchouli:text",        
+            "text": "This action will only begin so long as there's a viable target block in range.$(br2)It succeeds if it reaches its target block, and fails if its target block is removed or becomes inaccessible."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Guardian",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'guardian'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A guardian Familiar gives you the conduit power abilities whenever you're in water or rain, as if you were always within range of a conduit."
+        }
+    ]
+}

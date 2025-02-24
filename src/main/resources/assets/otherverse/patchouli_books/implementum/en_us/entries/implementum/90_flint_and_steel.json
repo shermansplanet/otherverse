@@ -1,0 +1,14 @@
+{
+    "name": "Implement: Flint & Steel",
+    "sortnum": 80,
+    "icon": "minecraft:flint_and_steel",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"item" : "minecraft:flint_and_steel"},
+            "title" : "Flint & Steel",
+            "text": "Using a flint & steel Implement on empty air will shoot a blaze-like fireball. If you also have a blaze Familiar, you can use this ability very rapidly."
+        }
+    ]
+}

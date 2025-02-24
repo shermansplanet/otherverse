@@ -1,0 +1,29 @@
+{
+    "name": "Webs and Spindles",
+    "icon": "otherverse:spindle_light_gray",
+    "category": "otherverse:contracts",
+    "sortnum": 12,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "For some actions, an empty block influence can embed a reference to its own position in a contract. But it can often be useful to change that position on the fly, without having to make a new contract. That's where Webs of Fate and Spindles come in."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:web_of_fate"
+            },
+            "title" : "Webs of Fate",
+            "text": "A $(bold)Web of Fate$() is created by transfusing Fate spirits into a cobweb.$(br2)It can be placed in a block focus of a contract diagram, anywhere that defines a position. For instance, a Web of Fate could influence a \"go\" action."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:spindle",
+            "text": "Spindles can be crafted and infused with color spirits to change their color. Using a spindle on a Web of Fate will turn the web the same color as the spindle."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "When you make a contract using a Web of Fate, you will see a variable (your name + the web's color) instead of a location.$(br2)You can use a spindle of that color on a block to update that location whenever you want, or use it on air to clear the location. Your Sight will reveal all the locations you've set."
+        }
+    ]
+}

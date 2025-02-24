@@ -1,0 +1,12 @@
+{
+    "name": "Mooshroom",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'mooshroom'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you have a mooshroom Familiar, you can use shears on empty air to shear mushrooms from yourself at the cost of a little health. If you're in the nether, you'll get nether fungus."
+        }
+    ]
+}

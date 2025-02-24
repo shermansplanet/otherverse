@@ -1,0 +1,40 @@
+{
+    "name": "Contract Structure",
+    "icon": "minecraft:red_dye",
+    "category": "otherverse:contracts",
+    "sortnum": 2,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A mob will attempt to do any possible action influencing its root contract. Red dye, when placed as an action, denotes a $(bold)fallback$(); if none of the other actions are possible, the mob switches to choosing from all the actions influencing the red dye (as if the red dye were the contract)"
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_4.png"],
+            "text": "go(sand), fallback(go(red sand))."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "This can be nested as many times as desired to create an explicit order of priority (e.g. \"go to sand if possible; if not, go to red sand; if neither, go to soul sand.\")$(br2)If a set of actions has no fallback and none are possible, the logic will start again from the beginning."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_6.png"],
+            "text": "go(sand), fallback(go(red sand), fallback(go(soul sand))."
+        },
+        {
+            "title": "Conditionals",
+            "type": "patchouli:text",
+            "text": "If red, yellow, and/or green dye are influencing an action and have actions of their own influencing them, they will become the new \"decider\" when the action they're infuencing succeeds (green), fails (red), or does either (yellow).$(br2)This diagram makes a mob eternally walk between sand and red sand."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_5.png"],
+            "text": "go(sand, success(go(red sand)))."
+        },
+        {
+        "type": "patchouli:text",
+            "text": "Remember, a $(italic)fallback$() (red dye as an action) activates if none of its neighboring actions are possible, e.g. there is no sand around to walk towards.$(br2)A conditional (green/yellow/red dye as a filter) activates if its parent action ends, e.g. a mob has reached the sand or the sand has become inaccessible."
+        }
+    ]
+}

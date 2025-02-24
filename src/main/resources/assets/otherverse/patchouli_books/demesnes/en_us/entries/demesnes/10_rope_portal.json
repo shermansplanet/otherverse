@@ -1,0 +1,26 @@
+{
+    "name": "Escape Ropes and Portals",
+    "sortnum": 10,
+    "icon": "otherverse:escape_rope",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:escape_rope",
+            "text": "If you have the Escape Rope perk, you can use an escape rope anywhere in your Demesne to set its 'home' position. Then use it anywhere else to instantly zip back."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The Portals perk lets you make permanent portal beams by influencing an empty block focus with an escape rope and some power (6 bound mob HP or 2 Self, and thrice that if the portal transports you across dimensions). The resulting portal will target the escape rope's destination."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Portals are anchored at their base (the position of the block focus in their creation diagram), and expand both vertically and horizontally to fill the available space. Their color can be changed by using dye on their base, and they can be snuffed out by placing a block on their base."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/portals.png"],
+            "border": true
+        }
+    ]
+}

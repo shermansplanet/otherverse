@@ -1,0 +1,14 @@
+{
+    "name": "Implement: Armor",
+    "sortnum": 30,
+    "icon": "minecraft:netherite_chestplate",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"tag" : "forge:armors"},
+            "title" : "Armor",
+            "text": "If you choose armor as your Implement, you will receive additional armor while wearing it. If the armor is boots, you will instead receive a speed boost.$(br2)As with tools, only enchantments already present during the ritual persist."
+        }
+    ]
+}

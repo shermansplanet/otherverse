@@ -1,0 +1,14 @@
+{
+    "name": "Implement: Dye",
+    "sortnum": 50,
+    "icon": "minecraft:gray_dye",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"tag" : "forge:dyes"},
+            "title" : "Dye",
+            "text": "A Dye Implement will become a near-unlimited wellspring of spirits of its color, and can be used on any colored block to change its color.$(br2)Use the Implement hotkey to refill your Implement."
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+	"other" : "minecraft:frog",
+	"transfusion" : [
+		{
+			"input" : "minecraft:slime_block",
+			"health" : 1,
+			"output" : "minecraft:verdant_froglight"
+		}
+	]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "The Sight",
+    "sortnum": 7,
+    "icon": "minecraft:ender_eye",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "The Sight is a valuable tool for any Practitioner. While activated (default hotkey O), it will reveal information about diagrams, Practices, and Practitioners."
+        }
+    ]
+}

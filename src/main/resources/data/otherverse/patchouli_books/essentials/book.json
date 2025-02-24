@@ -1,0 +1,9 @@
+{
+    "name": "Essentials",
+    "landing_text": "No, see, this book IS the tl;dr.",
+    "version": 3,
+    "model" : "otherverse:essentials",
+    "show_progress" : false,
+    "creative_tab" : "otherverse",
+    "use_resource_pack": true
+}

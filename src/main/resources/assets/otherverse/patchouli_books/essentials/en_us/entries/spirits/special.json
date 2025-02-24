@@ -1,0 +1,20 @@
+{
+    "name": "Special Cases",
+    "sortnum": 2,
+    "icon": "otherverse:sulfur{hallow:{spirit_type:'nether'}}",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "There are a few blocks that can be broken down for spirits that you won't see in JEI.$(br2)Nether portals (the purple portal blocks, not the obsidian) yield Nether spirits.$(br2)Fire blocks yield fire spirits.$(br2)Water source blocks yield water spirits."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "There's also a special way to get War spirits: every point of damage dealt by a hallowed weapon will put a War spirit in that weapon.$(br2)With some clever setup and a $(l:otherverse:items/spawn_altar)spawn altar$(), this can make for a self-contained mob farm."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If you're using diagrams to smelt an item, they will only smelt the item by one step (i.e. cobblestone into stone, but not into smooth stone) $(italic)unless$() the target item is also influenced by a furnace."
+        }
+    ]
+}

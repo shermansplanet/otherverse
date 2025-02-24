@@ -1,0 +1,18 @@
+{
+    "name": "Demesnes",
+    "icon": "otherverse:demesne_beacon",
+    "category": "otherverse:rituals",
+    "sortnum": 3,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title" : "Demesnes",
+            "text": "The Demesnes ritual allows you to claim a set of chunks as a $(bold)Demesne:$() an area that is irrevocably yours, in which you can bend the rules of magic and reality to your will."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:demesnes",
+            "text": "More information about claiming a Demesne and upgrading it can be found in the Demesnes book."
+        }
+    ]
+}

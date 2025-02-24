@@ -1,0 +1,12 @@
+{
+    "name": "Detection",
+    "icon": "minecraft:spyglass",
+    "category": "otherverse:contracts",
+    "sortnum": 3,
+    "pages": [
+        {
+            "type": "patchouli:text",        
+            "text": "When deciding on an action to take, a bound mob will spend up to a few seconds \"looking around\" in a 8-block radius (without actually moving its head).$(br2)The exception is if an action specifies a block position or range, in which case it will check the position(s) so long as they are loaded."
+        }
+    ]
+}

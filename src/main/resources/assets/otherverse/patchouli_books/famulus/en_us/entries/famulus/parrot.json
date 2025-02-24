@@ -1,0 +1,12 @@
+{
+    "name": "Parrot",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'parrot'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A parrot Familiar allows you to fly as though you had elytra, but a parrot's flight relies on its lightness - the more full your inventory, the more gravity will retain its hold on you."
+        }
+    ]
+}

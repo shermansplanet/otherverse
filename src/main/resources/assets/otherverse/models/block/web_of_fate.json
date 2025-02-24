@@ -1,0 +1,17 @@
+{
+  "ambientocclusion": false,
+  "render_type": "cutout",
+  "textures" : {
+    "particle": "minecraft:block/calcite",
+    "basetex" : "otherverse:block/web_of_fate"
+  },
+  "elements" : [
+    {
+      "from" : [-5,0,-5],
+      "to" : [22, 0.2, 20],
+      "faces" : {
+        "up" : {"uv" : [0,0,13.5,12.5], "texture": "basetex", "tintindex": 0}
+      }
+    }
+  ]
+}

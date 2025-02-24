@@ -1,0 +1,12 @@
+{
+    "name": "Familiar Transfusion",
+    "sortnum": 2,
+    "icon": "otherverse:familiar_name_tag",
+    "category": "otherverse:famulus_general",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you are holding an item your Familar could transfuse when you press the Familiar key, the item will instantly be transfused using your own health instead of summoning your Familiar.$(br2)If there's an item in your inventory that could be used in a diagram to heal your Familiar, that will be consumed instead of your health."
+        }
+    ]
+}

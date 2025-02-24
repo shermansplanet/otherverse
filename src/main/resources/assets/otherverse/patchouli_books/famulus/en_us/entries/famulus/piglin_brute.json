@@ -1,0 +1,12 @@
+{
+    "name": "Piglin Brute",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'piglin_brute'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A piglin brute Familiar allows you to recruit piglins. If you use a gold ingot on a piglin or a gold block on a piglin brute, you will buy their eternal loyalty."
+        }
+    ]
+}

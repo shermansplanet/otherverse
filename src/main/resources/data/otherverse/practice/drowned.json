@@ -1,0 +1,9 @@
+{
+	"other" : "minecraft:drowned",
+	"binding" : {
+		"otherverse:spirit_fire" : 1
+	},
+	"healing" : {
+		"otherverse:spirit_flesh" : 1
+	}
+}

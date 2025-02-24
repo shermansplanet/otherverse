@@ -1,0 +1,6 @@
+{
+	"other" : "minecraft:hoglin",
+	"binding" : {
+		"minecraft:warped_fungus" : 15
+	}
+}

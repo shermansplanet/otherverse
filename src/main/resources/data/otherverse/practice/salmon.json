@@ -1,0 +1,6 @@
+{
+	"other" : "minecraft:salmon",
+	"healing" : {
+		"minecraft:kelp" : 1
+	}
+}

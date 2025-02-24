@@ -1,0 +1,11 @@
+{
+	"other" : "minecraft:warden",
+	"spirit" : "dark",
+	"healing" : {
+		"minecraft:sculk_vein" : 3,
+		"minecraft:sculk" : 3,
+		"minecraft:sculk_sensor" : 9,
+		"minecraft:sculk_catalyst" : 27,
+		"minecraft:sculk_shrieker" : 18
+	}
+}

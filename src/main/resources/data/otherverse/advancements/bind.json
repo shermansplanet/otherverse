@@ -1,0 +1,19 @@
+{
+  "parent":"otherverse:diagram",
+  "display":{
+    "icon":{
+      "item": "minecraft:chain"
+    },
+    "title": "Tradpact",
+    "description": "Bind a mob."
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "binding"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

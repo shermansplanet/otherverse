@@ -1,0 +1,14 @@
+{
+    "name": "Action: Harvest",
+    "icon": "minecraft:wooden_hoe",
+    "category": "otherverse:contracts",
+    "sortnum": 8,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"tag" : "forge:tools/hoes"},
+            "title" : "Harvest",
+            "text": "A hoe item denotes the \"harvest\" action.$(br2)This works exactly like \"break,\" except it only targets fully grown crops and automatically re-plants them after."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Warden",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'warden'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A warden Familiar will give you heightened strength and health in the darkness. If a hallow has at least 13 darkness spirits, you can right-click while holding it to release those spirits as a powerful sonic attack."
+        }
+    ]
+}

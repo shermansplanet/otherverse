@@ -1,0 +1,19 @@
+{
+    "name": "Spawn Altar",
+    "sortnum": 10,
+    "icon": "otherverse:spawn_altar",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+              "item": "otherverse:spawn_altar"
+            },
+            "text": "Spawn altars can consume War spirits to spawn mobs.$(br2)A spawn altar must be activated by using it on a spawner. The altar will then become a hallow for War spirits and absorb the spawner's mob type, breaking the spawner."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "When placed, a spawn altar can absorb War spirits just like any other hallow (either from other hallows or by directly breaking down items).$(br2)After absorbing War spirits, a Spawn altar will try to spawn mobs of its assigned type, spending one War spirit per HP of the mob spawned."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Iron Golem",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'iron_golem'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "An iron golem Familiar gives you permanent armor in addition to what you're wearing. The extra armor is equivalent to a full set of iron armor, with some extra toughness."
+        }
+    ]
+}

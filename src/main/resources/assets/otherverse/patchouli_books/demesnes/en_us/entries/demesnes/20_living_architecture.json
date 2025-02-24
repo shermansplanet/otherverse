@@ -1,0 +1,20 @@
+{
+    "name": "Living Architecture",
+    "sortnum": 20,
+    "icon": "otherverse:spindle_lime",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you have the Living Architecture perk, you can make diagrams that automatically copy and paste within your Demesne. The core of such a diagram is a Demesne Beacon in a block focus influenced by two Webs of Fate (see the Contracts section of Essentials). The positions given by these Webs define the corners of a section of blocks to copy."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Any inventory (barrel, chest, etc.) in a block focus influencing the Demesne Beacon will try to place its contents to mimic this \"copy\" range. The inventory must be influenced by a third Web of Fate, which sets the \"paste\" position. Both the copy range and paste position can be changed with spindles at any point. Only the paste position must be in your Demesne."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If the diagram wants to place a block somewhere that is otherwise occupied, it will slowly break the block that's in the way. Be warned - when this happens, the block is erased and doesn't drop an item. Even once all the blocks are placed, the diagram will keep trying to make them match its reference range, which can have interesting results."
+        }
+    ]
+}

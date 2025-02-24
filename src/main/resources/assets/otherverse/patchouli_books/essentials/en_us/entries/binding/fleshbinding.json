@@ -1,0 +1,48 @@
+{
+    "name": "Fleshbinding",
+    "sortnum": 3,
+    "icon": "otherverse:salt",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Fleshbinding is a powerful technique whereby a mob can be bound into item form called an $(bold)idol$().$(br2)This $(italic)only$() works on mobs that have been sufficiently weakened (brought to 10 or less health). Your Sight will indicate when a mob is weak enough. To release a mob from a fleshbinding, simply use its idol like a spawn egg."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/binding_5.png"],
+            "border": true,
+            "text": "Four pig idols in a diagram."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/binding_4.png"],
+            "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "text": "To perform a Fleshbinding, you will need four items. $(br)1. An item that the mob might drop (or one of its mob transfusion results).$(br)2. The $(l:otherverse:items/resources)Prime$() of your current dimension (salt for the Overworld, sulfur for the Nether, quicksilver for the End).$(br)3. A tiny bit of power from any source, such as Self or an idol."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The fourth item will become the idol's $(bold)material$(), which affects how it functions when placed in an item focus. A tier 1 idol made from logs or planks functions as a living bound mob, but cannot be healed and is drained with 1/3 efficiency. Lapis idols can be healed. Diamond idols can also be healed, and are as efficient as a living mob."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/binding_6.png"],
+            "border": true
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+              "item": "otherverse:cinnabar_block"
+            },
+            "title": "Cinnabar Idols",
+            "text": "You can right-click a cinnabar block on any already-bound mob to trap the mob in the block for easy transport. These idols cannot be used in diagrams; the mob will be released automatically if the idol enters an item focus.$(br2)You will get the cinnabar block back when you release the mob."
+        },
+        {
+            "type": "patchouli:entity",
+            "entity": "minecraft:item{Item:{id:'otherverse:idol', Count: 1, tag:{material:'otherverse:cinnabar_block',entity_type_namespace:'minecraft',entity_type_path:'chicken'}}}"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "name": "Demesnes",
+    "landing_text": "A guide to the Demesnes ritual.",
+    "version": 3,
+    "model" : "otherverse:demesnes",
+    "show_progress" : false,
+    "creative_tab" : "otherverse",
+    "use_resource_pack": true,
+    "pamphlet" : true
+}

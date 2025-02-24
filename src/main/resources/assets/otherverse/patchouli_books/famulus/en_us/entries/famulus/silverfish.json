@@ -1,0 +1,12 @@
+{
+    "name": "Silverfish",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'silverfish'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If there's any infested stone in your inventory (which you can now produce at will), a silverfish Familiar will grant you a swarm of silverfish that follow you and attack whatever you attack. They despawn if you get too far away."
+        }
+    ]
+}

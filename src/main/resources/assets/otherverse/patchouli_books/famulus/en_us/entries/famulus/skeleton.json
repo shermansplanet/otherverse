@@ -1,0 +1,12 @@
+{
+    "name": "Skeleton",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'skeleton'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you have a skeleton Familiar, arrows you fire will not be depleted, even if your bow does not have the infinity enchantment."
+        }
+    ]
+}

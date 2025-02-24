@@ -1,0 +1,18 @@
+{
+    "name": "Implement: Tool",
+    "sortnum": 10,
+    "icon": "minecraft:netherite_pickaxe",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"tag" : "forge:tools"},
+            "title" : "Tools",
+            "text": "Tools (including weapons and shields) are a popular Implement choice. They will forever have whatever enchantments were on them at the time of the ritual, but will lose any additional enchantments when broken."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Implements meant to break blocks can now break multiple of those blocks at once; you can use the Implement key to cycle through options for this. You will also find tool Implements slightly faster to use than their mundane equivalents. "
+        }
+    ]
+}

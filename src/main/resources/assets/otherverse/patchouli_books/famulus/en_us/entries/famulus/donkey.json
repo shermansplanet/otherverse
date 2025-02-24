@@ -1,0 +1,12 @@
+{
+    "name": "Donkey/Llama/Mule",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'donkey'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A donkey, llama, or mule Familiar has a massively expanded inventory, effectively a double chest that you can summon at any time."
+        }
+    ]
+}

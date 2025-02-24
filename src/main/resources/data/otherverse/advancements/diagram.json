@@ -1,0 +1,19 @@
+{
+  "parent":"otherverse:awakening",
+  "display":{
+    "icon":{
+      "item": "otherverse:chalk"
+    },
+    "title": "Language of the Spirits",
+    "description": "Start drawing your first diagram."
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "diagram"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

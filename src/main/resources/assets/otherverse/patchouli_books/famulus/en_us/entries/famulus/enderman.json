@@ -1,0 +1,12 @@
+{
+    "name": "Enderman",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'enderman'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "An enderman Familiar will give you back any ender pearls or chorus fruit you use to teleport, and these teleports will not harm you. Water will hurt you, but a helmet will mostly protect you from rain."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Cat",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'cat'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A cat or ocelot Familiar is powerful but demanding, only deigning to share its abilities for 30 seconds after being fed fresh fish (you'll need to crouch to feed a Familiar). These benefits are invisibility, jump boost, night vision, immunity to fall damage, and not setting off sculk sensors. Creepers will also flee from you at all times, but wolves will attack you on sight."
+        }
+    ]
+}

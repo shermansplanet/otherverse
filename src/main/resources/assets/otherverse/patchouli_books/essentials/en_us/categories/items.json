@@ -1,0 +1,6 @@
+{
+    "name": "Resources",
+    "description": "Special Otherverse resources, and some useful utility items that can be crafted from them.",
+    "icon": "otherverse:spawn_altar",
+    "sortnum": 6
+}

@@ -1,0 +1,48 @@
+{
+    "name": "Hallows",
+    "sortnum": 1,
+    "icon": "minecraft:ender_pearl{hallow:{spirit_type:'end'}}",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Most items contain spirits of several types. The easiest way to harness these spirits is by turning an item into a $(bold)hallow$(): an item that can store and transfer spirits of a specific type. Hallowed items also retain their original functionality.$(br2)A hallow's default spirit capacity is equal to the total number of spirits its base item contains."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/spirits.png"],
+            "border": true,
+            "text": "As seen in JEI, a redstone block has 18 Tech, 18 Fortune, and 16 Red spirits."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "To make a hallow, simply place the desired item in an item focus, influenced by foci containing any power sources (Self or bound mobs). The focus must be above a specific block, which affects the hallow's capacity. Possible blocks are iron (33%), gold (66%), diamond (100%), or netherite (300%). These multipliers also apply to the power cost.$(br2)Items can be un-hallowed with a grindstone."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/hallow.png"],
+            "border": true,
+            "text": "Hallowing an ender pearl. Notice how it adopts the colors of its spirit type."
+        },
+        {
+            "title": "Determining Spirit Type",
+            "type": "patchouli:text",
+            "text": "A hallow's spirit type is chosen randomly from one of the spirit types its base item contains. If the hallow has item influences when created, it will try to choose a spirit type it shares with all those items. The choice will favor non-color spirits if possible."
+        },
+        {
+            "title": "Hallows in Diagrams",
+            "type": "patchouli:text",
+            "text": "In item or block foci, hallows will try to extract spirits from their influences. This will destroy normal blocks and items, and drain other hallows.$(br2)Hallows can be \"overfilled\" over capacity if they break down an item that yields more spirits than they can hold. However, they only absorb half the \"extra\" spirits."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Many hallows can be placed in the world as blocks. When in block foci, they extract or transfer spirits just like item hallows in item foci.$(br2)You can use a held hallow on a placed hallow to extract spirits from it (hold shift to insert spirits instead).$(br2)When breaking a placed hallow, it will only remain a hallow if the block drops itself."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/hallow_2.png"],
+            "border": true,
+            "text": "Most hallows maintain their spirit colors, but some ignore or distort them."
+        }
+    ]
+}

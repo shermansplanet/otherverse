@@ -1,0 +1,20 @@
+{
+    "name": "Action: Put",
+    "icon": "minecraft:dispenser",
+    "category": "otherverse:contracts",
+    "sortnum": 6,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:dispenser"
+            },
+            "title" : "Put",
+            "text": "A dispenser item denotes the \"put\" action, which is filtered the same way as the \"take\" action.$(br2)If possible, the mob will place a held item as a block rather than dropping it on the ground."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If you tell a bound spider to put a cobweb somewhere, it need not be holding any cobwebs - it will spin one at the desired location, at the cost of a little of its health."
+        }
+    ]
+}

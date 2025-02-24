@@ -1,0 +1,19 @@
+{
+  "parent":"otherverse:diagram",
+  "display":{
+    "icon":{
+      "item": "minecraft:lapis_block"
+    },
+    "title": "I Choose You",
+    "description": "Fleshbind a mob."
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "fleshbind"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Bat",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'bat'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A bat Familiar will grant you night vision and creative flight, but only in darkness. The darker it is, the faster you will be able to fly."
+        }
+    ]
+}

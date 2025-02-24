@@ -1,0 +1,12 @@
+{
+    "name": "Horse",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'horse'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "When you take a horse as a Familiar, its speed, jump height, and health will all double."
+        }
+    ]
+}

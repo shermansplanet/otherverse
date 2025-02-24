@@ -1,0 +1,16 @@
+{
+    "name": "Spirit Transfusion",
+    "sortnum": 3,
+    "icon": "minecraft:rotten_flesh{hallow:{spirit_type:'flesh'}}",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Hallows are able to $(bold)transfuse$() their spirits into items that they're influencing, transforming the target. You can find transfusion recipes in JEI, indicating the number of spirits that are required to turn one item into another. This can also be used to enchant books."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Simply using a hallow on a block in the world will also transfuse spirits into that block. So if you're holding a hallow full of red spirits, for example, you can use it on any wool block to turn it into red wool.$(br2)33 Nature spirits can also be used as bonemeal, which is about twice as efficient as composting."
+        }
+    ]
+}

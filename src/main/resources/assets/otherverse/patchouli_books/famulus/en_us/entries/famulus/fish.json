@@ -1,0 +1,12 @@
+{
+    "name": "Fish",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'cod'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If a fish Familiar is in water and not already holding an item, they will occasionally find an item (any non-fish item you could get from fishing) and pick it up. Consider giving them a contract to deposit items somewhere."
+        }
+    ]
+}

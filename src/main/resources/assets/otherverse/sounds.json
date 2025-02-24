@@ -1,0 +1,11 @@
+{
+  "implement": {
+    "sounds":
+    [
+      {
+        "name": "otherverse:implement",
+        "stream": true
+      }
+    ]
+  }
+}

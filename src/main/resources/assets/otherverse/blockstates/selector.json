@@ -1,0 +1,10 @@
+{
+  "multipart": [
+    {   "when": {"filled" : "false"},
+        "apply": { "model": "otherverse:block/selector_edges"}
+    },
+    {   "when": {"filled" : "true"},
+        "apply": { "model": "otherverse:block/selector"}
+    }
+  ]
+}

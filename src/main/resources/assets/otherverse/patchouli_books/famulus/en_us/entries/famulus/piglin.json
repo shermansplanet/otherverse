@@ -1,0 +1,12 @@
+{
+    "name": "Piglin",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'piglin'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A piglin Familiar will share its goods with you for free. If they're not already holding something, they will occasionally produce a barter item and start holding it. Consider giving them a contract to deposit items somewhere."
+        }
+    ]
+}

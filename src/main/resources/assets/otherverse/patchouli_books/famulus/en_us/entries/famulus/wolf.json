@@ -1,0 +1,12 @@
+{
+    "name": "Wolf",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'wolf'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A wolf Familiar will summon a temporary pack of loyal wolves to your side so long as you have a bone in your inventory. The number of wolves will be greater the more full the moon is. On the night of a full moon, you will find your own abilities greatly enhanced as well."
+        }
+    ]
+}

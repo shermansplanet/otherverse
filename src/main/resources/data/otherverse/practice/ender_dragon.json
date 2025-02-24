@@ -1,0 +1,11 @@
+{
+	"other" : "minecraft:ender_dragon",
+	"spirit" : "end",
+	"transfusion" : [
+		{
+			"input" : "minecraft:glass_bottle",
+			"health" : 27,
+			"output" : "minecraft:dragon_breath"
+		}
+	]
+}

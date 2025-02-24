@@ -1,0 +1,19 @@
+{
+	"other" : "minecraft:sheep",
+	"spirit" : "food",
+	"healing" : {
+		"minecraft:wheat" : 3
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:rotten_flesh",
+			"health" : 7,
+			"output" : "minecraft:mutton"
+		},
+		{
+			"input" : "minecraft:grass",
+			"health" : 1,
+			"output" : "minecraft:white_wool"
+		}
+	]
+}

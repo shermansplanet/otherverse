@@ -1,0 +1,26 @@
+{
+  "temperature": 0.25,
+  "downfall": 0.4,
+  "precipitation": "rain",
+  "effects": {
+    "sky_color": 0,
+    "fog_color": 2804437,
+    "water_color": 1450295,
+    "water_fog_color": 0,
+    "grass_color": 2581608,
+    "particle": {
+      "options": {
+        "type": "minecraft:flash"
+      },
+      "probability": 0.001
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    ["otherverse:shock_spires"],
+    [],
+    []
+  ]
+}

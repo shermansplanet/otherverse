@@ -1,0 +1,50 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"ambientocclusion" : false,
+	"textures": {
+		"0": "otherverse:block/salt_crystals",
+		"particle": "otherverse:block/salt_crystals"
+	},
+	"elements": [
+		{
+			"from": [3, 0, 8],
+			"to": [7, 4, 12],
+			"rotation": {"angle": 0, "axis": "x", "origin": [-1, 2, 1]},
+			"faces": {
+				"north": {"uv": [0, 0, 4, 4], "texture": "#0"},
+				"east": {"uv": [1, 7, 5, 11], "texture": "#0"},
+				"south": {"uv": [1, 7, 5, 11], "texture": "#0"},
+				"west": {"uv": [1, 7, 5, 11], "texture": "#0"},
+				"up": {"uv": [1, 7, 5, 11], "texture": "#0"},
+				"down": {"uv": [1, 7, 5, 11], "texture": "#0"}
+			}
+		},
+		{
+			"from": [9, 0, 2],
+			"to": [12, 3, 5],
+			"rotation": {"angle": 0, "axis": "x", "origin": [5, 2, -6]},
+			"faces": {
+				"north": {"uv": [0, 0, 4, 4], "texture": "#0"},
+				"east": {"uv": [1, 7, 4, 10], "texture": "#0"},
+				"south": {"uv": [1, 7, 4, 10], "texture": "#0"},
+				"west": {"uv": [1, 7, 4, 10], "texture": "#0"},
+				"up": {"uv": [1, 7, 4, 10], "texture": "#0"},
+				"down": {"uv": [1, 7, 4, 10], "texture": "#0"}
+			}
+		},
+		{
+			"from": [5, 0, 4],
+			"to": [11, 6, 10],
+			"rotation": {"angle": 0, "axis": "x", "origin": [1, 2, -1]},
+			"faces": {
+				"north": {"uv": [1, 7, 7, 13], "texture": "#0"},
+				"east": {"uv": [1, 7, 7, 13], "texture": "#0"},
+				"south": {"uv": [1, 7, 7, 13], "texture": "#0"},
+				"west": {"uv": [1, 7, 7, 13], "texture": "#0"},
+				"up": {"uv": [1, 7, 7, 13], "texture": "#0"},
+				"down": {"uv": [1, 7, 7, 13], "texture": "#0"}
+			}
+		}
+	]
+}

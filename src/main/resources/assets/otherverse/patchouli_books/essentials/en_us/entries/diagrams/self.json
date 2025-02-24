@@ -1,0 +1,16 @@
+{
+    "name": "Self",
+    "sortnum": 20,
+    "icon": "otherverse:self",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "There are a lot of ways to power diagrams, but at first you have no choice but to drain your $(bold)Self$(): the essence that makes you $(italic)you$() and keeps you going. It follows that depositing it in a diagram has... adverse effects. You will recover some Self each sunrise, and regain all of it when you get an Advancement."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "To place some of your Self in a diagram, crouch-right-click an item focus with an empty hand. Item foci can hold up to 7 Self.$(br2)Self is a versatile power source, and will attempt to power any focus it influences."
+        }
+    ]
+}

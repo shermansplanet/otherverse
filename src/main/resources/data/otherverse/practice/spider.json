@@ -1,0 +1,14 @@
+{
+	"other" : "minecraft:spider",
+	"healing" : {
+		"entity.minecraft.bee" : 1,
+		"entity.minecraft.silverfish" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:vine",
+			"health" : 3,
+			"output" : "minecraft:string"
+		}
+	]
+}

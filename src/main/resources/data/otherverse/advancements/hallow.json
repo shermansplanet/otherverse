@@ -1,0 +1,19 @@
+{
+  "parent":"otherverse:diagram",
+  "display":{
+    "icon":{
+      "item": "minecraft:iron_block"
+    },
+    "title": "Hallow World",
+    "description": "Make a hallow."
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "hallow"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

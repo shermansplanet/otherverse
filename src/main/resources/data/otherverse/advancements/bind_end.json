@@ -1,0 +1,20 @@
+{
+  "parent":"otherverse:bind",
+  "display":{
+    "icon":{
+      "item": "otherverse:spirit_end"
+    },
+    "title": "Bind the End",
+    "description": "Bind the Ender Dragon",
+    "frame": "challenge"
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "bind_end"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

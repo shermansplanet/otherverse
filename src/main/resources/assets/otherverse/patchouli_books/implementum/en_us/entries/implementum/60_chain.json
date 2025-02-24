@@ -1,0 +1,14 @@
+{
+    "name": "Implement: Chain",
+    "sortnum": 60,
+    "icon": "minecraft:chain",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"item" : "minecraft:chain"},
+            "title" : "Chain",
+            "text": "A Chain Implement will make binding much easier; mobs will only require influence equal 2x their health (instead of 3x) to be bound.$(br2)However, you will no longer find it easier to bind tamed mobs."
+        }
+    ]
+}

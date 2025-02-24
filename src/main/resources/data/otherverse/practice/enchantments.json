@@ -1,0 +1,230 @@
+{
+	"practice" : "enchantment",
+	"mob_transfusion" : {
+		"minecraft:aqua_affinity" : {
+			"health" : [13],
+			"required" : [
+				"minecraft:salmon",
+				"minecraft:cod",
+				"minecraft:tropical_fish"
+			],
+			"can_be_any" : true
+		},
+		"minecraft:blast_protection" : {
+			"health" : [9, 22, 40, 66],
+			"required" : [
+				"minecraft:turtle",
+				"minecraft:creeper"
+			]
+		},
+		"minecraft:channeling" : {
+			"health" : [33],
+			"required" : [
+				"minecraft:drowned",
+				"minecraft:witch"
+			]
+		},
+		"minecraft:depth_strider" : {
+			"health" : [9, 13, 27],
+			"required" : [
+				"minecraft:dolphin",
+				"minecraft:strider"
+			]
+		},
+		"minecraft:feather_falling" : {
+			"health" : [3, 6, 12, 24],
+			"required" : [
+				"minecraft:chicken"
+			]
+		},
+		"minecraft:fire_aspect" : {
+			"health" : [9, 18],
+			"required" : [
+				"minecraft:blaze",
+				"minecraft:wither_skeleton"
+			]
+		},
+		"minecraft:fire_protection" : {
+			"health" : [9, 22, 40, 66],
+			"required" : [
+				"minecraft:turtle",
+				"minecraft:strider"
+			]
+		},
+		"minecraft:flame" : {
+			"health" : [13],
+			"required" : [
+				"minecraft:blaze",
+				"minecraft:skeleton"
+			]
+		},
+		"minecraft:frost_walker" : {
+			"health" : [9, 18],
+			"required" : [
+				"minecraft:snow_golem"
+			]
+		},
+		"minecraft:impaling" : {
+			"health" : [6, 12, 24, 48, 96],
+			"required" : [
+				"minecraft:drowned",
+				"minecraft:bee"
+			]
+		},
+		"minecraft:infinity" : {
+			"health" : [76],
+			"required" : [
+				"minecraft:skeleton",
+				"minecraft:stray"
+			]
+		},
+		"minecraft:knockback" : {
+			"health" : [13,33],
+			"required" : [
+				"minecraft:zombie",
+				"minecraft:hoglin"
+			]
+		},
+		"minecraft:looting" : {
+			"health" : [9, 27, 81],
+			"required" : [
+				"minecraft:piglin"
+			]
+		},
+		"minecraft:loyalty" : {
+			"health" : [13,23,33],
+			"required" : [
+				"minecraft:drowned",
+				"minecraft:wolf"
+			]
+		},
+		"minecraft:luck_of_the_sea" : {
+			"health" : [9,18,27],
+			"required" : [
+				"minecraft:glow_squid"
+			]
+		},
+		"minecraft:lure" : {
+			"health" : [4,8,16],
+			"required" : [
+				"minecraft:tadpole"
+			]
+		},
+		"minecraft:mending" : {
+			"health" : [99],
+			"required" : [
+				"minecraft:wither"
+			]
+		},
+		"minecraft:piercing" : {
+			"health" : [9, 22, 40, 66],
+			"required" : [
+				"minecraft:skeleton",
+				"minecraft:pillager"
+			]
+		},
+		"minecraft:power" : {
+			"health" : [6, 12, 24, 48, 96],
+			"required" : [
+				"minecraft:skeleton",
+				"minecraft:zombie"
+			]
+		},
+		"minecraft:blast_protection" : {
+			"health" : [9, 22, 40, 66],
+			"required" : [
+				"minecraft:turtle",
+				"minecraft:skeleton"
+			]
+		},
+		"minecraft:punch" : {
+			"health" : [13,33],
+			"required" : [
+				"minecraft:skeleton",
+				"minecraft:hoglin"
+			]
+		},
+		"minecraft:quick_charge" : {
+			"health" : [9,18,27],
+			"required" : [
+				"minecraft:skeleton",
+				"minecraft:rabbit"
+			]
+		},
+		"minecraft:respiration" : {
+			"health" : [9,18,27],
+			"required" : [
+				"minecraft:squid"
+			]
+		},
+		"minecraft:riptide" : {
+			"health" : [13,23,33],
+			"required" : [
+				"minecraft:drowned",
+				"minecraft:goat"
+			]
+		},
+		"minecraft:silk_touch" : {
+			"health" : [66],
+			"required" : [
+				"minecraft:enderman"
+			]
+		},
+		"minecraft:smite" : {
+			"health" : [6, 12, 24, 48, 96],
+			"required" : [
+				"minecraft:vindicator"
+			]
+		},
+		"minecraft:soul_speed" : {
+			"health" : [9,18,27],
+			"required" : [
+				"minecraft:skeleton_horse"
+			]
+		},
+		"minecraft:sweeping" : {
+			"health" : [9,18,27],
+			"required" : [
+				"minecraft:piglin_brute"
+			]
+		},
+		"minecraft:swift_sneak" : {
+			"health" : [9,18,27],
+			"required" : [
+				"minecraft:horse",
+				"minecraft:rabbit"
+			]
+		},
+		"minecraft:thorns" : {
+			"health" : [9,18,27],
+			"required" : [
+				"minecraft:pufferfish"
+			]
+		},
+		"minecraft:unbreaking" : {
+			"health" : [9,18,27],
+			"required" : [
+				"minecraft:turtle",
+				"minecraft:iron_golem"
+			]
+		}
+	},
+	"spirit_transfusion" : {
+		"minecraft:efficiency" : {
+			"spirit" : "technology",
+			"price" : [18, 36, 72, 144]
+		},
+		"minecraft:fortune" : {
+			"spirit" : "fortune",
+			"price" : [27, 81, 243]
+		},
+		"minecraft:sharpness" : {
+			"spirit" : "war",
+			"price" : [13, 26, 52, 104, 208]
+		},
+		"minecraft:protection" : {
+			"spirit" : "protection",
+			"price" : [18, 36, 72, 144]
+		}
+	}
+}

@@ -1,0 +1,283 @@
+package com.shermansplanet.otherverse.spirits;
+
+import com.google.gson.JsonObject;
+import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.PracticeWorldManager;
+import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
+import com.shermansplanet.otherverse.binding.MobTransfusions;
+import com.shermansplanet.otherverse.diagrams.ChalkItem;
+import com.shermansplanet.otherverse.integrations.jei.SpiritExtractionRecipe;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.Tags.Items;
+import net.minecraftforge.registries.ForgeRegistries;
+import org.slf4j.Logger;
+
+import java.util.*;
+
+public class SpiritLabeler {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    public record SpiritAmount(SpiritType type, Integer amount) {
+    }
+
+    private final static PracticeWorldManager.WorldTraitComponent<HashMap<Item, SpiritLabeler.SpiritAmount[]>> SPIRITS_FROM_TAGS = new PracticeWorldManager.WorldTraitComponent<>() {
+    };
+    private final static PracticeWorldManager.WorldTraitComponent<HashMap<Item, SpiritLabeler.SpiritAmount[]>> SPIRITS_FROM_COLORS = new PracticeWorldManager.WorldTraitComponent<>() {
+    };
+    private final static PracticeWorldManager.WorldTraitComponent<HashMap<Item, SpiritLabeler.SpiritAmount[]>> SPIRITS_FROM_JSON = new PracticeWorldManager.WorldTraitComponent<>() {
+    };
+
+    public final static PracticeWorldManager.WorldTrait<HashMap<Item, Hashtable<SpiritType, Integer>>> SPIRIT_TYPE_OF =
+            new PracticeWorldManager.WorldTrait<>(new PracticeWorldManager.WorldTraitComponent[]{
+                    SPIRITS_FROM_TAGS, SPIRITS_FROM_COLORS, SPIRITS_FROM_JSON
+            }
+            ) {
+                @Override
+                public boolean synthesize() {
+                    for (var component : components) {
+                        if (component.data == null) return false;
+                    }
+                    data = new HashMap<>();
+                    for (var component : Arrays.stream(components).map(t -> (HashMap<Item, SpiritLabeler.SpiritAmount[]>) t.data).toList()) {
+                        for (var itemAmount : component.entrySet()) {
+                            var table = data.computeIfAbsent(itemAmount.getKey(), x -> new Hashtable<>());
+                            for (var spiritAmount : itemAmount.getValue()) {
+                                if (spiritAmount.amount() == 0) continue;
+                                var val = table.getOrDefault(spiritAmount.type(), 0);
+                                table.put(spiritAmount.type(), val + spiritAmount.amount());
+                            }
+                        }
+                    }
+                    return true;
+                }
+            };
+
+    public static HashSet<Item> doubleSmeltItems;
+
+    public static Hashtable<SpiritType, Integer> getSpiritsFor(Item item) {
+        return SPIRIT_TYPE_OF.data.get(item);
+    }
+
+    public static void onStartLoadingJson() {
+        SpiritLabeler.SPIRITS_FROM_JSON.data = new HashMap<>();
+    }
+
+    public static void onDoneLoadingJson() {
+        SpiritLabeler.SPIRITS_FROM_JSON.setData(SPIRITS_FROM_JSON.data);
+    }
+
+    public static List<SpiritExtractionRecipe> GenerateRecipes() {
+        List<SpiritExtractionRecipe> recipes = new ArrayList<>();
+        HashSet<Item> spiritItems = new HashSet<>();
+        for (var spiritItem : Spirits.spiritItems.values()) {
+            spiritItems.add(spiritItem.get());
+        }
+        for (var k : new HashSet<>(SPIRIT_TYPE_OF.data.keySet())) {
+            if (spiritItems.contains(k) || k instanceof SpawnEggItem) {
+                continue;
+            }
+            List<SpiritAmount> spiritAmounts = new ArrayList<>();
+            var spiritsForItem = getSpiritsFor(k);
+            for (var k2 : spiritsForItem.keySet()) {
+                spiritAmounts.add(new SpiritAmount(k2, spiritsForItem.get(k2)));
+            }
+            spiritAmounts.sort((a, b) -> b.amount.compareTo(a.amount));
+            recipes.add(new SpiritExtractionRecipe(new ResourceLocation(Otherverse.MODID, k.toString()),
+                    spiritAmounts, k.getDefaultInstance()));
+        }
+        for (var k : MobBindingInfluenceUtils.mobSpirits.entrySet()) {
+            var item = MobBindingInfluenceUtils.getIdol(k.getKey());
+            recipes.add(new SpiritExtractionRecipe(new ResourceLocation(Otherverse.MODID, k.getKey().toString()),
+                    List.of(new SpiritAmount(k.getValue(), 1)), item));
+        }
+        return recipes;
+    }
+
+    public static void onColorsUpdated(HashMap<Item, SpiritLabeler.SpiritAmount[]> cs) {
+        if (SPIRITS_FROM_COLORS.data == null) SPIRITS_FROM_COLORS.setData(cs);
+    }
+
+    public static void loadJsonSpirits(JsonObject practice) {
+        var spirits = practice.get("spirits").getAsJsonObject();
+        for (var itemstring : spirits.keySet()) {
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemstring));
+            var spiritcounts = spirits.get(itemstring).getAsJsonArray();
+            SpiritAmount[] amounts = new SpiritAmount[spiritcounts.size()];
+            for (var i = 0; i < spiritcounts.size(); i++) {
+                var parts = spiritcounts.get(i).getAsString().split(" ");
+                amounts[i] = new SpiritAmount(Spirits.spiritsByLabel.get(parts[1]), Integer.parseInt(parts[0]));
+            }
+            SPIRITS_FROM_JSON.data.put(item, amounts);
+        }
+    }
+
+    public interface SpiritAmountDeterminer {
+        int run(Item item);
+    }
+
+    public static void AddForTag(Item itemRegistry, List<SpiritAmount> amountsList,
+                                 TagKey<Item> tagKey, SpiritType spiritType, int spiritAmount) {
+        if (itemRegistry.getDefaultInstance().is(tagKey)) {
+            amountsList.add(new SpiritAmount(spiritType, spiritAmount));
+        }
+    }
+
+    public static void AddForTag(Item itemRegistry, List<SpiritAmount> amountsList,
+                                 TagKey<Item> tagKey, SpiritType spiritType, SpiritAmountDeterminer spiritAmount) {
+        if (itemRegistry.getDefaultInstance().is(tagKey)) {
+            amountsList.add(new SpiritAmount(spiritType, spiritAmount.run(itemRegistry)));
+        }
+    }
+
+    public static void AnalyzeTags() {
+        var yieldingSpiritTypes = new SpiritType[]{Spirits.FIRE, Spirits.NETHER};
+
+        HashMap<Item, SpiritLabeler.SpiritAmount[]> spiritsFromTags = new HashMap<>();
+
+        for (Item item : ForgeRegistries.ITEMS) {
+            if (item instanceof ChalkItem || item == OtherverseItems.SELF.get()) {
+                continue;
+            }
+            ArrayList<SpiritAmount> spiritAmounts = new ArrayList<>();
+
+            for (SpiritType spiritType : yieldingSpiritTypes) {
+                if (item == Spirits.spiritItems.get(spiritType).get()) {
+                    spiritAmounts.add(new SpiritAmount(spiritType, 3));
+                }
+            }
+
+            AddForTag(item, spiritAmounts, Items.ORES, Spirits.EARTH, 1);
+            AddForTag(item, spiritAmounts, Items.NETHERRACK, Spirits.EARTH, 1);
+            AddForTag(item, spiritAmounts, ItemTags.DIRT, Spirits.EARTH, 1);
+            AddForTag(item, spiritAmounts, Items.SANDSTONE, Spirits.EARTH, 1);
+            AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.EARTH, 1);
+            AddForTag(item, spiritAmounts, Items.STONE, Spirits.EARTH, 3);
+            AddForTag(item, spiritAmounts, Items.COBBLESTONE, Spirits.EARTH, 1);
+            AddForTag(item, spiritAmounts, Items.ARMORS, Spirits.PROTECTION,
+                    i -> i instanceof ArmorItem a ? (int) ((a.getDefense() + a.getToughness()) * 9) : 1);
+            AddForTag(item, spiritAmounts, Items.BONES, Spirits.DEATH, 9);
+
+            if (item instanceof HorseArmorItem horseArmor) {
+                spiritAmounts.add(new SpiritAmount(Spirits.PROTECTION, horseArmor.getProtection()));
+            }
+
+            SpiritAmountDeterminer tierFunc = i -> i instanceof TieredItem t ?
+                    (int) (t.getTier().getAttackDamageBonus() + t.getTier().getSpeed()) : 7;
+
+            AddForTag(item, spiritAmounts, Items.TOOLS_AXES, Spirits.OVERWORLD, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS_SHOVELS, Spirits.EARTH, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS_HOES, Spirits.NATURE, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS_PICKAXES, Spirits.FORTUNE, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS_BOWS, Spirits.AIR, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS_CROSSBOWS, Spirits.AIR, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS_FISHING_RODS, Spirits.WATER, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS_TRIDENTS, Spirits.WATER, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS_SHIELDS, Spirits.PROTECTION, tierFunc);
+
+            AddForTag(item, spiritAmounts, ItemTags.BUTTONS, Spirits.TECH, 1);
+
+            var modifiers = item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND);
+            if (!modifiers.get(Attributes.ATTACK_DAMAGE).isEmpty() && !modifiers
+                    .get(Attributes.ATTACK_SPEED).isEmpty()) {
+                float damage = 1;
+                for (AttributeModifier mod : modifiers.get(Attributes.ATTACK_DAMAGE)) {
+                    damage += mod.getAmount();
+                }
+                float speed = 4;
+                for (AttributeModifier mod : modifiers.get(Attributes.ATTACK_SPEED)) {
+                    speed += mod.getAmount();
+                }
+                int war = Math.round(damage * 10f * speed);
+                if (war >= 64) {
+                    spiritAmounts.add(new SpiritAmount(Spirits.WAR, war - 63));
+                }
+            }
+
+            int burnTime = ForgeHooks.getBurnTime(item.getDefaultInstance(), null) / 100;
+            if (burnTime > 0) {
+                var st = item == net.minecraft.world.item.Items.LAVA_BUCKET ? Spirits.FIRE : Spirits.PHLOGISTON;
+                spiritAmounts.add(new SpiritAmount(st, burnTime));
+            }
+
+            if (item.isEdible()) {
+                var foodProps = item.getDefaultInstance().getFoodProperties(null);
+                int foodAmount = 1;
+                if (foodProps != null) {
+                    foodAmount = (int) (foodProps.getNutrition() *
+                            (1 + foodProps.getSaturationModifier() * 2));
+                    if (foodProps.isMeat() && foodProps.getSaturationModifier() < 0.5f) {
+                        spiritAmounts.add(new SpiritAmount(Spirits.FLESH, foodAmount));
+                    }
+                }
+                spiritAmounts.add(new SpiritAmount(Spirits.FOOD, foodAmount));
+            } else if (ComposterBlock.COMPOSTABLES.containsKey(item)) {
+                spiritAmounts.add(new SpiritAmount(Spirits.NATURE,
+                        (int) (ComposterBlock.COMPOSTABLES.getFloat(item) * 10)));
+            }
+
+            if (item instanceof BlockItem bi) {
+                if (bi.getBlock() instanceof BonemealableBlock) {
+                    spiritAmounts.add(new SpiritAmount(Spirits.NATURE, 27));
+                }
+                float strength = bi.getBlock().defaultDestroyTime();
+                if (strength > 10) {
+                    spiritAmounts.add(new SpiritAmount(Spirits.PROTECTION, (int) (strength)));
+                }
+
+                int lightEmission = bi.getBlock().defaultBlockState().getLightEmission();
+                if (lightEmission > 0) {
+                    spiritAmounts.add(new SpiritAmount(Spirits.LIGHT, lightEmission * 3));
+                }
+
+                if (item.toString().contains("copper")) {
+                    spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18));
+                    spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
+                }
+            }
+
+            if (spiritAmounts.isEmpty()) {
+                continue;
+            }
+
+            spiritsFromTags.put(item, spiritAmounts.toArray(new SpiritAmount[0]));
+        }
+
+        SPIRITS_FROM_TAGS.setData(spiritsFromTags);
+    }
+
+    public static void analyzeSmeltingRecipes(List<SmeltingRecipe> smeltingRecipes) {
+        HashSet<Item> products = new HashSet<>();
+        doubleSmeltItems = new HashSet<>();
+        SpiritTransfusions.TRANSFUSIONS_FROM_RECIPES.data = new HashMap<>();
+        MobTransfusions.TRANSFUSIONS_FROM_RECIPES.data = new HashMap<>();
+        for (var recipe : smeltingRecipes) {
+            products.add(recipe.getResultItem().getItem());
+            SpiritTransfusions.analyzeSmeltingRecipe(recipe);
+            MobTransfusions.analyzeSmeltingRecipe(recipe);
+        }
+        for (var recipe : smeltingRecipes) {
+            for (Ingredient ingredient : recipe.getIngredients()) {
+                for (ItemStack input : ingredient.getItems()) {
+                    if (products.contains(input.getItem())) {
+                        doubleSmeltItems.add(recipe.getResultItem().getItem());
+                    }
+                }
+            }
+        }
+        SpiritTransfusions.TRANSFUSIONS_FROM_RECIPES.setData(SpiritTransfusions.TRANSFUSIONS_FROM_RECIPES.data);
+        MobTransfusions.TRANSFUSIONS_FROM_RECIPES.setData(MobTransfusions.TRANSFUSIONS_FROM_RECIPES.data);
+    }
+}

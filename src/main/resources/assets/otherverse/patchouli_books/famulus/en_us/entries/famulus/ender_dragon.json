@@ -1,0 +1,16 @@
+{
+    "name": "Ender Dragon",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'ender_dragon'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Yes, the Ender Dragon can be a Familiar. It will grant you elytra-style flight and the ability to regenerate from end crystals (the more in range, the faster you regenerate). If you fall out of the world, you will be returned to the main End island before you die."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "You can also use flint and steel to shoot dragon fireballs (much faster, if it's your Implement). But be warned, this Familiar is so powerful that you won't quite be able to control the power. If you don't shoot at least one of these fireballs per day, you will start shooting them at random times."
+        }
+    ]
+}

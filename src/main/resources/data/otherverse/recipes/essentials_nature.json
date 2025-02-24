@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+      {"item": "minecraft:book"},
+      {"item": "minecraft:string"},
+      {"item": "minecraft:sand"},
+      {"tag" : "forge:tools/swords"},
+      {"item": "minecraft:bone"},
+      {"tag" : "minecraft:saplings"}
+  ],
+  "result": {
+    "item": "patchouli:guide_book",
+    "nbt": {
+        "patchouli:book": "otherverse:essentials"
+    },
+    "count" : 1
+  }
+}

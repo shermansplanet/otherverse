@@ -1,0 +1,20 @@
+{
+    "name": "Making/Applying Contracts",
+    "icon": "otherverse:contract",
+    "category": "otherverse:contracts",
+    "sortnum": 0,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:contract"
+            },
+            "text": "To make a contract, put a piece of paper in a diagram. Behaviors simple and complex can be \"programmed\" into the contract via the paper's influences.$(br2)Using a contract on a bound mob will apply the contract. A contract in an item focus influencing a mob at the time of binding will also be applied."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_1.png"],
+            "text": "A contract's tooltip shows what it does."
+        }
+    ]
+}

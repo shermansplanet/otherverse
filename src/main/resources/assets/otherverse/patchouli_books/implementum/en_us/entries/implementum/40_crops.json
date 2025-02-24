@@ -1,0 +1,14 @@
+{
+    "name": "Implement: Growable",
+    "sortnum": 40,
+    "icon": "minecraft:wheat_seeds",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": "tag:minecraft:saplings,tag:forge:seeds",
+            "title" : "Growables",
+            "text": "Anything that can be bonemealed - saplings, crops, even grass and nylium - is treated as a block Implement. In addition to the normal block Implement abilities, using such an Implement on an already-placed block of that type will consume one use to apply a bonemeal effect to that block."
+        }
+    ]
+}

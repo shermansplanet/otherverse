@@ -1,0 +1,7 @@
+{
+	"other" : "minecraft:allay",
+	"binding" : {
+		"minecraft:note_block" : 13,
+		"minecraft:dark_oak_fence" : 7
+	}
+}

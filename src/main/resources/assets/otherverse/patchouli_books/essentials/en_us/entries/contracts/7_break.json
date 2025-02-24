@@ -1,0 +1,18 @@
+{
+    "name": "Action: Break",
+    "icon": "minecraft:wooden_pickaxe",
+    "category": "otherverse:contracts",
+    "sortnum": 7,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"tag" : "forge:tools/pickaxes"},
+            "title" : "Break",
+            "text": "A pickaxe item denotes the \"break\" action.$(br2)Item filters denote which items to break. If any block filters are present, the mob will only break blocks on top of those block types. Otherwise, the mob will only break blocks at its height or higher."
+        },
+        {
+            "type": "patchouli:text",        
+            "text": "Mobs with more powerful attacks will mine faster.$(br2)If a mob is holding a tool, it will use that tool to break the block.$(br2)An enderman who is not holding anything will pick up the block instead of breaking it."
+        }
+    ]
+}

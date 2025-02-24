@@ -1,0 +1,12 @@
+{
+    "name": "Cow",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'cow'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A cow Familiar yields no special abilities, but thanks to the transfusion mechanic discussed earlier, it does let you fill any bucket you're holding with milk."
+        }
+    ]
+}

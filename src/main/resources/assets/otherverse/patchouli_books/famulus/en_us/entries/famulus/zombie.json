@@ -1,0 +1,12 @@
+{
+    "name": "Zombie/Husk",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'zombie'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "With a zombie or husk Familiar, eligible mobs you hit will occasionally be zombified, granting you brief regeneration. Also, anything that gave you the hunger effect will now give you the saturation effect instead."
+        }
+    ]
+}

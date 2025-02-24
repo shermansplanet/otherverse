@@ -1,0 +1,12 @@
+{
+    "name": "Panda",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'panda'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A panda Familiar gives you its deforestation abilities, allowing you to fell entire trees just by breaking one log. The same ability applies to leaves, which will all drop themselves if you use shears."
+        }
+    ]
+}

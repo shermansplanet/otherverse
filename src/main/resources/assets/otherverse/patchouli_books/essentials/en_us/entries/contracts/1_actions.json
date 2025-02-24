@@ -1,0 +1,26 @@
+{
+    "name": "Actions and Filters",
+    "icon": "otherverse:contract",
+    "category": "otherverse:contracts",
+    "sortnum": 1,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Certain items influencing the contract when it is created will denote $(bold)actions$() that the bound mob must perform.$(br2)For instance, a hopper will tell it to collect all the dropped items it sees."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_2.png"],
+            "text": "The \"take\" action."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Anything influencing an action will act as a $(bold)filter$(). For instance, this diagram tells a mob to pick up only gold nuggets or iron nuggets.$(br2)The specifics of how filters work depends on the action, and will be covered in other sections."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_3.png"],
+            "text": "take(gold nugget, iron nugget)"
+        }
+    ]
+}

@@ -1,0 +1,870 @@
+{
+  "type": "otherverse:ruins",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": {
+      "sea_level": -64,
+      "disable_mob_generation": true,
+      "aquifers_enabled": false,
+      "ore_veins_enabled": false,
+      "legacy_random_source": false,
+      "default_block": {
+        "Name": "minecraft:stone"
+      },
+      "default_fluid": {
+        "Name": "minecraft:water",
+        "Properties": {
+          "level": "0"
+        }
+      },
+      "noise": {
+        "min_y": -64,
+        "height": 384,
+        "size_horizontal": 1,
+        "size_vertical": 2
+      },
+      "noise_router": {
+        "barrier": 0,
+        "fluid_level_floodedness": 0,
+        "fluid_level_spread": 0,
+        "lava": -64,
+        "temperature": {
+          "type": "minecraft:shifted_noise",
+          "noise": "minecraft:surface",
+          "xz_scale": 0.1,
+          "y_scale": 0,
+          "shift_x": "minecraft:shift_x",
+          "shift_y": 0,
+          "shift_z": "minecraft:shift_z"
+        },
+        "vegetation": {
+          "type": "minecraft:shifted_noise",
+          "noise": "minecraft:surface_secondary",
+          "xz_scale": 0.1,
+          "y_scale": 0,
+          "shift_x": "minecraft:shift_x",
+          "shift_y": 0,
+          "shift_z": "minecraft:shift_z"
+        },
+        "continents": {
+          "type": "minecraft:shifted_noise",
+          "noise": "minecraft:continentalness",
+          "xz_scale": 1,
+          "y_scale": 0,
+          "shift_x": "minecraft:shift_x",
+          "shift_y": 0,
+          "shift_z": "minecraft:shift_z"
+        },
+        "erosion": {
+          "type": "minecraft:abs",
+          "argument": {
+            "type": "minecraft:shifted_noise",
+            "noise": "minecraft:erosion",
+            "xz_scale": 1,
+            "y_scale": 0,
+            "shift_x": "minecraft:shift_x",
+            "shift_y": 0,
+            "shift_z": "minecraft:shift_z"
+          }
+        },
+        "depth": 0,
+        "ridges": 0,
+        "initial_density_without_jaggedness": 0,
+        "final_density": {
+          "type": "minecraft:add",
+          "argument1": {
+            "type": "minecraft:add",
+            "argument1": {
+              "type": "minecraft:add",
+              "argument1": {
+                "type": "minecraft:mul",
+                "argument1": {
+                  "type": "minecraft:y_clamped_gradient",
+                  "from_y": 0,
+                  "to_y": 256,
+                  "from_value": 5,
+                  "to_value": -20
+                },
+                "argument2": {
+                  "type": "minecraft:clamp",
+                  "input": {
+                    "type": "minecraft:add",
+                    "argument1": 2,
+                    "argument2": {
+                      "type": "minecraft:mul",
+                      "argument1": -4,
+                      "argument2": {
+                        "type": "minecraft:shifted_noise",
+                        "noise": "minecraft:surface_secondary",
+                        "xz_scale": 0.1,
+                        "y_scale": 0,
+                        "shift_x": "minecraft:shift_x",
+                        "shift_y": 0,
+                        "shift_z": "minecraft:shift_z"
+                      }
+                    }
+                  },
+                  "min": 0.04,
+                  "max": 1
+                }
+              },
+              "argument2": {
+                "type": "minecraft:noise",
+                "noise": "minecraft:surface",
+                "xz_scale": 1,
+                "y_scale": 2
+              }
+            },
+            "argument2": {
+              "type": "minecraft:mul",
+              "argument1": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:add",
+                  "argument1": -150,
+                  "argument2": {
+                    "type": "minecraft:mul",
+                    "argument1": -600,
+                    "argument2": {
+                      "type": "minecraft:shifted_noise",
+                      "noise": "minecraft:surface_secondary",
+                      "xz_scale": 0.1,
+                      "y_scale": 0,
+                      "shift_x": "minecraft:shift_x",
+                      "shift_y": 0,
+                      "shift_z": "minecraft:shift_z"
+                    }
+                  }
+                },
+                "min": 0,
+                "max": 300
+              },
+              "argument2": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:add",
+                  "argument1": -0.05,
+                  "argument2": {
+                    "type": "minecraft:abs",
+                    "argument": {
+                      "type": "minecraft:shifted_noise",
+                      "noise": "minecraft:erosion",
+                      "xz_scale": 3,
+                      "y_scale": 0,
+                      "shift_x": "minecraft:shift_x",
+                      "shift_y": 0,
+                      "shift_z": "minecraft:shift_z"
+                    }
+                  }
+                },
+                "min": -1,
+                "max": 0
+              }
+            }
+          },
+          "argument2": {
+            "type": "minecraft:min",
+            "argument1": 0,
+            "argument2": {
+              "type": "minecraft:mul",
+              "argument1": {
+                "type": "minecraft:y_clamped_gradient",
+                "from_y": -64,
+                "to_y": 50,
+                "from_value": 100,
+                "to_value": 40
+              },
+              "argument2": {
+                "type": "minecraft:add",
+                "argument1": -0.1,
+                "argument2": {
+                  "type": "minecraft:add",
+                  "argument1": {
+                    "type": "minecraft:square",
+                    "argument": {
+                      "type": "minecraft:shifted_noise",
+                      "noise": "minecraft:surface",
+                      "xz_scale": 0.1,
+                      "y_scale": 0,
+                      "shift_x": "minecraft:shift_x",
+                      "shift_y": 0,
+                      "shift_z": "minecraft:shift_z"
+                    }
+                  },
+                  "argument2": {
+                    "type": "minecraft:square",
+                    "argument": {
+                      "type": "minecraft:shifted_noise",
+                      "noise": "minecraft:surface_secondary",
+                      "xz_scale": 0.1,
+                      "y_scale": 0,
+                      "shift_x": "minecraft:shift_x",
+                      "shift_y": 0,
+                      "shift_z": "minecraft:shift_z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "vein_toggle": 0,
+        "vein_ridged": 0,
+        "vein_gap": 0
+      },
+      "spawn_target": [],
+      "surface_rule": {
+        "type": "minecraft:sequence",
+        "sequence": [
+          {
+            "type": "minecraft:condition",
+            "if_true": {
+              "type": "minecraft:biome",
+              "biome_is": [
+                "otherverse:ruins_misery",
+                "otherverse:ruins_chaos",
+                "otherverse:ruins_disgust"
+              ]
+            },
+            "then_run": {
+              "type": "minecraft:condition",
+              "if_true": {
+                "type": "minecraft:not",
+                "invert": {
+                  "type": "minecraft:stone_depth",
+                  "offset": 1,
+                  "surface_type": "floor",
+                  "add_surface_depth": false,
+                  "secondary_depth_range": 0
+                }
+              },
+              "then_run": {
+                "type": "minecraft:block",
+                "result_state": {
+                  "Name": "minecraft:blackstone"
+                }
+              }
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": {
+              "type": "minecraft:biome",
+              "biome_is": [
+                "otherverse:ruins_misery"
+              ]
+            },
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": 0.5,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:soul_sand"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": 0.25,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:muddy_mangrove_roots"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": 0,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:mud"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": -0.1,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:cracked_deepslate_bricks"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": -0.35,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:deepslate_bricks"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": -0.5,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:cobbled_deepslate"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": {
+                    "Name": "minecraft:deepslate"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": {
+              "type": "minecraft:biome",
+              "biome_is": [
+                "otherverse:ruins_disgust"
+              ]
+            },
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": 0.3,
+                    "max_threshold": 10
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:slime_block"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": 0.1,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "otherverse:serpent_soil"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": -0.1,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "otherverse:verdant_mud"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": -0.35,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:mud"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": -0.5,
+                    "max_threshold": 1
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:blackstone"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": {
+                    "Name": "minecraft:obsidian"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": {
+              "type": "minecraft:biome",
+              "biome_is": [
+                "otherverse:ruins_fear"
+              ]
+            },
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:not",
+                    "invert": {
+                      "type": "minecraft:stone_depth",
+                      "offset": 3,
+                      "surface_type": "floor",
+                      "add_surface_depth": false,
+                      "secondary_depth_range": 0
+                    }
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:ice"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:badlands_surface",
+                    "min_threshold": -0.1,
+                    "max_threshold": 0.1
+                  },
+                  "then_run": {
+                    "type": "minecraft:condition",
+                    "if_true": {
+                      "type": "minecraft:stone_depth",
+                      "offset": 0,
+                      "surface_type": "floor",
+                      "add_surface_depth": false,
+                      "secondary_depth_range": 0
+                    },
+                    "then_run": {
+                      "type": "minecraft:block",
+                      "result_state": {
+                        "Name": "minecraft:snow",
+                        "Properties": {
+                          "layers": "6"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": {
+                    "Name": "minecraft:powder_snow"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": {
+              "type": "minecraft:biome",
+              "biome_is": [
+                "otherverse:ruins_anger"
+              ]
+            },
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:not",
+                    "invert": {
+                      "type": "minecraft:stone_depth",
+                      "offset": 1,
+                      "surface_type": "floor",
+                      "add_surface_depth": false,
+                      "secondary_depth_range": 0
+                    }
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:magma_block"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:badlands_surface",
+                    "min_threshold": -0.04,
+                    "max_threshold": 0.04
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:lava"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:badlands_surface",
+                    "min_threshold": -0.06,
+                    "max_threshold": 0.06
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:magma_block"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:badlands_surface",
+                    "min_threshold": -0.1,
+                    "max_threshold": 0.1
+                  },
+                  "then_run": {
+                    "type": "minecraft:sequence",
+                    "sequence": [
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:noise_threshold",
+                          "noise": "minecraft:aquifer_lava",
+                          "min_threshold": 0,
+                          "max_threshold": 1
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:magma_block"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "otherverse:ground_texture",
+                    "min_threshold": -0.2,
+                    "max_threshold": 0.2
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:orange_terracotta"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": {
+                    "Name": "minecraft:red_sand"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": {
+              "type": "minecraft:biome",
+              "biome_is": [
+                "otherverse:ruins_shock"
+              ]
+            },
+            "then_run": {
+              "type": "minecraft:sequence",
+              "sequence": [
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:noise_threshold",
+                    "noise": "minecraft:aquifer_fluid_level_spread",
+                    "min_threshold": -0.03,
+                    "max_threshold": 0.03
+                  },
+                  "then_run": {
+                    "type": "minecraft:sequence",
+                    "sequence": [
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:not",
+                          "invert": {
+                            "type": "minecraft:stone_depth",
+                            "offset": 16,
+                            "surface_type": "floor",
+                            "add_surface_depth": false,
+                            "secondary_depth_range": 0
+                          }
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:blackstone"
+                          }
+                        }
+                      },
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:not",
+                          "invert": {
+                            "type": "minecraft:stone_depth",
+                            "offset": 1,
+                            "surface_type": "floor",
+                            "add_surface_depth": false,
+                            "secondary_depth_range": 0
+                          }
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:air"
+                          }
+                        }
+                      },
+                      {
+                        "type": "minecraft:block",
+                        "result_state": {
+                          "Name": "minecraft:cyan_concrete_powder"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:not",
+                    "invert": {
+                      "type": "minecraft:stone_depth",
+                      "offset": 1,
+                      "surface_type": "floor",
+                      "add_surface_depth": false,
+                      "secondary_depth_range": 0
+                    }
+                  },
+                  "then_run": {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:deepslate"
+                    }
+                  }
+                },
+                {
+                  "type": "minecraft:block",
+                  "result_state": {
+                    "Name": "minecraft:soul_sand"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "minecraft:condition",
+            "if_true": {
+              "type": "minecraft:stone_depth",
+              "offset": 0,
+              "surface_type": "floor",
+              "add_surface_depth": false,
+              "secondary_depth_range": 0
+            },
+            "then_run": {
+              "type": "minecraft:block",
+              "result_state": {
+                "Name": "minecraft:deepslate_bricks"
+              }
+            }
+          },
+          {
+            "type": "minecraft:block",
+            "result_state": {
+              "Name": "minecraft:deepslate"
+            }
+          }
+        ]
+      }
+    },
+    "biome_source": {
+      "type": "minecraft:multi_noise",
+      "biomes": [
+        {
+          "biome": "otherverse:ruins_misery",
+          "parameters": {
+            "temperature": 0,
+            "humidity": -1,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "otherverse:ruins_shock",
+          "parameters": {
+            "temperature": 0.7,
+            "humidity": -0.7,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "otherverse:ruins_fear",
+          "parameters": {
+            "temperature": 1,
+            "humidity": 0,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "otherverse:ruins_trust",
+          "parameters": {
+            "temperature": 0.7,
+            "humidity": 0.7,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "otherverse:ruins_ecstasy",
+          "parameters": {
+            "temperature": 0,
+            "humidity": 1,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "otherverse:ruins_vigil",
+          "parameters": {
+            "temperature": -0.7,
+            "humidity": 0.7,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "otherverse:ruins_anger",
+          "parameters": {
+            "temperature": -1,
+            "humidity": 0,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "otherverse:ruins_disgust",
+          "parameters": {
+            "temperature": -0.7,
+            "humidity": -0.7,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "otherverse:ruins_chaos",
+          "parameters": {
+            "temperature": 0,
+            "humidity": 0,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0.85,
+            "depth": 0,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Turtle",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'turtle'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A turtle Familiar will double your armor when you are crouching."
+        }
+    ]
+}

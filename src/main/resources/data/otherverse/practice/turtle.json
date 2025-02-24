@@ -1,0 +1,16 @@
+{
+	"other" : "minecraft:turtle",
+	"binding" : {
+		"minecraft:rabbit_foot" : 13
+	},
+	"healing" : {
+		"minecraft:seagrass" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:bone",
+			"health" : 9,
+			"output" : "minecraft:scute"
+		}
+	]
+}

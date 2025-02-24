@@ -1,0 +1,38 @@
+{
+  "temperature": 0.75,
+  "downfall": 0.4,
+  "precipitation": "none",
+  "effects": {
+    "sky_color": 2773037,
+    "fog_color": 5864253,
+    "water_color": 6655555,
+    "water_fog_color": 5077821,
+    "grass_color": 8820314,
+    "foliage_color": 5335624,
+    "ambient_sound": "minecraft:ambient.crimson_forest.loop",
+    "mood_sound": {
+      "sound": "minecraft:ambient.crimson_forest.mood",
+      "tick_delay": 100,
+      "block_search_extent": 8,
+      "offset": 4
+    },
+    "particle": {
+      "options": {
+        "type": "minecraft:sneeze"
+      },
+      "probability": 0.003
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [
+      "otherverse:disgust_pools"
+    ],
+    [],
+    [
+      "otherverse:disgust_decor"
+    ]
+  ]
+}

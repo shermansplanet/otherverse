@@ -1,0 +1,16 @@
+{
+    "name": "Action: Observe",
+    "icon": "minecraft:observer",
+    "category": "otherverse:contracts",
+    "sortnum": 11,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:observer"
+            },
+            "title" : "Observe",
+            "text": "An observer denotes the \"observe\" action.$(br2)This does not make the mob do anything, but will succeed or fail based on whether its filters' conditions are met. The filters are interpreted the same as for the \"take\" action."
+        }
+    ]
+}

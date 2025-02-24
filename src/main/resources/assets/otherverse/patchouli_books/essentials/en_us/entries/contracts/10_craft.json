@@ -1,0 +1,25 @@
+{
+    "name": "Action: Craft",
+    "icon": "minecraft:crafting_table",
+    "category": "otherverse:contracts",
+    "sortnum": 10,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:crafting_table"
+            },
+            "title" : "Craft",
+            "text": "A crafting table item denotes the \"craft\" action.$(br2)The recipe is determined by the crafting table's item influences. They must be in the same orientation as they would be on a crafting grid, where \"down\" is in the direction of the crafting table."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/contracts_7.png"],
+            "text": "Crafting a torch."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "A mob performing this action will look for a crafting table with adjacent inventories containing all the necessary crafting ingredients. It will go to the crafting table and craft the item."
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "name": "Action: Attack",
+    "icon": "minecraft:wooden_sword",
+    "category": "otherverse:contracts",
+    "sortnum": 9,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"tag" : "forge:tools/swords"},
+            "title" : "Attack",
+            "text": "A sword item denotes the \"attack\" action. Item influences limit potential targets to mobs that drop any of those items.$(br2)Block influences are more general filters: hay bale for passive mobs, target block for hostile mobs, and crafting table for players."
+        },
+        {
+            "type": "patchouli:text",        
+            "text": "For most mobs with ranged attacks, an empty block influence will denote a position towards which they will regularly fire attacks."
+        }
+    ]
+}

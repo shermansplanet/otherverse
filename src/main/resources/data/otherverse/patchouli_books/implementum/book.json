@@ -1,0 +1,10 @@
+{
+    "name": "Implementum",
+    "landing_text": "A guide to the Implementum ritual.",
+    "version": 3,
+    "model" : "otherverse:implementum",
+    "show_progress" : false,
+    "creative_tab" : "otherverse",
+    "use_resource_pack": true,
+    "pamphlet" : true
+}

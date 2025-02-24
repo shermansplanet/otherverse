@@ -1,0 +1,27 @@
+{
+  "temperature": 1,
+  "downfall": 0.4,
+  "precipitation": "none",
+  "effects": {
+    "sky_color": 14775310,
+    "fog_color": 14775310,
+    "water_color": 14780686,
+    "water_fog_color": 14780686,
+    "grass_color": 15379979,
+    "foliage_color": 15379981,
+    "particle": {
+      "options": {
+        "type": "minecraft:flame"
+      },
+      "probability": 0.003
+    }
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [
+    [],
+    ["otherverse:anger_decor"],
+    ["otherverse:burnt_trees"]
+  ]
+}

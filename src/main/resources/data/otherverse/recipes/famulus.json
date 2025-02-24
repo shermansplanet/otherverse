@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+      "a!b",
+      "!c!",
+      "d!e"
+  ],
+  "key": {
+      "!": {"item": "minecraft:book"},
+      "a": {"item": "minecraft:carrot"},
+      "b": {"item": "minecraft:wheat_seeds"},
+      "c": {"item": "minecraft:lead"},
+      "d": {"item": "minecraft:wheat"},
+      "e": {"item": "minecraft:bone"}
+  },
+  "result": {
+    "item": "patchouli:guide_book",
+    "nbt": {
+        "patchouli:book": "otherverse:famulus"
+    },
+    "count" : 1
+  }
+}

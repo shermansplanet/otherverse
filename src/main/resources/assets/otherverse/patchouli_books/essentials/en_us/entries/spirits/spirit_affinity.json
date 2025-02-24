@@ -1,0 +1,16 @@
+{
+    "name": "Spirit Affinity",
+    "sortnum": 4,
+    "icon": "minecraft:amethyst_cluster{hallow:{spirit_type:'light'}}",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Whenever you use a diagram to work with spirits, it will increase your affinity for that spirit type and decrease it for the opposing type. The greater your affinity, the faster those spirits will move in your diagrams. Your choice of Implement, Familiar, and Demesne will permanantly affect this as well. At high enough levels, you will even be able to extract more or fewer spirits from items."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Opposing spirit pairs are Earth and Air, Fire and Cold, Phlogiston and Water, Light and Dark, Protection and War, Food and Death, Flesh and Tech, Nature and Fortune, Fate and Time, White and Black, Gray and Light Gray, Lime and Purple, Brown and Pink, Orange and Light Blue, Red and Cyan, Green and Magenta, and Blue and Yellow. Nether opposes Overworld, End opposes Nether, and Overworld opposes End."
+        }
+    ]
+}
