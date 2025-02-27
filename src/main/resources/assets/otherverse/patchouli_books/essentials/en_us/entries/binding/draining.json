@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Much like spirits, bound mobs can be drained of health to transfuse whatever their binding focus is influencing. These recipes can be found in the same JEI category as spirit transfusion. Note that certain recipes require more health than a single mob of that type can provide, necessitating multiple bound mobs influencing one item."
+            "text": "Much like spirits, bound mobs can be drained of health to transfuse whatever their binding focus is influencing. These recipes can be found in the same JEI tab as spirit transfusion. Note that some recipes require multiple mobs to be drained at once. Many mobs can also be drained directly for spirits, which can be found in the Spiritual Composition JEI tab."
         },
         {
             "type": "patchouli:image",
@@ -16,7 +16,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "A binding will stop draining a mob before it dies. Bound mobs can also be $(italic)healed$() by consuming certain influences. These can be seen in the bindings section of JEI, indicated by red hearts instead of black chains. Note that some mobs can drain the health of certain other bound mobs to heal."
+            "text": "A binding will stop draining a mob before it dies. Bound mobs can also be $(italic)healed$() by consuming certain influences. These can be seen in the bindings section of JEI, indicated by red hearts instead of black chains. Note that some mobs can drain the health of certain other bound mobs to heal, and some require multiple spirits to heal one HP."
         }
     ]
 }

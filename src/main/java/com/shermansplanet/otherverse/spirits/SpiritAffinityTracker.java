@@ -1,14 +1,18 @@
 package com.shermansplanet.otherverse.spirits;
 
+import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import org.slf4j.Logger;
 
 import java.util.HashMap;
 
 public class SpiritAffinityTracker {
 
     private static HashMap<String, SpiritAffinitySet> playerAffinities = new HashMap<>();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static class SpiritAffinitySet {
         private HashMap<SpiritType, Float> baseAffinities = new HashMap<>();
@@ -48,15 +52,14 @@ public class SpiritAffinityTracker {
 
         public float getTotalFor(SpiritType spiritType) {
             var total = baseAffinities.getOrDefault(spiritType, 0f);
-            var opposite = SpiritTransfer.getOppositeSpiritType(spiritType);
 
             if (implementType == spiritType) total += 0.5f;
             if (familiarType == spiritType) total += 0.5f;
             if (demesneType == spiritType) total += 0.5f;
 
-            if (implementType == opposite) total -= 0.5f;
-            if (familiarType == opposite) total -= 0.5f;
-            if (demesneType == opposite) total -= 0.5f;
+            if (SpiritTransfer.getOppositeSpiritType(implementType) == spiritType) total -= 0.5f;
+            if (SpiritTransfer.getOppositeSpiritType(familiarType) == spiritType) total -= 0.5f;
+            if (SpiritTransfer.getOppositeSpiritType(demesneType) == spiritType) total -= 0.5f;
 
             return total;
         }
@@ -78,53 +81,58 @@ public class SpiritAffinityTracker {
 
     public static void increaseAffinity(SpiritType spiritType, ServerPlayer player) {
         if (spiritType == null) return;
-        getAffinityFor(player).pullAffinityTowards(spiritType, 1f);
-        sendUpdate(player);
+        getAffinities(player).pullAffinityTowards(spiritType, 1f);
+        markUpdated(player);
     }
 
     public static void decreaseAffinity(SpiritType spiritType, ServerPlayer player) {
         if (spiritType == null) return;
-        getAffinityFor(player).pullAffinityTowards(spiritType, -1f);
-        sendUpdate(player);
+        getAffinities(player).pullAffinityTowards(spiritType, -1f);
+        markUpdated(player);
     }
 
     public static void setImplementAffinity(SpiritType spiritType, ServerPlayer player) {
-        getAffinityFor(player).implementType = spiritType;
-        sendUpdate(player);
+        getAffinities(player).implementType = spiritType;
+        markUpdated(player);
     }
 
     public static void setFamiliarAffinity(SpiritType spiritType, ServerPlayer player) {
-        getAffinityFor(player).familiarType = spiritType;
-        sendUpdate(player);
+        getAffinities(player).familiarType = spiritType;
+        markUpdated(player);
     }
 
     public static void setDemesneAffinity(SpiritType spiritType, ServerPlayer player) {
-        getAffinityFor(player).demesneType = spiritType;
-        sendUpdate(player);
+        getAffinities(player).demesneType = spiritType;
+        markUpdated(player);
     }
 
-    private static void sendUpdate(ServerPlayer player) {
+    private static void markUpdated(ServerPlayer player) {
+        DiagramManager.getOrCreateLevelData(player.getLevel().getServer().overworld()).savedData.setDirty();
     }
 
-    private static SpiritAffinitySet getAffinityFor(ServerPlayer player) {
-        return player == null ? null : getAffinityFor(player.getGameProfile().getName());
+    private static SpiritAffinitySet getAffinities(ServerPlayer player) {
+        return player == null ? null : getAffinities(player.getGameProfile().getName());
     }
 
-    private static SpiritAffinitySet getAffinityFor(String playerName) {
+    private static SpiritAffinitySet getAffinities(String playerName) {
         return playerAffinities.computeIfAbsent(playerName, x -> new SpiritAffinitySet());
     }
 
     public static int getTransferDuration(String playerName, SpiritType spiritType) {
         var base = 100;
         if (playerName == null) return base;
-        var affinity = getAffinityFor(playerName).getTotalFor(spiritType);
+        var affinity = getAffinities(playerName).getTotalFor(spiritType);
         return Math.round(base * (float) Math.pow(0.3f, affinity));
     }
 
-    public static float getCoeff(String playerName, SpiritType spiritType) {
-        var affinity = getAffinityFor(playerName).getTotalFor(spiritType);
+    public static float getSpiritYieldCoeff(String playerName, SpiritType spiritType) {
+        var affinity = getAffinities(playerName).getTotalFor(spiritType);
         affinity -= Mth.clamp(affinity, -1f, 1f);
         if (affinity < 0) affinity *= 2;
         return (float) Math.pow(1.32f, affinity);
+    }
+
+    public static float getAffinity(String name, SpiritType spiritType) {
+        return getAffinities(name).getTotalFor(spiritType);
     }
 }

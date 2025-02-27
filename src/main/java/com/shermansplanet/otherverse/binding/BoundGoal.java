@@ -281,9 +281,6 @@ public class BoundGoal extends Goal {
             } else {
                 bindingInfo.mob.hurt(DamageSource.OUT_OF_WORLD, SPIRIT_DRAIN);
             }
-        } else if (mostUniqueFocus instanceof ChalkCircle cc && mostUniqueItem.is(Items.MILK_BUCKET)) {
-            cc.item = new ItemStack(Items.BUCKET, 1);
-            cc.markUpdated();
         } else {
             mostUniqueFocus.removeItem();
         }

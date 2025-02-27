@@ -37,6 +37,7 @@
             "item": {
               "item": "otherverse:cinnabar_block"
             },
+            "anchor": "cinnabar",
             "title": "Cinnabar Idols",
             "text": "You can right-click a cinnabar block on any already-bound mob to trap the mob in the block for easy transport. These idols cannot be used in diagrams; the mob will be released automatically if the idol enters an item focus.$(br2)You will get the cinnabar block back when you release the mob."
         },

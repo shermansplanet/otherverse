@@ -2,10 +2,8 @@ package com.shermansplanet.otherverse.spirits;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
-import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.DiagramProcess;
 import com.shermansplanet.otherverse.diagrams.IFocus;
-import com.shermansplanet.otherverse.implement.ImplementManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,6 +15,7 @@ public class TransfusionProcess extends DiagramProcess {
 
     private static final Logger LOGGER = LogUtils.getLogger();
     private final SpiritTransfusions.SpiritTransfusionData transfusion;
+
     public TransfusionProcess(IFocus sink, IFocus source, int duration, SpiritTransfusions.SpiritTransfusionData t) {
         super(sink, source, duration);
         transfusion = t;
@@ -24,21 +23,20 @@ public class TransfusionProcess extends DiagramProcess {
 
     public void tick() {
         super.tick();
-        if(abandoned){
+        if (abandoned) {
             return;
         }
 
         var tag = source.getItem().getTag();
-        if(tag == null){
+        if (tag == null) {
             LOGGER.debug("abandoning - null tag");
             abandon();
             return;
         }
         CompoundTag hallowTag = tag.getCompound("hallow");
         SpiritType spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
-        int spiritCount = hallowTag.getInt("spirit_count");
 
-        if(spiritCount < transfusion.price() || spiritType != transfusion.spiritType()){
+        if (spiritType != transfusion.spiritType()) {
             LOGGER.debug("abandoning - can't fulfill");
             abandon();
             return;
@@ -51,6 +49,8 @@ public class TransfusionProcess extends DiagramProcess {
         }
 
         abandon();
+
+        if (source.drainHallow(spiritType, transfusion.price(), true) < transfusion.price()) return;
 
         if (sink.getFocusLevel() instanceof ServerLevel sl) {
             BlockPos bp = sink.getPos();
@@ -69,25 +69,12 @@ public class TransfusionProcess extends DiagramProcess {
             targetCircle.markUpdated();
         }
 
-        hallowTag.putInt("spirit_count", spiritCount - transfusion.price());
-        if (source.isBlock()) {
-            DiagramManager.getOrCreateLevelData(level).putPlacedItemTag(source.getPos(), hallowTag);
-        }
-
-        if(level instanceof ServerLevel sl) {
+        if (level instanceof ServerLevel sl) {
             var player = source.getDiagram().getOwner(sl);
-            if(player != null){
-                var cap = player.getCapability(ImplementManager.PRACTICE_HANDLER).resolve();
-                cap.ifPresent(practice -> {
-                    SpiritAffinityTracker.increaseAffinity(spiritType, player);
-                    SpiritAffinityTracker.decreaseAffinity(SpiritTransfer.getOppositeSpiritType(spiritType), player);
-                });
+            if (player != null) {
+                SpiritAffinityTracker.increaseAffinity(spiritType, player);
+                SpiritAffinityTracker.decreaseAffinity(SpiritTransfer.getOppositeSpiritType(spiritType), player);
             }
-        }
-
-        if (sink.getFocusLevel() instanceof ServerLevel sl) {
-            LOGGER.debug("ACTIVATING DIAGRAM: TRANSFUSION COMPLETE");
-            DiagramManager.markDiagramActive(sl, sink.getDiagram());
         }
     }
 }

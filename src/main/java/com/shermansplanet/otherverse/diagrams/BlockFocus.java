@@ -4,9 +4,12 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.binding.BindingInfo;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
+import com.shermansplanet.otherverse.spirits.ShrineHelper;
+import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
@@ -54,9 +57,11 @@ public class BlockFocus implements IFocus {
     @Override
     public ItemStack getItem() {
         var levelData = DiagramManager.getOrCreateLevelData(level);
-        BindingInfo binding = levelData.bindingsByPosition.get(blockPos);
-        if (binding != null && binding.mob != null) {
-            return MobBindingInfluenceUtils.getIdol(binding.mob.getType());
+        if (level instanceof ServerLevel sl) {
+            BindingInfo binding = DiagramManager.getBindingOrBoundMobAt(sl, blockPos);
+            if (binding != null && binding.mob != null) {
+                return MobBindingInfluenceUtils.getIdol(binding.mob.getType());
+            }
         }
         BlockState blockstate = level.getBlockState(blockPos);
         Item item = blockReplacements.getOrDefault(blockstate.getBlock(), blockstate.getBlock().asItem());
@@ -68,7 +73,12 @@ public class BlockFocus implements IFocus {
         }
         CompoundTag hallowTag = levelData.getPlacedItemTag(blockPos);
         if (hallowTag != null) {
-            stack.getOrCreateTag().put("hallow", hallowTag);
+            var newHallowTag = hallowTag.copy();
+            var spiritType = Spirits.spiritsByLabel.get(newHallowTag.getString("spirit_type"));
+            var countcap = HallowHelper.getShrineSpiritCountAndCapacity(this, spiritType);
+            newHallowTag.putInt("spirit_count", countcap.first);
+            newHallowTag.putInt("capacity", countcap.second);
+            stack.getOrCreateTag().put("hallow", newHallowTag);
             HallowHelper.addFakeEnchantment(stack.getTag());
         }
         if (stack.is(Items.AIR)) {
@@ -121,6 +131,93 @@ public class BlockFocus implements IFocus {
     @Override
     public DiagramProcess getProcess() {
         return activeProcess;
+    }
+
+    @Override
+    public int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice) {
+        var data = DiagramManager.getOrCreateLevelData(level);
+        var hallowPositions = ShrineHelper.getAllHallows(getPos(), spiritType, data);
+        if (hallowPositions.isEmpty()) return 0;
+
+        var drainPositions = new HashMap<BlockPos, Integer>();
+
+        var remainingPrice = price;
+        for (BlockPos sourcePos : hallowPositions) {
+            if(remainingPrice > 0) {
+                var ht = data.getPlacedItemTag(sourcePos);
+                var count = ht.getInt("spirit_count");
+                count = Math.min(count, remainingPrice);
+                drainPositions.put(sourcePos, count);
+                remainingPrice -= count;
+            }
+            var otherFocus = data.allBlockFoci.get(sourcePos);
+            if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
+            DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+        }
+
+        if (mustMeetFullPrice && remainingPrice > 0) {
+            return 0;
+        }
+
+        for (var drainPosition : drainPositions.entrySet()) {
+            var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
+            shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") - drainPosition.getValue());
+            data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
+            var otherFocus = data.allBlockFoci.get(drainPosition.getKey());
+            if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
+            DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+        }
+
+        return price - remainingPrice;
+    }
+
+    @Override
+    public int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll) {
+        var data = DiagramManager.getOrCreateLevelData(level);
+        var hallowPositions = ShrineHelper.getAllHallows(getPos(), spiritType, data);
+        if (hallowPositions.isEmpty()) return 0;
+
+        var drainPositions = new HashMap<BlockPos, Integer>();
+
+        var remainingAmount = amount;
+        for (BlockPos sourcePos : hallowPositions) {
+            if (remainingAmount > 0) {
+                var ht = data.getPlacedItemTag(sourcePos);
+                var remainingCapacity = Math.max(0, ht.getInt("capacity") - ht.getInt("spirit_count"));
+                var transferAmount = Math.min(remainingCapacity, remainingAmount);
+                drainPositions.put(sourcePos, transferAmount);
+                remainingAmount -= transferAmount;
+            }
+            var otherFocus = data.allBlockFoci.get(sourcePos);
+            if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
+            DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+        }
+
+        if (mustAcceptAll && remainingAmount > 0) {
+            return 0;
+        }
+
+        for (var drainPosition : drainPositions.entrySet()) {
+            var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
+            shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") + drainPosition.getValue());
+            data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
+        }
+
+        return amount - remainingAmount;
+    }
+
+    @Override
+    public int getHallowCapacity(SpiritType spiritType) {
+        var data = DiagramManager.getOrCreateLevelData(level);
+        var hallowPositions = ShrineHelper.getAllHallows(getPos(), spiritType, data);
+        if (hallowPositions.isEmpty()) return 0;
+
+        var capacity = 0;
+        for (BlockPos sourcePos : hallowPositions) {
+            var ht = data.getPlacedItemTag(sourcePos);
+            capacity += Math.max(0, ht.getInt("capacity") - ht.getInt("spirit_count"));
+        }
+        return capacity;
     }
 
     public Vec3 getCenter() {

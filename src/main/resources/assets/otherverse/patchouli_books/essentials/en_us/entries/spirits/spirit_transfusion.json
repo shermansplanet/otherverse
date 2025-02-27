@@ -10,7 +10,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Simply using a hallow on a block in the world will also transfuse spirits into that block. So if you're holding a hallow full of red spirits, for example, you can use it on any wool block to turn it into red wool.$(br2)33 Nature spirits can also be used as bonemeal, which is about twice as efficient as composting."
+            "text": "Simply using a hallow on a block in the world will also transfuse spirits into that block. So if you're holding a hallow full of red spirits, for example, you can use it on any wool block to turn it into red wool. You can also change the color of placed chalk this way.$(br2)33 Nature spirits can also be used as bonemeal, which is about twice as efficient as composting."
         }
     ]
 }

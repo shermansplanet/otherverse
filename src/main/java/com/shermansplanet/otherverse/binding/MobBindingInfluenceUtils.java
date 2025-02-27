@@ -151,6 +151,7 @@ public class MobBindingInfluenceUtils {
         ALL_BINDING_INFLUENCES.data = fai;
         allFoods.clear();
         allBindingInfluences.clear();
+        LOGGER.debug("RECEIVING FOODS");
         for (var entry : fai.entrySet()) {
             var foods = new HashMap<ItemOrEntityType, Integer>();
             var bindingInfluences = new HashMap<ItemOrEntityType, Integer>();
@@ -260,16 +261,13 @@ public class MobBindingInfluenceUtils {
     }
 
     public static int GetInfluence(Mob mob, ItemStack item) {
-        LOGGER.debug("GetInfluence: " + mob.getType() + ", " + item.getItem());
         HashMap<ItemOrEntityType, Integer> influenceMap = allBindingInfluences.get(mob.getType());
 
         if (influenceMap == null) {
-            LOGGER.debug("NO BINDING DATA FOR " + mob.getType());
             return 0;
         }
 
         if (influenceMap.isEmpty()) {
-            LOGGER.debug("EMPTY BINDING DATA FOR " + mob.getType());
             return 0;
         }
 
@@ -291,10 +289,8 @@ public class MobBindingInfluenceUtils {
         }
         var ioe = new ItemOrEntityType(item.getItem());
         if (influenceMap.containsKey(ioe)) {
-            LOGGER.debug("CONTAINS DATA");
             return Math.max(0, influenceMap.get(ioe));
         }
-        LOGGER.debug("DOES NOT CONTAIN DATA");
         return 0;
     }
 

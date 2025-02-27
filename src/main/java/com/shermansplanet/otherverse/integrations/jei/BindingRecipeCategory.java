@@ -7,6 +7,7 @@ import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.implement.ImplementManager;
+import com.shermansplanet.otherverse.spirits.Spirits;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -126,6 +127,10 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
             if (val < 0) {
                 val = -val;
                 icon = heartIcon;
+            }
+            var spiritType = MobBindingInfluenceUtils.mobSpirits.get(recipe.entityType);
+            if (spiritType != null && Spirits.spiritItems.get(spiritType).get() == influence.getKey().item) {
+                val = 0.5f;
             }
             String s = Float.toString(val).replace(".0", "");
             if (val > 999) {

@@ -1,16 +1,14 @@
 package com.shermansplanet.otherverse.spirits;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
-import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.DiagramProcess;
 import com.shermansplanet.otherverse.diagrams.IFocus;
-import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -58,6 +56,7 @@ public class SpiritTransfer extends DiagramProcess {
     }
 
     public static SpiritType getOppositeSpiritType(SpiritType spiritType) {
+        if (spiritType == null) return null;
         return Spirits.spiritsByLabel.get(oppositeSpirits.getOrDefault(spiritType.label(), ""));
     }
 
@@ -72,8 +71,8 @@ public class SpiritTransfer extends DiagramProcess {
             abandon();
             return;
         }
-        CompoundTag sinkHallowTag = tag.getCompound("hallow");
-        SpiritType spiritType = Spirits.spiritsByLabel.get(sinkHallowTag.getString("spirit_type"));
+
+        SpiritType spiritType = Spirits.spiritsByLabel.get(tag.getCompound("hallow").getString("spirit_type"));
         makeSpiritParticles(spiritType);
 
         if (remainingDuration > 0) {
@@ -83,21 +82,21 @@ public class SpiritTransfer extends DiagramProcess {
         abandon();
 
         ItemStack sourceItem = source.getItem();
-        boolean isHallow = sourceItem.hasTag() && sourceItem.getTag().contains("hallow");
+        boolean sourceIsHallow = sourceItem.hasTag() && sourceItem.getTag().contains("hallow");
+        LOGGER.debug("DRAINING SOURCE ITEM: " + sourceItem);
 
-        int sinkCount = sinkHallowTag.getInt("spirit_count");
-        int sinkCapacity = sinkHallowTag.getInt("capacity");
-        int remainingCapacity = sinkCapacity - sinkCount;
+        var remainingCapacity = sink.getHallowCapacity(spiritType);
+
         if (remainingCapacity <= 0) {
             return;
         }
 
-        if (!HallowHelper.canFill(sinkHallowTag, source, spiritType)) {
+        if (!HallowHelper.canFill(sink, source, spiritType)) {
             return;
         }
 
         int transferAmount = 0;
-        float coeff = SpiritAffinityTracker.getCoeff(sink.getDiagram().getOwnerName(), spiritType);
+        float coeff = SpiritAffinityTracker.getSpiritYieldCoeff(sink.getDiagram().getOwnerName(), spiritType);
         var isDemesne = false;
         if (sourceItem.is(OtherverseItems.DEMESNE_BEACON.get())) {
             var demesne = DemesnesManager.getData((ServerLevel) source.getFocusLevel(), source.getPos());
@@ -106,43 +105,42 @@ public class SpiritTransfer extends DiagramProcess {
                 isDemesne = true;
             }
         }
-        if(!isDemesne) {
-            if (isHallow) {
-                CompoundTag sourceHallowTag = sourceItem.getTag().getCompound("hallow");
-                int sourceCount = sourceHallowTag.getInt("spirit_count");
-                transferAmount = Math.min(sourceCount, remainingCapacity);
-                sourceHallowTag.putInt("spirit_count", sourceCount - transferAmount);
+
+        if (!(source.getFocusLevel() instanceof ServerLevel sl)) return;
+
+        if (!isDemesne) {
+            if (sourceIsHallow) {
+                transferAmount = source.drainHallow(spiritType, remainingCapacity, false);
             } else {
-                transferAmount = Math.round(SpiritLabeler.getSpiritsFor(sourceItem.getItem()).get(spiritType) * coeff);
-                if (transferAmount + sinkCount > sinkCapacity) {
-                    transferAmount -= (transferAmount + sinkCount - sinkCapacity) / 2;
-                }
-                source.removeItem();
-                if (sink.getFocusLevel() instanceof ServerLevel sl && !sourceItem.is(Items.AIR)) {
-                    BlockPos bp = source.getPos();
-                    for (int i = 0; i < 6; i++) {
-                        sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, sourceItem),
-                                bp.getX() + 0.5, bp.getY() + 0.5, bp.getZ() + 0.5, 1, 0, 0, 0, 0.1D);
+                if (sourceItem.is(OtherverseItems.IDOL.get())) {
+                    var binding = BindingOrFleshbinding.getFromPosition(sl, source.getPos());
+                    if (binding == null) return;
+                    transferAmount = Math.min(remainingCapacity, binding.getHealth() - 1);
+                    binding.changeHealth(-transferAmount, sl);
+                } else {
+                    transferAmount = Math.round(SpiritLabeler.getSpiritsFor(sourceItem.getItem()).get(spiritType) * coeff);
+                    transferAmount = Math.min(remainingCapacity, transferAmount);
+                    source.removeItem();
+                    if (!sourceItem.is(Items.AIR)) {
+                        BlockPos bp = source.getPos();
+                        for (int i = 0; i < 6; i++) {
+                            sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, sourceItem),
+                                    bp.getX() + 0.5, bp.getY() + 0.5, bp.getZ() + 0.5, 1, 0, 0, 0, 0.1D);
+                        }
                     }
                 }
             }
         }
 
-        sinkHallowTag.putInt("spirit_count", sinkCount + transferAmount);
-
-        if (sink.getFocusLevel() instanceof ServerLevel sl) {
-            var player = source.getDiagram().getOwner(sl);
-            if (player != null) {
-                var cap = player.getCapability(ImplementManager.PRACTICE_HANDLER).resolve();
-                cap.ifPresent(practice -> {
-                    SpiritAffinityTracker.increaseAffinity(spiritType, player);
-                    SpiritAffinityTracker.decreaseAffinity(getOppositeSpiritType(spiritType), player);
-                });
-            }
+        var remainingAfterFill = sink.fillHallow(spiritType, transferAmount, false);
+        if (remainingAfterFill > 0) {
+            LOGGER.error("HALLOW OVERFILL");
         }
 
-        if (sink.getFocusLevel() instanceof ServerLevel sl) {
-            DiagramManager.markDiagramActive(sl, sink.getDiagram());
+        var player = source.getDiagram().getOwner(sl);
+        if (player != null) {
+            SpiritAffinityTracker.increaseAffinity(spiritType, player);
+            SpiritAffinityTracker.decreaseAffinity(getOppositeSpiritType(spiritType), player);
         }
     }
 }

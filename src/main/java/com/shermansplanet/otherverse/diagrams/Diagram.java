@@ -184,7 +184,8 @@ public class Diagram {
 
     private boolean tryActivateBlockFocus(ServerLevel level, BlockFocus focus) {
         var needsReactivation = MobTransfusions.tryLightningTransform(level, focus, this)
-                || trySummonDragon(level, focus, this);
+                || trySummonDragon(level, focus, this)
+                || MobTransfusions.tryFeed(level, focus, this);
 
         if (!needsReactivation) {
             HallowHelper.tryFillHallow(level, focus, this);

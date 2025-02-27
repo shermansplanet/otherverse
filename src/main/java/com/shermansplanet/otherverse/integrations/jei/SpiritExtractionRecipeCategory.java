@@ -2,7 +2,9 @@ package com.shermansplanet.otherverse.integrations.jei;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.implement.ImplementManager;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritLabeler.SpiritAmount;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import mezz.jei.api.constants.VanillaTypes;
@@ -17,6 +19,10 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -91,6 +97,10 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
             //var coeff = SpiritAffinityTracker.getCoeff(Minecraft.getInstance().player.getGameProfile().getName(), spiritAmount.type());
             //var newAmount = (int) (spiritAmount.amount() * coeff);
             var newAmount = spiritAmount.amount();
+            if (recipe.input.is(OtherverseItems.IDOL.get())) {
+                var et = (EntityType<? extends LivingEntity>) IdolItem.getType(recipe.input);
+                newAmount = (int) DefaultAttributes.getSupplier(et).getValue(Attributes.MAX_HEALTH);
+            }
             var stack = new ItemStack(Spirits.spiritItems.get(spiritAmount.type()).get(), newAmount);
             builder.addSlot(RecipeIngredientRole.OUTPUT, i * 15 + (total * 6) + 18, 2).addItemStack(stack);
             invisibleInput.addItemStack(stack);

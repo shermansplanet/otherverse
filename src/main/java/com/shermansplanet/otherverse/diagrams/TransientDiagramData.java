@@ -11,6 +11,7 @@ import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
 import com.shermansplanet.otherverse.sympathy.SympathyUpdateMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.network.PacketDistributor;
@@ -135,7 +136,10 @@ public class TransientDiagramData {
             demesnesTag.put(demesne.getKey(), demesne.getValue().getTag());
         }
         tag.put("demesnes", demesnesTag);
-        tag.put("spiritAffinities", SpiritAffinityTracker.save());
+
+        if (level instanceof ServerLevel sl && level == sl.getServer().overworld()) {
+            tag.put("spiritAffinities", SpiritAffinityTracker.save());
+        }
     }
 
     public Set<BlockPos> getAllPlacedItemPositions() {

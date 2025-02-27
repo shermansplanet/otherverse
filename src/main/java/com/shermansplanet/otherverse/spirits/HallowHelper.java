@@ -1,19 +1,22 @@
 package com.shermansplanet.otherverse.spirits;
 
+import com.ibm.icu.impl.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
+import com.shermansplanet.otherverse.binding.IdolItem;
+import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
-import com.shermansplanet.otherverse.diagrams.ChalkCircle;
-import com.shermansplanet.otherverse.diagrams.Diagram;
-import com.shermansplanet.otherverse.diagrams.DiagramManager;
-import com.shermansplanet.otherverse.diagrams.IFocus;
+import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.implement.ImplementManager;
+import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -28,6 +31,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -187,6 +191,33 @@ public class HallowHelper {
         return false;
     }
 
+    @SubscribeEvent
+    public static void recolorChalk(PlayerInteractEvent.RightClickBlock event) {
+        var player = event.getEntity();
+        var itemstack = event.getItemStack();
+        var state = player.level.getBlockState(event.getPos());
+        if (state.is(OtherverseBlocks.CHALK_LINE.get()) && player.isShiftKeyDown()
+                && itemstack.hasTag() && itemstack.getTag().contains("hallow")) {
+            var hallowTag = itemstack.getTag().getCompound("hallow");
+            var spiritCount = hallowTag.getInt("spirit_count");
+            if (spiritCount <= 0) return;
+            var spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
+            for (var dyeColor : Spirits.colorsByDye.entrySet()) {
+                if (dyeColor.getValue() != spiritType) continue;
+                var newstate = ChalkLineBlock.getConnectionState(player.level, event.getPos(), state.setValue(ChalkLineBlock.color, dyeColor.getKey()));
+                player.level.setBlockAndUpdate(event.getPos(), newstate);
+                ChalkLineBlock.refreshNeighborLines(player.level, event.getPos());
+                if (player.level instanceof ServerLevel sl) {
+                    DiagramManager.OnDiagramBlockChanged(sl, event.getPos(), DiagramManager.BlockUpdateType.ADDED);
+                }
+                hallowTag.putInt("spirit_count", spiritCount - 1);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                event.setCanceled(true);
+                return;
+            }
+        }
+    }
+
     public static void addFakeEnchantment(CompoundTag tag) {
         /*if (!tag.contains("Enchantments", 9)) {
             tag.put("Enchantments", new ListTag());
@@ -240,39 +271,77 @@ public class HallowHelper {
                 possibleSpirits.get(level.getRandom().nextInt(possibleSpirits.size())).label());
     }
 
-    public static boolean canFill(CompoundTag hallowTag, IFocus source, SpiritType spiritType) {
-        ItemStack item = source.getItem();
-        boolean isHallow = item.hasTag() && item.getTag().contains("hallow");
+    public static boolean canFill(IFocus sink, IFocus source, SpiritType spiritType) {
+        ItemStack sourceItem = source.getItem();
+        boolean sourceIsHallow = sourceItem.hasTag() && sourceItem.getTag().contains("hallow");
 
-        if(spiritType == null){
-            if(isHallow){
-                CompoundTag ht = item.getTag().getCompound("hallow");
+        if (spiritType == null) {
+            if (sourceIsHallow) {
+                CompoundTag ht = sourceItem.getTag().getCompound("hallow");
                 return ht.getInt("spirit_count") > 0;
-            }else{
+            } else {
                 return false;
             }
         }
 
-        int spiritCount = hallowTag.getInt("spirit_count");
-        int capacity = hallowTag.getInt("capacity");
-        if (spiritCount >= capacity) {
+        var hallowTag = sink.getItem().getTag().getCompound("hallow");
+
+        if (sink.getHallowCapacity(spiritType) <= 0) {
             return false;
         }
 
-        if (item.is(OtherverseItems.DEMESNE_BEACON.get())) {
+        if (sourceItem.is(OtherverseItems.DEMESNE_BEACON.get())) {
             var demesne = DemesnesManager.getData((ServerLevel) source.getFocusLevel(), source.getPos());
             if (demesne != null && demesne.favoredSpirits.contains(hallowTag.getString("spirit_type"))) {
                 return true;
             }
         }
 
-        if (isHallow) {
-            CompoundTag ht = item.getTag().getCompound("hallow");
-            return ht.getInt("spirit_count") > 0 &&
-                    ht.getString("spirit_type").equals(hallowTag.getString("spirit_type"));
+        if (sourceIsHallow) {
+            var sourceTag = sourceItem.getTag().getCompound("hallow");
+            if (!sourceTag.getString("spirit_type").equals(spiritType.label()))
+                return false;
+            if (source.isBlock()) {
+                return getShrineSpiritCount(source, spiritType) > 0;
+            } else {
+                return sourceTag.getInt("spirit_count") > 0;
+            }
         }
-        var spirits = SpiritLabeler.getSpiritsFor(item.getItem());
+
+        if (sourceItem.is(OtherverseItems.IDOL.get()) && source.getFocusLevel() instanceof ServerLevel sl) {
+            var et = IdolItem.getType(sourceItem);
+            if (MobBindingInfluenceUtils.mobSpirits.get(et) != spiritType) return false;
+            var binding = BindingOrFleshbinding.getFromPosition(sl, source.getPos());
+            if (binding == null) return false;
+            return binding.getHealth() > 1;
+        }
+
+        var spirits = SpiritLabeler.getSpiritsFor(sourceItem.getItem());
         return spirits != null && spirits.containsKey(spiritType);
+    }
+
+    public static int getShrineSpiritCount(IFocus source, SpiritType spiritType) {
+        var level = source.getFocusLevel();
+        var data = DiagramManager.getOrCreateLevelData(level);
+        var total = 0;
+        for (BlockPos sourcePos : ShrineHelper.getAllHallows(source.getPos(), spiritType, data)) {
+            var ht = data.getPlacedItemTag(sourcePos);
+            total += ht.getInt("spirit_count");
+        }
+        return total;
+    }
+
+    public static Pair<Integer, Integer> getShrineSpiritCountAndCapacity(BlockFocus source, SpiritType spiritType) {
+        var level = source.getFocusLevel();
+        var data = DiagramManager.getOrCreateLevelData(level);
+        var count = 0;
+        var cap = 0;
+        for (BlockPos sourcePos : ShrineHelper.getAllHallows(source.getPos(), spiritType, data)) {
+            var ht = data.getPlacedItemTag(sourcePos);
+            count += ht.getInt("spirit_count");
+            cap += ht.getInt("capacity");
+        }
+        return Pair.of(count, cap);
     }
 
     public static void tryFillHallow(ServerLevel level, IFocus focus, Diagram diagram) {
@@ -309,10 +378,10 @@ public class HallowHelper {
         }
         SpiritType spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
         for (IFocus sourceFocus : influences) {
-            if (sourceFocus.getProcess() != null || !canFill(hallowTag, sourceFocus, spiritType)) {
+            if (sourceFocus.getProcess() != null || !canFill(focus, sourceFocus, spiritType)) {
                 continue;
             }
-            if(isDemesneBeacon){
+            if (isDemesneBeacon) {
                 var sourceHallowTag = sourceFocus.getItem().getTag().getCompound("hallow");
                 spiritType = Spirits.spiritsByLabel.get(sourceHallowTag.getString("spirit_type"));
             }

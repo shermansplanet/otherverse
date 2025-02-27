@@ -1,8 +1,7 @@
 package com.shermansplanet.otherverse.diagrams;
 
-import com.shermansplanet.otherverse.spirits.SpiritTransfer;
+import com.shermansplanet.otherverse.spirits.SpiritType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -23,4 +22,7 @@ public interface IFocus {
   void setProcess(DiagramProcess process);
 
   DiagramProcess getProcess();
+  int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice);
+  int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll);
+  int getHallowCapacity(SpiritType spiritType);
 }

@@ -12,6 +12,8 @@ import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SavedPracticeData;
+import com.shermansplanet.otherverse.spirits.ShrineHelper;
+import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -305,11 +307,18 @@ public class DiagramManager {
     }
 
     public static void BlockChanged(BlockPos pos, ServerLevel sl) {
-        BlockFocus blockFocus = getOrCreateLevelData(sl).allBlockFoci.get(pos);
-        if (blockFocus == null) {
+        var data = getOrCreateLevelData(sl);
+        var tag = data.getPlacedItemTag(pos);
+        if (tag == null) {
+            var blockFocus = data.allBlockFoci.get(pos);
+            if (blockFocus != null) markDiagramActive(sl, blockFocus.getDiagram());
             return;
         }
-        markDiagramActive(sl, blockFocus.getDiagram());
+
+        for (var hallowPos : ShrineHelper.getAllHallows(pos, Spirits.spiritsByLabel.get(tag.getString("spirit_type")), data)) {
+            var blockFocus = data.allBlockFoci.get(hallowPos);
+            if (blockFocus != null) markDiagramActive(sl, blockFocus.getDiagram());
+        }
     }
 
     private static void BlockBreak(Level level, BlockPos pos) {

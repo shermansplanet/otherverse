@@ -135,7 +135,7 @@ public class ImplementManager {
     @SubscribeEvent
     public static void useBucket(PlayerInteractEvent.RightClickBlock event) {
         var stack = event.getItemStack();
-        if (!(event.getLevel() instanceof ServerLevel sl)) return;
+        if (!(event.getLevel() instanceof ServerLevel sl) || stack.getItem() instanceof BlockItem) return;
         var practiceData = DiagramManager.getOrCreateLevelData(sl);
         var blockTag = practiceData.getPlacedItemTag(event.getPos());
         if (blockTag == null || !blockTag.contains("spirit_type")) return;

@@ -41,7 +41,7 @@
 		"minecraft:stone" : ["2 overworld", "2 earth"],
 		"minecraft:cobblestone" : ["1 overworld"],
 		"minecraft:blue_ice" : ["21 cold"],
-		"minecraft:repeater" : ["18 technology"],
+		"minecraft:repeater" : ["18 technology", "3 time"],
 		"minecraft:quartz" : ["9 fortune", "9 nether"],
 		"minecraft:ancient_debris" : ["162 fortune", "27 nether"],
 		"minecraft:twisting_vines" : ["3 nether"],
@@ -121,8 +121,10 @@
 		"minecraft:quartz_block" : ["81 fortune", "9 nether"],
 		"minecraft:sea_lantern" : ["9 water"],
 		"minecraft:ink_sac" : ["3 dark"],
+		"minecraft:cake" : ["16 food"],
 		"minecraft:coal" : ["3 fortune"],
 		"minecraft:lava_bucket" : ["9 fire"],
+		"minecraft:magma_block" : ["3 fire"],
 		"minecraft:nether_brick_stairs" : ["27 nether"],
 		"minecraft:deepslate_copper_ore" : ["7 fortune"],
 		"minecraft:glow_berries" : ["7 light"],
@@ -165,6 +167,7 @@
 		"minecraft:firework_rocket" : ["8 fire", "3 light"],
 		"minecraft:firework_star" : ["6 fire", "5 light"],
 		"minecraft:ghast_tear" : ["36 nether", "3 fire", "33 death"],
-		"minecraft:skeleton_skull" : ["50 death"]
+		"minecraft:skeleton_skull" : ["50 death"],
+		"minecraft:wither_rose" : ["3 death"]
 	}
 }

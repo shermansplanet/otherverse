@@ -166,6 +166,12 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.EARTH, 1);
             AddForTag(item, spiritAmounts, Items.STONE, Spirits.EARTH, 3);
             AddForTag(item, spiritAmounts, Items.COBBLESTONE, Spirits.EARTH, 1);
+
+            AddForTag(item, spiritAmounts, Items.GLASS, Spirits.TIME, 1);
+            AddForTag(item, spiritAmounts, Items.SAND, Spirits.TIME, 1);
+            AddForTag(item, spiritAmounts, ItemTags.CANDLES, Spirits.TIME, 3);
+            AddForTag(item, spiritAmounts, ItemTags.CANDLES, Spirits.FIRE, 1);
+
             AddForTag(item, spiritAmounts, Items.ARMORS, Spirits.PROTECTION,
                     i -> i instanceof ArmorItem a ? (int) ((a.getDefense() + a.getToughness()) * 9) : 1);
             AddForTag(item, spiritAmounts, Items.BONES, Spirits.DEATH, 9);

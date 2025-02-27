@@ -70,8 +70,10 @@ public class SavedPracticeData extends SavedData {
                 }
             }
         }
-        if(tag.contains("spiritAffinities")){
-            SpiritAffinityTracker.load(tag.getCompound("spiritAffinities"));
+        if (level instanceof ServerLevel sl && level == sl.getServer().overworld()) {
+            if (tag.contains("spiritAffinities")) {
+                SpiritAffinityTracker.load(tag.getCompound("spiritAffinities"));
+            }
         }
     }
 

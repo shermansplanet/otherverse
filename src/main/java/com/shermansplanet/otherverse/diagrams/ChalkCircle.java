@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.diagrams.DiagramManager.BlockUpdateType;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.spirits.SpiritType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -203,7 +204,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
             if (stack.is(OtherverseItems.IDOL.get()) && stack.getTag().getString("material").equals("otherverse:cinnabar_block") && level instanceof ServerLevel sl) {
                 FamiliarManager.makeMobFromTag(IdolItem.getType(stack), stack.getTag(), getCenter(), sl);
                 item = new ItemStack(OtherverseItems.CINNABAR_BLOCK.get(), 1);
-            }else {
+            } else {
                 item = stack.copy();
                 item.setCount(1);
             }
@@ -268,7 +269,11 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
 
     @Override
     public void removeItem() {
-        item = new ItemStack(OtherverseItems.CHALK.get(), 1);
+        if (item.hasCraftingRemainingItem()) {
+            item = item.getCraftingRemainingItem();
+        } else {
+            item = new ItemStack(OtherverseItems.CHALK.get(), 1);
+        }
         markUpdated();
         if (level instanceof ServerLevel sl) {
             DiagramManager.OnDiagramBlockChanged(sl, getBlockPos(), BlockUpdateType.CHANGED);
@@ -297,6 +302,46 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     @Override
     public DiagramProcess getProcess() {
         return activeProcess;
+    }
+
+    @Override
+    public int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice) {
+        if (isEmpty()) return 0;
+        if (!getItem().hasTag() || !getItem().getTag().contains("hallow")) return 0;
+        var hallowTag = getItem().getTag().getCompound("hallow");
+        if (!hallowTag.getString("spirit_type").equals(spiritType.label())) return 0;
+        var spiritCount = hallowTag.getInt("spirit_count");
+        if (mustMeetFullPrice && spiritCount < price) return 0;
+        var drained = Math.min(price, spiritCount);
+        hallowTag.putInt("spirit_count", spiritCount - drained);
+        if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
+        return drained;
+    }
+
+    @Override
+    public int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll) {
+        if (isEmpty()) return 0;
+        if (!getItem().hasTag() || !getItem().getTag().contains("hallow")) return 0;
+        var hallowTag = getItem().getTag().getCompound("hallow");
+        if (!hallowTag.getString("spirit_type").equals(spiritType.label())) return 0;
+        var spiritCount = hallowTag.getInt("spirit_count");
+        var capacity = hallowTag.getInt("capacity");
+        var transferAmount = Math.min(amount, Math.max(0, capacity - spiritCount));
+        if (mustAcceptAll && transferAmount < amount) return 0;
+        hallowTag.putInt("spirit_count", spiritCount + transferAmount);
+        if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
+        return transferAmount;
+    }
+
+    @Override
+    public int getHallowCapacity(SpiritType spiritType) {
+        if (isEmpty()) return 0;
+        if (!getItem().hasTag() || !getItem().getTag().contains("hallow")) return 0;
+        var hallowTag = getItem().getTag().getCompound("hallow");
+        if (!hallowTag.getString("spirit_type").equals(spiritType.label())) return 0;
+        var spiritCount = hallowTag.getInt("spirit_count");
+        var capacity = hallowTag.getInt("capacity");
+        return Math.max(0, capacity - spiritCount);
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos blockPos, BlockState blockState, T t) {

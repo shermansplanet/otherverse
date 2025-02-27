@@ -211,78 +211,77 @@ public class ChalkLineBlock extends Block implements EntityBlock {
         }
 
         BlockEntity blockentity = level.getBlockEntity(pos);
-        if (blockentity instanceof ChalkCircle circle) {
-            ItemStack itemstack = player.getItemInHand(hand);
-            if (ImplementManager.isImplement(itemstack)) {
-                return InteractionResult.PASS;
-            }
-            if (itemstack.is(OtherverseItems.IDOL.get()) && itemstack.getTag().getString("material").equals("otherverse:cinnabar_block")) {
-                return InteractionResult.PASS;
-            }
-            boolean hadScaffolding = state.getValue(hasScaffolding);
-            if (itemstack.is(OtherverseItems.SLATE_SCAFFOLDING.get())) {
-                if (hadScaffolding) {
-                    ItemStack drop = OtherverseItems.SLATE_SCAFFOLDING.get().getDefaultInstance();
-                    if (!player.addItem(drop)) {
-                        player.drop(drop, false);
-                    }
-                } else {
-                    itemstack.split(1);
-                }
-                level.setBlockAndUpdate(pos, state.setValue(hasScaffolding, !hadScaffolding));
-                return InteractionResult.SUCCESS;
-            }
-            if (hadScaffolding && itemstack.getItem() instanceof ChalkItem
-                    && result.getDirection() == Direction.UP) {
-                return InteractionResult.PASS;
-            }
-            boolean containsSelf = circle.item.is(OtherverseItems.SELF.get());
-            boolean makeCircle = !itemstack.isEmpty() && !circle.item.is(itemstack.getItem());
-            boolean fullOfSelf =
-                    containsSelf && circle.item.getCount() >= selfPositions.length;
-            circle.isNumber = false;
-            if (player.isShiftKeyDown() && itemstack.isEmpty()) {
-                if (fullOfSelf) {
-                    return InteractionResult.SUCCESS;
-                }
-                if (!player.isCreative()) {
-                    if (!SelfManager.ChangeSelf(player, -1)) {
-                        return InteractionResult.SUCCESS;
-                    }
-                }
-                makeCircle = true;
-                int selfCount = 1;
-                if (containsSelf) {
-                    selfCount += circle.item.getCount();
-                }
-                itemstack = new ItemStack(OtherverseItems.SELF.get(), selfCount);
-            } else if (makeCircle) {
-                boolean dontSpend =
-                        player.getAbilities().instabuild || itemstack.getItem() instanceof ChalkItem;
-                itemstack = dontSpend ? itemstack.copy() : itemstack;
-                if (player.isShiftKeyDown() && itemstack.is(Tags.Items.SEEDS)) {
-                    player.getInventory().removeItem(itemstack);
-                    player.displayClientMessage(Component.literal("Count: " + itemstack.getCount()), true);
-                    circle.isNumber = true;
-                } else {
-                    itemstack = itemstack.split(1);
-                }
-            }
-            boolean leaveCircleBehind = makeCircle || !(itemstack.getItem() instanceof ChalkItem);
-            state = state.setValue(chalkCircle, leaveCircleBehind);
-            ItemStack drop = getDrop(circle);
-            if (!drop.isEmpty()) {
+        if (!(blockentity instanceof ChalkCircle circle)) return InteractionResult.SUCCESS;
+        ItemStack itemstack = player.getItemInHand(hand);
+        if (ImplementManager.isImplement(itemstack)) {
+            return InteractionResult.PASS;
+        }
+        if (itemstack.is(OtherverseItems.IDOL.get()) && itemstack.getTag().getString("material").equals("otherverse:cinnabar_block")) {
+            return InteractionResult.PASS;
+        }
+        boolean hadScaffolding = state.getValue(hasScaffolding);
+        if (itemstack.is(OtherverseItems.SLATE_SCAFFOLDING.get())) {
+            if (hadScaffolding) {
+                ItemStack drop = OtherverseItems.SLATE_SCAFFOLDING.get().getDefaultInstance();
                 if (!player.addItem(drop)) {
                     player.drop(drop, false);
                 }
+            } else {
+                itemstack.split(1);
             }
-            circle.item = makeCircle ? itemstack
-                    : leaveCircleBehind ? new ItemStack(OtherverseItems.CHALK.get()) : ItemStack.EMPTY;
-            circle.setPlayer(player);
-            level.setBlock(pos, state, 2);
-            circle.markUpdated();
-            updateAllNeighbors(pos, level, DiagramManager.BlockUpdateType.CHANGED);
+            level.setBlockAndUpdate(pos, state.setValue(hasScaffolding, !hadScaffolding));
+            return InteractionResult.SUCCESS;
         }
+        if (hadScaffolding && itemstack.getItem() instanceof ChalkItem
+                && result.getDirection() == Direction.UP) {
+            return InteractionResult.PASS;
+        }
+        boolean containsSelf = circle.item.is(OtherverseItems.SELF.get());
+        boolean makeCircle = !itemstack.isEmpty() && !circle.item.is(itemstack.getItem());
+        boolean fullOfSelf =
+                containsSelf && circle.item.getCount() >= selfPositions.length;
+        circle.isNumber = false;
+        if (player.isShiftKeyDown() && itemstack.isEmpty()) {
+            if (fullOfSelf) {
+                return InteractionResult.SUCCESS;
+            }
+            if (!player.isCreative()) {
+                if (!SelfManager.ChangeSelf(player, -1)) {
+                    return InteractionResult.SUCCESS;
+                }
+            }
+            makeCircle = true;
+            int selfCount = 1;
+            if (containsSelf) {
+                selfCount += circle.item.getCount();
+            }
+            itemstack = new ItemStack(OtherverseItems.SELF.get(), selfCount);
+        } else if (makeCircle) {
+            boolean dontSpend =
+                    player.getAbilities().instabuild || itemstack.getItem() instanceof ChalkItem;
+            itemstack = dontSpend ? itemstack.copy() : itemstack;
+            if (player.isShiftKeyDown() && itemstack.is(Tags.Items.SEEDS)) {
+                player.getInventory().removeItem(itemstack);
+                player.displayClientMessage(Component.literal("Count: " + itemstack.getCount()), true);
+                circle.isNumber = true;
+            } else {
+                itemstack = itemstack.split(1);
+            }
+        }
+        boolean leaveCircleBehind = makeCircle || !(itemstack.getItem() instanceof ChalkItem);
+        state = state.setValue(chalkCircle, leaveCircleBehind);
+        ItemStack drop = getDrop(circle);
+        if (!drop.isEmpty()) {
+            if (!player.addItem(drop)) {
+                player.drop(drop, false);
+            }
+        }
+        circle.item = makeCircle ? itemstack
+                : leaveCircleBehind ? new ItemStack(OtherverseItems.CHALK.get()) : ItemStack.EMPTY;
+        circle.setPlayer(player);
+        level.setBlock(pos, state, 2);
+        circle.markUpdated();
+        updateAllNeighbors(pos, level, DiagramManager.BlockUpdateType.CHANGED);
         return InteractionResult.SUCCESS;
     }
 
@@ -298,7 +297,7 @@ public class ChalkLineBlock extends Block implements EntityBlock {
                         : DyeColor.BLACK));
     }
 
-    private static BlockState getConnectionState(Level level, BlockPos pos, BlockState currentState) {
+    public static BlockState getConnectionState(Level level, BlockPos pos, BlockState currentState) {
         for (int i = 0; i < 8; i++) {
             int[] d = DiagramManager.dirs[i];
             BlockState bs = level.getBlockState(pos.offset(d[0], 0, d[1]));
@@ -371,7 +370,7 @@ public class ChalkLineBlock extends Block implements EntityBlock {
         return state.getValue(hasScaffolding);
     }
 
-    private void refreshNeighborLines(Level level, BlockPos pos) {
+    public static void refreshNeighborLines(Level level, BlockPos pos) {
         for (int i = 0; i < 8; i++) {
             int[] d = DiagramManager.dirs[i];
             BlockPos newpos = pos.offset(d[0], 0, d[1]);

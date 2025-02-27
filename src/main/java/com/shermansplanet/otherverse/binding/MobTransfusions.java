@@ -6,13 +6,11 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.ItemOrEntityType;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.PracticeWorldManager;
-import com.shermansplanet.otherverse.diagrams.BlockFocus;
-import com.shermansplanet.otherverse.diagrams.ChalkCircle;
-import com.shermansplanet.otherverse.diagrams.Diagram;
-import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.integrations.jei.TransfusionRecipe;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritLabeler;
+import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -257,12 +255,12 @@ public class MobTransfusions {
             return false;
         }
 
-        var foods = MobBindingInfluenceUtils.allFoods.get(new ItemOrEntityType(sourceBinding.entityType));
+        var foods = MobBindingInfluenceUtils.allFoods.get(targetBinding.entityType);
         if (foods == null) {
             return false;
         }
 
-        if (!foods.containsKey(targetBinding.entityType)) {
+        if (!foods.containsKey(new ItemOrEntityType(sourceBinding.entityType))) {
             return false;
         }
 
@@ -274,19 +272,16 @@ public class MobTransfusions {
         return true;
     }
 
-    public static boolean tryFeed(ServerLevel level, ChalkCircle circle, Diagram diagram) {
-        Item item = circle.getItem().getItem();
-        boolean isHallow = false;
-        if (circle.getItem().hasTag() && circle.getItem().getTag().contains("hallow")) {
-            CompoundTag ht = circle.getItem().getTag().getCompound("hallow");
-            item = Spirits.spiritItems.get(Spirits.spiritsByLabel.get(ht.getString("spirit_type"))).get();
-            isHallow = true;
+    public static boolean tryFeed(ServerLevel level, IFocus sourceFocus, Diagram diagram) {
+        Item item = sourceFocus.getItem().getItem();
+        LOGGER.debug("TRYING TO FEED");
+        SpiritType spiritType = null;
+        if (sourceFocus.getItem().hasTag() && sourceFocus.getItem().getTag().contains("hallow")) {
+            CompoundTag ht = sourceFocus.getItem().getTag().getCompound("hallow");
+            spiritType = Spirits.spiritsByLabel.get(ht.getString("spirit_type"));
+            item = Spirits.spiritItems.get(spiritType).get();
         }
-        var foods = MobBindingInfluenceUtils.allFoods.get(new ItemOrEntityType(item));
-        if (foods == null) {
-            return false;
-        }
-        BlockPos target = diagram.influences.get(circle.getPos());
+        BlockPos target = diagram.influences.get(sourceFocus.getPos());
         if (target == null) {
             return false;
         }
@@ -294,36 +289,33 @@ public class MobTransfusions {
         if (binding == null || binding.getHealth() == binding.getMaxHealth()) {
             return false;
         }
-        Integer amount = foods.get(binding.entityType);
+        var foods = MobBindingInfluenceUtils.allFoods.get(binding.entityType);
+        if (foods == null) {
+            return false;
+        }
+        Integer amount = foods.get(new ItemOrEntityType(item));
         if (amount == null) {
             return false;
         }
-        if (isHallow) {
-            CompoundTag ht = circle.getItem().getTag().getCompound("hallow");
+        if (spiritType != null) {
             int maxHeal = binding.getMaxHealth() - binding.getHealth();
             int spiritCount = (int) Math.ceil(maxHeal / (float) amount);
-            spiritCount = Math.min(spiritCount, ht.getInt("spirit_count"));
-            if (spiritCount == 0) {
+            amount = sourceFocus.drainHallow(spiritType, spiritCount * 2, false) / 2;
+            if (amount == 0) {
                 return false;
             }
-            amount *= spiritCount;
-            ht.putInt("spirit_count", ht.getInt("spirit_count") - spiritCount);
         }
         binding.changeHealth(amount, level);
-        BlockPos bp = circle.getPos();
+        BlockPos bp = sourceFocus.getPos();
         for (var i = 0; i < 10; i++) {
             level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, item.getDefaultInstance()),
                     bp.getX() + 0.5, bp.getY() + 0.25, bp.getZ() + 0.5, 1, 0, 0.1, 0, 0.15);
         }
 
-        if (item == Items.MILK_BUCKET) {
-            circle.item = Items.BUCKET.getDefaultInstance();
-            circle.markUpdated();
-        } else if (!isHallow) {
-            circle.removeItem();
+        if (spiritType == null) {
+            sourceFocus.removeItem();
         }
 
-        LOGGER.debug("DIAGRAM SUCCESS: MOB FEEDING");
         return true;
     }
 

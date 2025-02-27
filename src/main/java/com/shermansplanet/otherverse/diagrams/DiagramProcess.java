@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.diagrams;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
@@ -8,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
@@ -65,14 +67,20 @@ public class DiagramProcess {
     }
 
     protected void makeSpiritParticles(SpiritType spiritType) {
-        if ((source.isBlock() || totalDuration - remainingDuration > 20)
+        if ((source.isBlock() || (totalDuration - remainingDuration > 20) || (remainingDuration < 20))
                 && remainingDuration % 4 == 0 && sink.getFocusLevel() instanceof ServerLevel sl) {
             ItemStack sourceItem = source.getItem();
             BlockPos sourcePos = source.getPos();
-            Vec3 center = new Vec3(sourcePos.getX() + 0.5, sourcePos.getY() + 0.5, sourcePos.getZ() + 0.5);
+            var uplerp = source.isBlock() ? 1 : Mth.clamp((totalDuration - remainingDuration) / 20f, 0, 1);
+            Vec3 center = new Vec3(sourcePos.getX() + 0.5, sourcePos.getY() + 0.5f * uplerp, sourcePos.getZ() + 0.5);
 
-            if (!sourceItem.is(Items.AIR)) {
-                sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, sourceItem),
+            if (!sourceItem.is(Items.AIR) && !sourceItem.is(OtherverseItems.IDOL.get())) {
+                var particleItem = sourceItem;
+                if(sourceItem.hasTag() && sourceItem.getTag().contains("hallow")){
+                    var spiritName = sourceItem.getTag().getCompound("hallow").getString("spirit_type");
+                    particleItem = Spirits.spiritItems.get(Spirits.spiritsByLabel.get(spiritName)).get().getDefaultInstance();
+                }
+                sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, particleItem),
                         center.x, center.y, center.z, 1, 0, 0, 0, 0.05D);
             }
 

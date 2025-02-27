@@ -1,6 +1,6 @@
 {
     "name": "Wards",
-    "sortnum": 5,
+    "sortnum": 20,
     "icon": "minecraft:iron_helmet{hallow:{spirit_type:'protection'}}",
     "category": "otherverse:spirits",
     "pages": [

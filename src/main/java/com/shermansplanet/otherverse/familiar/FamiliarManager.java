@@ -807,14 +807,18 @@ public class FamiliarManager {
         if (persistentData.contains("bindingId") && e instanceof Mob mob) {
             TransientDiagramData data = DiagramManager.getOrCreateLevelData(level.getServer().overworld());
             BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
-            binding.mob = mob;
-            if (isFamiliar(mob)) {
-                binding.dimensionHash = DiagramManager.getDimensionHash(level);
-                if (data.savedData != null) {
-                    data.savedData.setDirty();
+            if(binding == null){
+                persistentData.remove("bindingId");
+            }else {
+                binding.mob = mob;
+                if (isFamiliar(mob)) {
+                    binding.dimensionHash = DiagramManager.getDimensionHash(level);
+                    if (data.savedData != null) {
+                        data.savedData.setDirty();
+                    }
                 }
+                data.retryUpdateClient();
             }
-            data.retryUpdateClient();
         }
         level.addFreshEntityWithPassengers(e);
     }
