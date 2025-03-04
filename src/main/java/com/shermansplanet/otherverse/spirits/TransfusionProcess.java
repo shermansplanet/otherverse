@@ -50,7 +50,7 @@ public class TransfusionProcess extends DiagramProcess {
 
         abandon();
 
-        if (source.drainHallow(spiritType, transfusion.price(), true) < transfusion.price()) return;
+        if (source.drainHallow(spiritType, transfusion.price(), true, false) < transfusion.price()) return;
 
         if (sink.getFocusLevel() instanceof ServerLevel sl) {
             BlockPos bp = sink.getPos();

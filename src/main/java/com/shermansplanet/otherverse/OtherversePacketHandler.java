@@ -13,6 +13,7 @@ import com.shermansplanet.otherverse.ruins.RuinsManager;
 import com.shermansplanet.otherverse.ruins.ShockLightningMessage;
 import com.shermansplanet.otherverse.spirits.ColorSpiritMessage;
 import com.shermansplanet.otherverse.spirits.HallowUpdateMessage;
+import com.shermansplanet.otherverse.spirits.OverflowMessage;
 import com.shermansplanet.otherverse.sympathy.SympathyRangeUpdateMessage;
 import com.shermansplanet.otherverse.sympathy.SympathySelectRenderer;
 import com.shermansplanet.otherverse.sympathy.SympathyUpdateMessage;
@@ -138,6 +139,22 @@ public class OtherversePacketHandler {
                 PracticeWorldUpdateMessage::decode,
                 OtherversePacketHandler::handlePracticeWorldUpdate
         );
+        OtherversePacketHandler.INSTANCE.registerMessage(
+                id++,
+                OverflowMessage.class,
+                OverflowMessage::encode,
+                OverflowMessage::decode,
+                OtherversePacketHandler::handleKnockback
+        );
+    }
+
+    private static void handleKnockback(OverflowMessage msg, Supplier<Context> ctx) {
+        ctx.get().enqueueWork(() ->
+                // Make sure it's only executed on the physical client
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                        () -> () -> OtherverseClientPacketHandler.handleOverflow(msg, ctx))
+        );
+        ctx.get().setPacketHandled(true);
     }
 
     private static void handlePracticeWorldUpdate(PracticeWorldUpdateMessage msg, Supplier<Context> ctx) {

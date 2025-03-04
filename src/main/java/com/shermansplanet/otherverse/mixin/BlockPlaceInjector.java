@@ -35,6 +35,7 @@ public abstract class BlockPlaceInjector {
     List<ItemStack> drops = ci.getReturnValue();
     for (ItemStack drop : drops) {
       if (drop.is(itemToMatch)) {
+        tag.remove("shrine");
         drop.getOrCreateTag().put("hallow", tag);
         HallowHelper.addFakeEnchantment(drop.getTag());
         break;

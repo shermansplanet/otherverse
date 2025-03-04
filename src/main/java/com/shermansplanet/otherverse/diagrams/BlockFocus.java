@@ -134,7 +134,7 @@ public class BlockFocus implements IFocus {
     }
 
     @Override
-    public int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice) {
+    public int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice, boolean simulate) {
         var data = DiagramManager.getOrCreateLevelData(level);
         var hallowPositions = ShrineHelper.getAllHallows(getPos(), spiritType, data);
         if (hallowPositions.isEmpty()) return 0;
@@ -143,36 +143,42 @@ public class BlockFocus implements IFocus {
 
         var remainingPrice = price;
         for (BlockPos sourcePos : hallowPositions) {
-            if(remainingPrice > 0) {
+            if (remainingPrice > 0) {
                 var ht = data.getPlacedItemTag(sourcePos);
                 var count = ht.getInt("spirit_count");
                 count = Math.min(count, remainingPrice);
                 drainPositions.put(sourcePos, count);
                 remainingPrice -= count;
             }
-            var otherFocus = data.allBlockFoci.get(sourcePos);
-            if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
-            DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+        }
+
+        if (remainingPrice == price) {
+            if (price == Integer.MAX_VALUE) {
+                return 0;
+            }
+            return ShrineHelper.onOverdrawOrOverflow(level, blockPos, spiritType, price, true, simulate);
         }
 
         if (mustMeetFullPrice && remainingPrice > 0) {
             return 0;
         }
 
-        for (var drainPosition : drainPositions.entrySet()) {
-            var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
-            shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") - drainPosition.getValue());
-            data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
-            var otherFocus = data.allBlockFoci.get(drainPosition.getKey());
-            if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
-            DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+        if(!simulate) {
+            for (var drainPosition : drainPositions.entrySet()) {
+                var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
+                shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") - drainPosition.getValue());
+                data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
+                var otherFocus = data.allBlockFoci.get(drainPosition.getKey());
+                if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
+                DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+            }
         }
 
         return price - remainingPrice;
     }
 
     @Override
-    public int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll) {
+    public int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll, boolean simulate) {
         var data = DiagramManager.getOrCreateLevelData(level);
         var hallowPositions = ShrineHelper.getAllHallows(getPos(), spiritType, data);
         if (hallowPositions.isEmpty()) return 0;
@@ -188,19 +194,26 @@ public class BlockFocus implements IFocus {
                 drainPositions.put(sourcePos, transferAmount);
                 remainingAmount -= transferAmount;
             }
-            var otherFocus = data.allBlockFoci.get(sourcePos);
-            if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
-            DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+        }
+
+        if(!simulate && remainingAmount < amount){
+            for (BlockPos sourcePos : hallowPositions) {
+                var otherFocus = data.allBlockFoci.get(sourcePos);
+                if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
+                DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+            }
         }
 
         if (mustAcceptAll && remainingAmount > 0) {
             return 0;
         }
 
-        for (var drainPosition : drainPositions.entrySet()) {
-            var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
-            shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") + drainPosition.getValue());
-            data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
+        if(!simulate) {
+            for (var drainPosition : drainPositions.entrySet()) {
+                var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
+                shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") + drainPosition.getValue());
+                data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
+            }
         }
 
         return amount - remainingAmount;

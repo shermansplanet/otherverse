@@ -23,6 +23,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -369,11 +371,17 @@ public class MobBindingInfluenceUtils {
             Entity instance = et.create(level);
             if (instance instanceof Mob mob) {
                 MakeIdol(et);
+                mob.tick();
+                var le = (EntityType<? extends LivingEntity>) et;
                 if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
-                    registerMobSpirit((EntityType<? extends LivingEntity>) et, Spirits.WATER);
+                    registerMobSpirit(le, Spirits.WATER);
+                }
+                if (mob instanceof FlyingMob || mob instanceof FlyingAnimal || mob.isNoGravity()
+                        || mob.getNavigation() instanceof FlyingPathNavigation) {
+                    registerMobSpirit(le, Spirits.AIR);
                 }
                 if (mob.getMobType() == MobType.UNDEAD) {
-                    registerMobSpirit((EntityType<? extends LivingEntity>) et, Spirits.DEATH);
+                    registerMobSpirit(le, Spirits.DEATH);
                 }
                 try {
                     if (mob.canBeLeashed(null)) {

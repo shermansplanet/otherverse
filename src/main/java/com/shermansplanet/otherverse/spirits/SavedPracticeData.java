@@ -24,13 +24,11 @@ public class SavedPracticeData extends SavedData {
     }
 
     public void load(CompoundTag tag) {
-        LOGGER.debug("LOADING LEVEL DATA " + (level.isClientSide() ? "client" : "server"));
         if (tag.contains("placedTags")) {
             CompoundTag positions = tag.getCompound("placedTagPositions");
             CompoundTag placedTags = tag.getCompound("placedTags");
             TransientDiagramData diagramData = DiagramManager.getOrCreateLevelData(level);
             for (String key : placedTags.getAllKeys()) {
-                LOGGER.debug(key);
                 CompoundTag itemTag = placedTags.getCompound(key);
                 BlockPos pos = new BlockPos(
                         positions.getInt(key + "_x"),

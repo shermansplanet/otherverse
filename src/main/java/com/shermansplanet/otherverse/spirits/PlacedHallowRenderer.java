@@ -8,6 +8,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.ClientEvents;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.SightManager;
+import com.shermansplanet.otherverse.diagrams.ChalkCircleRenderer;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IBlockRenderGetter;
 import com.shermansplanet.otherverse.familiar.MobRetexturer;
@@ -34,7 +36,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -50,12 +54,24 @@ public class PlacedHallowRenderer {
     private static final RenderStateShard.ShaderStateShard RENDERTYPE_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeCutoutShader);
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private static final HashSet<ShrineHelper.Shrine> shrinesToRender = new HashSet<>();
+
     @SubscribeEvent
     public static void renderTick(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) return;
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
         renderHallows(player, event);
+    }
+
+    @SubscribeEvent
+    public static void tick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        var level = Minecraft.getInstance().level;
+        if (level == null || level.getGameTime() % 5 != 0) return;
+        for (var shrine : shrinesToRender) {
+            ShrineHelper.recalculateShrine(shrine);
+        }
     }
 
     private static void renderHallows(LocalPlayer player, RenderLevelStageEvent event) {
@@ -68,20 +84,57 @@ public class PlacedHallowRenderer {
         poseStack.translate(-camera.getPosition().x(), -camera.getPosition().y(), -camera.getPosition().z());
         var multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         var renderDist = 64 * 64;
+
+        var renderShrineBounds = SightManager.shouldRenderSight();
+        if (renderShrineBounds) shrinesToRender.clear();
+
         for (BlockPos pos : levelData.getAllPlacedItemPositions()) {
             if (player.position().distanceToSqr(new Vec3(pos.getX(), pos.getY(), pos.getZ())) > renderDist) continue;
+            var tag = levelData.getPlacedItemTag(pos);
+            var bs = player.level.getBlockState(pos);
             poseStack.pushPose();
             poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-            var bs = player.level.getBlockState(pos);
+            var st = tag.getString("spirit_type");
             renderSingleBlock((IBlockRenderGetter) Minecraft.getInstance().getBlockRenderer(), bs, poseStack, multiBufferSource,
-                    255, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout(),
-                    levelData.getPlacedItemTag(pos).getString("spirit_type"));
+                    255, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout(), st);
+            poseStack.popPose();
+            if (!tag.contains("shrine") || !renderShrineBounds) continue;
+            var shrine = ShrineHelper.shrinesByPosition.computeIfAbsent(player.level, x -> new HashMap<>()).get(pos);
+            if (shrine == null) {
+                shrine = ShrineHelper.getShrine(player.level, pos, Spirits.spiritsByLabel.get(st));
+            }
+            shrinesToRender.add(shrine);
+        }
+
+        if (!renderShrineBounds) {
+            poseStack.popPose();
+            return;
+        }
+
+        var dir1 = new Vec3(1, 0, 0);
+        var dir2 = new Vec3(0, 0, 1);
+        var rot = (event.getRenderTick() + event.getPartialTick()) * 0.003f;
+        for (var shrine : shrinesToRender) {
+            var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
+            if (behavior == null) continue;
+            poseStack.pushPose();
+            var range = shrine.range;
+            var shape = behavior.getShape();
+            var cylinderTop = switch (shape) {
+                case BELOW -> range.bottom();
+                case ABOVE -> range.bottom() + range.height();
+                case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
+            };
+            poseStack.translate(range.center().x, cylinderTop, range.center().z);
+            ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
+                    rot, 255, 255, 255, 100, range.height());
             poseStack.popPose();
         }
+
         poseStack.popPose();
     }
 
-    private static void renderSingleBlock(IBlockRenderGetter blockRenderGetter, BlockState p_110913_, PoseStack p_110914_, MultiBufferSource p_110915_, int p_110916_, int p_110917_, net.minecraftforge.client.model.data.ModelData modelData, net.minecraft.client.renderer.RenderType renderType, String spiritName) {
+    private static void renderSingleBlock(IBlockRenderGetter blockRenderGetter, BlockState p_110913_, PoseStack p_110914_, MultiBufferSource p_110915_, int p_110916_, int p_110917_, ModelData modelData, RenderType renderType, String spiritName) {
         RenderShape rendershape = p_110913_.getRenderShape();
         if (rendershape != RenderShape.INVISIBLE) {
             switch (rendershape) {
@@ -91,12 +144,12 @@ public class PlacedHallowRenderer {
                     float f = (float) (i >> 16 & 255) / 255.0F;
                     float f1 = (float) (i >> 8 & 255) / 255.0F;
                     float f2 = (float) (i & 255) / 255.0F;
-                    for (net.minecraft.client.renderer.RenderType rt : modelAndRender.getFirst().getRenderTypes(p_110913_, RandomSource.create(42), modelData))
+                    for (RenderType rt : modelAndRender.getFirst().getRenderTypes(p_110913_, RandomSource.create(42), modelData))
                         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(p_110914_.last(), p_110915_.getBuffer(modelAndRender.getSecond()), p_110913_, modelAndRender.getFirst(), f, f1, f2, p_110916_, p_110917_, modelData, rt);
                     break;
                 case ENTITYBLOCK_ANIMATED:
                     ItemStack stack = new ItemStack(p_110913_.getBlock());
-                    net.minecraftforge.client.extensions.common.IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, p_110914_, p_110915_, p_110916_, p_110917_);
+                    IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, p_110914_, p_110915_, p_110916_, p_110917_);
             }
 
         }
@@ -177,14 +230,13 @@ public class PlacedHallowRenderer {
         }
     }
 
-    private static BakedModel forceBake(ModelBakery bakery, ResourceLocation p_119350_, ModelState p_119351_, java.util.function.Function<Material, net.minecraft.client.renderer.texture.TextureAtlasSprite> sprites) {
+    private static BakedModel forceBake(ModelBakery bakery, ResourceLocation p_119350_, ModelState p_119351_, Function<Material, TextureAtlasSprite> sprites) {
         UnbakedModel unbakedmodel = bakery.getModel(p_119350_);
-        if (unbakedmodel instanceof BlockModel) {
-            BlockModel blockmodel = (BlockModel)unbakedmodel;
+        if (unbakedmodel instanceof BlockModel blockmodel) {
             if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
-                return ((IModelGetter)bakery).getItemModelGenerator().generateBlockModel(sprites, blockmodel).bake(bakery, blockmodel, sprites, p_119351_, p_119350_, false);
+                return ((IModelGetter) bakery).getItemModelGenerator().generateBlockModel(sprites, blockmodel).bake(bakery, blockmodel, sprites, p_119351_, p_119350_, false);
             }
-        }else if(unbakedmodel instanceof MultiVariant mv){
+        } else if (unbakedmodel instanceof MultiVariant mv) {
             return bakeMultiVariant(mv, bakery, sprites);
         }
 

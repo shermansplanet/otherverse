@@ -18,10 +18,10 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 
 public class GrowArchitectureProcess extends DiagramProcess {
-    private final BlockPos minCopyPos, maxSourcePos;
+    private final BlockPos minCopyPos;
     private final int dx, dy, dz;
     private int currentSeekIndex;
-    private ServerLevel level;
+    private final ServerLevel level;
     private final DemesnesManager.ArchitectureInventory inventory;
     private long destroyStartTime = -1;
     private boolean hasSentUpdate = false;
@@ -36,7 +36,7 @@ public class GrowArchitectureProcess extends DiagramProcess {
         var p1 = webPositions.get(0);
         var p2 = webPositions.get(1);
         minCopyPos = new BlockPos(Math.min(p1.getX(), p2.getX()), Math.min(p1.getY(), p2.getY()), Math.min(p1.getZ(), p2.getZ()));
-        maxSourcePos = new BlockPos(Math.max(p1.getX(), p2.getX()), Math.max(p1.getY(), p2.getY()), Math.max(p1.getZ(), p2.getZ()));
+        BlockPos maxSourcePos = new BlockPos(Math.max(p1.getX(), p2.getX()), Math.max(p1.getY(), p2.getY()), Math.max(p1.getZ(), p2.getZ()));
         dx = maxSourcePos.getX() - minCopyPos.getX() + 1;
         dy = maxSourcePos.getY() - minCopyPos.getY() + 1;
         dz = maxSourcePos.getZ() - minCopyPos.getZ() + 1;
@@ -76,7 +76,8 @@ public class GrowArchitectureProcess extends DiagramProcess {
 
             var pasteBlock = level.getBlockState(pastePos);
             if (pasteBlock.is(OtherverseBlocks.CHALK_LINE.get())) continue;
-            var sameBlocks = false;
+            var sameBlocks = copyBlock.getBlock() == pasteBlock.getBlock();
+            /*var sameBlocks = false;
             if (copyBlock.getBlock() == pasteBlock.getBlock()) {
                 sameBlocks = true;
                 for (var key : copyBlock.getValues().keySet()) {
@@ -89,7 +90,7 @@ public class GrowArchitectureProcess extends DiagramProcess {
                     level.destroyBlockProgress(inventory.hashCode(), pastePos, -1);
                     sameBlocks = true;
                 }
-            }
+            }*/
             if (sameBlocks) {
                 currentSeekIndex++;
                 continue;

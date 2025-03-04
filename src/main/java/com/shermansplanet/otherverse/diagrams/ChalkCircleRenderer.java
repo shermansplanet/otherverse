@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -71,20 +72,20 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                 poseStack.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, (float) -chalkCircle.angleDegrees, 0)));
 
                 var fade1 = (int) Math.max(0, (5000 - t) * 255 / 1000);
-                drawPolygon(poseStack, multiBufferSource, side, up, 4, 0.85f * s, r, 255, fade1, fade1);
-                drawPolygon(poseStack, multiBufferSource, side, up, 4, 0.85f * s, r + 0.125f, 255, fade1, fade1);
-                drawPolygon(poseStack, multiBufferSource, side, up, 24, 0.85f * s, r, 255, fade1, fade1);
+                drawPolygon(poseStack, multiBufferSource, side, up, 4, 0.85f * s, r, 255, fade1, fade1, 255);
+                drawPolygon(poseStack, multiBufferSource, side, up, 4, 0.85f * s, r + 0.125f, 255, fade1, fade1, 255);
+                drawPolygon(poseStack, multiBufferSource, side, up, 24, 0.85f * s, r, 255, fade1, fade1, 255);
 
                 if (t > 5000) {
                     var fade2 = (int) Math.max(0, (6000 - t) * 255 / 1000);
-                    drawPolygon(poseStack, multiBufferSource, side, up, 6, s, -r, 255, fade2, fade2);
-                    drawPolygon(poseStack, multiBufferSource, side, up, 24, s, -r, 255, fade2, fade2);
+                    drawPolygon(poseStack, multiBufferSource, side, up, 6, s, -r, 255, fade2, fade2,255);
+                    drawPolygon(poseStack, multiBufferSource, side, up, 24, s, -r, 255, fade2, fade2,255);
 
                     if (t > 6000) {
                         var fade3 = (int) Math.max(0, (7000 - t) * 255 / 1000);
-                        drawPolygon(poseStack, multiBufferSource, side, up, 4, 1.414f * s, r, 255, fade3, fade3);
-                        drawPolygon(poseStack, multiBufferSource, side, up, 4, 1.414f * s, r + 0.125f, 255, fade3, fade3);
-                        drawPolygon(poseStack, multiBufferSource, side, up, 24, 1.414f * s, r, 255, fade3, fade3);
+                        drawPolygon(poseStack, multiBufferSource, side, up, 4, 1.414f * s, r, 255, fade3, fade3,255);
+                        drawPolygon(poseStack, multiBufferSource, side, up, 4, 1.414f * s, r + 0.125f, 255, fade3, fade3,255);
+                        drawPolygon(poseStack, multiBufferSource, side, up, 24, 1.414f * s, r, 255, fade3, fade3,255);
                     }
                 }
 
@@ -133,8 +134,30 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
         poseStack.popPose();
     }
 
-    public void drawPolygon(PoseStack ps, MultiBufferSource bufferSource, Vec3 dir1, Vec3 dir2, int sides,
-                            float radius, float rotation, int r, int g, int b) {
+    public static void drawCylinder(PoseStack ps, MultiBufferSource bufferSource, Vec3 dir1, Vec3 dir2, int sides,
+                                    float radius, float rotation, int r, int g, int b, int a, float height) {
+        var bufferSides = bufferSource.getBuffer(RenderType.lineStrip());
+        var sideVertical = height / (Mth.TWO_PI * radius / sides);
+        for (var i = 0; i <= sides; i++) {
+            var angle = Math.PI * 2 * (i / (float) sides + rotation);
+            var cos = Math.cos(angle);
+            var sin = Math.sin(angle);
+            var pos = dir1.scale(cos).add(dir2.scale(sin)).scale(radius);
+            var nrm = dir1.scale(-sin).add(dir2.scale(cos));
+            drawLineVertex(ps,
+                    (float) pos.x, (float) pos.y - (i % 2 == 0 ? 0 : height), (float) pos.z,
+                    (float) nrm.x, (float) nrm.y + (i % 2 == 0 ? -sideVertical : sideVertical), (float) nrm.z,
+                    r, g, b, a, bufferSides);
+        }
+        drawPolygon(ps, bufferSource, dir1, dir2, sides, radius, rotation,r,g,b,a);
+        ps.pushPose();
+        ps.translate(0,-height,0);
+        drawPolygon(ps, bufferSource, dir1, dir2, sides, radius, rotation,r,g,b,a);
+        ps.popPose();
+    }
+
+    public static void drawPolygon(PoseStack ps, MultiBufferSource bufferSource, Vec3 dir1, Vec3 dir2, int sides,
+                                   float radius, float rotation, int r, int g, int b, int a) {
         var buffer = bufferSource.getBuffer(RenderType.lineStrip());
         for (var i = 0; i <= sides; i++) {
             var angle = Math.PI * 2 * (i / (float) sides + rotation);
@@ -145,13 +168,13 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
             drawLineVertex(ps,
                     (float) pos.x, (float) pos.y, (float) pos.z,
                     (float) nrm.x, (float) nrm.y, (float) nrm.z,
-                    r, g, b, buffer);
+                    r, g, b, a, buffer);
         }
     }
 
-    public static void drawLineVertex(PoseStack ps, float x, float y, float z, float nx, float ny, float nz, int r, int g, int b, VertexConsumer consumer) {
+    public static void drawLineVertex(PoseStack ps, float x, float y, float z, float nx, float ny, float nz, int r, int g, int b, int a, VertexConsumer consumer) {
         consumer.vertex(ps.last().pose(), x, y, z)
-                .color(r, g, b, 255)
+                .color(r, g, b, a)
                 .normal(ps.last().normal(), nx, ny, nz)
                 .endVertex();
     }

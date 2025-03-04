@@ -205,6 +205,7 @@ public class SpiritTransfusions {
         if (!event.getItemStack().hasTag() || !event.getItemStack().getTag().contains("hallow")) {
             return;
         }
+        if(event.getItemStack().getItem() instanceof BlockItem && !event.getEntity().isShiftKeyDown()) return;
         var spiritTransfusions = ALL_SPIRIT_TRANSFUSIONS.data;
         Item inputItem = event.getLevel().getBlockState(event.getPos()).getBlock().asItem();
         CompoundTag hallowTag = event.getItemStack().getTag().getCompound("hallow");

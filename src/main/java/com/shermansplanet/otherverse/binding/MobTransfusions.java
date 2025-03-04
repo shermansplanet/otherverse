@@ -274,11 +274,14 @@ public class MobTransfusions {
 
     public static boolean tryFeed(ServerLevel level, IFocus sourceFocus, Diagram diagram) {
         Item item = sourceFocus.getItem().getItem();
-        LOGGER.debug("TRYING TO FEED");
         SpiritType spiritType = null;
         if (sourceFocus.getItem().hasTag() && sourceFocus.getItem().getTag().contains("hallow")) {
             CompoundTag ht = sourceFocus.getItem().getTag().getCompound("hallow");
             spiritType = Spirits.spiritsByLabel.get(ht.getString("spirit_type"));
+            if(spiritType == null){
+                LOGGER.error("HALLOW WITHOUT SPIRIT TYPE");
+                return false;
+            }
             item = Spirits.spiritItems.get(spiritType).get();
         }
         BlockPos target = diagram.influences.get(sourceFocus.getPos());
@@ -300,7 +303,7 @@ public class MobTransfusions {
         if (spiritType != null) {
             int maxHeal = binding.getMaxHealth() - binding.getHealth();
             int spiritCount = (int) Math.ceil(maxHeal / (float) amount);
-            amount = sourceFocus.drainHallow(spiritType, spiritCount * 2, false) / 2;
+            amount = sourceFocus.drainHallow(spiritType, spiritCount * 2, false, false) / 2;
             if (amount == 0) {
                 return false;
             }

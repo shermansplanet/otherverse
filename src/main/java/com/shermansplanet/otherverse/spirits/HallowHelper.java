@@ -12,12 +12,17 @@ import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -28,11 +33,16 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -66,6 +76,11 @@ public class HallowHelper {
     }
 
     @SubscribeEvent
+    public static void startup(ServerAboutToStartEvent event) {
+        ShrineHelper.onStartup();
+    }
+
+    @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
         if (event.getLevel() instanceof ServerLevel sl) {
             DiagramManager.tryLoadOverworld(sl);
@@ -81,6 +96,9 @@ public class HallowHelper {
     public static void onPlayerLogin(PlayerLoggedInEvent event) {
         if (event.getEntity().getLevel() instanceof ServerLevel sl) {
             DiagramManager.getOrCreateLevelData(sl).retryUpdateClient();
+            for (var pos : DiagramManager.getOrCreateLevelData(sl).getAllPlacedItemPositions()) {
+                ShrineHelper.getShrine(sl, pos);
+            }
         }
     }
 
@@ -93,24 +111,45 @@ public class HallowHelper {
 
     @SubscribeEvent
     static void onGrief(EntityMobGriefingEvent event) {
-        if (event.getEntity() == null) return;
-        var data = DiagramManager.getOrCreateLevelData(event.getEntity().level);
-        var mobPos = event.getEntity().blockPosition();
-        for (var pos : data.getAllPlacedItemPositions()) {
-            var tag = data.getPlacedItemTag(pos);
-            if (!tag.getString("spirit_type").equals("protection")) continue;
-            var radius = tag.getInt("capacity") / 2;
-            var dist = mobPos.distSqr(pos);
-            if (dist > radius * radius) continue;
-            var count = tag.getInt("spirit_count");
-            if (count < 9) continue;
-            tag.putInt("spirit_count", count - 9);
+        if (event.getEntity() == null || event.getEntity().getType() != EntityType.CREEPER) return;
+        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level);
+        for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
+            if (!shrine.tryDrain(9, levelData)) continue;
+            event.setResult(Event.Result.DENY);
             event.setCanceled(true);
-            break;
+            return;
         }
     }
 
     @SubscribeEvent
+    static void onAttack(LivingHurtEvent event) {
+        if (event.getEntity() == null) return;
+        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level);
+        for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
+            if (!shrine.tryDrain(Mth.ceil(event.getAmount() * 3), levelData)) continue;
+            event.setAmount(event.getAmount() / 2);
+        }
+        for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.WAR)) {
+            if (!shrine.tryDrain(Mth.ceil(event.getAmount() * 3), levelData)) continue;
+            event.setAmount(event.getAmount() * 2);
+        }
+    }
+
+    @SubscribeEvent
+    static void onDie(LivingDeathEvent event) {
+        var entity = event.getEntity();
+        if (entity == null) return;
+        var levelData = DiagramManager.getOrCreateLevelData(entity.level);
+        for (var shrine : ShrineHelper.getShrinesFor(entity, Spirits.DEATH)) {
+            if (!shrine.tryDrain(444, levelData)) continue;
+            entity.setHealth(1);
+            entity.removeAllEffects();
+            event.setCanceled(true);
+            return;
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     static void warDamage(LivingDamageEvent event) {
         if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
         ItemStack item = attacker.getMainHandItem();
@@ -190,6 +229,42 @@ public class HallowHelper {
         }
         return false;
     }
+
+    @SubscribeEvent
+    public static void makeShrine(PlayerInteractEvent.RightClickBlock event) {
+        if (!event.getItemStack().isEmpty() || !event.getEntity().isShiftKeyDown()) return;
+        var data = DiagramManager.getOrCreateLevelData(event.getLevel());
+        var tag = data.getPlacedItemTag(event.getPos());
+        if (tag == null || tag.contains("shrine")) return;
+        if (!event.getEntity().getAbilities().instabuild) event.getEntity().hurt(DamageSource.OUT_OF_WORLD, 3);
+        for (var pos : ShrineHelper.getAllHallows(event.getPos(), tag.getString("spirit_type"), data)) {
+            tag = data.getPlacedItemTag(pos);
+            tag.putBoolean("shrine", true);
+            data.putPlacedItemTag(pos, tag);
+        }
+        if (event.getLevel() instanceof ServerLevel sl) {
+            ShrineHelper.getShrine(sl, event.getPos());
+            var r = sl.getRandom();
+            var v1 = event.getHitVec().getLocation();
+            for (var i = 0; i < 8; i++) {
+                sl.sendParticles(ParticleTypes.INSTANT_EFFECT,
+                        v1.x, v1.y, v1.z, 1,
+                        r.nextFloat() - 0.5f,
+                        r.nextFloat() - 0.5f,
+                        r.nextFloat() - 0.5f,
+                        0.15);
+            }
+        }
+        event.setUseBlock(Event.Result.DENY);
+    }
+
+    /*@SubscribeEvent
+    public static void useHallow(PlayerInteractEvent.RightClickBlock event) {
+        if(!event.getEntity().isShiftKeyDown()) return;
+        if(!event.getItemStack().hasTag()) return;
+        var hallowTag = event.getItemStack().getTag().getCompound("hallow");
+        if(hallowTag.isEmpty()) return;
+    }*/
 
     @SubscribeEvent
     public static void recolorChalk(PlayerInteractEvent.RightClickBlock event) {
@@ -274,19 +349,16 @@ public class HallowHelper {
     public static boolean canFill(IFocus sink, IFocus source, SpiritType spiritType) {
         ItemStack sourceItem = source.getItem();
         boolean sourceIsHallow = sourceItem.hasTag() && sourceItem.getTag().contains("hallow");
+        var isOverflowable = ShrineHelper.isOverflowable(spiritType);
 
         if (spiritType == null) {
-            if (sourceIsHallow) {
-                CompoundTag ht = sourceItem.getTag().getCompound("hallow");
-                return ht.getInt("spirit_count") > 0;
-            } else {
-                return false;
-            }
+            LOGGER.error("NULL SPIRIT TYPE");
+            return false;
         }
 
         var hallowTag = sink.getItem().getTag().getCompound("hallow");
 
-        if (sink.getHallowCapacity(spiritType) <= 0) {
+        if (!isOverflowable && sink.getHallowCapacity(spiritType) <= 0) {
             return false;
         }
 
@@ -302,7 +374,7 @@ public class HallowHelper {
             if (!sourceTag.getString("spirit_type").equals(spiritType.label()))
                 return false;
             if (source.isBlock()) {
-                return getShrineSpiritCount(source, spiritType) > 0;
+                return isOverflowable || getShrineSpiritCount(source, spiritType) > 0;
             } else {
                 return sourceTag.getInt("spirit_count") > 0;
             }
@@ -346,19 +418,10 @@ public class HallowHelper {
 
     public static void tryFillHallow(ServerLevel level, IFocus focus, Diagram diagram) {
         ItemStack item = focus.getItem();
-        var isDemesneBeacon = item.is(OtherverseItems.DEMESNE_BEACON.get()) && focus.isBlock();
-        CompoundTag hallowTag = new CompoundTag();
-        if (!isDemesneBeacon) {
-            if (!item.hasTag() || !item.getTag().contains("hallow")) {
-                return;
-            }
-            hallowTag = item.getTag().getCompound("hallow");
-            int spiritCount = hallowTag.getInt("spirit_count");
-            int capacity = hallowTag.getInt("capacity");
-            if (spiritCount == capacity) {
-                return;
-            }
+        if (!item.hasTag() || !item.getTag().contains("hallow")) {
+            return;
         }
+        CompoundTag hallowTag = item.getTag().getCompound("hallow");
 
         List<IFocus> influences = new ArrayList<>();
         BlockPos targetPos = focus.getPos();
@@ -373,18 +436,31 @@ public class HallowHelper {
                 influences.add(DiagramManager.getOrCreateLevelData(level).allBlockFoci.get(pos));
             }
         }
-        if (!isDemesneBeacon && !hallowTag.contains("spirit_type")) {
+
+        if (!hallowTag.contains("spirit_type")) {
             applySpiritType(level, focus, diagram, hallowTag, influences);
         }
-        SpiritType spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
+
+        var spiritTypeString = hallowTag.getString("spirit_type");
+        SpiritType spiritType = Spirits.spiritsByLabel.get(spiritTypeString);
+
+        var willOverflow = false;
+        int spiritCount = hallowTag.getInt("spirit_count");
+        int capacity = hallowTag.getInt("capacity");
+        if (spiritCount >= capacity) {
+            if (ShrineHelper.isOverflowable(spiritType) && focus.isBlock()) {
+                willOverflow = true;
+            } else {
+                return;
+            }
+        }
+
         for (IFocus sourceFocus : influences) {
-            if (sourceFocus.getProcess() != null || !canFill(focus, sourceFocus, spiritType)) {
-                continue;
-            }
-            if (isDemesneBeacon) {
-                var sourceHallowTag = sourceFocus.getItem().getTag().getCompound("hallow");
-                spiritType = Spirits.spiritsByLabel.get(sourceHallowTag.getString("spirit_type"));
-            }
+            if (sourceFocus.getProcess() != null) continue;
+            if (!canFill(focus, sourceFocus, spiritType)) continue;
+            var sourceItem = sourceFocus.getItem();
+            if (willOverflow && sourceItem.hasTag() && sourceItem.getTag().contains("hallow")
+                    && sourceItem.getTag().getCompound("hallow").getInt("spirit_count") <= 0) continue;
             new SpiritTransfer(focus, sourceFocus, SpiritAffinityTracker.getTransferDuration(focus.getDiagram().getOwnerName(), spiritType));
         }
     }
@@ -395,12 +471,21 @@ public class HallowHelper {
         return Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
     }
 
-    public static boolean tryDrainHallow(ItemStack item, SpiritType spiritType, int spiritAmount) {
+    public static boolean tryDrainHallow(ItemStack item, Player player, SpiritType spiritType, int spiritAmount) {
         if (!item.hasTag() || !item.getTag().contains("hallow")) return false;
         CompoundTag hallowTag = item.getTag().getCompound("hallow");
         if (spiritType != Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"))) return false;
         int count = hallowTag.getInt("spirit_count");
         if (count < spiritAmount) return false;
+
+        var newItem = item.split(1);
+        if (item.getCount() == 0) {
+            player.getInventory().removeItem(item);
+        }
+        if (!player.addItem(newItem)) {
+            player.drop(newItem, false);
+        }
+        hallowTag = newItem.getTag().getCompound("hallow");
         hallowTag.putInt("spirit_count", count - spiritAmount);
         return true;
     }

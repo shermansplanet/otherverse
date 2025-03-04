@@ -8,6 +8,8 @@ import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.implement.SyncPracticeDataMessage;
 import com.shermansplanet.otherverse.spirits.HallowUpdateMessage;
+import com.shermansplanet.otherverse.spirits.OverflowMessage;
+import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.sympathy.SympathyUpdateMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,7 +47,7 @@ public class OtherverseClientPacketHandler {
             if (!(entity instanceof LivingEntity le)) continue;
             LOGGER.debug("RENDERING BINDING ON REFRESH");
             var msgs = waitingMessages.get(id);
-            if(msgs != null) {
+            if (msgs != null) {
                 for (var msg : msgs) {
                     BindingRenderer.updateBinding(le, msg);
                 }
@@ -72,5 +74,11 @@ public class OtherverseClientPacketHandler {
     public static void handleSympathyPacket(SympathyUpdateMessage message, Supplier<Context> ctx) {
         TransientDiagramData data = DiagramManager.getOrCreateLevelData(message.levelValue, true);
         data.putSympathyPosition(message.key, message.position);
+    }
+
+    public static void handleOverflow(OverflowMessage msg, Supplier<Context> ctx) {
+        var level = Minecraft.getInstance().level;
+        if (level == null || DiagramManager.getDimensionHash(level) != msg.dimension()) return;
+        ShrineHelper.onOverdrawOrOverflow(level, msg.focusPos(), msg.spiritType(), msg.amount(), msg.overdraw(), false);
     }
 }

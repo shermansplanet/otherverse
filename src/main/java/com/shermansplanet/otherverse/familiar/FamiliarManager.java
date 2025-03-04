@@ -1042,7 +1042,7 @@ public class FamiliarManager {
         if (!(player instanceof ServerPlayer sp)) return false;
         if (!hasFamiliarType(player, EntityType.WARDEN)
                 || player.getCooldowns().isOnCooldown(stack.getItem())
-                || !HallowHelper.tryDrainHallow(stack, Spirits.DARK, 13)) {
+                || !HallowHelper.tryDrainHallow(stack, player, Spirits.DARK, 13)) {
             return false;
         }
         var start = player.getEyePosition();

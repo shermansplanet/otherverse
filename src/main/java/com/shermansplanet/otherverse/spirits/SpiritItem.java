@@ -1,6 +1,5 @@
 package com.shermansplanet.otherverse.spirits;
 
-import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
@@ -28,12 +27,11 @@ public class SpiritItem extends Item {
         }
         var tag = item.getOrCreateTag();
         HallowHelper.addFakeEnchantment(tag);
-        CompoundTag hallowTag = new CompoundTag();
+        var hallowTag = new CompoundTag();
         hallowTag.putInt("capacity", 999);
         hallowTag.putInt("spirit_count", 999);
         hallowTag.putString("spirit_type", spiritType.label());
         tag.put("hallow", hallowTag);
-        Otherverse.primeForDimension(level);
         return InteractionResultHolder.pass(item);
     }
 }

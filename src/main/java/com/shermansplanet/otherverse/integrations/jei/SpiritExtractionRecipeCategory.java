@@ -125,7 +125,11 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
             totalColor = ImplementManager.IMPLEMENT_UI_COLOR;
         }
 
-        mc.font.draw(stack, String.valueOf(total), 19, 6, totalColor);
+        var totalString = String.valueOf(total);
+        if(recipe.input.is(OtherverseItems.IDOL.get())){
+            totalString = "";
+        }
+        mc.font.draw(stack, totalString, 19, 6, totalColor);
         if (ImplementManager.durabilities.containsKey(recipe.input)) {
             blockIcon.draw(stack, 110, 1);
             mc.font.draw(stack, String.valueOf(ImplementManager.durabilities.get(recipe.input)),

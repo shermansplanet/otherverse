@@ -10,6 +10,7 @@ import com.shermansplanet.otherverse.diagrams.ChalkItem;
 import com.shermansplanet.otherverse.integrations.jei.SpiritExtractionRecipe;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -18,9 +19,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.Tags.Items;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
@@ -142,6 +145,13 @@ public class SpiritLabeler {
         }
     }
 
+    private static void AddForTag(Item itemRegistry, ArrayList<SpiritAmount> amountsList,
+                                  TagKey<Block> tagKey, SpiritType spiritType, int spiritAmount) {
+        if (!(itemRegistry instanceof BlockItem bi)) return;
+        if (!bi.getBlock().defaultBlockState().is(tagKey)) return;
+        amountsList.add(new SpiritAmount(spiritType, spiritAmount));
+    }
+
     public static void AnalyzeTags() {
         var yieldingSpiritTypes = new SpiritType[]{Spirits.FIRE, Spirits.NETHER};
 
@@ -167,10 +177,13 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Items.STONE, Spirits.EARTH, 3);
             AddForTag(item, spiritAmounts, Items.COBBLESTONE, Spirits.EARTH, 1);
 
+            AddForTag(item, spiritAmounts, ItemTags.LEAVES, Spirits.AIR, 1);
+
+            AddForTag(item, spiritAmounts, ItemTags.CANDLES, Spirits.FIRE, 1);
+
             AddForTag(item, spiritAmounts, Items.GLASS, Spirits.TIME, 1);
             AddForTag(item, spiritAmounts, Items.SAND, Spirits.TIME, 1);
             AddForTag(item, spiritAmounts, ItemTags.CANDLES, Spirits.TIME, 3);
-            AddForTag(item, spiritAmounts, ItemTags.CANDLES, Spirits.FIRE, 1);
 
             AddForTag(item, spiritAmounts, Items.ARMORS, Spirits.PROTECTION,
                     i -> i instanceof ArmorItem a ? (int) ((a.getDefense() + a.getToughness()) * 9) : 1);
@@ -182,6 +195,22 @@ public class SpiritLabeler {
 
             SpiritAmountDeterminer tierFunc = i -> i instanceof TieredItem t ?
                     (int) (t.getTier().getAttackDamageBonus() + t.getTier().getSpeed()) : 7;
+
+            AddForTag(item, spiritAmounts, BlockTags.DIRT, Spirits.OVERWORLD, 1);
+            AddForTag(item, spiritAmounts, Tags.Blocks.GRAVEL, Spirits.OVERWORLD, 1);
+            AddForTag(item, spiritAmounts, Tags.Blocks.SAND, Spirits.OVERWORLD, 1);
+            AddForTag(item, spiritAmounts, Tags.Blocks.SANDSTONE, Spirits.OVERWORLD, 3);
+            AddForTag(item, spiritAmounts, Tags.Blocks.STONE, Spirits.OVERWORLD, 3);
+            AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_STONE, Spirits.OVERWORLD, 3);
+            AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_DEEPSLATE, Spirits.OVERWORLD, 3);
+
+            AddForTag(item, spiritAmounts, Tags.Blocks.ORE_BEARING_GROUND_NETHERRACK, Spirits.NETHER, 3);
+            AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_NETHERRACK, Spirits.OVERWORLD, 3);
+
+            AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.END, 3);
+
+            AddForTag(item, spiritAmounts, BlockTags.CORAL_BLOCKS, Spirits.WATER, 1);
+            AddForTag(item, spiritAmounts, BlockTags.UNDERWATER_BONEMEALS, Spirits.WATER, 1);
 
             AddForTag(item, spiritAmounts, Items.TOOLS_AXES, Spirits.OVERWORLD, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_SHOVELS, Spirits.EARTH, tierFunc);
@@ -213,9 +242,8 @@ public class SpiritLabeler {
             }
 
             int burnTime = ForgeHooks.getBurnTime(item.getDefaultInstance(), null) / 100;
-            if (burnTime > 0) {
-                var st = item == net.minecraft.world.item.Items.LAVA_BUCKET ? Spirits.FIRE : Spirits.PHLOGISTON;
-                spiritAmounts.add(new SpiritAmount(st, burnTime));
+            if (burnTime > 0 && item != net.minecraft.world.item.Items.LAVA_BUCKET) {
+                spiritAmounts.add(new SpiritAmount(Spirits.PHLOGISTON, burnTime));
             }
 
             if (item.isEdible()) {

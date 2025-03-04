@@ -63,6 +63,7 @@ import java.util.*;
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DemesnesManager {
     public static final int MAX_CHOICES = 10;
+    public static final int SPIRITS_FROM_DEMESNE = 3;
 
     public static int getLevelCost(int claimedPerkCount) {
         return (int) Math.pow(1.6f, claimedPerkCount) + 1;

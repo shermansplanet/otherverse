@@ -1,10 +1,12 @@
 package com.shermansplanet.otherverse.diagrams;
 
+import com.ibm.icu.impl.Pair;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.SightManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
+import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
@@ -14,6 +16,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -40,6 +43,8 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Bus.FORGE, value = Dist.CLIENT)
 public class DiagramSightRenderer {
@@ -67,22 +72,69 @@ public class DiagramSightRenderer {
         }
 
         TransientDiagramData levelData = DiagramManager.getOrCreateLevelData(camera.level);
-        if (camera.level.getGameTime() % 16 == 0) {
+        if (camera.level.getGameTime() % 8 == 0) {
             RandomSource random = camera.level.random;
             for (BlockPos pos : levelData.getAllPlacedItemPositions()) {
-                Vec3 v1 = new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-                Vec3 offset = random.nextBoolean()
-                        ? new Vec3(random.nextBoolean() ? -0.6D : 0.6D,
-                        random.nextDouble() - 0.5D, random.nextDouble() - 0.5D)
-                        : new Vec3(random.nextDouble() - 0.5D, random.nextDouble() - 0.5D,
-                        random.nextBoolean() ? -0.6D : 0.6D);
-                v1 = v1.add(offset);
                 CompoundTag tag = levelData.getPlacedItemTag(pos);
                 SpiritType spiritType = Spirits.spiritsByLabel.get(tag.getString("spirit_type"));
-                camera.level.addParticle(
-                        new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
-                                Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
-                        0, 0.04D, 0);
+                var isShrine = tag.contains("shrine");
+                Vec3 v1 = new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+                if (isShrine) {
+                    var emptyDirections = new ArrayList<Direction>();
+                    var hallowDirections = new HashSet<Direction>();
+                    var shrineToMatch = ShrineHelper.getShrine(camera.level, pos);
+                    for (var dir : Direction.values()) {
+                        var newpos = pos.relative(dir);
+                        if (camera.level.isEmptyBlock(newpos) || camera.level.getBlockState(newpos).is(OtherverseBlocks.CHALK_LINE.get())) {
+                            emptyDirections.add(dir);
+                        } else if (ShrineHelper.getShrine(camera.level, newpos) == shrineToMatch) {
+                            hallowDirections.add(dir);
+                        }
+                    }
+                    var validDirectionPairs = new ArrayList<Pair<Direction, Direction>>();
+                    if(hallowDirections.isEmpty()) hallowDirections = new HashSet<>(Arrays.stream(Direction.values()).toList());
+                    for (var dir1 : emptyDirections) {
+                        for (var dir2 : hallowDirections) {
+                            if (dir1.getAxis() == dir2.getAxis()) continue;
+                            validDirectionPairs.add(Pair.of(dir1, dir2));
+                        }
+                    }
+                    var speed = 0.2f;
+                    if (validDirectionPairs.isEmpty()) continue;
+                        /*var dir = emptyDirections.get(random.nextInt(emptyDirections.size()));
+                        v1 = v1.relative(dir, 0.6f);
+                        v1 = v1.add(dir.getStepX() == 0 ? random.nextFloat() - 0.5f : 0,
+                                dir.getStepY() == 0 ? random.nextFloat() - 0.5f : 0,
+                                dir.getStepZ() == 0 ? random.nextFloat() - 0.5f : 0);
+                        camera.level.addParticle(
+                                new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
+                                        Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
+                                dir.getStepX() * speed, dir.getStepY() * speed, dir.getStepZ() * speed);
+                        continue;*/
+
+                    var dirs = validDirectionPairs.get(random.nextInt(validDirectionPairs.size()));
+                    v1 = v1.relative(dirs.first, 0.6f);
+                    var normal = dirs.first.getNormal().cross(dirs.second.getNormal());
+                    var offset = random.nextFloat() * 0.5f;
+                    v1 = v1.add(normal.getX() * offset, normal.getY() * offset, normal.getZ() * offset);
+                    camera.level.addParticle(
+                            new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
+                                    Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
+                            dirs.second.getStepX() * speed, dirs.second.getStepY() * speed, dirs.second.getStepZ() * speed);
+
+                } else {
+                    if (camera.level.getGameTime() % 16 != 0) continue;
+                    Vec3 offset = random.nextBoolean()
+                            ? new Vec3(random.nextBoolean() ? -0.6D : 0.6D,
+                            random.nextDouble() - 0.5D, random.nextDouble() - 0.5D)
+                            : new Vec3(random.nextDouble() - 0.5D, random.nextDouble() - 0.5D,
+                            random.nextBoolean() ? -0.6D : 0.6D);
+                    v1 = v1.add(offset);
+                    camera.level.addParticle(
+                            new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
+                                    Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
+                            0, 0.04D, 0);
+                }
             }
         }
 

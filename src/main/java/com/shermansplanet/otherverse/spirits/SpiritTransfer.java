@@ -15,6 +15,7 @@ import net.minecraft.world.item.Items;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 public class SpiritTransfer extends DiagramProcess {
 
@@ -25,6 +26,8 @@ public class SpiritTransfer extends DiagramProcess {
     }
 
     private static HashMap<String, String> oppositeSpirits = new HashMap<>();
+
+    private boolean firstFrame = true;
 
     static {
         declareOpposites(Spirits.EARTH, Spirits.AIR);
@@ -75,67 +78,106 @@ public class SpiritTransfer extends DiagramProcess {
         SpiritType spiritType = Spirits.spiritsByLabel.get(tag.getCompound("hallow").getString("spirit_type"));
         makeSpiritParticles(spiritType);
 
-        if (remainingDuration > 0) {
+        var firstFrameCheck = firstFrame;
+        firstFrame = false;
+
+        if (!firstFrameCheck && remainingDuration > 0) {
             return;
         }
 
-        abandon();
+        if(!firstFrameCheck) abandon();
 
         ItemStack sourceItem = source.getItem();
         boolean sourceIsHallow = sourceItem.hasTag() && sourceItem.getTag().contains("hallow");
-        LOGGER.debug("DRAINING SOURCE ITEM: " + sourceItem);
 
         var remainingCapacity = sink.getHallowCapacity(spiritType);
 
-        if (remainingCapacity <= 0) {
+        var sinkCanOverflow = sink.isBlock() && ShrineHelper.isOverflowable(spiritType);
+        if (remainingCapacity <= 0 && !sinkCanOverflow) {
+            if(firstFrameCheck) abandon();
             return;
         }
 
         if (!HallowHelper.canFill(sink, source, spiritType)) {
+            if(firstFrameCheck) abandon();
             return;
         }
 
         int transferAmount = 0;
         float coeff = SpiritAffinityTracker.getSpiritYieldCoeff(sink.getDiagram().getOwnerName(), spiritType);
         var isDemesne = false;
+        var effectiveCapacity = sinkCanOverflow ? Integer.MAX_VALUE : remainingCapacity;
+
         if (sourceItem.is(OtherverseItems.DEMESNE_BEACON.get())) {
             var demesne = DemesnesManager.getData((ServerLevel) source.getFocusLevel(), source.getPos());
             if (demesne != null && demesne.favoredSpirits.contains(spiritType.label())) {
-                transferAmount = Math.min((int) (3 * coeff), remainingCapacity);
+                transferAmount = Math.min((int) (DemesnesManager.SPIRITS_FROM_DEMESNE * coeff), effectiveCapacity);
                 isDemesne = true;
             }
         }
 
-        if (!(source.getFocusLevel() instanceof ServerLevel sl)) return;
+        if (!(source.getFocusLevel() instanceof ServerLevel sl)) {
+            if(firstFrameCheck) abandon();
+            return;
+        }
+
+        Consumer<Integer> onTransfer = x -> {
+        };
 
         if (!isDemesne) {
             if (sourceIsHallow) {
-                transferAmount = source.drainHallow(spiritType, remainingCapacity, false);
+                transferAmount = source.drainHallow(spiritType, effectiveCapacity, false, true);
+                onTransfer = x -> source.drainHallow(spiritType, x, false, false);
             } else {
                 if (sourceItem.is(OtherverseItems.IDOL.get())) {
                     var binding = BindingOrFleshbinding.getFromPosition(sl, source.getPos());
-                    if (binding == null) return;
-                    transferAmount = Math.min(remainingCapacity, binding.getHealth() - 1);
-                    binding.changeHealth(-transferAmount, sl);
+                    if (binding == null) {
+                        if(firstFrameCheck) abandon();
+                        return;
+                    }
+                    transferAmount = Math.min(effectiveCapacity, binding.getHealth() - 1);
+                    onTransfer = x -> binding.changeHealth(-x, sl);
                 } else {
                     transferAmount = Math.round(SpiritLabeler.getSpiritsFor(sourceItem.getItem()).get(spiritType) * coeff);
-                    transferAmount = Math.min(remainingCapacity, transferAmount);
-                    source.removeItem();
-                    if (!sourceItem.is(Items.AIR)) {
-                        BlockPos bp = source.getPos();
-                        for (int i = 0; i < 6; i++) {
-                            sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, sourceItem),
-                                    bp.getX() + 0.5, bp.getY() + 0.5, bp.getZ() + 0.5, 1, 0, 0, 0, 0.1D);
+                    transferAmount = Math.min(effectiveCapacity, transferAmount);
+                    onTransfer = x -> {
+                        source.removeItem();
+                        if (!sourceItem.is(Items.AIR)) {
+                            BlockPos bp = source.getPos();
+                            for (int i = 0; i < 6; i++) {
+                                sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, sourceItem),
+                                        bp.getX() + 0.5, bp.getY() + 0.5, bp.getZ() + 0.5, 1, 0, 0, 0, 0.1D);
+                            }
                         }
-                    }
+                    };
                 }
             }
         }
 
-        var remainingAfterFill = sink.fillHallow(spiritType, transferAmount, false);
-        if (remainingAfterFill > 0) {
-            LOGGER.error("HALLOW OVERFILL");
+        if(transferAmount == 0) {
+            if(firstFrameCheck) abandon();
+            return;
         }
+
+        var transferredAmount = sink.fillHallow(spiritType, transferAmount, false, firstFrameCheck);
+
+        if (transferredAmount < transferAmount) {
+            if (sinkCanOverflow) {
+                var overflowAmount = ShrineHelper.onOverdrawOrOverflow(sink.getFocusLevel(), sink.getPos(), spiritType, transferAmount - transferredAmount, false, firstFrameCheck);
+                transferredAmount += overflowAmount;
+            } else {
+                LOGGER.error("HALLOW OVERFILL FOR ILLEGAL SPIRIT TYPE");
+            }
+        }
+
+        if (transferredAmount == 0) {
+            if(firstFrameCheck) abandon();
+            return;
+        }
+
+        if(firstFrameCheck) return;
+
+        onTransfer.accept(transferredAmount);
 
         var player = source.getDiagram().getOwner(sl);
         if (player != null) {

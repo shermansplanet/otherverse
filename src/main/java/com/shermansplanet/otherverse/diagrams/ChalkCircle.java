@@ -305,7 +305,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     }
 
     @Override
-    public int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice) {
+    public int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice, boolean simulate) {
         if (isEmpty()) return 0;
         if (!getItem().hasTag() || !getItem().getTag().contains("hallow")) return 0;
         var hallowTag = getItem().getTag().getCompound("hallow");
@@ -313,13 +313,15 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         var spiritCount = hallowTag.getInt("spirit_count");
         if (mustMeetFullPrice && spiritCount < price) return 0;
         var drained = Math.min(price, spiritCount);
-        hallowTag.putInt("spirit_count", spiritCount - drained);
-        if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
+        if(!simulate) {
+            hallowTag.putInt("spirit_count", spiritCount - drained);
+            if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
+        }
         return drained;
     }
 
     @Override
-    public int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll) {
+    public int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll, boolean simulate) {
         if (isEmpty()) return 0;
         if (!getItem().hasTag() || !getItem().getTag().contains("hallow")) return 0;
         var hallowTag = getItem().getTag().getCompound("hallow");
@@ -328,7 +330,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         var capacity = hallowTag.getInt("capacity");
         var transferAmount = Math.min(amount, Math.max(0, capacity - spiritCount));
         if (mustAcceptAll && transferAmount < amount) return 0;
-        hallowTag.putInt("spirit_count", spiritCount + transferAmount);
+        if(!simulate) hallowTag.putInt("spirit_count", spiritCount + transferAmount);
         if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
         return transferAmount;
     }

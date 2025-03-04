@@ -1,5 +1,6 @@
 {
 	"other" : "minecraft:turtle",
+	"spirit" : "protection",
 	"binding" : {
 		"minecraft:rabbit_foot" : 13
 	},

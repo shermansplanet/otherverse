@@ -170,6 +170,7 @@ public class ItemRendererInjector {
         if (stack.isEmpty() || !stack.hasTag() || !stack.getTag().contains("hallow") || stack.is(Items.TRIDENT)) return;
 
         var spiritType = stack.getTag().getCompound("hallow").getString("spirit_type");
+        if(spiritType.isEmpty()) return;
 
         var model = modelReplacements.computeIfAbsent(stack.getItem(), t -> new HashMap<>())
                 .computeIfAbsent(spiritType, t -> getModel(stack.getItem(), t));

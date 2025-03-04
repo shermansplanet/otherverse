@@ -1,14 +1,8 @@
 package com.shermansplanet.otherverse.spirits;
 
-import com.shermansplanet.otherverse.OtherverseClientPacketHandler;
-import java.util.UUID;
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent.Context;
 
 public class HallowUpdateMessage {
 
@@ -31,6 +25,7 @@ public class HallowUpdateMessage {
       buffer.writeInt(spiritType.id());
       buffer.writeInt(tag.getInt("spirit_count"));
       buffer.writeInt(tag.getInt("capacity"));
+      buffer.writeBoolean(tag.contains("shrine"));
     }
   }
 
@@ -46,6 +41,7 @@ public class HallowUpdateMessage {
     tag.putString("spirit_type", Spirits.spiritsById.get(id).label());
     tag.putInt("spirit_count", buffer.readInt());
     tag.putInt("capacity", buffer.readInt());
+    if(buffer.readBoolean()) tag.putBoolean("shrine", true);
     return new HallowUpdateMessage(pos, tag, lvl);
   }
 }

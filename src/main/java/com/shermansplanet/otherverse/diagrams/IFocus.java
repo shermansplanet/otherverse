@@ -22,7 +22,7 @@ public interface IFocus {
   void setProcess(DiagramProcess process);
 
   DiagramProcess getProcess();
-  int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice);
-  int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll);
+  int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice, boolean simulate);
+  int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll, boolean simulate);
   int getHallowCapacity(SpiritType spiritType);
 }

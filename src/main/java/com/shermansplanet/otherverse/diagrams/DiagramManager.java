@@ -15,6 +15,7 @@ import com.shermansplanet.otherverse.spirits.SavedPracticeData;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -323,6 +324,10 @@ public class DiagramManager {
 
     private static void BlockBreak(Level level, BlockPos pos) {
         TransientDiagramData diagramData = getOrCreateLevelData(level);
+        var shrine = ShrineHelper.getShrine(level, pos);
+        if(shrine != null){
+            ShrineHelper.recalculateShrine(shrine);
+        }
         if (level instanceof ServerLevel sl) {
             BlockChanged(pos, sl);
             if (sl.getBlockState(pos).is(OtherverseBlocks.DEMESNE_BEACON.get())) {
@@ -394,11 +399,14 @@ public class DiagramManager {
                 }
             }
             if (item != null && item.hasTag() && item.getTag().contains("hallow")) {
-                CompoundTag tag = item.getTag().getCompound("hallow");
+                CompoundTag tag = item.getTag().getCompound("hallow").copy();
                 TransientDiagramData levelData = DiagramManager
                         .getOrCreateLevelData(event.getLevel());
                 levelData.putPlacedItemTag(pos, tag);
-                LOGGER.debug(pos + ": " + tag);
+                var st = Spirits.spiritsByLabel.get(tag.getString("spirit_type"));
+                for(var dir : Direction.values()){
+                    ShrineHelper.getShrine(event.getLevel(), pos.relative(dir), st);
+                }
             }
             BlockChanged(pos, sl);
         }
