@@ -11,6 +11,7 @@ import com.shermansplanet.otherverse.implement.SyncPracticeDataMessage;
 import com.shermansplanet.otherverse.integrations.jei.OtherverseJeiPlugin;
 import com.shermansplanet.otherverse.ruins.RuinsManager;
 import com.shermansplanet.otherverse.ruins.ShockLightningMessage;
+import com.shermansplanet.otherverse.spirits.Chronomancy;
 import com.shermansplanet.otherverse.spirits.ColorSpiritMessage;
 import com.shermansplanet.otherverse.spirits.HallowUpdateMessage;
 import com.shermansplanet.otherverse.spirits.OverflowMessage;
@@ -144,11 +145,27 @@ public class OtherversePacketHandler {
                 OverflowMessage.class,
                 OverflowMessage::encode,
                 OverflowMessage::decode,
-                OtherversePacketHandler::handleKnockback
+                OtherversePacketHandler::handleOverflow
+        );
+        OtherversePacketHandler.INSTANCE.registerMessage(
+                id++,
+                Chronomancy.ChronomancyMessage.class,
+                Chronomancy.ChronomancyMessage::encode,
+                Chronomancy.ChronomancyMessage::decode,
+                OtherversePacketHandler::handleChronomancyMessage
         );
     }
 
-    private static void handleKnockback(OverflowMessage msg, Supplier<Context> ctx) {
+    private static void handleChronomancyMessage(Chronomancy.ChronomancyMessage msg, Supplier<Context> ctx) {
+        ctx.get().enqueueWork(() ->
+                // Make sure it's only executed on the physical client
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                        () -> () -> OtherverseClientPacketHandler.chronomancy(msg, ctx))
+        );
+        ctx.get().setPacketHandled(true);
+    }
+
+    private static void handleOverflow(OverflowMessage msg, Supplier<Context> ctx) {
         ctx.get().enqueueWork(() ->
                 // Make sure it's only executed on the physical client
                 DistExecutor.unsafeRunWhenOn(Dist.CLIENT,

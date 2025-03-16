@@ -1,7 +1,7 @@
 package com.shermansplanet.otherverse.familiar;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.spirits.SpiritColorAnalyzer;
@@ -21,6 +21,7 @@ public class MobRetexturer {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static HashMap<ResourceLocation, Palette> paletteCache = new HashMap<>();
     private static HashMap<String, Palette> spiritPaletteCache = new HashMap<>();
+    private static HashMap<String, Palette> spiritPaletteCacheSplit = new HashMap<>();
 
     public static Pair<ResourceLocation, AbstractTexture> makeSpiritVariant(List<ResourceLocation> textureSet, String spiritType) {
         var SIZE = 16;
@@ -36,7 +37,7 @@ public class MobRetexturer {
                 return null;
             }
 
-            var spiritPalettes = spiritPaletteCache.computeIfAbsent(spiritType, MobRetexturer::paletteFromSpirit);
+            var spiritPalettes = spiritPaletteCacheSplit.computeIfAbsent(spiritType, MobRetexturer::paletteFromSpirit);
             var itemPalettes = new Palette(Collections.singleton(image), true);
 
             for (var paletteIndex = 0; paletteIndex < itemPalettes.palettes.size(); paletteIndex++) {
@@ -89,6 +90,24 @@ public class MobRetexturer {
         var image = getNativeImage(new ResourceLocation(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
         return new Palette(Collections.singleton(image), true);
     }
+    private static Palette paletteFromSpiritSplit(String s) {
+        var image = getNativeImage(new ResourceLocation(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
+        return new Palette(Collections.singleton(image), false);
+    }
+
+    public static ResourceLocation retextureMob(ResourceLocation originalTextureLoc, String spiritType) {
+        LOGGER.debug("MAKING SPLIT PALETTE : " + spiritType);
+        var spiritPalettes = spiritPaletteCache.computeIfAbsent(spiritType, MobRetexturer::paletteFromSpiritSplit);
+        var originalTexture = getNativeImage(originalTextureLoc);
+        var originalPalettes = new Palette(Collections.singleton(originalTexture));
+        var rawTex = MakeTexture(originalTexture, originalPalettes, spiritPalettes);
+        var newTexLoc = new ResourceLocation(Otherverse.MODID,
+                "skin_" + originalTextureLoc.getNamespace() + "_" + originalTextureLoc.getPath() + "_" + spiritType);
+        DynamicTexture newTex = new DynamicTexture(rawTex);
+        var textureManager = Minecraft.getInstance().getTextureManager();
+        textureManager.register(newTexLoc, newTex);
+        return newTexLoc;
+    }
 
     public static boolean retexture(Collection<ResourceLocation> textureLocations, AbstractClientPlayer player) {
         // GET MOB TEXTURE
@@ -102,7 +121,7 @@ public class MobRetexturer {
         }
         var palette = new Palette(textures);
         ((ITextureSetter) player).setTexture(null);
-        var rawTex = MakeTexture(player, palette);
+        var rawTex = MakePlayerTexture(player, palette);
         if (rawTex == null) {
             LOGGER.error("TEXTURE GENERATION FAILED");
             return false;
@@ -131,30 +150,35 @@ public class MobRetexturer {
         return texture;
     }
 
-    private static NativeImage MakeTexture(AbstractClientPlayer player, Palette mobPalette) {
+    private static NativeImage MakePlayerTexture(AbstractClientPlayer player, Palette mobPalette) {
         var playerTexture = getPlayerTexture(player);
         if (playerTexture == null) return null;
         var playerPalettes = new Palette(Collections.singleton(playerTexture));
         paletteCache.put(player.getSkinTextureLocation(), playerPalettes);
-        NativeImage tex = new NativeImage(playerTexture.getWidth(), playerTexture.getHeight(), true);
+        return MakeTexture(playerTexture, playerPalettes, mobPalette);
+    }
+
+    private static NativeImage MakeTexture(NativeImage originalTex, Palette originalPalettes, Palette targetPalette) {
+        NativeImage tex = new NativeImage(originalTex.getWidth(), originalTex.getHeight(), true);
         var r = new Random();
         var debug = false;
-        for (var paletteIndex = 0; paletteIndex < playerPalettes.palettes.size(); paletteIndex++) {
-            var playerPalette = playerPalettes.palettes.get(paletteIndex);
-            var pixelCount = playerPalette.size();
-            if (debug) {
-                var randomColor = (r.nextInt(256)) | ((r.nextInt(256) << 8) & 0xff00) | ((r.nextInt(256) << 16) & 0xff0000) | 0xff000000;
-                for (var i = 0; i < pixelCount; i++) {
-                    var playerPixel = playerPalette.get(i);
-                    tex.setPixelRGBA(playerPixel.x, playerPixel.y, randomColor);
+        if (debug) {
+            for (var x = 0; x < originalTex.getWidth(); x++) {
+                for (var y = 0; y < originalTex.getHeight(); y++) {
+                    var randomColor = (r.nextInt(256)) | ((r.nextInt(256) << 8) & 0xff00) | ((r.nextInt(256) << 16) & 0xff0000) | 0xff000000;
+                    tex.setPixelRGBA(x, y, randomColor);
                 }
-            } else {
-                var eligiblePalettes = mobPalette.palettes.stream()
-                        .filter(x -> (x.size() > 8) == (playerPalette.size() > 8)).toList();
-                if (eligiblePalettes.isEmpty()) eligiblePalettes = mobPalette.palettes;
+            }
+        } else {
+            for (var paletteIndex = 0; paletteIndex < originalPalettes.palettes.size(); paletteIndex++) {
+                var originalPalette = originalPalettes.palettes.get(paletteIndex);
+                var pixelCount = originalPalette.size();
+                var eligiblePalettes = targetPalette.palettes.stream()
+                        .filter(x -> (x.size() > 8) == (originalPalette.size() > 8)).toList();
+                if (eligiblePalettes.isEmpty()) eligiblePalettes = targetPalette.palettes;
                 var correspondingPalette = eligiblePalettes.get(paletteIndex % eligiblePalettes.size());
                 for (var i = 0; i < pixelCount; i++) {
-                    var playerPixel = playerPalette.get(i);
+                    var playerPixel = originalPalette.get(i);
                     var pixelIndex = Mth.floor(i * correspondingPalette.size() / (float) pixelCount);
                     var mobPixel = correspondingPalette.get(pixelIndex);
                     var pixelInt = (mobPixel.r) | ((mobPixel.g << 8) & 0xff00) | ((mobPixel.b << 16) & 0xff0000) | 0xff000000;
@@ -201,13 +225,27 @@ public class MobRetexturer {
 
         public ArrayList<ArrayList<Pixel>> palettes = new ArrayList<>();
 
+        public void printInfo(String name) {
+            LOGGER.debug(name);
+            LOGGER.debug(palettes.size() + " PALETTES");
+            for(var palette : palettes) {
+                LOGGER.debug(palette.size() + " PIXELS");
+            }
+        }
+
         public record Pixel(int r, int g, int b, int x, int y) {
             public double getPerceptualBrightnessSqr() {
                 return 0.299 * r * r + 0.587 * g * g + 0.114 * b * b;
             }
+
+            public String makStr() {
+                return "(" + r + ", " + g + ", " + b + ")";
+            }
         }
 
         private static final float CONNECTED_CUTOFF = 42;
+        private static final float CONNECTED_CUTOFF_MEDIUM = 60;
+        private static final float CONNECTED_CUTOFF_SMALL = 15;
         private static final float UNCONNECTED_CUTOFF = 30;
 
         private static final int[][] directions = new int[][]{
@@ -222,7 +260,7 @@ public class MobRetexturer {
         }
 
         public Palette(Collection<NativeImage> images) {
-            new Palette(images, false);
+            this(images, false);
         }
 
         public Palette(Collection<NativeImage> images, boolean isForItem) {
@@ -230,6 +268,8 @@ public class MobRetexturer {
             for (var image : images) {
                 var WIDTH = isForItem ? Math.min(image.getWidth(), image.getHeight()) : image.getWidth();
                 var HEIGHT = isForItem ? Math.min(image.getWidth(), image.getHeight()) : image.getHeight();
+                var cutoff = isForItem || HEIGHT > 32 ? CONNECTED_CUTOFF : HEIGHT > 16 ? CONNECTED_CUTOFF_MEDIUM : CONNECTED_CUTOFF_SMALL;
+                cutoff *= cutoff;
                 var searchedPixels = new HashSet<Pixel>();
                 var pixels = new Pixel[WIDTH][HEIGHT];
                 for (var x = 0; x < WIDTH; x++) {
@@ -262,7 +302,7 @@ public class MobRetexturer {
                                 if (newY < 0 || newY >= HEIGHT) continue;
                                 var otherPixel = pixels[newX][newY];
                                 if (otherPixel == null || searchedPixels.contains(otherPixel)) continue;
-                                if (!isForItem && colorDistanceSqr(pixel, otherPixel) > CONNECTED_CUTOFF * CONNECTED_CUTOFF)
+                                if (!isForItem && colorDistanceSqr(pixel, otherPixel) > cutoff)
                                     continue;
                                 toSearch.add(otherPixel);
                                 searchedPixels.add(otherPixel);
@@ -320,6 +360,8 @@ public class MobRetexturer {
             for (var palette : palettes) {
                 palette.sort(Comparator.comparingInt(p -> -p.y));
                 palette.sort(Comparator.comparingDouble(Pixel::getPerceptualBrightnessSqr));
+                LOGGER.debug("COUNT: " + palette.size());
+                LOGGER.debug("FROM " + palette.get(0).makStr() + " TO " + palette.get(palette.size()-1).makStr());
             }
             palettes.sort((a, b) -> Integer.compare(b.size(), a.size()));
         }

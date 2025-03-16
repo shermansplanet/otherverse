@@ -222,7 +222,12 @@ public class BindingRenderer {
             }
             le.level.playSound(Minecraft.getInstance().player, le, SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 1, 1);
         } else if (updateType == BindingUpdateMessage.BindingUpdateType.CONTRACT) {
-            contractEntities.add(le.getUUID());
+            LOGGER.debug("CONSTRUCT TYPE: " + update.data.getString("construct_type"));
+            if(update.data.contains("construct_type")){
+                ReskinManager.reskinMob(le, update.data.getString("construct_type"));
+            }else {
+                contractEntities.add(le.getUUID());
+            }
             if (silent) {
                 return;
             }

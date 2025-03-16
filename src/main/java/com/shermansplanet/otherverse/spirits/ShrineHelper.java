@@ -16,12 +16,16 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.item.BoneMealItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -449,6 +453,97 @@ public class ShrineHelper {
                 return ShrineShape.CENTERED;
             }
         });
+        overflowBehaviors.put(Spirits.TECH, new OverflowBehavior() {
+            @Override
+            public boolean canRun(int amount, boolean isOverdraw) {
+                return !isOverdraw && amount >= 3;
+            }
+
+            @Override
+            public boolean affectsIndividualBlocks() {
+                return false;
+            }
+
+            @Override
+            public ShrineShape getShape() {
+                return ShrineShape.CENTERED;
+            }
+
+            @Override
+            public boolean multipleTargets() {
+                return true;
+            }
+
+            @Override
+            public int overflowEntity(Entity e, int amount, Shrine shrine, boolean simulate) {
+                if (!(e instanceof Mob mob)) return 0;
+                if (!Objects.equals(mob.getPersistentData().getString("construct_type"), Spirits.TECH.label()))
+                    return 0;
+                var effect = mob.getEffect(MobEffects.MOVEMENT_SPEED);
+                var amplifier = effect == null ? 0 : effect.getAmplifier() + 1;
+                var cost = (int) Math.pow(3, amplifier + 1);
+                if (amount < cost) return 0;
+                if (!simulate) mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 30, amplifier));
+                return cost;
+            }
+        });
+        overflowBehaviors.put(Spirits.FLESH, new OverflowBehavior() {
+            @Override
+            public boolean canRun(int amount, boolean isOverdraw) {
+                return !isOverdraw && amount >= 3;
+            }
+
+            @Override
+            public boolean affectsIndividualBlocks() {
+                return false;
+            }
+
+            @Override
+            public ShrineShape getShape() {
+                return ShrineShape.CENTERED;
+            }
+
+            @Override
+            public boolean multipleTargets() {
+                return true;
+            }
+
+            @Override
+            public int overflowEntity(Entity e, int amount, Shrine shrine, boolean simulate) {
+                if (!(e instanceof Mob mob)) return 0;
+                if (!Objects.equals(mob.getPersistentData().getString("construct_type"), Spirits.FLESH.label()))
+                    return 0;
+                var effect = mob.getEffect(MobEffects.DAMAGE_BOOST);
+                var amplifier = effect == null ? 0 : effect.getAmplifier() + 1;
+                var cost = (int) Math.pow(3, amplifier + 1);
+                if (amount < cost) return 0;
+                if (!simulate) mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 30, amplifier));
+                return cost;
+            }
+        });
+        overflowBehaviors.put(Spirits.NATURE, new OverflowBehavior() {
+            public boolean canRun(int amount, boolean isOverdraw) {
+                return !isOverdraw && amount >= 33;
+            }
+
+            public ShrineShape getShape() {
+                return ShrineShape.ABOVE;
+            }
+
+            public boolean multipleTargets() {
+                return true;
+            }
+
+            @Override
+            public int overflowBlock(BlockPos pos, Level level, int amount, boolean simulate) {
+                if (!(level.getBlockState(pos).getBlock() instanceof BonemealableBlock)) return 0;
+                if (!simulate) {
+                    if (!BoneMealItem.applyBonemeal(ItemStack.EMPTY, level, pos, null)) return 0;
+                    if (!level.isClientSide) level.levelEvent(1505, pos, 0);
+                }
+                return 33;
+            }
+        });
     }
 
     public static class Shrine {
@@ -475,7 +570,7 @@ public class ShrineHelper {
                 data.putPlacedItemTag(pos, tag);
             }
 
-            if (!overflowBehaviors.containsKey(st) || !overflowBehaviors.get(st).affectsIndividualBlocks()) return;
+            if (!overflowBehaviors.containsKey(st)) return;
 
             targetPositions = new ArrayList<>();
             var r = range.radius + 0.01f;
@@ -507,6 +602,7 @@ public class ShrineHelper {
                 shrinesByChunk.computeIfAbsent(level, x -> new HashMap<>())
                         .computeIfAbsent(chunkPos, x -> new HashSet<>())
                         .add(this);
+                LOGGER.debug("ADDING " + st.label() + " SHRINE TO " + chunkPos);
             }
 
             targetPositions.sort(Comparator.comparingDouble(
@@ -600,8 +696,13 @@ public class ShrineHelper {
         if (hasNewShrine) {
             for (var chunkPos : shrine.chunkPositions) {
                 var set = shrinesByChunk.get(shrine.level).get(chunkPos);
-                if (set == null) continue;
+                if (set == null || set.isEmpty()) continue;
                 set.remove(shrine);
+                for (var otherShrine : new HashSet<>(set)) {
+                    if (otherShrine == shrine) continue;
+                    recalculateShrine(otherShrine);
+                }
+                LOGGER.debug("REMOVING " + shrine.st.label() + " SHRINE FROM RECALCULATE " + chunkPos);
             }
         }
         return hasNewShrine;
@@ -613,13 +714,17 @@ public class ShrineHelper {
         var data = DiagramManager.getOrCreateLevelData(level);
         var tag = data.getPlacedItemTag(pos);
         if (tag == null || !tag.contains("shrine")) return null;
-        return getShrine(level, pos, Spirits.spiritsByLabel.get(tag.getString("spirit_type")));
+        return getShrineInternal(level, pos, Spirits.spiritsByLabel.get(tag.getString("spirit_type")), data);
     }
 
     public static Shrine getShrine(Level level, BlockPos pos, SpiritType st) {
         var data = DiagramManager.getOrCreateLevelData(level);
         var tag = data.getPlacedItemTag(pos);
         if (tag == null || !tag.contains("shrine")) return null;
+        return getShrineInternal(level, pos, st, data);
+    }
+
+    private static Shrine getShrineInternal(Level level, BlockPos pos, SpiritType st, TransientDiagramData data) {
         var blockPositions = getAllHallows(pos, st, data);
         var shrinesByLevel = shrinesByPosition.computeIfAbsent(level, x -> new HashMap<>());
         if (blockPositions.isEmpty()) {
@@ -629,6 +734,7 @@ public class ShrineHelper {
                     var set = shrinesByChunk.get(level).get(chunkPos);
                     if (set == null) continue;
                     set.remove(shrine);
+                    LOGGER.debug("REMOVING " + shrine.st.label() + " SHRINE FROM GET " + chunkPos);
                 }
                 shrinesByLevel.remove(pos);
             }
@@ -712,7 +818,7 @@ public class ShrineHelper {
                     if (!overflowBehavior.canRun(remainingAmount, overdraw)) break;
                 }
             }
-            shrine.markActive(level);
+            if (!simulate) shrine.markActive(level);
             return remainingAmount;
         }
 

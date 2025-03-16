@@ -75,7 +75,7 @@ public class BlockFocus implements IFocus {
         if (hallowTag != null) {
             var newHallowTag = hallowTag.copy();
             var spiritType = Spirits.spiritsByLabel.get(newHallowTag.getString("spirit_type"));
-            var countcap = HallowHelper.getShrineSpiritCountAndCapacity(this, spiritType);
+            var countcap = HallowHelper.getShrineSpiritCountAndCapacity(level, blockPos, spiritType);
             newHallowTag.putInt("spirit_count", countcap.first);
             newHallowTag.putInt("capacity", countcap.second);
             stack.getOrCreateTag().put("hallow", newHallowTag);
@@ -135,88 +135,12 @@ public class BlockFocus implements IFocus {
 
     @Override
     public int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice, boolean simulate) {
-        var data = DiagramManager.getOrCreateLevelData(level);
-        var hallowPositions = ShrineHelper.getAllHallows(getPos(), spiritType, data);
-        if (hallowPositions.isEmpty()) return 0;
-
-        var drainPositions = new HashMap<BlockPos, Integer>();
-
-        var remainingPrice = price;
-        for (BlockPos sourcePos : hallowPositions) {
-            if (remainingPrice > 0) {
-                var ht = data.getPlacedItemTag(sourcePos);
-                var count = ht.getInt("spirit_count");
-                count = Math.min(count, remainingPrice);
-                drainPositions.put(sourcePos, count);
-                remainingPrice -= count;
-            }
-        }
-
-        if (remainingPrice == price) {
-            if (price == Integer.MAX_VALUE) {
-                return 0;
-            }
-            return ShrineHelper.onOverdrawOrOverflow(level, blockPos, spiritType, price, true, simulate);
-        }
-
-        if (mustMeetFullPrice && remainingPrice > 0) {
-            return 0;
-        }
-
-        if(!simulate) {
-            for (var drainPosition : drainPositions.entrySet()) {
-                var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
-                shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") - drainPosition.getValue());
-                data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
-                var otherFocus = data.allBlockFoci.get(drainPosition.getKey());
-                if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
-                DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
-            }
-        }
-
-        return price - remainingPrice;
+        return HallowHelper.drainBlockHallow(level, blockPos, spiritType, price, mustMeetFullPrice, simulate);
     }
 
     @Override
     public int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll, boolean simulate) {
-        var data = DiagramManager.getOrCreateLevelData(level);
-        var hallowPositions = ShrineHelper.getAllHallows(getPos(), spiritType, data);
-        if (hallowPositions.isEmpty()) return 0;
-
-        var drainPositions = new HashMap<BlockPos, Integer>();
-
-        var remainingAmount = amount;
-        for (BlockPos sourcePos : hallowPositions) {
-            if (remainingAmount > 0) {
-                var ht = data.getPlacedItemTag(sourcePos);
-                var remainingCapacity = Math.max(0, ht.getInt("capacity") - ht.getInt("spirit_count"));
-                var transferAmount = Math.min(remainingCapacity, remainingAmount);
-                drainPositions.put(sourcePos, transferAmount);
-                remainingAmount -= transferAmount;
-            }
-        }
-
-        if(!simulate && remainingAmount < amount){
-            for (BlockPos sourcePos : hallowPositions) {
-                var otherFocus = data.allBlockFoci.get(sourcePos);
-                if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
-                DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
-            }
-        }
-
-        if (mustAcceptAll && remainingAmount > 0) {
-            return 0;
-        }
-
-        if(!simulate) {
-            for (var drainPosition : drainPositions.entrySet()) {
-                var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
-                shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") + drainPosition.getValue());
-                data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
-            }
-        }
-
-        return amount - remainingAmount;
+        return HallowHelper.fillBlockHallow(level, blockPos, spiritType, amount, mustAcceptAll, simulate);
     }
 
     @Override

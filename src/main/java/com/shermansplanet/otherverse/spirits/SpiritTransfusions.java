@@ -127,6 +127,12 @@ public class SpiritTransfusions {
                 Blocks.LIME_CARPET, Blocks.GREEN_CARPET, Blocks.CYAN_CARPET, Blocks.LIGHT_BLUE_CARPET,
                 Blocks.BLUE_CARPET, Blocks.PURPLE_CARPET, Blocks.MAGENTA_CARPET, Blocks.PINK_CARPET
         });
+        registerDyableBlocks(new Block[]{
+                Blocks.WHITE_BED, Blocks.LIGHT_GRAY_BED, Blocks.GRAY_BED, Blocks.BLACK_BED,
+                Blocks.BROWN_BED, Blocks.RED_BED, Blocks.ORANGE_BED, Blocks.YELLOW_BED,
+                Blocks.LIME_BED, Blocks.GREEN_BED, Blocks.CYAN_BED, Blocks.LIGHT_BLUE_BED,
+                Blocks.BLUE_BED, Blocks.PURPLE_BED, Blocks.MAGENTA_BED, Blocks.PINK_BED
+        });
 
         registerDyableBlocks(new Block[]{
                 Blocks.WHITE_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE, Blocks.GRAY_CONCRETE,

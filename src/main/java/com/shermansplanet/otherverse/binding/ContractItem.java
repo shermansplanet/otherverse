@@ -41,11 +41,14 @@ public class ContractItem extends Item {
 
     private boolean tryTameContract(Mob mob, ItemStack stack, Player player) {
         if (!(mob.getLevel() instanceof ServerLevel sl)) return false;
-        if ((!(mob instanceof TamableAnimal ta) || !ta.isOwnedBy(player))
-                && (!(mob instanceof AbstractHorse horse) || horse.getOwnerUUID() != player.getUUID())) return false;
-        var demesne = DemesnesManager.getData(sl, mob.blockPosition());
-        if (demesne == null) return false;
-        if (demesne.getPerkLevel(DemesnesManager.DemesnePerk.COLLAR) == 0) return false;
+        if(!mob.getPersistentData().contains("construct_type")) {
+            if ((!(mob instanceof TamableAnimal ta) || !ta.isOwnedBy(player))
+                    && (!(mob instanceof AbstractHorse horse) || horse.getOwnerUUID() != player.getUUID()))
+                return false;
+            var demesne = DemesnesManager.getData(sl, mob.blockPosition());
+            if (demesne == null) return false;
+            if (demesne.getPerkLevel(DemesnesManager.DemesnePerk.COLLAR) == 0) return false;
+        }
         mob.getPersistentData().put("unbound_contract", stack.getTag().getCompound("contract"));
         BindingManager.applyUnboundContract(mob, true);
         return true;

@@ -80,6 +80,10 @@ public class OtherverseItems {
             () -> new WritItem(new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
     public static final RegistryObject<Item> ESCAPE_ROPE = ITEMS.register("escape_rope",
             () -> new EscapeRopeItem(new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+    public static final RegistryObject<Item> SPINDLE_BLOODY = ITEMS.register("spindle_bloody",
+            () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> SPIRIT_TABLET = ITEMS.register("spirit_tablet",
+            () -> new Item(new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
 
     public static final RegistryObject<Item> PLUM_BRICKS_ITEM = ITEMS.register("plum_bricks",
             () -> new BlockItem(OtherverseBlocks.PLUM_BRICKS.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));

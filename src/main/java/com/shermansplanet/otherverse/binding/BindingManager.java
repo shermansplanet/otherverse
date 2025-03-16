@@ -101,7 +101,6 @@ public class BindingManager {
     }
 
     public static boolean tryBindMob(Mob mob, BlockFocus focus, Level level) {
-        LOGGER.debug("TRYING TO BIND " + mob.getType());
         boolean rebinding = false;
         var data = DiagramManager.getOrCreateLevelData(level);
         var bindingsByPosition = data.bindingsByPosition;
@@ -118,6 +117,9 @@ public class BindingManager {
                 oldBinding.unload();
             }
             focus.mostRecentMob = null;
+            return false;
+        }
+        if(mob.getPersistentData().contains("construct_type")){
             return false;
         }
         if (oldBinding != null) {
@@ -139,7 +141,6 @@ public class BindingManager {
         }
         List<ItemStack> influenceItems = new ArrayList<>();
         CompoundTag contract = null;
-        LOGGER.debug("GATHERING INFLUENCE");
         for (var influence : focus.getDiagram().influences.entrySet()) {
             if (!influence.getValue().equals(focus.getPos())) {
                 continue;
@@ -164,7 +165,6 @@ public class BindingManager {
                 }
             }
         }
-        LOGGER.debug(influenceItems.size() + " INFLUENCE ITEMS FOUND");
         if (influenceItems.isEmpty() || !MobBindingInfluenceUtils.CanBeBound(mob, influenceItems, focus)) {
             if (rebinding) {
                 LOGGER.debug("BREAKING BINDING BECAUSE REBINDING");
@@ -172,18 +172,17 @@ public class BindingManager {
             }
             return false;
         }
+        LOGGER.debug("BINDING");
         if (rebinding) {
-            LOGGER.debug("REBINDING");
             return true;
         }
         if (mob.level instanceof ServerLevel sl) {
-            LOGGER.debug("DECODING DIMENSION HASH " + DiagramManager.getDimensionHash(sl) + " FROM " + sl.dimension());
             BindingInfo binding = new BindingInfo(UUID.randomUUID(), focus.getPos(), mob, sl, new CompoundTag(), DiagramManager.getDimensionHash(sl));
             mob.setPersistenceRequired();
             mob.getPersistentData().putUUID("bindingId", binding.bindingId);
             binding.register();
+            LOGGER.debug("APPLYING BINDING");
             applyBinding(binding, mob, false);
-            LOGGER.debug("CREATED BINDING " + binding.bindingId);
             if (contract != null) {
                 ContractManager.applyContract(contract, mob, false);
             }
@@ -241,7 +240,6 @@ public class BindingManager {
             var id = event.getEntity().getId();
             var msg = OtherverseClientPacketHandler.waitingMessages.get(id);
             if (msg != null) {
-                LOGGER.debug("RENDERING BINDING ON ENTITY JOIN");
                 for(var m : msg) {
                     BindingRenderer.updateBinding(mob, m);
                 }
@@ -265,7 +263,7 @@ public class BindingManager {
             mob.goalSelector.addGoal(-1, boundGoal);
         }
         OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, !fromClick));
+                new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), !fromClick));
     }
 
     @SubscribeEvent
@@ -460,7 +458,7 @@ public class BindingManager {
             return;
         }
 
-        if (!(target.getPersistentData().hasUUID("bindingId") || target.getPersistentData().hasUUID("unbound_contract"))
+        if (!(target.getPersistentData().hasUUID("bindingId") || target.getPersistentData().contains("unbound_contract"))
                 || !(target instanceof Mob mob)) return;
 
         if (item.is(OtherverseItems.CINNABAR_BLOCK.get())) {

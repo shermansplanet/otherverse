@@ -28,6 +28,7 @@
     "item.otherverse.spindle_red": "Red Spindle",
     "item.otherverse.spindle_white": "White Spindle",
     "item.otherverse.spindle_yellow": "Yellow Spindle",
+    "item.otherverse.spindle_bloody": "Bloody Spindle",
 
     "item.otherverse.chalk": "Chalk",
     "block.otherverse.chalk_line": "Chalk",
@@ -126,5 +127,7 @@
     "item.otherverse.spirit_blue": "Blue Spirits",
     "item.otherverse.spirit_purple": "Purple Spirits",
     "item.otherverse.spirit_magenta": "Magenta Spirits",
-    "item.otherverse.spirit_pink": "Pink Spirits"
+    "item.otherverse.spirit_pink": "Pink Spirits",
+
+    "item.otherverse.spirit_tablet": "Spirit Tablet"
 }

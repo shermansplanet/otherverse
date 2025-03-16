@@ -31,7 +31,6 @@ public class GrowArchitectureProcess extends DiagramProcess {
 
     public GrowArchitectureProcess(BlockFocus beaconFocus, DemesnesManager.ArchitectureInventory inventory, ArrayList<BlockPos> webPositions, ClaimedDemesneData demesne) {
         super(beaconFocus, inventory.focus(), -1); // beacon sink, inventory source - because sources can only have one process
-        LOGGER.debug("NEW PROCESS");
         this.inventory = inventory;
         var p1 = webPositions.get(0);
         var p2 = webPositions.get(1);
@@ -47,14 +46,12 @@ public class GrowArchitectureProcess extends DiagramProcess {
     @Override
     public void abandon() {
         super.abandon();
-        LOGGER.debug("GROWTH ABANDONED");
         inventory.pos().trySendUpdate(level, dx, dy, dz, bounds, false);
     }
 
     @Override
     public void tick() {
         if (!hasSentUpdate) {
-            LOGGER.debug("TRYING TO SEND UPDATE");
             hasSentUpdate = inventory.pos().trySendUpdate(level, dx, dy, dz, bounds, true);
         }
         var minPastePos = inventory.pos().getPos(level);

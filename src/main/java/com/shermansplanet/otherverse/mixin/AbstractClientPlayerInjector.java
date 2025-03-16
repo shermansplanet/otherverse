@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,12 +29,14 @@ public class AbstractClientPlayerInjector extends Player implements ITextureSett
 
     @Override
     public boolean isSpectator() {
-        return false;
+        PlayerInfo playerinfo = Minecraft.getInstance().getConnection().getPlayerInfo(this.getGameProfile().getId());
+        return playerinfo != null && playerinfo.getGameMode() == GameType.SPECTATOR;
     }
 
     @Override
     public boolean isCreative() {
-        return false;
+        PlayerInfo playerinfo = Minecraft.getInstance().getConnection().getPlayerInfo(this.getGameProfile().getId());
+        return playerinfo != null && playerinfo.getGameMode() == GameType.CREATIVE;
     }
 
     @Inject(method = "getSkinTextureLocation", at = @At("HEAD"), cancellable = true)

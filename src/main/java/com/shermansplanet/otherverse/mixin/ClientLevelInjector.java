@@ -1,11 +1,13 @@
 package com.shermansplanet.otherverse.mixin;
 
 import com.shermansplanet.otherverse.demesnes.DemesnesRenderer;
+import com.shermansplanet.otherverse.spirits.Chronomancy;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -13,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Supplier;
@@ -20,6 +23,13 @@ import java.util.function.Supplier;
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelInjector extends Level {
     private boolean wasInDemesne = false;
+
+    @Inject(method = "tickNonPassenger", at = @At("HEAD"), cancellable = true)
+    public void tickNonPassenger(Entity e, CallbackInfo ci) {
+        if (Chronomancy.frozenEntitiesForClient.contains(e)) {
+            ci.cancel();
+        }
+    }
 
     protected ClientLevelInjector(WritableLevelData p_220352_, ResourceKey<Level> p_220353_, Holder<DimensionType> p_220354_, Supplier<ProfilerFiller> p_220355_, boolean p_220356_, boolean p_220357_, long p_220358_, int p_220359_) {
         super(p_220352_, p_220353_, p_220354_, p_220355_, p_220356_, p_220357_, p_220358_, p_220359_);

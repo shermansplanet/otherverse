@@ -21,25 +21,25 @@ import java.util.List;
 @Mixin(BlockBehaviour.class)
 public abstract class BlockPlaceInjector {
 
-  @Inject(method = "getDrops", at = @At("RETURN"))
-  protected void onGetDrops(BlockState blockState, LootContext.Builder context,
-      CallbackInfoReturnable<List<ItemStack>> ci) {
-    BlockPos pos = new BlockPos(context.getParameter(LootContextParams.ORIGIN));
-    TransientDiagramData diagramData = DiagramManager.getOrCreateLevelData(context.getLevel());
-    CompoundTag tag = diagramData.getPlacedItemTag(pos);
-    if (tag == null) {
-      return;
+    @Inject(method = "getDrops", at = @At("RETURN"))
+    protected void onGetDrops(BlockState blockState, LootContext.Builder context,
+                              CallbackInfoReturnable<List<ItemStack>> ci) {
+        BlockPos pos = new BlockPos(context.getParameter(LootContextParams.ORIGIN));
+        TransientDiagramData diagramData = DiagramManager.getOrCreateLevelData(context.getLevel());
+        CompoundTag tag = diagramData.getPlacedItemTag(pos);
+        if (tag == null) {
+            return;
+        }
+        diagramData.removePlacedItemTag(pos);
+        Item itemToMatch = blockState.getBlock().asItem();
+        List<ItemStack> drops = ci.getReturnValue();
+        for (ItemStack drop : drops) {
+            if (drop.is(itemToMatch)) {
+                tag.remove("shrine");
+                drop.getOrCreateTag().put("hallow", tag);
+                HallowHelper.addFakeEnchantment(drop.getTag());
+                break;
+            }
+        }
     }
-    diagramData.removePlacedItemTag(pos);
-    Item itemToMatch = blockState.getBlock().asItem();
-    List<ItemStack> drops = ci.getReturnValue();
-    for (ItemStack drop : drops) {
-      if (drop.is(itemToMatch)) {
-        tag.remove("shrine");
-        drop.getOrCreateTag().put("hallow", tag);
-        HallowHelper.addFakeEnchantment(drop.getTag());
-        break;
-      }
-    }
-  }
 }

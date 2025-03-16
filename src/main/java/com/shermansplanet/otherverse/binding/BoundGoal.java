@@ -210,7 +210,7 @@ public class BoundGoal extends Goal {
             if(isTamed && cooldown == 1000){
                 cooldown = 0;
                 OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                        new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, true));
+                        new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), true));
             }
         }
         if (mob.level instanceof ServerLevel sl) {

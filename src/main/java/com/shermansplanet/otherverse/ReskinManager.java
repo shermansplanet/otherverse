@@ -55,7 +55,7 @@ public class ReskinManager {
         var mobRenderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(le);
         var texLoc = mobRenderer.getTextureLocation(le);
         sightSkins.put(player.getUUID(), List.of(texLoc));
-        if(SightManager.shouldRenderSight()) {
+        if (SightManager.shouldRenderSight()) {
             cachedSkinUpdates.put(player.getUUID(), List.of(texLoc));
         }
     }
@@ -72,5 +72,25 @@ public class ReskinManager {
             cachedSkinUpdates.remove(id);
             cachedSkinUpdates.put(id, SightManager.shouldRenderSight() ? sightSkins.get(id) : alwaysSkins.getOrDefault(id, new ArrayList<>()));
         }
+    }
+
+    private static final HashMap<ResourceLocation, HashMap<String, ResourceLocation>> mobSkinCache = new HashMap<>();
+    private static final HashMap<LivingEntity, ResourceLocation> reskinnedMobs = new HashMap<>();
+
+    public static void reskinMob(LivingEntity le, String spiritType) {
+        var originalTexture = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(le).getTextureLocation(le);
+        //ResourceLocation actualPath = new ResourceLocation(originalTexture.getNamespace(), "textures/" + originalTexture.getPath() + ".png");
+        var newTexture = mobSkinCache.computeIfAbsent(originalTexture, x -> new HashMap<>())
+                .computeIfAbsent(spiritType, x -> MobRetexturer.retextureMob(originalTexture, spiritType));
+        reskinnedMobs.put(le, newTexture);
+    }
+
+    public static boolean shouldReskin(LivingEntity le) {
+        return reskinnedMobs.containsKey(le);
+    }
+
+    public static ResourceLocation getSkinLocation(LivingEntity le) {
+
+        return reskinnedMobs.get(le);
     }
 }

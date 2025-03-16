@@ -27,10 +27,9 @@
     "BeaconBlockEntityInjector",
     "ArmorDyeRecipeInjector",
     "LevelChunkInjector",
-    "ItemEntityInjector"
-  ],
-  "server":[
-    "ServerLevelInjector",
+    "ItemEntityInjector",
+    "LivingEntityRendererInjector",
+    "ServerLevelInjector"
   ],
   "client":[
     "ModelBakeryInjector",

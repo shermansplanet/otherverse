@@ -508,7 +508,6 @@ public class ContractManager {
     }
 
     public static void applyContract(CompoundTag contractTag, Mob mob, boolean fromPlayerClick) {
-        LOGGER.debug("APPLYING CONTRACT TO " + mob.getType());
         for (var g : mob.goalSelector.getAvailableGoals()) {
             if (g.getGoal() instanceof BoundGoal bg) {
                 bg.setContract(contractTag, fromPlayerClick);

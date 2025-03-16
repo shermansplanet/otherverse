@@ -5,6 +5,7 @@ import com.shermansplanet.otherverse.binding.*;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spawning.SpawnAltarManager;
+import com.shermansplanet.otherverse.spirits.FleshTechManager;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritTransfusions;
 import net.minecraft.core.BlockPos;
@@ -128,7 +129,6 @@ public class Diagram {
                         MobTransfusions.tryFeedFromMob(new BindingOrFleshbinding(data.bindingsByPosition.get(pos)), pos, focus.getDiagram())) {
                     return true;
                 }
-                continue;
             }
             if (tryActivateBlockFocus(level, focus)) {
                 return true;
@@ -185,7 +185,8 @@ public class Diagram {
     private boolean tryActivateBlockFocus(ServerLevel level, BlockFocus focus) {
         var needsReactivation = MobTransfusions.tryLightningTransform(level, focus, this)
                 || trySummonDragon(level, focus, this)
-                || MobTransfusions.tryFeed(level, focus, this);
+                || MobTransfusions.tryFeed(level, focus, this)
+                || FleshTechManager.tryMakeConstruct(level, focus, this);
 
         if (!needsReactivation) {
             HallowHelper.tryFillHallow(level, focus, this);
@@ -530,7 +531,8 @@ public class Diagram {
         if (mob.getPersistentData().hasUUID("bindingId")) {
             var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
             var binding = data.bindingsById.get(mob.getPersistentData().getUUID("bindingId"));
-            return MobTransfusions.tryFeedFromMob(new BindingOrFleshbinding(binding), focus.getPos(), this);
+            return MobTransfusions.tryFeedFromMob(new BindingOrFleshbinding(binding), focus.getPos(), this)
+                    || FleshTechManager.tryMakeConstruct(sl, focus, focus.getDiagram());
         }
         return BindingManager.tryBindMob(mob, focus, sl) || FleshbindingManager.tryFleshbindMob(mob, focus, sl);
     }

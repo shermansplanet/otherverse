@@ -5,6 +5,7 @@ import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -83,8 +84,9 @@ public class BindingOrFleshbinding {
     public void changeHealth(int delta, ServerLevel sl) {
         if (isCreative) return;
         int currentHealth = getHealth();
-        int newHealth = currentHealth + delta;
         if (isIdol) {
+            delta = SympathyManager.distributeHpChange(circle, delta, DamageSource.OUT_OF_WORLD);
+            int newHealth = currentHealth + delta;
             idolTag.putFloat("Health", newHealth);
             if (delta < 0) {
                 var instance = IdolRenderer.renderEntities.get(entityType);

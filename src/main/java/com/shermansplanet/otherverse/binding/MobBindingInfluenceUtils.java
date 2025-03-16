@@ -306,7 +306,6 @@ public class MobBindingInfluenceUtils {
 
     public static boolean CanBeBound(Mob mob, List<ItemStack> items, IFocus focus) {
         int totalInfluence = GetTotalInfluence(mob, items);
-        LOGGER.debug("TOTAL INFLUENCE: " + totalInfluence);
 
         var implementData = ImplementManager.getImplementData(focus);
         boolean hasChain = !implementData.isEmpty()

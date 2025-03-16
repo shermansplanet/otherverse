@@ -20,6 +20,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraftforge.common.ForgeHooks;
@@ -263,17 +264,22 @@ public class SpiritLabeler {
             }
 
             if (item instanceof BlockItem bi) {
-                if (bi.getBlock() instanceof BonemealableBlock) {
+                var block = bi.getBlock();
+                if (block instanceof BonemealableBlock && block != Blocks.NETHERRACK) {
                     spiritAmounts.add(new SpiritAmount(Spirits.NATURE, 27));
                 }
-                float strength = bi.getBlock().defaultDestroyTime();
+                float strength = block.defaultDestroyTime();
                 if (strength > 10) {
                     spiritAmounts.add(new SpiritAmount(Spirits.PROTECTION, (int) (strength)));
                 }
 
-                int lightEmission = bi.getBlock().defaultBlockState().getLightEmission();
+                int lightEmission = block.defaultBlockState().getLightEmission();
                 if (lightEmission > 0) {
                     spiritAmounts.add(new SpiritAmount(Spirits.LIGHT, lightEmission * 3));
+                }
+
+                if (ForgeRegistries.ITEMS.getKey(item).getPath().startsWith("infested")) {
+                    spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 13));
                 }
 
                 if (item.toString().contains("copper")) {
@@ -288,7 +294,6 @@ public class SpiritLabeler {
 
             spiritsFromTags.put(item, spiritAmounts.toArray(new SpiritAmount[0]));
         }
-
         SPIRITS_FROM_TAGS.setData(spiritsFromTags);
     }
 

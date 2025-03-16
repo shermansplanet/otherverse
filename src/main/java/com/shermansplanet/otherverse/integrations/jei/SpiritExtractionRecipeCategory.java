@@ -36,8 +36,7 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
     private final Component localizedName;
     private final IDrawable icon;
     private final IGuiHelper guiHelper;
-    private final ItemStack renderStack = new ItemStack(
-            Spirits.spiritItems.get(Spirits.COLOR_GRAY).get());
+    private final ItemStack renderStack = new ItemStack(OtherverseItems.SPIRIT_TABLET.get());
 
     private final IDrawable blockIcon;
 
@@ -46,9 +45,6 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
         localizedName = Component.translatable("otherverse.jei.spirit_extraction");
         renderStack.getOrCreateTag().putBoolean("RenderFull", true);
         icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, renderStack.copy());
-        /*icon = guiHelper.createDrawable(
-                new ResourceLocation(Otherverse.MODID, "textures/gui/jei.png"),
-                81, 0, 16, 16);*/
         this.guiHelper = guiHelper;
 
         blockIcon = guiHelper.createDrawable(

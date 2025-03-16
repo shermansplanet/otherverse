@@ -14,6 +14,7 @@ import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -258,6 +259,74 @@ public class HallowHelper {
         event.setUseBlock(Event.Result.DENY);
     }
 
+    @SubscribeEvent
+    public static void spiritTransferClick(PlayerInteractEvent.RightClickBlock event) {
+        var stack = event.getItemStack();
+        if (!(event.getLevel() instanceof ServerLevel sl) || stack.getItem() instanceof BlockItem) return;
+        var practiceData = DiagramManager.getOrCreateLevelData(sl);
+        var blockTag = practiceData.getPlacedItemTag(event.getPos());
+        if (blockTag == null || !blockTag.contains("spirit_type")) return;
+        var itemSpiritType = HallowHelper.getSpiritType(stack);
+        var isBucketImplement = stack.is(Items.BUCKET) && ImplementManager.isImplement(stack);
+        var isSpiritTablet = stack.is(OtherverseItems.SPIRIT_TABLET.get());
+        if (itemSpiritType == null && !isBucketImplement && !isSpiritTablet) return;
+        var blockSpiritType = Spirits.spiritsByLabel.get(blockTag.getString("spirit_type"));
+        var itemTag = stack.getTag();
+        if (itemSpiritType == null && blockSpiritType != null) {
+            itemSpiritType = blockSpiritType;
+            HallowHelper.addFakeEnchantment(itemTag);
+            var hallowTag = new CompoundTag();
+            hallowTag.putInt("capacity", ImplementManager.BUCKET_CAPACITY);
+            hallowTag.putInt("spirit_count", 0);
+            hallowTag.putString("spirit_type", blockSpiritType.label());
+            if (isSpiritTablet) {
+                var drained = drainBlockHallow(sl, event.getPos(), itemSpiritType, Integer.MAX_VALUE, false, false);
+                if(drained == 0) return;
+                hallowTag.putInt("capacity", drained);
+                stack.shrink(1);
+                var newstack = new ItemStack(Spirits.spiritItems.get(itemSpiritType).get(), 1);
+                newstack.getOrCreateTag().put("hallow", hallowTag);
+                var player = event.getEntity();
+                if(stack.getCount() == 0){
+                    player.getInventory().removeItem(stack);
+                }
+                if (!player.addItem(newstack)) {
+                    player.drop(newstack, false);
+                }
+                return;
+            }
+            itemTag.put("hallow", hallowTag);
+        }
+        if (itemSpiritType == blockSpiritType) {
+            var hallowTag = itemTag.getCompound("hallow");
+            var spiritCount = hallowTag.getInt("spirit_count");
+            var spiritCapacity = hallowTag.getInt("capacity");
+
+            var amountAndCapacity = getShrineSpiritCountAndCapacity(sl, event.getPos(), blockSpiritType);
+            var otherAmount = amountAndCapacity.first;
+            var otherCapacity = amountAndCapacity.second;
+            var depositing = otherAmount == 0 || spiritCount == spiritCapacity || event.getEntity().isShiftKeyDown();
+            if (depositing) {
+                spiritCount -= fillBlockHallow(sl, event.getPos(), itemSpiritType,
+                        Math.min(otherCapacity, spiritCount), false, false);
+            }else{
+                spiritCount += drainBlockHallow(sl, event.getPos(), itemSpiritType,
+                        Math.min(spiritCapacity - spiritCount, otherAmount), false, false);
+            }
+            hallowTag.putInt("spirit_count", spiritCount);
+            if (spiritCount == 0 && isBucketImplement) {
+                itemTag.remove("hallow");
+                ListTag listtag = itemTag.getList("Enchantments", 10);
+                listtag.removeIf(tag -> {
+                    if (!(tag instanceof CompoundTag ct)) return false;
+                    return ct.getString("id").equals("Hallow");
+                });
+            }
+            practiceData.putPlacedItemTag(event.getPos(), blockTag);
+            event.setCancellationResult(InteractionResult.CONSUME);
+        }
+    }
+
     /*@SubscribeEvent
     public static void useHallow(PlayerInteractEvent.RightClickBlock event) {
         if(!event.getEntity().isShiftKeyDown()) return;
@@ -403,12 +472,11 @@ public class HallowHelper {
         return total;
     }
 
-    public static Pair<Integer, Integer> getShrineSpiritCountAndCapacity(BlockFocus source, SpiritType spiritType) {
-        var level = source.getFocusLevel();
+    public static Pair<Integer, Integer> getShrineSpiritCountAndCapacity(Level level, BlockPos pos, SpiritType spiritType) {
         var data = DiagramManager.getOrCreateLevelData(level);
         var count = 0;
         var cap = 0;
-        for (BlockPos sourcePos : ShrineHelper.getAllHallows(source.getPos(), spiritType, data)) {
+        for (BlockPos sourcePos : ShrineHelper.getAllHallows(pos, spiritType, data)) {
             var ht = data.getPlacedItemTag(sourcePos);
             count += ht.getInt("spirit_count");
             cap += ht.getInt("capacity");
@@ -488,5 +556,89 @@ public class HallowHelper {
         hallowTag = newItem.getTag().getCompound("hallow");
         hallowTag.putInt("spirit_count", count - spiritAmount);
         return true;
+    }
+
+    public static int drainBlockHallow(Level level, BlockPos pos, SpiritType spiritType, int price, boolean mustMeetFullPrice, boolean simulate) {
+        var data = DiagramManager.getOrCreateLevelData(level);
+        var hallowPositions = ShrineHelper.getAllHallows(pos, spiritType, data);
+        if (hallowPositions.isEmpty()) return 0;
+
+        var drainPositions = new HashMap<BlockPos, Integer>();
+
+        var remainingPrice = price;
+        for (BlockPos sourcePos : hallowPositions) {
+            if (remainingPrice > 0) {
+                var ht = data.getPlacedItemTag(sourcePos);
+                var count = ht.getInt("spirit_count");
+                count = Math.min(count, remainingPrice);
+                drainPositions.put(sourcePos, count);
+                remainingPrice -= count;
+            }
+        }
+
+        if (remainingPrice == price) {
+            if (price == Integer.MAX_VALUE) {
+                return 0;
+            }
+            return ShrineHelper.onOverdrawOrOverflow(level, pos, spiritType, price, true, simulate);
+        }
+
+        if (mustMeetFullPrice && remainingPrice > 0) {
+            return 0;
+        }
+
+        if (!simulate) {
+            for (var drainPosition : drainPositions.entrySet()) {
+                var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
+                shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") - drainPosition.getValue());
+                data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
+                var otherFocus = data.allBlockFoci.get(drainPosition.getKey());
+                if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
+                DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+            }
+        }
+
+        return price - remainingPrice;
+    }
+
+    public static int fillBlockHallow(Level level, BlockPos blockPos, SpiritType spiritType, int amount, boolean mustAcceptAll, boolean simulate) {
+        var data = DiagramManager.getOrCreateLevelData(level);
+        var hallowPositions = ShrineHelper.getAllHallows(blockPos, spiritType, data);
+        if (hallowPositions.isEmpty()) return 0;
+
+        var drainPositions = new HashMap<BlockPos, Integer>();
+
+        var remainingAmount = amount;
+        for (BlockPos sourcePos : hallowPositions) {
+            if (remainingAmount > 0) {
+                var ht = data.getPlacedItemTag(sourcePos);
+                var remainingCapacity = Math.max(0, ht.getInt("capacity") - ht.getInt("spirit_count"));
+                var transferAmount = Math.min(remainingCapacity, remainingAmount);
+                drainPositions.put(sourcePos, transferAmount);
+                remainingAmount -= transferAmount;
+            }
+        }
+
+        if(!simulate && remainingAmount < amount){
+            for (BlockPos sourcePos : hallowPositions) {
+                var otherFocus = data.allBlockFoci.get(sourcePos);
+                if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
+                DiagramManager.markDiagramActive(sl, otherFocus.getDiagram());
+            }
+        }
+
+        if (mustAcceptAll && remainingAmount > 0) {
+            return 0;
+        }
+
+        if(!simulate) {
+            for (var drainPosition : drainPositions.entrySet()) {
+                var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
+                shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") + drainPosition.getValue());
+                data.putPlacedItemTag(drainPosition.getKey(), shrineTag);
+            }
+        }
+
+        return amount - remainingAmount;
     }
 }

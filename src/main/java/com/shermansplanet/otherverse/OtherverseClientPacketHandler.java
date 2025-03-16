@@ -7,6 +7,7 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.implement.SyncPracticeDataMessage;
+import com.shermansplanet.otherverse.spirits.Chronomancy;
 import com.shermansplanet.otherverse.spirits.HallowUpdateMessage;
 import com.shermansplanet.otherverse.spirits.OverflowMessage;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
@@ -80,5 +81,20 @@ public class OtherverseClientPacketHandler {
         var level = Minecraft.getInstance().level;
         if (level == null || DiagramManager.getDimensionHash(level) != msg.dimension()) return;
         ShrineHelper.onOverdrawOrOverflow(level, msg.focusPos(), msg.spiritType(), msg.amount(), msg.overdraw(), false);
+    }
+
+    public static void chronomancy(Chronomancy.ChronomancyMessage msg, Supplier<Context> ctx) {
+        var entity = Minecraft.getInstance().level.getEntity(msg.entityId());
+        if (entity == null) return;
+        if (msg.shouldTick()) {
+            Chronomancy.frozenEntitiesForClient.remove(entity);
+        } else {
+            Chronomancy.frozenEntitiesForClient.add(entity);
+            entity.xOld = entity.getX();
+            entity.yOld = entity.getY();
+            entity.zOld = entity.getZ();
+            entity.xRotO = entity.getXRot();
+            entity.yRotO = entity.getYRot();
+        }
     }
 }

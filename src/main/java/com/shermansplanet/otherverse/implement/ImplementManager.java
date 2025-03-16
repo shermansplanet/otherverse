@@ -20,13 +20,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -131,52 +129,6 @@ public class ImplementManager {
 
     private static final Supplier<Multimap<Attribute, AttributeModifier>> rangeModifier = Suppliers.memoize(() ->
             ImmutableMultimap.of(ForgeMod.REACH_DISTANCE.get(), singleRangeAttributeModifier));
-
-    @SubscribeEvent
-    public static void useBucket(PlayerInteractEvent.RightClickBlock event) {
-        var stack = event.getItemStack();
-        if (!(event.getLevel() instanceof ServerLevel sl) || stack.getItem() instanceof BlockItem) return;
-        var practiceData = DiagramManager.getOrCreateLevelData(sl);
-        var blockTag = practiceData.getPlacedItemTag(event.getPos());
-        if (blockTag == null || !blockTag.contains("spirit_type")) return;
-        var itemSpiritType = HallowHelper.getSpiritType(stack);
-        var isBucketImplement = stack.is(Items.BUCKET) && isImplement(stack);
-        if (itemSpiritType == null && !isBucketImplement) return;
-        var blockSpiritType = Spirits.spiritsByLabel.get(blockTag.getString("spirit_type"));
-        var itemTag = stack.getTag();
-        if (itemSpiritType == null && blockSpiritType != null) {
-            itemSpiritType = blockSpiritType;
-            HallowHelper.addFakeEnchantment(itemTag);
-            var hallowTag = new CompoundTag();
-            hallowTag.putInt("capacity", BUCKET_CAPACITY);
-            hallowTag.putInt("spirit_count", 0);
-            hallowTag.putString("spirit_type", blockSpiritType.label());
-            itemTag.put("hallow", hallowTag);
-        }
-        if (itemSpiritType == blockSpiritType) {
-            var hallowTag = itemTag.getCompound("hallow");
-            var spiritCount = hallowTag.getInt("spirit_count");
-            var spiritCapacity = hallowTag.getInt("capacity");
-
-            var otherAmount = blockTag.getInt("spirit_count");
-            var otherCapacity = blockTag.getInt("capacity");
-            var transferAmount = (otherAmount == 0 || spiritCount == spiritCapacity || event.getEntity().isShiftKeyDown())
-                    ? -Math.min(otherCapacity, spiritCount)
-                    : Math.min(spiritCapacity - spiritCount, otherAmount);
-            hallowTag.putInt("spirit_count", spiritCount + transferAmount);
-            blockTag.putInt("spirit_count", otherAmount - transferAmount);
-            if (spiritCount + transferAmount == 0 && isBucketImplement) {
-                itemTag.remove("hallow");
-                ListTag listtag = itemTag.getList("Enchantments", 10);
-                listtag.removeIf(tag -> {
-                    if (!(tag instanceof CompoundTag ct)) return false;
-                    return ct.getString("id").equals("Hallow");
-                });
-            }
-            practiceData.putPlacedItemTag(event.getPos(), blockTag);
-            event.setCancellationResult(InteractionResult.CONSUME);
-        }
-    }
 
     @SubscribeEvent
     public static void fillBucket(FillBucketEvent event) {

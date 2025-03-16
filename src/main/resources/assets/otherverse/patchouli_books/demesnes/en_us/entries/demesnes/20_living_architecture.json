@@ -14,7 +14,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "If the diagram wants to place a block somewhere that is otherwise occupied, it will slowly break the block that's in the way. Be warned - when this happens, the block is erased and doesn't drop an item. Even once all the blocks are placed, the diagram will keep trying to make them match its reference range, which can have interesting results."
+            "text": "If the diagram wants to place a block somewhere that is otherwise occupied, it will slowly break the block that's in the way. Be warned - when this happens, the block is erased and doesn't drop an item. Even once all the blocks are placed, the diagram will remain active and try to \"fix\" any discrepancies."
         }
     ]
 }
