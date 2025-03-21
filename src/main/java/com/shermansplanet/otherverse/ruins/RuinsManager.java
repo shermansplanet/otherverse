@@ -6,33 +6,27 @@ import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.potions.OtherversePotions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkEvent;
@@ -177,9 +171,11 @@ public class RuinsManager {
         });
     }
 
-    /*@SubscribeEvent
+    @SubscribeEvent
     public static void onClick(PlayerInteractEvent.RightClickBlock event) {
-        if (event.getLevel().isClientSide() || event.getLevel().getBlockState(event.getPos()).getBlock() != Blocks.GOLD_BLOCK)
+        if (event.getLevel().isClientSide()
+                || event.getLevel().getBlockState(event.getPos()).getBlock() != Blocks.SCULK
+                || !event.getItemStack().is(Items.FLINT_AND_STEEL))
             return;
 
         ServerLevel level = ((ServerLevel) event.getLevel()).getServer().getLevel(
@@ -188,9 +184,9 @@ public class RuinsManager {
             System.out.println("Ruins not found!");
             return;
         }
-
+        event.setCanceled(true);
         event.getEntity().changeDimension(level, new NoReturnTeleporter());
-    }*/
+    }
 
     public static void handleShockUpdate(ShockLightningMessage message, Supplier<NetworkEvent.Context> ctx) {
         skyMultiplierRaw = message.distance / LIGHTNING_MAX_DIST;

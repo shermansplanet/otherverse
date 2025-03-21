@@ -53,7 +53,7 @@ public class SpiritTransfusions {
                     for (var component : Arrays.stream(components).map(t -> (HashMap<Item, List<SpiritTransfusionData>>) t.data).toList()) {
                         for (var itemData : component.entrySet()) {
                             var key = itemData.getKey();
-                            if(!data.containsKey(key)) data.put(key, new ArrayList<>());
+                            if (!data.containsKey(key)) data.put(key, new ArrayList<>());
                             data.get(key).addAll(itemData.getValue());
                         }
                     }
@@ -163,7 +163,7 @@ public class SpiritTransfusions {
         }
     }
 
-    public static void onDoneLoadingJson(){
+    public static void onDoneLoadingJson() {
         TRANSFUSIONS_FROM_JSON.setData(TRANSFUSIONS_FROM_JSON.data);
     }
 
@@ -211,7 +211,8 @@ public class SpiritTransfusions {
         if (!event.getItemStack().hasTag() || !event.getItemStack().getTag().contains("hallow")) {
             return;
         }
-        if(event.getItemStack().getItem() instanceof BlockItem && !event.getEntity().isShiftKeyDown()) return;
+        if (event.getItemStack().getItem() instanceof BlockItem && !event.getEntity().isShiftKeyDown()) return;
+        if (DiagramManager.getOrCreateLevelData(event.getLevel()).getPlacedItemTag(event.getPos()) != null) return;
         var spiritTransfusions = ALL_SPIRIT_TRANSFUSIONS.data;
         Item inputItem = event.getLevel().getBlockState(event.getPos()).getBlock().asItem();
         CompoundTag hallowTag = event.getItemStack().getTag().getCompound("hallow");

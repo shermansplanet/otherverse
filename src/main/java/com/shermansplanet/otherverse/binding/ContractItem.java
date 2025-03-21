@@ -35,6 +35,9 @@ public class ContractItem extends Item {
         if (binding == null) {
             return InteractionResult.PASS;
         }
+        if (!mob.getPersistentData().getString("last_bound_by").equals(player.getGameProfile().getName())) {
+            return InteractionResult.PASS;
+        }
         ContractManager.applyContract(stack.getTag().getCompound("contract"), mob, true);
         return InteractionResult.SUCCESS;
     }

@@ -26,7 +26,7 @@
         {
             "type": "patchouli:crafting",
             "recipe": "otherverse:cinnabar",
-            "text": "The three Primes can be combined into cinnabar, which can be used to craft Spawn Altars. Cinnabar blocks can be used to $(l:otherverse:binding/fleshbinding#cinnabar)easily transport bound mobs$()."
+            "text": "The three Primes can be combined into cinnabar, which can be used to craft Spawn Altars and Spirit Tablets. Cinnabar blocks can be used to $(l:otherverse:binding/fleshbinding#cinnabar)easily transport bound mobs$()."
         }
     ]
 }

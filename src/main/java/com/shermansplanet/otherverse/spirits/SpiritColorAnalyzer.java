@@ -8,6 +8,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.binding.FleshbindingManager;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
@@ -97,7 +98,7 @@ public class SpiritColorAnalyzer {
     private static ArrayList<PackResources> packCache;
 
     public static ArrayList<PackResources> getPacks() {
-        if(packCache != null) return packCache;
+        if (packCache != null) return packCache;
         Minecraft mc = Minecraft.getInstance();
         ArrayList<PackResources> packs = new ArrayList<>();
         packs.add(mc.getClientPackSource().getVanillaPack());
@@ -172,7 +173,7 @@ public class SpiritColorAnalyzer {
                     new SpiritLabeler.SpiritAmount(Spirits.COLOR_BROWN, 10),
                     new SpiritLabeler.SpiritAmount(Spirits.COLOR_GREEN, 6)
             };
-        } else if (item instanceof DyeableLeatherItem) {
+        } else if (item instanceof DyeableLeatherItem && item != OtherverseItems.CHALK.get()) {
             return new SpiritLabeler.SpiritAmount[]{
                     new SpiritLabeler.SpiritAmount(Spirits.COLOR_BROWN, 16)
             };
@@ -184,11 +185,11 @@ public class SpiritColorAnalyzer {
             }
         }
         var textures = getTexturesRecursive(item);
-        if(textures == null) return new SpiritLabeler.SpiritAmount[0];
+        if (textures == null) return new SpiritLabeler.SpiritAmount[0];
         return getColorCountsFromTextures(textures);
     }
 
-    public static ArrayList<ResourceLocation> getResourcesRecursive(ResourceLocation resourceLocation){
+    public static ArrayList<ResourceLocation> getResourcesRecursive(ResourceLocation resourceLocation) {
         var packs = getPacks();
         JsonElement el = getJsonFor(resourceLocation, packs);
         if (el == null) {
@@ -199,7 +200,7 @@ public class SpiritColorAnalyzer {
         return new ArrayList<>(resources);
     }
 
-    public static ArrayList<NativeImage> getTexturesRecursive(Item item){
+    public static ArrayList<NativeImage> getTexturesRecursive(Item item) {
         var packs = getPacks();
         var resourceLocation = ForgeRegistries.ITEMS.getKey(item);
         resourceLocation = new ResourceLocation(resourceLocation.getNamespace(), "models/item/" + resourceLocation.getPath() + ".json");

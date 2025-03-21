@@ -18,7 +18,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "If your Familiar has a spirit type, you will permanently gain affinity for that spirit type and lose affinity for its opposits. See the 'Spirit Affinity' section of Essentials for more information on spirit affinities and a list of opposing spirit types."
+            "text": "If your Familiar has a spirit type, you will permanently gain affinity for that spirit type and lose affinity for its opposits. Homunculi and Golems created with Practice have Flesh and Technology types respectively. See the 'Spirit Affinity' section of Essentials for more information on spirit affinities and a list of opposing spirit types."
         }
     ]
 }

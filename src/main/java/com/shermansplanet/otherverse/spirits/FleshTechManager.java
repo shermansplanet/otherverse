@@ -89,7 +89,6 @@ public class FleshTechManager {
                     new AttributeModifier(constructModifier, "golem", -0.5f, AttributeModifier.Operation.MULTIPLY_BASE));
         }
 
-        LOGGER.debug("CONSTRUCT TYPE: " + e.getPersistentData().getString("construct_type"));
         BindingManager.applyUnboundContract((Mob) e, false);
         return true;
     }

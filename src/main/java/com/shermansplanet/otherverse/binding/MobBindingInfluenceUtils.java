@@ -13,6 +13,7 @@ import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritTransfer;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.item.Item;
@@ -90,7 +92,7 @@ public class MobBindingInfluenceUtils {
 
         List<TagKey<Biome>> biomeTags = List.of(BiomeTags.IS_OVERWORLD, BiomeTags.IS_NETHER, BiomeTags.IS_END,
                 Tags.Biomes.IS_UNDERGROUND, Tags.Biomes.IS_HOT, Tags.Biomes.IS_DRY, Tags.Biomes.IS_COLD,
-                Tags.Biomes.IS_MAGICAL, Tags.Biomes.IS_LUSH, Tags.Biomes.IS_DEAD, BiomeTags.IS_OCEAN);
+                Tags.Biomes.IS_MAGICAL, Tags.Biomes.IS_LUSH, Tags.Biomes.IS_DEAD, BiomeTags.IS_OCEAN, BiomeTags.IS_RIVER);
 
         HashMap<EntityType<?>, Set<TagKey<Biome>>> mobTags = new HashMap<>();
         HashMap<EntityType<?>, Set<TagKey<Biome>>> forbiddenMobTags = new HashMap<>();
@@ -111,7 +113,7 @@ public class MobBindingInfluenceUtils {
             for (var category : biome.get().getMobSettings().getSpawnerTypes()) {
                 for (var spawnerData : biome.get().getMobSettings().getMobs(category).unwrap()) {
                     var et = spawnerData.type;
-                    if (mobSpirits.containsKey(et)) continue;
+                    if (mobSpirits.containsKey(et) && mobSpirits.get(et) != Spirits.NATURE) continue;
                     if (!mobTags.containsKey(et)) {
                         mobTags.put(et, new HashSet<>());
                         forbiddenMobTags.put(et, new HashSet<>());
@@ -131,8 +133,32 @@ public class MobBindingInfluenceUtils {
             }
             var spirit = getSpiritType(tags);
             if (spirit == null) continue;
+            if (spirit == Spirits.OVERWORLD && mobSpirits.get(et) == Spirits.NATURE) continue;
             registerMobSpirit((EntityType<? extends LivingEntity>) et, spirit);
         }
+/*
+        for (var biomeKey : registry.registryKeySet()) {
+            var biome = registry.getOrCreateHolderOrThrow(biomeKey);
+            if(getSpiritType(biome.tags().toList()) != Spirits.OVERWORLD) continue;
+            var keyMaybe = biome.unwrap();
+            var biomeName = "";
+            if (keyMaybe.left().isPresent()) {
+                biomeName = keyMaybe.left().get().location().getPath();
+            } else if (keyMaybe.right().isPresent()) {
+                biomeName = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
+            }
+            LOGGER.debug(biomeName + ": " + getNatureString(biome));
+        }*/
+    }
+
+    public static String getNatureString(Holder<Biome> biome){
+        for (var category : biome.get().getMobSettings().getSpawnerTypes()) {
+            for (var spawnerData : biome.get().getMobSettings().getMobs(category).unwrap()) {
+                var spirit = MobBindingInfluenceUtils.mobSpirits.get(spawnerData.type);
+                if (spirit == Spirits.NATURE) return spawnerData.type.toString();
+            }
+        }
+        return "OVERWORLD";
     }
 
     public static SpiritType getSpiritType(Collection<TagKey<Biome>> tags) {
@@ -142,9 +168,10 @@ public class MobBindingInfluenceUtils {
         if (tags.contains(BiomeTags.IS_END)) return Spirits.END;
         if (tags.contains(BiomeTags.IS_NETHER)) return Spirits.NETHER;
         if (tags.contains(BiomeTags.IS_OCEAN)) return Spirits.WATER;
+        if (tags.contains(BiomeTags.IS_RIVER)) return Spirits.WATER;
         if (tags.contains(Tags.Biomes.IS_UNDERGROUND)) return Spirits.EARTH;
         if (tags.contains(Tags.Biomes.IS_COLD)) return Spirits.COLD;
-        if (tags.contains(Tags.Biomes.IS_HOT) && tags.contains(Tags.Biomes.IS_DRY)) return Spirits.FIRE;
+        if (tags.contains(Tags.Biomes.IS_HOT) && tags.contains(Tags.Biomes.IS_DRY)) return Spirits.PHLOGISTON;
         if (tags.contains(BiomeTags.IS_OVERWORLD)) return Spirits.OVERWORLD;
         return null;
     }
@@ -372,15 +399,17 @@ public class MobBindingInfluenceUtils {
                 MakeIdol(et);
                 mob.tick();
                 var le = (EntityType<? extends LivingEntity>) et;
-                if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
-                    registerMobSpirit(le, Spirits.WATER);
-                }
-                if (mob instanceof FlyingMob || mob instanceof FlyingAnimal || mob.isNoGravity()
-                        || mob.getNavigation() instanceof FlyingPathNavigation) {
-                    registerMobSpirit(le, Spirits.AIR);
-                }
-                if (mob.getMobType() == MobType.UNDEAD) {
-                    registerMobSpirit(le, Spirits.DEATH);
+                if (!mobSpirits.containsKey(et)) {
+                    if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
+                        registerMobSpirit(le, Spirits.WATER);
+                    } else if (mob instanceof FlyingMob || mob instanceof FlyingAnimal || mob.isNoGravity()
+                            || mob.getNavigation() instanceof FlyingPathNavigation) {
+                        registerMobSpirit(le, Spirits.AIR);
+                    } else if (mob.getMobType() == MobType.UNDEAD) {
+                        registerMobSpirit(le, Spirits.DEATH);
+                    } else if (mob instanceof Animal && !(mob instanceof TamableAnimal)) {
+                        registerMobSpirit(le, Spirits.NATURE);
+                    }
                 }
                 try {
                     if (mob.canBeLeashed(null)) {

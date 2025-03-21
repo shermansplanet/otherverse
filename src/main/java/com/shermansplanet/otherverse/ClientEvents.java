@@ -55,8 +55,8 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void onFMLClientSetupEvent(final FMLClientSetupEvent event) {
-        LOGGER.error("ACCESS_TOKEN "+ Minecraft.getInstance().getUser().getAccessToken());
-        LOGGER.error("UUID "+ Minecraft.getInstance().getUser().getUuid());
+        LOGGER.error("ACCESS_TOKEN " + Minecraft.getInstance().getUser().getAccessToken());
+        LOGGER.error("UUID " + Minecraft.getInstance().getUser().getUuid());
 
         PracticeWorldManager.noJeiPending = false;
         PracticeWorldManager.worldSetUp = false;

@@ -28,6 +28,8 @@ public class SpiritTransfer extends DiagramProcess {
     private static HashMap<String, String> oppositeSpirits = new HashMap<>();
 
     private boolean firstFrame = true;
+    private boolean spawnParticlesOverTime = false;
+    private float spawnRatio = 0f;
 
     static {
         declareOpposites(Spirits.EARTH, Spirits.AIR);
@@ -75,17 +77,29 @@ public class SpiritTransfer extends DiagramProcess {
             return;
         }
 
-        SpiritType spiritType = Spirits.spiritsByLabel.get(tag.getCompound("hallow").getString("spirit_type"));
+        var sinkTag = tag.getCompound("hallow");
+        SpiritType spiritType = Spirits.spiritsByLabel.get(sinkTag.getString("spirit_type"));
         makeSpiritParticles(spiritType);
 
         var firstFrameCheck = firstFrame;
         firstFrame = false;
 
+        if (spawnParticlesOverTime) {
+            var ticksPerParticle = Math.max(Math.round(spawnRatio), 1);
+            var particlesPerTick = Math.max(Math.round(1f / spawnRatio), 1);
+            if (sink.getFocusLevel().getGameTime() % ticksPerParticle == 0) {
+                ShrineHelper.onOverdrawOrOverflow(sink.getFocusLevel(), sink.getPos(), spiritType,
+                        particlesPerTick, false, false);
+            }
+        }
+
         if (!firstFrameCheck && remainingDuration > 0) {
             return;
         }
 
-        if(!firstFrameCheck) abandon();
+        spawnParticlesOverTime = Spirits.colorsByDye.containsValue(spiritType);
+
+        if (!firstFrameCheck) abandon();
 
         ItemStack sourceItem = source.getItem();
         boolean sourceIsHallow = sourceItem.hasTag() && sourceItem.getTag().contains("hallow");
@@ -94,12 +108,12 @@ public class SpiritTransfer extends DiagramProcess {
 
         var sinkCanOverflow = sink.isBlock() && ShrineHelper.isOverflowable(spiritType);
         if (remainingCapacity <= 0 && !sinkCanOverflow) {
-            if(firstFrameCheck) abandon();
+            if (firstFrameCheck) abandon();
             return;
         }
 
         if (!HallowHelper.canFill(sink, source, spiritType)) {
-            if(firstFrameCheck) abandon();
+            if (firstFrameCheck) abandon();
             return;
         }
 
@@ -117,7 +131,7 @@ public class SpiritTransfer extends DiagramProcess {
         }
 
         if (!(source.getFocusLevel() instanceof ServerLevel sl)) {
-            if(firstFrameCheck) abandon();
+            if (firstFrameCheck) abandon();
             return;
         }
 
@@ -132,7 +146,7 @@ public class SpiritTransfer extends DiagramProcess {
                 if (sourceItem.is(OtherverseItems.IDOL.get())) {
                     var binding = BindingOrFleshbinding.getFromPosition(sl, source.getPos());
                     if (binding == null) {
-                        if(firstFrameCheck) abandon();
+                        if (firstFrameCheck) abandon();
                         return;
                     }
                     transferAmount = Math.min(effectiveCapacity, binding.getHealth() - 1);
@@ -154,28 +168,33 @@ public class SpiritTransfer extends DiagramProcess {
             }
         }
 
-        if(transferAmount == 0) {
-            if(firstFrameCheck) abandon();
+        if (transferAmount == 0) {
+            if (firstFrameCheck) abandon();
             return;
         }
+
+        spawnRatio = totalDuration * 1f / transferAmount;
 
         var transferredAmount = sink.fillHallow(spiritType, transferAmount, false, firstFrameCheck);
 
         if (transferredAmount < transferAmount) {
             if (sinkCanOverflow) {
-                var overflowAmount = ShrineHelper.onOverdrawOrOverflow(sink.getFocusLevel(), sink.getPos(), spiritType, transferAmount - transferredAmount, false, firstFrameCheck);
+                var overflowAmount = ShrineHelper.onOverdrawOrOverflow(sink.getFocusLevel(), sink.getPos(), spiritType,
+                        transferAmount - transferredAmount, false, firstFrameCheck || spawnParticlesOverTime);
                 transferredAmount += overflowAmount;
             } else {
                 LOGGER.error("HALLOW OVERFILL FOR ILLEGAL SPIRIT TYPE");
             }
+        } else {
+            spawnParticlesOverTime = false;
         }
 
         if (transferredAmount == 0) {
-            if(firstFrameCheck) abandon();
+            if (firstFrameCheck) abandon();
             return;
         }
 
-        if(firstFrameCheck) return;
+        if (firstFrameCheck) return;
 
         onTransfer.accept(transferredAmount);
 

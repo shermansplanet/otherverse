@@ -133,7 +133,6 @@ public class DiagramManager {
                 if (level.getBlockEntity(d.primaryBlockPos) instanceof ChalkCircle cc) {
                     cc.markUpdated();
                 }
-                LOGGER.debug("ACTIVATING DIAGRAM: CIRCLE CHANGED");
                 markDiagramActive(level, d);
             }
             return;
@@ -143,7 +142,6 @@ public class DiagramManager {
                 cc.diagram = null;
                 cc.markUpdated();
             }
-            LOGGER.debug("unloading diagram because recalculating");
             unloadDiagram(d, level);
         }
         HashSet<ChalkCircle> visited = new HashSet<>();
@@ -192,7 +190,6 @@ public class DiagramManager {
         }
 
         for (Diagram d : diagramsToUpdate) {
-            LOGGER.debug("ACTIVATING DIAGRAM: STRUCTURE CHANGED");
             markDiagramActive(level, d);
         }
     }
@@ -286,13 +283,13 @@ public class DiagramManager {
                 continue;
             }
             if (d.tryActivateDiagram(sl)) {
-                LOGGER.debug("reactivating diagram");
+//                LOGGER.debug("reactivating diagram");
                 d.calculateItemFociAndInfluences(sl);
                 diagrams.add(d);
             } else {
-                LOGGER.debug("deactivating diagram");
+//                LOGGER.debug("deactivating diagram");
                 if (!d.processes.isEmpty()) {
-                    LOGGER.debug("...but it still has processes");
+//                    LOGGER.debug("...but it still has processes");
                     continue;
                 }
                 for (BlockPos pos : d.itemFocusPositions) {

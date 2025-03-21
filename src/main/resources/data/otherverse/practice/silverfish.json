@@ -1,5 +1,6 @@
 {
 	"other" : "minecraft:silverfish",
+	"spirit" : "earth",
 	"binding" : {
 		"minecraft:cobweb" : 7
 	},

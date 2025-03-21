@@ -10,7 +10,9 @@ import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.data.worldgen.Structures;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
@@ -27,7 +29,10 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -69,7 +74,23 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
             var levelName = level.dimensionTypeId().location().getPath();
 
             var depthCutoff = biome.is(BiomeTags.IS_OCEAN) ? 30 : 60;
-            if (biome.is(Biomes.DEEP_DARK)) spiritType = Spirits.DARK;
+            var blockBelow = level.getBlockState(getBlockPos().below());
+
+            var structures = sl.structureManager().getAllStructuresAt(getBlockPos()).keySet();
+            if (structures.contains(Structures.BASTION_REMNANT.get()) || structures.contains(Structures.PILLAGER_OUTPOST.get()))
+                spiritType = Spirits.WAR;
+            else if (structures.contains(Structures.STRONGHOLD.get()) || structures.contains(Structures.FORTRESS.get()) || isInDragonArena(biome))
+                spiritType = Spirits.FATE;
+            else if (isSurroundedBy(sl, getBlockPos(), Blocks.FARMLAND)) spiritType = Spirits.FOOD;
+            else if (blockBelow.is(Blocks.GOLD_BLOCK) || blockBelow.is(Blocks.EMERALD_BLOCK))
+                spiritType = Spirits.FORTUNE;
+            else if (biome.is(Biomes.DEEP_DARK)) spiritType = Spirits.DARK;
+            else if (isSurroundedBy(sl, getBlockPos(), Blocks.GLOWSTONE)) spiritType = Spirits.LIGHT;
+            else if (biome.is(Biomes.SOUL_SAND_VALLEY)) spiritType = Spirits.DEATH;
+            else if (biome.is(Biomes.GROVE)) spiritType = Spirits.FOOD;
+            else if (biome.is(Biomes.OLD_GROWTH_BIRCH_FOREST)
+                    || biome.is(Biomes.OLD_GROWTH_PINE_TAIGA)
+                    || biome.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)) spiritType = Spirits.TIME;
             else if (levelName.equals("overworld") && getBlockPos().getY() < depthCutoff) spiritType = Spirits.EARTH;
             else if (levelName.equals("overworld") && getBlockPos().getY() > 190) spiritType = Spirits.AIR;
             else spiritType = MobBindingInfluenceUtils.getSpiritType(biome.tags().toList());
@@ -97,6 +118,20 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
                 };
             }
 
+            if (spiritType == Spirits.OVERWORLD) {
+                for (var category : biome.get().getMobSettings().getSpawnerTypes()) {
+                    for (var spawnerData : biome.get().getMobSettings().getMobs(category).unwrap()) {
+                        var spirit = MobBindingInfluenceUtils.mobSpirits.get(spawnerData.type);
+                        if (spirit != Spirits.NATURE) continue;
+                        spiritType = Spirits.NATURE;
+                        break;
+                    }
+                }
+            }
+
+            if (biome.is(Biomes.WINDSWEPT_HILLS)
+                    || biome.is(Biomes.WINDSWEPT_GRAVELLY_HILLS)) spiritType = Spirits.OVERWORLD;
+
             demesneData = DemesnesManager.getData(sl, getBlockPos());
             if (demesneData != null) {
                 inDemesneOf = demesneData.practitioner;
@@ -108,6 +143,22 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
                 markUpdated();
             }
         }
+    }
+
+    private boolean isInDragonArena(Holder<Biome> biome) {
+        var x = getBlockPos().getX();
+        var z = getBlockPos().getZ();
+        return biome.is(Biomes.THE_END) && (x * x + z * z) < (100 * 100);
+    }
+
+    private boolean isSurroundedBy(ServerLevel sl, BlockPos blockPos, Block block) {
+        for (var dx = -1; dx <= 1; dx++) {
+            for (var dz = -1; dz <= 1; dz++) {
+                if (dx == 0 && dz == 0) continue;
+                if (!sl.getBlockState(blockPos.offset(dx, 0, dz)).is(block)) return false;
+            }
+        }
+        return true;
     }
 
     private boolean trySetChronoPos(ClaimedDemesneData demesneData, ServerLevel sl, BlockPos originalPos, int dy) {

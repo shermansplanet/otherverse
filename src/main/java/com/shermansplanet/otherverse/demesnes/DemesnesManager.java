@@ -42,6 +42,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
@@ -484,6 +485,15 @@ public class DemesnesManager {
     }
 
     @SubscribeEvent
+    public static void livingTick(LivingDeathEvent event) {
+        var data = event.getEntity().getPersistentData();
+        if (!data.getBoolean("demesnes_challenger")) return;
+        var ritual = activeRituals.get(data.getString("demesnes_claimant"));
+        if(ritual == null) return;
+        ritual.onChallengerDeath(event);
+    }
+
+    @SubscribeEvent
     public static void onChangeDimensions(PlayerEvent.PlayerChangedDimensionEvent event) {
         tryAbandon(event.getEntity());
     }
@@ -583,7 +593,7 @@ public class DemesnesManager {
                 event.setCanceled(true);
                 DiagramManager.getOrCreateLevelData(sp.getLevel().getServer().overworld()).savedData.setDirty();
                 return;
-            }else{
+            } else {
                 event.setCancellationResult(InteractionResult.FAIL);
                 event.setCanceled(true);
             }
@@ -694,7 +704,7 @@ public class DemesnesManager {
                 new DemesnesClientboundMessage(DemesnesClientboundMessage.EventType.SUCCEED, ritual.minBlock, ritual.maxBlock, ritual.levelId, ritual.claimant.getGameProfile().getName()));
         var demesne = new ClaimedDemesneData(ritual.minBlock, ritual.maxBlock, ritual.claimant.getGameProfile().getName(), ritual.range, ritual.levelId, ritual.spiritType);
         demesne.addToChunks(claimedDemesnes, ritual.level);
-        if(ritual.spiritType != null) SpiritAffinityTracker.setDemesneAffinity(ritual.spiritType, ritual.claimant);
+        if (ritual.spiritType != null) SpiritAffinityTracker.setDemesneAffinity(ritual.spiritType, ritual.claimant);
         demesnesByPlayer.put(ritual.claimant.getGameProfile().getName(), demesne);
         DiagramManager.getOrCreateLevelData(ritual.claimant.getLevel().getServer().overworld()).registerClaimedDemesne(demesne);
         Otherverse.ADVANCEMENTS.trigger(ritual.claimant, "demesnes");

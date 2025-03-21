@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.demesnes;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.spirits.SpiritType;
+import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -11,10 +12,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.slf4j.Logger;
 
 import java.util.HashSet;
@@ -29,7 +33,7 @@ public class DemesnesClaimRitual {
     public SpiritType spiritType;
     private final HashSet<ChunkPos> chunkPositions = new HashSet<>();
     public int range = -1;
-    private AABB ritualBounds;
+    public AABB ritualBounds;
     //private final HashSet<Entity> ritualEntities = new HashSet<>();
     public BlockPos minBlock, maxBlock;
     public int levelId;
@@ -37,6 +41,9 @@ public class DemesnesClaimRitual {
     private int tickCount = 0;
     private int currentWaveIndex = 0;
     private DemesnesWave currentWave;
+
+    private int burnKills, otherMobKills, techKills, witherKills, allKills;
+    private boolean didEncroach = false;
 
     public DemesnesClaimRitual(DemesnesClaimStartMessage msg, ServerPlayer player) {
         LOGGER.debug("DEMESNES: STARTING");
@@ -71,13 +78,11 @@ public class DemesnesClaimRitual {
         }
         if (tickCount % 10 != 0) return;
         if (claimant == null || !claimant.isAddedToWorld() || !claimant.isAlive()) {
-            LOGGER.debug("PLAYER DOESN'T EXIST");
             abandon();
             return;
         }
         if (!ritualBounds.contains(claimant.position())) {
             claimant.displayClientMessage(Component.literal("By leaving the Claimed area during the ritual, you forfeit your Claim."), false);
-            LOGGER.debug("PLAYER LEFT BOUNDS");
             abandon();
             return;
         }
@@ -85,16 +90,28 @@ public class DemesnesClaimRitual {
         if (currentWave == null) return;
 
         for (var mob : currentWave.entities) {
-            if(ritualBounds.intersects(mob.getBoundingBox())) continue;
+            if (ritualBounds.intersects(mob.getBoundingBox())) continue;
             mob.setTarget(claimant);
             mob.getNavigation().moveTo(claimant, 1);
         }
 
         var remainingHp = currentWave.getRemainingHp();
+        if (!didEncroach && currentWave.areAnyEncroaching(ritualBounds)) didEncroach = true;
         demesnesEvent.setProgress(remainingHp);
 
         if (remainingHp == 0) {
             if (currentWaveIndex == 3) {
+                if (!didEncroach) {
+                    spiritType = Spirits.PROTECTION;
+                } else if (burnKills * 1f / allKills > 0.5f) {
+                    spiritType = Spirits.FIRE;
+                } else if (techKills * 1f / allKills > 0.5f) {
+                    spiritType = Spirits.TECH;
+                } else if (otherMobKills * 1f / allKills > 0.5f) {
+                    spiritType = Spirits.FLESH;
+                } else if (witherKills * 1f / allKills > 0.5f) {
+                    spiritType = Spirits.DEATH;
+                }
                 DemesnesManager.complete(this);
                 cleanup();
                 return;
@@ -139,6 +156,29 @@ public class DemesnesClaimRitual {
 
     public void addEntity(Entity entity) {
         currentWave.entities.add((Mob) entity);
+    }
+
+    public void onChallengerDeath(LivingDeathEvent event) {
+        allKills++;
+        var source = event.getSource();
+        if (source == DamageSource.IN_FIRE || source == DamageSource.ON_FIRE || source == DamageSource.HOT_FLOOR || source == DamageSource.LAVA) {
+            burnKills++;
+        } else if (source == DamageSource.CRAMMING || source == DamageSource.FALL || source == DamageSource.FALLING_BLOCK
+                || source == DamageSource.IN_WALL || source == DamageSource.FALLING_STALACTITE || source == DamageSource.ANVIL) {
+            techKills++;
+        } else if (source == DamageSource.WITHER) {
+            witherKills++;
+        } else if (source.getMsgId().equals("arrow") && source.getEntity() == null) {
+            techKills++;
+        }
+
+        if (source.getEntity() != null && source.getEntity().getType() != EntityType.PLAYER) {
+            if (source.getEntity().getPersistentData().getString("construct_type").equals("technology")) {
+                techKills++;
+            } else {
+                otherMobKills++;
+            }
+        }
     }
 
     /*public void onEntityAdded(EntityJoinLevelEvent event) {

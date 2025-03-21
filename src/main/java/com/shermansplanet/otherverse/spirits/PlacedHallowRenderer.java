@@ -39,6 +39,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -65,12 +66,19 @@ public class PlacedHallowRenderer {
     }
 
     @SubscribeEvent
+    public static void startup(ServerAboutToStartEvent event) {
+        shrinesToRender.clear();
+    }
+
+    @SubscribeEvent
     public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         var level = Minecraft.getInstance().level;
         if (level == null || level.getGameTime() % 5 != 0) return;
-        for (var shrine : shrinesToRender) {
-            ShrineHelper.recalculateShrine(shrine);
+        if(SightManager.shouldRenderSight()) {
+            for (var shrine : shrinesToRender) {
+                ShrineHelper.recalculateShrine(shrine);
+            }
         }
     }
 

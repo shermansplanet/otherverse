@@ -16,7 +16,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BowlFoodItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -271,6 +273,8 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     public void removeItem() {
         if (item.hasCraftingRemainingItem()) {
             item = item.getCraftingRemainingItem();
+        } else if (item.getItem() instanceof BowlFoodItem) {
+            item = new ItemStack(Items.BOWL, 1);
         } else {
             item = new ItemStack(OtherverseItems.CHALK.get(), 1);
         }
@@ -313,7 +317,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         var spiritCount = hallowTag.getInt("spirit_count");
         if (mustMeetFullPrice && spiritCount < price) return 0;
         var drained = Math.min(price, spiritCount);
-        if(!simulate) {
+        if (!simulate) {
             hallowTag.putInt("spirit_count", spiritCount - drained);
             if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
         }
@@ -330,7 +334,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         var capacity = hallowTag.getInt("capacity");
         var transferAmount = Math.min(amount, Math.max(0, capacity - spiritCount));
         if (mustAcceptAll && transferAmount < amount) return 0;
-        if(!simulate) hallowTag.putInt("spirit_count", spiritCount + transferAmount);
+        if (!simulate) hallowTag.putInt("spirit_count", spiritCount + transferAmount);
         if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
         return transferAmount;
     }

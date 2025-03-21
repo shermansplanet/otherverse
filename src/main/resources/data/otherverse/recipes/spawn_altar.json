@@ -1,20 +1,20 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " # ",
-        " ! ",
-        " # "
+        "###",
+        "#!#",
+        "###"
     ],
     "key": {
         "#": {
-            "item": "minecraft:chiseled_stone_bricks"
+            "item": "minecraft:iron_bars"
         },
         "!": {
             "item": "otherverse:cinnabar"
         }
     },
     "result": {
-        "item": "otherverse:spirit_tablet",
+        "item": "otherverse:spawn_altar",
         "count" : 1
     }
 }

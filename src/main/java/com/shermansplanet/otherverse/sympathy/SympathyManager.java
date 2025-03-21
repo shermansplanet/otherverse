@@ -9,10 +9,12 @@ import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -20,12 +22,17 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SympathyManager {
@@ -40,7 +47,8 @@ public class SympathyManager {
         var bloodySpindle = OtherverseItems.SPINDLE_BLOODY.get();
         if (!(spindle.getItem() instanceof SpindleItem) && !spindle.is(bloodySpindle)) return;
         var newstack = new ItemStack(bloodySpindle, spindle.getCount(), spindle.getTag());
-        newstack.getOrCreateTag().putInt("sympathy_target", event.getEntity().getId());
+        newstack.getOrCreateTag().putUUID("sympathy_target", event.getEntity().getUUID());
+        newstack.getOrCreateTag().putString("sympathy_label", event.getEntity().getType().getDescriptionId());
         le.setItemSlot(EquipmentSlot.MAINHAND, newstack);
     }
 
@@ -111,6 +119,7 @@ public class SympathyManager {
         var spindlePos = focus.getDiagram().influences.get(hallowPos);
         if (spindlePos == null) return delta;
         var level = focus.getFocusLevel();
+        if (!(level instanceof ServerLevel sl)) return delta;
         if (!(level.getBlockEntity(spindlePos) instanceof ChalkCircle spindleCircle)) return delta;
         if (!spindleCircle.getItem().is(OtherverseItems.SPINDLE_BLOODY.get())) return delta;
         IFocus hallowFocus = DiagramManager.getOrCreateLevelData(level).allBlockFoci.get(hallowPos);
@@ -125,14 +134,44 @@ public class SympathyManager {
         var price = Math.abs(delta) / 2;
         var drained = hallowFocus.drainHallow(Spirits.FATE, price, false, false);
         var otherDelta = Mth.sign(delta) * drained;
-        if(otherDelta == 0) return delta;
-        var otherEntity = level.getEntity(spindleCircle.getItem().getTag().getInt("sympathy_target"));
-        if(!(otherEntity instanceof LivingEntity le)) return delta;
-        if(otherDelta > 0){
+        if (otherDelta == 0) return delta;
+        var otherEntity = getEntityByUniqueId(spindleCircle.getItem().getTag().getUUID("sympathy_target"), sl);
+        if (!(otherEntity instanceof LivingEntity le)) return delta;
+        if (otherDelta > 0) {
             le.heal(otherDelta);
-        }else{
+        } else {
             le.hurt(damageSource, -otherDelta);
         }
         return delta - otherDelta;
+    }
+
+    @SubscribeEvent
+    public static void onTooltip(ItemTooltipEvent event) {
+        if (!event.getItemStack().is(OtherverseItems.SPINDLE_BLOODY.get())) return;
+        if (!event.getItemStack().hasTag() || !event.getItemStack().getTag().contains("sympathy_label")) return;
+        var label = event.getItemStack().getTag().getString("sympathy_label");
+        event.getToolTip().add(Component.literal("Sympathy target: ")
+                .append(Component.translatable(label))
+                .withStyle(Style.EMPTY.withColor(0xaaaaaa).withItalic(true)));
+    }
+
+    private static HashMap<UUID, Entity> entitiesByUUID = new HashMap<>();
+
+    @SubscribeEvent
+    public static void onStart(ServerStartedEvent event) {
+        entitiesByUUID.clear();
+    }
+
+    public static Entity getEntityByUniqueId(UUID uniqueId, ServerLevel sl) {
+        if (entitiesByUUID.containsKey(uniqueId)) return entitiesByUUID.get(uniqueId);
+        for (ServerLevel level : sl.getServer().getAllLevels()) {
+            for (Entity entity : level.getAllEntities()) {
+                if (entity.isAddedToWorld() && entity.getUUID().equals(uniqueId))
+                    entitiesByUUID.put(uniqueId, entity);
+                return entity;
+            }
+        }
+
+        return null;
     }
 }

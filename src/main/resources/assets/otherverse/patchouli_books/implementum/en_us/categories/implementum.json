@@ -1,6 +1,6 @@
 {
-    "name": "Implementum",
-    "description": "A guide to the Implementum ritual.",
-    "icon": "otherverse:implementum",
-    "sortnum": 0
+    "name": "Implements",
+    "description": "The benefits of various items when taken as Implements.",
+    "icon": "minecraft:netherite_pickaxe",
+    "sortnum": 1
 }

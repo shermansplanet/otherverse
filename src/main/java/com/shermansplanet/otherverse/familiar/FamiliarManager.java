@@ -241,6 +241,14 @@ public class FamiliarManager {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onRightClickDarkness(PlayerInteractEvent.RightClickItem event) {
+        if (!trySonicBoom(event.getEntity(), event.getItemStack())) return;
+        event.setResult(Event.Result.ALLOW);
+        event.setCancellationResult(InteractionResult.CONSUME);
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void hirePiglin(PlayerInteractEvent.EntityInteractSpecific event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)
                 || !hasFamiliarType(sp, EntityType.PIGLIN_BRUTE)
@@ -360,7 +368,10 @@ public class FamiliarManager {
         mob.playAmbientSound();
 
         var spiritType = MobBindingInfluenceUtils.mobSpirits.get(mob.getType());
-        if(spiritType != null) SpiritAffinityTracker.setFamiliarAffinity(spiritType, sp);
+        if (mob.getPersistentData().contains("construct_type")) {
+            spiritType = Spirits.spiritsByLabel.get(mob.getPersistentData().getString("construct_type"));
+        }
+        if (spiritType != null) SpiritAffinityTracker.setFamiliarAffinity(spiritType, sp);
 
         Otherverse.ADVANCEMENTS.trigger(sp, "famulus");
 
@@ -541,7 +552,7 @@ public class FamiliarManager {
                     }
                 }
             }
-        }else if(type.equals(EntityType.STRIDER)){
+        } else if (type.equals(EntityType.STRIDER)) {
             var inLava = sp.getLevel().getBlockState(sp.blockPosition()).is(Blocks.LAVA);
             var attr = sp.getAttribute(Attributes.MOVEMENT_SPEED);
             attr.removePermanentModifier(FAMILIAR_MODIFIER);
@@ -749,7 +760,7 @@ public class FamiliarManager {
                 }
             } else {
                 abilities.mayfly = true;
-                if(setSpeed) {
+                if (setSpeed) {
                     abilities.setFlyingSpeed(type.equals(EntityType.WITHER) ? 0.024f : 0.012f);
                 }
                 if (!player.isOnGround()) abilities.flying = true;
@@ -807,9 +818,9 @@ public class FamiliarManager {
         if (persistentData.contains("bindingId") && e instanceof Mob mob) {
             TransientDiagramData data = DiagramManager.getOrCreateLevelData(level.getServer().overworld());
             BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
-            if(binding == null){
+            if (binding == null) {
                 persistentData.remove("bindingId");
-            }else {
+            } else {
                 binding.mob = mob;
                 if (isFamiliar(mob)) {
                     binding.dimensionHash = DiagramManager.getDimensionHash(level);
@@ -867,7 +878,7 @@ public class FamiliarManager {
 
         LOGGER.debug("FAMILIAR JOINING LEVEL: " + sl.dimension() + " " + DiagramManager.getDimensionHash(sl));
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
-        if(!event.getEntity().getPersistentData().contains("bindingId")) return;
+        if (!event.getEntity().getPersistentData().contains("bindingId")) return;
         var binding = data.bindingsById.get(event.getEntity().getPersistentData().getUUID("bindingId"));
         if (binding == null) {
             LOGGER.debug("NULL BINDING FOR FAMILIAR");
@@ -1152,7 +1163,7 @@ public class FamiliarManager {
         witherskull.setPosRaw(d0, d1, d2);
         sp.getLevel().addFreshEntity(witherskull);
 
-        if(!player.getAbilities().instabuild){
+        if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
             if (itemStack.isEmpty()) {
                 player.getInventory().removeItem(itemStack);

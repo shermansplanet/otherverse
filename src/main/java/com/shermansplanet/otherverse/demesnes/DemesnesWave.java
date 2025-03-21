@@ -9,6 +9,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -39,7 +40,6 @@ public class DemesnesWave {
         register(EntityType.SPIDER, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDEABLE});
         register(EntityType.CAVE_SPIDER, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDEABLE});
         register(EntityType.CREEPER, new EntityTag[]{EntityTag.OVERWORLD});
-        register(EntityType.SLIME, new EntityTag[]{EntityTag.OVERWORLD});
         register(EntityType.WITCH, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDER});
         register(EntityType.WARDEN, new EntityTag[]{EntityTag.OVERWORLD});
         register(EntityType.SILVERFISH, new EntityTag[]{EntityTag.OVERWORLD});
@@ -84,6 +84,15 @@ public class DemesnesWave {
             if (entity.isAlive()) totalHp += entity.getHealth();
         }
         return totalHp / combinedEntityHp;
+    }
+
+    public boolean areAnyEncroaching(AABB bounds) {
+        var smallerBounds = bounds.deflate(4);
+        for (var entity : entities) {
+            if (entityTagsByType.get(entity.getType()).contains(EntityTag.FLYING)) continue;
+            if (smallerBounds.contains(entity.position())) return true;
+        }
+        return false;
     }
 
     private Mob trySpawn(DemesnesClaimRitual ritual, int hpRemaining) {
@@ -177,7 +186,7 @@ public class DemesnesWave {
     public DemesnesWave(DemesnesClaimRitual ritual, int waveIndex) {
         this.waveIndex = waveIndex;
         var hpRemaining = Mth.square(ritual.range * 2 + 1) * 60;
-        if(ritual.claimant.getAbilities().instabuild) hpRemaining = 20;
+        if (ritual.claimant.getAbilities().instabuild) hpRemaining = 20;
         LOGGER.debug("Spawning mobs with combined HP of " + hpRemaining);
         var timeout = hpRemaining;
         combinedEntityHp = 0;

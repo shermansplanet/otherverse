@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "There are a few blocks that can be broken down for spirits that you won't see in JEI.$(br2)Nether portals (the purple portal blocks, not the obsidian) yield Nether spirits.$(br2)Fire blocks yield fire spirits.$(br2)Water source blocks yield water spirits."
+            "text": "There are a few ways to obtain spirits that you won't see in JEI. Nether portals (the purple portal blocks, not the obsidian) yield Nether spirits. Fire blocks yield fire spirits. Water source blocks yield water spirits. If a block influence of a time hallow would be randomly ticked, it will yield nine time spirits instead."
         },
         {
             "type": "patchouli:text",

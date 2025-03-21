@@ -242,6 +242,8 @@ public class HallowHelper {
             tag = data.getPlacedItemTag(pos);
             tag.putBoolean("shrine", true);
             data.putPlacedItemTag(pos, tag);
+            var focus = data.allBlockFoci.get(pos);
+            if(focus != null && event.getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, focus.getDiagram());
         }
         if (event.getLevel() instanceof ServerLevel sl) {
             ShrineHelper.getShrine(sl, event.getPos());
@@ -268,7 +270,7 @@ public class HallowHelper {
         if (blockTag == null || !blockTag.contains("spirit_type")) return;
         var itemSpiritType = HallowHelper.getSpiritType(stack);
         var isBucketImplement = stack.is(Items.BUCKET) && ImplementManager.isImplement(stack);
-        var isSpiritTablet = stack.is(OtherverseItems.SPIRIT_TABLET.get());
+        var isSpiritTablet = stack.is(OtherverseItems.SPIRIT_TABLET.get()) && blockTag.contains("shrine");
         if (itemSpiritType == null && !isBucketImplement && !isSpiritTablet) return;
         var blockSpiritType = Spirits.spiritsByLabel.get(blockTag.getString("spirit_type"));
         var itemTag = stack.getTag();

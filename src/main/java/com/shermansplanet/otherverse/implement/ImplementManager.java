@@ -25,18 +25,25 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.SpawnUtil;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.capabilities.Capability;
@@ -48,6 +55,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.*;
 import net.minecraftforge.eventbus.api.Event;
@@ -68,7 +76,7 @@ public class ImplementManager {
     public static final Capability<IPracticeCapability> PRACTICE_HANDLER = CapabilityManager.get(new CapabilityToken<>() {
     });
     public static final int BUCKET_CAPACITY = 333;
-    public static final float BUCKET_BONUS = 4f/3f;
+    public static final float BUCKET_BONUS = 4f / 3f;
 
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final HashMap<Item, Integer> durabilities = new HashMap<>();
@@ -107,6 +115,7 @@ public class ImplementManager {
 
         durabilities.put(Items.SOUL_SAND, 48);
         durabilities.put(Items.LANTERN, 48);
+        durabilities.put(Items.INFESTED_STONE, 48);
 
         durabilities.put(Items.LAVA_BUCKET, 32);
         durabilities.put(Items.AXOLOTL_BUCKET, 32);
@@ -121,6 +130,8 @@ public class ImplementManager {
         durabilities.put(Items.GLOWSTONE, 32);
 
         durabilities.put(Items.TNT, 16);
+
+        durabilities.put(Items.WITHER_SKELETON_SKULL, 3);
     }
 
     public static final AttributeModifier singleRangeAttributeModifier =
@@ -332,8 +343,51 @@ public class ImplementManager {
 
     private static boolean canBeImplement(ItemStack item) {
         return item.is(Tags.Items.TOOLS) || item.is(Tags.Items.ARMORS) || item.is(Tags.Items.DYES)
-                || durabilities.containsKey(item.getItem())
+                || durabilities.containsKey(item.getItem()) || item.isEdible() || item.is(Items.SCULK_SHRIEKER)
                 || item.is(Items.CHAIN) || item.is(Items.BUCKET) || item.is(Items.FLINT_AND_STEEL);
+    }
+
+    @SubscribeEvent
+    public static void eatItem(LivingEntityUseItemEvent.Finish e) {
+        var itemStack = e.getItem();
+        if (!isImplement(itemStack) || !itemStack.isEdible()) return;
+        if (itemStack.hasTag() && itemStack.getTag().contains("implement_max_uses")) {
+            var tag = itemStack.getTag();
+            var newAmount = tag.getInt("implement_remaining_uses") - 1;
+            if (newAmount <= 0) {
+                return;
+            }
+            tag.putInt("implement_remaining_uses", newAmount);
+            e.setResultStack(itemStack);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlaceShrieker(PlayerInteractEvent.RightClickBlock e) {
+        shriek(e);
+    }
+
+    @SubscribeEvent
+    public static void onClickShrieker(PlayerInteractEvent.RightClickItem e) {
+        shriek(e);
+    }
+
+    public static void shriek(PlayerInteractEvent e) {
+        var stack = e.getItemStack();
+        if (!isImplement(stack) || !stack.is(Items.SCULK_SHRIEKER)) return;
+        e.setCancellationResult(InteractionResult.CONSUME);
+        e.setCanceled(true);
+        if (!(e.getLevel() instanceof ServerLevel sl)) return;
+        var player = e.getEntity();
+        if(player.experienceLevel < 1) return;
+        player.giveExperienceLevels(-1);
+        var pos = player.blockPosition();
+        var didSpawn = SpawnUtil.trySpawnMob(EntityType.WARDEN, MobSpawnType.TRIGGERED, sl, pos, 20, 5, 6, SpawnUtil.Strategy.ON_TOP_OF_COLLIDER).isPresent();
+        if (!didSpawn) return;
+        player.getInventory().removeItem(stack);
+        Warden.applyDarknessAround(sl, Vec3.atCenterOf(pos), null, 40);
+        sl.levelEvent(3007, pos, 0);
+        sl.gameEvent(GameEvent.SHRIEK, pos, GameEvent.Context.of(player));
     }
 
     public static CompoundTag getImplementData(Player player) {
@@ -375,6 +429,9 @@ public class ImplementManager {
             itemTag.put("Enchantments", playerImplementTag.get("Enchantments"));
         }
         var durability = durabilities.get(item.getItem());
+        if (item.isEdible()) {
+            durability = 9;
+        }
         if (durability != null) {
             itemTag.putInt("implement_max_uses", durability);
             itemTag.putInt("implement_remaining_uses", durability);
@@ -390,7 +447,7 @@ public class ImplementManager {
         var mostSpirit = Spirits.OVERWORLD;
         if (item.hasTag() && item.getTag().contains("hallow")) {
             mostSpirit = Spirits.spiritsByLabel.get(item.getTag().getCompound("hallow").getString("spirit_type"));
-        }else {
+        } else {
             var mostAmount = 0;
             for (var spiritType : SpiritLabeler.getSpiritsFor(item.getItem()).entrySet()) {
                 var amount = spiritType.getValue();

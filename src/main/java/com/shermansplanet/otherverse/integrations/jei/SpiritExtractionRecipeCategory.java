@@ -126,9 +126,9 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
             totalString = "";
         }
         mc.font.draw(stack, totalString, 19, 6, totalColor);
-        if (ImplementManager.durabilities.containsKey(recipe.input)) {
+        if (ImplementManager.durabilities.containsKey(recipe.input.getItem())) {
             blockIcon.draw(stack, 110, 1);
-            mc.font.draw(stack, String.valueOf(ImplementManager.durabilities.get(recipe.input)),
+            mc.font.draw(stack, String.valueOf(ImplementManager.durabilities.get(recipe.input.getItem())),
                     109, 12, ImplementManager.IMPLEMENT_UI_COLOR);
         }
     }

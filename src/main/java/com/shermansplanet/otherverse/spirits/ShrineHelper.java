@@ -2,12 +2,15 @@ package com.shermansplanet.otherverse.spirits;
 
 import com.ibm.icu.impl.Pair;
 import com.mojang.logging.LogUtils;
+import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -43,8 +46,6 @@ public class ShrineHelper {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public enum ShrineShape {BELOW, ABOVE, CENTERED}
-
-    ;
 
     public static abstract class OverflowBehavior {
         public boolean affectsIndividualBlocks() {
@@ -112,6 +113,51 @@ public class ShrineHelper {
     public static HashMap<SpiritType, OverflowBehavior> overflowBehaviors = new HashMap<>();
 
     static {
+        for (var colorSpirit : Spirits.colorsByDye.entrySet()) {
+            var diffuseColors = colorSpirit.getKey().getTextureDiffuseColors();
+            var particleOptions = switch (colorSpirit.getValue().label()) {
+                case "blue" -> ParticleTypes.UNDERWATER;
+                case "brown" -> ParticleTypes.SOUL;
+                case "cyan" -> ParticleTypes.SOUL_FIRE_FLAME;
+                case "light_gray" -> ParticleTypes.ASH;
+                case "gray" -> ParticleTypes.SMOKE;
+                case "green" -> ParticleTypes.SPORE_BLOSSOM_AIR;
+                case "light_blue" -> ParticleTypes.BUBBLE_POP;
+                case "red" -> ParticleTypes.CRIMSON_SPORE;
+                case "orange" -> ParticleTypes.SMALL_FLAME;
+                case "magenta" -> ParticleTypes.DRAGON_BREATH;
+                case "white" -> ParticleTypes.WHITE_ASH;
+                default ->
+                        new DustParticleOptions(new Vector3f(diffuseColors[0], diffuseColors[1], diffuseColors[2]), 1.0F);
+            };
+            overflowBehaviors.put(colorSpirit.getValue(), new OverflowBehavior() {
+                @Override
+                public ShrineShape getShape() {
+                    return ShrineShape.ABOVE;
+                }
+
+                @Override
+                public int overflowBlock(BlockPos pos, Level level, int amount, boolean simulate) {
+                    if (!(level instanceof ServerLevel sl)) return 0;
+                    if (!level.isEmptyBlock(pos)) return 0;
+                    if (!simulate) {
+                        var r = level.random;
+                        sl.sendParticles(particleOptions,
+                                pos.getX() + r.nextFloat(),
+                                pos.getY() + r.nextFloat(),
+                                pos.getZ() + r.nextFloat(),
+                                0, 0, 0, 0, 0.1
+                        );
+                    }
+                    return 1;
+                }
+
+                @Override
+                public boolean multipleTargets() {
+                    return true;
+                }
+            });
+        }
         overflowBehaviors.put(Spirits.EARTH, new OverflowBehavior() {
 
             @Override
@@ -138,7 +184,6 @@ public class ShrineHelper {
                     var spiritCount = SpiritLabeler.getSpiritsFor(item).get(Spirits.EARTH);
                     if (spiritCount == null) return 0;
                     if (!simulate) {
-                        LOGGER.debug("DESTROYING BLOCK");
                         level.destroyBlock(pos, false);
                     }
                     return spiritCount;
@@ -378,7 +423,10 @@ public class ShrineHelper {
             @Override
             public int overflowEntity(Entity e, int amount, Shrine shrine, boolean simulate) {
                 if (!(e instanceof Player player)) return 0;
-                if (!simulate) player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, amount * 20));
+                if (!simulate) {
+                    player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, amount * 20));
+                    player.addEffect(new MobEffectInstance(MobEffects.GLOWING, amount * 20));
+                }
                 return amount;
             }
         });
@@ -602,11 +650,14 @@ public class ShrineHelper {
                 shrinesByChunk.computeIfAbsent(level, x -> new HashMap<>())
                         .computeIfAbsent(chunkPos, x -> new HashSet<>())
                         .add(this);
-                LOGGER.debug("ADDING " + st.label() + " SHRINE TO " + chunkPos);
             }
 
-            targetPositions.sort(Comparator.comparingDouble(
-                    p -> range.center.distanceToSqr(new Vec3(p.getX() + 0.5f, p.getY() + 0.5f, p.getZ() + 0.5f))));
+            if (Spirits.colorsByDye.containsValue(st)) {
+                Collections.shuffle(targetPositions);
+            } else {
+                targetPositions.sort(Comparator.comparingDouble(
+                        p -> range.center.distanceToSqr(new Vec3(p.getX() + 0.5f, p.getY() + 0.5f, p.getZ() + 0.5f))));
+            }
         }
 
         public boolean matches(Collection<BlockPos> blockPositions, SpiritType type, int totalCapacity) {
@@ -686,26 +737,23 @@ public class ShrineHelper {
     }
 
     public static boolean recalculateShrine(Shrine shrine) {
-        var hasNewShrine = false;
         var shrinesByLevel = shrinesByPosition.computeIfAbsent(shrine.level, x -> new HashMap<>());
         for (var pos : shrine.hallowPositions) {
             var newshrine = getShrine(shrine.level, pos, shrine.st);
-            if (newshrine != shrine) hasNewShrine = true;
-            if (hasNewShrine && shrinesByLevel.get(pos) == shrine) shrinesByLevel.remove(pos);
+            if (newshrine == shrine) return false;
+            if (shrinesByLevel.get(pos) == shrine) shrinesByLevel.remove(pos);
         }
-        if (hasNewShrine) {
-            for (var chunkPos : shrine.chunkPositions) {
-                var set = shrinesByChunk.get(shrine.level).get(chunkPos);
-                if (set == null || set.isEmpty()) continue;
-                set.remove(shrine);
-                for (var otherShrine : new HashSet<>(set)) {
-                    if (otherShrine == shrine) continue;
-                    recalculateShrine(otherShrine);
-                }
-                LOGGER.debug("REMOVING " + shrine.st.label() + " SHRINE FROM RECALCULATE " + chunkPos);
+        for (var chunkPos : shrine.chunkPositions) {
+            var set = shrinesByChunk.get(shrine.level).get(chunkPos);
+            if (set == null || set.isEmpty()) continue;
+            set.remove(shrine);
+            for (var otherShrine : new HashSet<>(set)) {
+                if (otherShrine == shrine) continue;
+                recalculateShrine(otherShrine);
             }
+            LOGGER.debug("REMOVING " + shrine.st.label() + " SHRINE FROM RECALCULATE " + chunkPos);
         }
-        return hasNewShrine;
+        return true;
     }
 
     public static Shrine getShrine(Level level, BlockPos pos) {
@@ -780,8 +828,12 @@ public class ShrineHelper {
                 var newIndex = (i + shrine.checkIndex) % shrine.targetPositions.size();
                 if (overflowBehavior.multipleTargets() && !overflowBehavior.canRun(remainingAmount, overdraw)) {
                     if (remainingAmount < amount && !simulate) {
-                        shrine.checkIndex = newIndex;
-                        shrine.markActive(level);
+                        if (Set.of(Spirits.colorSpiritTypes).contains(spiritType)) {
+                            shrine.checkIndex = (newIndex + 1 % shrine.targetPositions.size());
+                        } else {
+                            shrine.checkIndex = newIndex;
+                            shrine.markActive(level);
+                        }
                         if (spiritType == Spirits.WATER) {
                             level.playSound(null, focusPos, overdraw ? SoundEvents.BUCKET_FILL : SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1, 1);
                         }

@@ -1,5 +1,6 @@
 {
 	"other" : "minecraft:wither_skeleton",
+	"spirit" : "time",
 	"healing" : {
 		"minecraft:soul_sand" : 1,
 		"minecraft:soul_soil" : 1

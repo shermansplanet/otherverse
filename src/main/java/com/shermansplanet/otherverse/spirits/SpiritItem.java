@@ -32,6 +32,6 @@ public class SpiritItem extends Item {
         hallowTag.putInt("spirit_count", 999);
         hallowTag.putString("spirit_type", spiritType.label());
         tag.put("hallow", hallowTag);
-        return InteractionResultHolder.pass(item);
+        return InteractionResultHolder.success(item);
     }
 }
