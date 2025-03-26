@@ -602,20 +602,35 @@ public class ShrineHelper {
         public final SpiritType st;
         public final Range range;
         public final Level level;
+        public final boolean isCombined;
         public final HashSet<ChunkPos> chunkPositions = new HashSet<>();
+        private int maxY, minY;
+        private final HashSet<Shrine> directNeighbors;
+        private HashSet<Shrine> network;
+        public Shrine parentShrine;
 
-        public Shrine(HashSet<BlockPos> hallowPositions, int totalCapacity, SpiritType st, Level level) {
+        public Shrine(HashSet<BlockPos> hallowPositions, int totalCapacity, SpiritType st, Level level, boolean isCombined, HashSet<Shrine> initialNetwork) {
+            network = initialNetwork;
+            directNeighbors = new HashSet<>();
+            this.isCombined = isCombined;
             this.level = level;
             this.hallowPositions = hallowPositions;
             this.totalCapacity = totalCapacity;
             this.st = st;
-            range = getShrineRange(hallowPositions, totalCapacity);
+            range = isCombined ? getCombinedRange(network, totalCapacity) : getShrineRange(hallowPositions, totalCapacity, false);
             var data = DiagramManager.getOrCreateLevelData(level);
             for (var pos : hallowPositions) {
                 var tag = data.getPlacedItemTag(pos);
                 if (tag.contains("shrine")) continue;
                 tag.putBoolean("shrine", true);
                 data.putPlacedItemTag(pos, tag);
+            }
+
+            var shrinesByLevel = shrinesByPosition.computeIfAbsent(level, x -> new HashMap<>());
+            for (var p : hallowPositions) {
+                var prev = shrinesByLevel.get(p);
+                if (prev != null) prev.cleanup();
+                shrinesByLevel.put(p, this);
             }
 
             if (!overflowBehaviors.containsKey(st)) return;
@@ -645,11 +660,29 @@ public class ShrineHelper {
                     }
                 }
             }
+            maxY = baseY;
+            minY = baseY - range.height - 1;
+
+            var possibleNeighbors = new HashSet<Shrine>();
 
             for (var chunkPos : chunkPositions) {
-                shrinesByChunk.computeIfAbsent(level, x -> new HashMap<>())
-                        .computeIfAbsent(chunkPos, x -> new HashSet<>())
-                        .add(this);
+                var shrines = shrinesByChunk.computeIfAbsent(level, x -> new HashMap<>())
+                        .computeIfAbsent(chunkPos, x -> new HashSet<>());
+                possibleNeighbors.addAll(shrines);
+                shrines.add(this);
+            }
+
+            LOGGER.debug("new shrine (" + (isCombined ? "combined" : "uncombined") + ") in " + chunkPositions.size() + " chunks");
+            LOGGER.debug("possible neighbors: " + possibleNeighbors.size());
+
+            if (!isCombined) {
+                for (var otherShrine : possibleNeighbors) {
+                    if (otherShrine.isCombined || otherShrine.st != st || !overlaps(otherShrine)) continue;
+                    directNeighbors.add(otherShrine);
+                    otherShrine.directNeighbors.add(this);
+                }
+                LOGGER.debug("direct neighbors: " + directNeighbors.size());
+                recalculateNetwork(true);
             }
 
             if (Spirits.colorsByDye.containsValue(st)) {
@@ -658,6 +691,95 @@ public class ShrineHelper {
                 targetPositions.sort(Comparator.comparingDouble(
                         p -> range.center.distanceToSqr(new Vec3(p.getX() + 0.5f, p.getY() + 0.5f, p.getZ() + 0.5f))));
             }
+        }
+
+        private void recalculateNetwork(boolean thisIsPresent) {
+            if (thisIsPresent) {
+                setNetworkRecursive(new HashSet<>());
+                LOGGER.debug("network size: " + network.size());
+                refreshNetwork(network);
+            } else {
+                for (var direct : directNeighbors) {
+                    direct.directNeighbors.remove(this);
+                }
+                var newNetworks = new HashSet<HashSet<Shrine>>();
+                for (var direct : directNeighbors) {
+                    if (newNetworks.contains(direct.network)) continue;
+                    direct.setNetworkRecursive(new HashSet<>());
+                    newNetworks.add(direct.network);
+                }
+                for (var newNetwork : newNetworks) {
+                    refreshNetwork(newNetwork);
+                }
+            }
+        }
+
+        private static void refreshNetwork(HashSet<Shrine> network) {
+            var avg = new Vec3(0, 0, 0);
+            Shrine key = null;
+            var totalCapacity = 0;
+            for (var shrine : network) {
+                if (shrine.parentShrine != null) {
+                    shrine.parentShrine.cleanup();
+                    shrine.parentShrine = null;
+                }
+                avg = avg.add(shrine.range.center.scale(1f / network.size()));
+                key = shrine;
+                totalCapacity += shrine.totalCapacity;
+            }
+            if (network.size() == 1) return;
+            var x = avg.x;
+            var z = avg.z;
+            var keyX = key.range.center.x;
+            var keyZ = key.range.center.z;
+            var r = Math.sqrt(Math.pow(x - keyX, 2) + Math.pow(z - keyZ, 2));
+            var startAngle = Math.atan2(keyZ - z, keyX - x);
+            LOGGER.debug(x + ", " + z + ", " + keyX + ", " + keyZ + ", " + r);
+            for (var i = 1; i < network.size(); i++) {
+                var angle = startAngle + Math.PI * 2 / network.size();
+                var targetX = x + Math.cos(angle) * r;
+                var targetZ = z + Math.sin(angle) * r;
+                LOGGER.debug("target: " + targetX + ", " + targetZ);
+                var shrineFound = false;
+                for (var shrine : network) {
+                    var shrineX = shrine.range.center.x;
+                    var shrineZ = shrine.range.center.z;
+                    var dist = Math.sqrt(Math.pow(targetX - shrineX, 2) + Math.pow(targetZ - shrineZ, 2));
+                    if (dist < r * 0.1f) {
+                        shrineFound = true;
+                        LOGGER.debug("shrine found :D");
+                        break;
+                    }
+                }
+                if (!shrineFound) {
+                    LOGGER.debug("no shrine found D:");
+                    return;
+                }
+            }
+            var parentShrine = new Shrine(new HashSet<>(), totalCapacity, key.st, key.level, true, network);
+            for (var shrine : network) {
+                shrine.parentShrine = parentShrine;
+            }
+        }
+
+        private void setNetworkRecursive(HashSet<Shrine> network) {
+            this.network = network;
+            network.add(this);
+            for (var direct : directNeighbors) {
+                if (!network.contains(direct)) direct.setNetworkRecursive(network);
+            }
+        }
+
+        private double getSqrDistTo(Shrine otherShrine) {
+            var dx = otherShrine.range.center.x - range.center.x;
+            var dz = otherShrine.range.center.z - range.center.z;
+            return dx * dx + dz * dz;
+        }
+
+        private boolean overlaps(Shrine otherShrine) {
+            if (otherShrine.maxY < minY || otherShrine.minY > maxY) return false;
+            var r = otherShrine.range.radius + range.radius;
+            return getSqrDistTo(otherShrine) < r * r;
         }
 
         public boolean matches(Collection<BlockPos> blockPositions, SpiritType type, int totalCapacity) {
@@ -671,6 +793,13 @@ public class ShrineHelper {
         }
 
         public void markActive(Level level) {
+            if(isCombined){
+                for(var shrine : network){
+                    if(shrine.isCombined) continue;
+                    shrine.markActive(level);
+                }
+                return;
+            }
             var data = DiagramManager.getOrCreateLevelData(level);
             for (var pos : hallowPositions) {
                 var otherFocus = data.allBlockFoci.get(pos);
@@ -695,7 +824,31 @@ public class ShrineHelper {
             return (relative.x * relative.x + relative.z * relative.z <= r * r);
         }
 
+        public void cleanup() {
+            for (var chunkPos : chunkPositions) {
+                var set = shrinesByChunk.get(level).get(chunkPos);
+                if (set == null) continue;
+                set.remove(this);
+            }
+            var levelShrines = shrinesByPosition.get(level);
+            for (var hallowPos : hallowPositions) {
+                if (levelShrines.get(hallowPos) == this) levelShrines.remove(hallowPos);
+            }
+            if (!isCombined) {
+                recalculateNetwork(false);
+            }
+        }
+
         public boolean tryDrain(int price, TransientDiagramData data) {
+
+            if(isCombined){
+                for(var shrine : network){
+                    if(shrine.isCombined) continue;
+                    if(shrine.tryDrain(price, data)) return true;
+                }
+                return false;
+            }
+
             if (ShrineHelper.recalculateShrine(this)) return false;
 
             var drainPositions = new HashMap<BlockPos, Integer>();
@@ -737,22 +890,26 @@ public class ShrineHelper {
     }
 
     public static boolean recalculateShrine(Shrine shrine) {
-        var shrinesByLevel = shrinesByPosition.computeIfAbsent(shrine.level, x -> new HashMap<>());
+        if (shrine.isCombined) {
+            for (var child : shrine.network) {
+                if (child.isCombined) {
+                    LOGGER.debug("COMBINED SHRINE IN NETWORK");
+                    continue;
+                }
+                if (recalculateShrine(child)) return true;
+            }
+            return false;
+        }
+        LOGGER.debug("RECALCULATING");
         for (var pos : shrine.hallowPositions) {
             var newshrine = getShrine(shrine.level, pos, shrine.st);
-            if (newshrine == shrine) return false;
-            if (shrinesByLevel.get(pos) == shrine) shrinesByLevel.remove(pos);
-        }
-        for (var chunkPos : shrine.chunkPositions) {
-            var set = shrinesByChunk.get(shrine.level).get(chunkPos);
-            if (set == null || set.isEmpty()) continue;
-            set.remove(shrine);
-            for (var otherShrine : new HashSet<>(set)) {
-                if (otherShrine == shrine) continue;
-                recalculateShrine(otherShrine);
+            if (newshrine == shrine) {
+                LOGGER.debug("SHRINE OK");
+                return false;
             }
-            LOGGER.debug("REMOVING " + shrine.st.label() + " SHRINE FROM RECALCULATE " + chunkPos);
         }
+        LOGGER.debug("CLEANING UP");
+        shrine.cleanup();
         return true;
     }
 
@@ -775,32 +932,20 @@ public class ShrineHelper {
     private static Shrine getShrineInternal(Level level, BlockPos pos, SpiritType st, TransientDiagramData data) {
         var blockPositions = getAllHallows(pos, st, data);
         var shrinesByLevel = shrinesByPosition.computeIfAbsent(level, x -> new HashMap<>());
+        var existingShrine = shrinesByLevel.get(pos);
         if (blockPositions.isEmpty()) {
-            var shrine = shrinesByLevel.get(pos);
-            if (shrine != null) {
-                for (var chunkPos : shrine.chunkPositions) {
-                    var set = shrinesByChunk.get(level).get(chunkPos);
-                    if (set == null) continue;
-                    set.remove(shrine);
-                    LOGGER.debug("REMOVING " + shrine.st.label() + " SHRINE FROM GET " + chunkPos);
-                }
-                shrinesByLevel.remove(pos);
-            }
+            if (existingShrine != null) existingShrine.cleanup();
             return null;
         }
         var totalCapacity = 0;
         for (var h : blockPositions) {
             totalCapacity += data.getPlacedItemTag(h).getInt("capacity");
         }
-        var existingShrine = shrinesByLevel.get(pos);
         if (existingShrine != null && existingShrine.matches(blockPositions, st, totalCapacity)) {
             return existingShrine;
         }
-        var shrine = new Shrine(new HashSet<>(blockPositions), totalCapacity, st, level);
-        for (var p : blockPositions) {
-            shrinesByLevel.put(p, shrine);
-        }
-        return shrine;
+        if (existingShrine != null) existingShrine.cleanup();
+        return new Shrine(new HashSet<>(blockPositions), totalCapacity, st, level, false, null);
     }
 
     public static int onOverdrawOrOverflow(Level level, BlockPos focusPos, SpiritType spiritType, int amount, boolean overdraw, boolean simulate) {
@@ -822,6 +967,8 @@ public class ShrineHelper {
         }
 
         var remainingAmount = amount;
+
+        if(shrine.parentShrine != null) shrine = shrine.parentShrine;
 
         if (overflowBehavior.affectsIndividualBlocks()) {
             for (var i = 0; i < shrine.targetPositions.size(); i++) {
@@ -926,7 +1073,15 @@ public class ShrineHelper {
         return list;
     }
 
-    public static Range getShrineRange(Collection<BlockPos> positions, float capacity) {
+    private static Range getCombinedRange(HashSet<Shrine> network, float capacity) {
+        var positions = new ArrayList<BlockPos>();
+        for (var shrine : network) {
+            positions.addAll(shrine.hallowPositions);
+        }
+        return getShrineRange(positions, capacity, true);
+    }
+
+    public static Range getShrineRange(Collection<BlockPos> positions, float capacity, boolean isCombined) {
         var minX = Integer.MAX_VALUE;
         var minY = Integer.MAX_VALUE;
         var minZ = Integer.MAX_VALUE;
@@ -944,18 +1099,28 @@ public class ShrineHelper {
             maxY = Math.max(maxY, pos.getY());
             maxZ = Math.max(maxZ, pos.getZ());
         }
-        capacity *= 0.25f;
-        var shrineWidth = Math.max(maxX - minX, maxZ - minZ) + 0.1f;
-        var shrineHeight = (maxY - minY) + 0.2f;
+        var center = new Vec3((minX + maxX + 1) / 2f, (minY + maxY + 1) / 2f, (minZ + maxZ + 1) / 2f);
+        capacity = (float) Math.pow(capacity, 1.3f) * 0.25f;
+        var shrineWidth = Math.max(maxX - minX, maxZ - minZ) + 1f;
+        var shrineHeight = (maxY - minY) + 1f;
+        if (maxY == minY && maxZ == minZ) shrineHeight = 0.1f;
         var aspectRatio = shrineWidth / shrineHeight;
-        float r = (float) Math.pow(capacity * aspectRatio / Mth.PI, 1f / 3f);
+        var pow = 3f;
+        float r = (float) Math.pow(capacity * aspectRatio / Mth.PI, 1f / pow);
+        if (isCombined) {
+            var furthestDist = 0d;
+            for (var pos : positions) {
+                furthestDist = Math.max(furthestDist, (pos.distToCenterSqr(center.x, center.y, center.z)));
+            }
+            r = Math.min(r, (float) Math.sqrt(furthestDist)) + 0.5f;
+            aspectRatio = (float) Math.pow(r, pow) * Mth.PI / capacity;
+        }
         if (r < Mth.sqrt(2) / 2) {
             r = Mth.sqrt(2) / 2;
-            aspectRatio = (float) Math.pow(r, 3) * Mth.PI / capacity;
+            aspectRatio = (float) Math.pow(r, pow) * Mth.PI / capacity;
         }
         var h = Math.max(1, Math.round(r / aspectRatio));
         r = Mth.sqrt(capacity / Mth.PI / h);
-        var center = new Vec3((minX + maxX + 1) / 2f, (minY + maxY + 1) / 2f, (minZ + maxZ + 1) / 2f);
         return new Range(center, r, h, minY);
     }
 }

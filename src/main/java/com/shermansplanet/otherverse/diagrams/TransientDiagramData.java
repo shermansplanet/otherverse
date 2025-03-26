@@ -7,9 +7,12 @@ import com.shermansplanet.otherverse.binding.BindingUpdateMessage;
 import com.shermansplanet.otherverse.demesnes.ClaimedDemesneData;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.spirits.HallowUpdateMessage;
+import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
+import com.shermansplanet.otherverse.spirits.Spirits;
 import com.shermansplanet.otherverse.sympathy.SympathyUpdateMessage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -44,6 +47,10 @@ public class TransientDiagramData {
 
     public void putPlacedItemTag(BlockPos pos, CompoundTag tag) {
         placedItemTags.put(pos, tag);
+        var st = Spirits.spiritsByLabel.get(tag.getString("spirit_type"));
+        for(var dir : Direction.values()){
+            ShrineHelper.getShrine(level, pos.relative(dir), st);
+        }
         if (savedData != null) {
             savedData.setDirty();
         }
@@ -93,6 +100,10 @@ public class TransientDiagramData {
     public void removePlacedItemTag(BlockPos pos) {
         if (placedItemTags.remove(pos) == null) {
             return;
+        }
+        var shrine = ShrineHelper.getShrine(level, pos);
+        if(shrine != null){
+            ShrineHelper.recalculateShrine(shrine);
         }
         if (savedData != null) {
             savedData.setDirty();

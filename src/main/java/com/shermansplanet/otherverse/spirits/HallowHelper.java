@@ -40,6 +40,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -151,6 +152,17 @@ public class HallowHelper {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
+    static void trample(BlockEvent.FarmlandTrampleEvent event) {
+        var entity = event.getEntity();
+        if (entity == null) return;
+        for (var spiritType : List.of(Spirits.PROTECTION, Spirits.NATURE)) {
+            if (ShrineHelper.getShrinesFor(entity, spiritType).isEmpty()) continue;
+            event.setCanceled(true);
+            return;
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     static void warDamage(LivingDamageEvent event) {
         if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
         ItemStack item = attacker.getMainHandItem();
@@ -243,7 +255,8 @@ public class HallowHelper {
             tag.putBoolean("shrine", true);
             data.putPlacedItemTag(pos, tag);
             var focus = data.allBlockFoci.get(pos);
-            if(focus != null && event.getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, focus.getDiagram());
+            if (focus != null && event.getLevel() instanceof ServerLevel sl)
+                DiagramManager.markDiagramActive(sl, focus.getDiagram());
         }
         if (event.getLevel() instanceof ServerLevel sl) {
             ShrineHelper.getShrine(sl, event.getPos());
@@ -283,13 +296,13 @@ public class HallowHelper {
             hallowTag.putString("spirit_type", blockSpiritType.label());
             if (isSpiritTablet) {
                 var drained = drainBlockHallow(sl, event.getPos(), itemSpiritType, Integer.MAX_VALUE, false, false);
-                if(drained == 0) return;
+                if (drained == 0) return;
                 hallowTag.putInt("capacity", drained);
                 stack.shrink(1);
                 var newstack = new ItemStack(Spirits.spiritItems.get(itemSpiritType).get(), 1);
                 newstack.getOrCreateTag().put("hallow", hallowTag);
                 var player = event.getEntity();
-                if(stack.getCount() == 0){
+                if (stack.getCount() == 0) {
                     player.getInventory().removeItem(stack);
                 }
                 if (!player.addItem(newstack)) {
@@ -311,7 +324,7 @@ public class HallowHelper {
             if (depositing) {
                 spiritCount -= fillBlockHallow(sl, event.getPos(), itemSpiritType,
                         Math.min(otherCapacity, spiritCount), false, false);
-            }else{
+            } else {
                 spiritCount += drainBlockHallow(sl, event.getPos(), itemSpiritType,
                         Math.min(spiritCapacity - spiritCount, otherAmount), false, false);
             }
@@ -621,7 +634,7 @@ public class HallowHelper {
             }
         }
 
-        if(!simulate && remainingAmount < amount){
+        if (!simulate && remainingAmount < amount) {
             for (BlockPos sourcePos : hallowPositions) {
                 var otherFocus = data.allBlockFoci.get(sourcePos);
                 if (otherFocus == null || !(level instanceof ServerLevel sl)) continue;
@@ -633,7 +646,7 @@ public class HallowHelper {
             return 0;
         }
 
-        if(!simulate) {
+        if (!simulate) {
             for (var drainPosition : drainPositions.entrySet()) {
                 var shrineTag = data.getPlacedItemTag(drainPosition.getKey());
                 shrineTag.putInt("spirit_count", shrineTag.getInt("spirit_count") + drainPosition.getValue());

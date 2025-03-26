@@ -38,7 +38,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -70,24 +69,24 @@ public class PlacedHallowRenderer {
         shrinesToRender.clear();
     }
 
-    @SubscribeEvent
+    /*@SubscribeEvent
     public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         var level = Minecraft.getInstance().level;
         if (level == null || level.getGameTime() % 5 != 0) return;
-        if(SightManager.shouldRenderSight()) {
+        if (SightManager.shouldRenderSight()) {
             for (var shrine : shrinesToRender) {
                 ShrineHelper.recalculateShrine(shrine);
             }
         }
-    }
+    }*/
 
     private static void renderHallows(LocalPlayer player, RenderLevelStageEvent event) {
         var levelData = DiagramManager.getOrCreateLevelData(player.level);
         var poseStack = event.getPoseStack();
         var camera = event.getCamera();
         poseStack.pushPose();
-        var s = 0.9999f;
+        var s = 0.999f;
         poseStack.scale(s, s, s);
         poseStack.translate(-camera.getPosition().x(), -camera.getPosition().y(), -camera.getPosition().z());
         var multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -111,7 +110,7 @@ public class PlacedHallowRenderer {
             if (shrine == null) {
                 shrine = ShrineHelper.getShrine(player.level, pos, Spirits.spiritsByLabel.get(st));
             }
-            shrinesToRender.add(shrine);
+            shrinesToRender.add(shrine.parentShrine == null ? shrine : shrine.parentShrine);
         }
 
         if (!renderShrineBounds) {
@@ -122,6 +121,9 @@ public class PlacedHallowRenderer {
         var dir1 = new Vec3(1, 0, 0);
         var dir2 = new Vec3(0, 0, 1);
         var rot = (event.getRenderTick() + event.getPartialTick()) * 0.003f;
+
+        var t = (player.level.getGameTime() + Minecraft.getInstance().getPartialTick()) / 20f;
+
         for (var shrine : shrinesToRender) {
             var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
             if (behavior == null) continue;
@@ -134,10 +136,38 @@ public class PlacedHallowRenderer {
                 case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
             };
             poseStack.translate(range.center().x, cylinderTop, range.center().z);
+            var r = shrine.isCombined ? (int)((Math.sin(t) + 1) * 128) : 255;
+            var g = shrine.isCombined ? (int)((Math.sin(t + Math.PI * 2 / 3) + 1) * 128) : 255;
+            var b = shrine.isCombined ? (int)((Math.sin(t + Math.PI * 4 / 3) + 1) * 128) : 255;
             ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
-                    rot, 255, 255, 255, 100, range.height());
+                    rot, r, g, b, 100, range.height());
             poseStack.popPose();
         }
+
+/*        var levelShrines = ShrineHelper.shrinesByChunk.computeIfAbsent(player.level, x -> new HashMap<>());
+
+        for (var chunkShrines : levelShrines.values()) {
+            for (var shrine : chunkShrines) {
+                if (shrinesToRender.contains(shrine)) continue;
+                var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
+                if (behavior == null) continue;
+                poseStack.pushPose();
+                var range = shrine.range;
+                var shape = behavior.getShape();
+                var cylinderTop = switch (shape) {
+                    case BELOW -> range.bottom();
+                    case ABOVE -> range.bottom() + range.height();
+                    case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
+                };
+                poseStack.translate(range.center().x, cylinderTop, range.center().z);
+                var r = 0;
+                var g = shrine.isCombined ? 50 : 255;
+                var b = shrine.isCombined ? 200 : 255;
+                ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
+                        rot, r, g, b, 100, range.height());
+                poseStack.popPose();
+            }
+        }*/
 
         poseStack.popPose();
     }

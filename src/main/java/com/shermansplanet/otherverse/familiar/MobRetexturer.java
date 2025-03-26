@@ -96,7 +96,6 @@ public class MobRetexturer {
     }
 
     public static ResourceLocation retextureMob(ResourceLocation originalTextureLoc, String spiritType) {
-        LOGGER.debug("MAKING SPLIT PALETTE : " + spiritType);
         var spiritPalettes = spiritPaletteCache.computeIfAbsent(spiritType, MobRetexturer::paletteFromSpiritSplit);
         var originalTexture = getNativeImage(originalTextureLoc);
         var originalPalettes = new Palette(Collections.singleton(originalTexture));
@@ -360,8 +359,6 @@ public class MobRetexturer {
             for (var palette : palettes) {
                 palette.sort(Comparator.comparingInt(p -> -p.y));
                 palette.sort(Comparator.comparingDouble(Pixel::getPerceptualBrightnessSqr));
-                LOGGER.debug("COUNT: " + palette.size());
-                LOGGER.debug("FROM " + palette.get(0).makStr() + " TO " + palette.get(palette.size()-1).makStr());
             }
             palettes.sort((a, b) -> Integer.compare(b.size(), a.size()));
         }

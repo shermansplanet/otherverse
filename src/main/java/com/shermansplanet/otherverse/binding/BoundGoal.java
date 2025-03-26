@@ -32,7 +32,6 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Shulker;
-import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
@@ -215,7 +214,6 @@ public class BoundGoal extends Goal {
         }
         if (mob.level instanceof ServerLevel sl) {
             mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
-            if (mob instanceof PiglinBrute pb) pb.getBrain().tick(sl, pb);
         }
         if (FamiliarManager.isFamiliar(mob)) return;
         if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType())) {

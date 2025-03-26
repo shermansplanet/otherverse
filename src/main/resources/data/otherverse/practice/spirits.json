@@ -67,7 +67,7 @@
 		"minecraft:deepslate_coal_ore" : ["3 fortune"],
 		"minecraft:glow_lichen" : ["7 light"],
 		"minecraft:fire_charge" : ["27 fire"],
-		"minecraft:coal_ore" : ["3 fortune", "3 fortune"],
+		"minecraft:coal_ore" : ["3 fortune"],
 		"minecraft:map" : ["9 fate"],
 		"minecraft:warped_hyphae" : ["3 nether"],
 		"minecraft:redstone_ore" : ["9 fortune"],

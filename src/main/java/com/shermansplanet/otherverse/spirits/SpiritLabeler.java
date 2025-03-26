@@ -54,9 +54,19 @@ public class SpiritLabeler {
                     for (var component : components) {
                         if (component.data == null) return false;
                     }
+                    Set<Item> itemsWithoutSpirits = new HashSet<>();
+                    itemsWithoutSpirits.add(OtherverseItems.CHALK.get());
+                    itemsWithoutSpirits.add(OtherverseItems.CHARCOAL_STICK.get());
+                    itemsWithoutSpirits.add(OtherverseItems.SELF.get());
+                    itemsWithoutSpirits.add(OtherverseItems.SPIRIT_TABLET.get());
+                    itemsWithoutSpirits.add(OtherverseItems.IDOL.get());
+                    for(var item : Spirits.spiritItems.values()){
+                        itemsWithoutSpirits.add(item.get());
+                    }
                     data = new HashMap<>();
                     for (var component : Arrays.stream(components).map(t -> (HashMap<Item, SpiritLabeler.SpiritAmount[]>) t.data).toList()) {
                         for (var itemAmount : component.entrySet()) {
+                            if(itemsWithoutSpirits.contains(itemAmount.getKey())) continue;
                             var table = data.computeIfAbsent(itemAmount.getKey(), x -> new Hashtable<>());
                             for (var spiritAmount : itemAmount.getValue()) {
                                 if (spiritAmount.amount() == 0) continue;
