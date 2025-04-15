@@ -11,6 +11,7 @@
     "item.otherverse.writ": "Writ",
     "item.otherverse.escape_rope": "Escape Rope",
     "item.otherverse.charcoal_stick": "Charcoal Stick",
+    "item.otherverse.realm_wracked_coal" : "Realm-Wracked Coal",
 
     "item.otherverse.spindle_black": "Black Spindle",
     "item.otherverse.spindle_blue": "Blue Spindle",
@@ -49,6 +50,8 @@
     "block.otherverse.cinnabar_block" : "Cinnabar Block",
     "item.otherverse.demesne_beacon" : "Demesnes Beacon",
     "block.otherverse.demesne_beacon" : "Demesnes Beacon",
+    "item.otherverse.biome_brazier" : "Biome Brazier",
+    "block.otherverse.biome_brazier" : "Biome Brazier",
 
     "effect.otherverse.heaviness" : "Heaviness",
     "effect.otherverse.familiar_blessing" : "Familiar's Blessing",

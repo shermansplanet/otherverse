@@ -6,15 +6,15 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Your Familiar is now inextricably linked to you, and no longer needs a binding diagram. When you press the Familiar key ('r' by default), you will summon it to your side from wherever it may be. You can even summon your Familiar back from death itself this way, but there is a price."
+            "text": "Your Familiar is now inextricably linked to you, and no longer needs a binding diagram. When you press the Familiar key ('r' by default), you will summon it to your side from wherever it may be. You can even summon your Familiar back from death itself this way, but there is a price. If summoned into a small space, your Familiar will shrink to fit."
         },
         {
             "type": "patchouli:text",
-            "text": "You can give your Familiar contracts as if it were a bound mob. You can also right-click it with an empty hand to switch between simpler behaviors as though it were a tamed mob.$(br2)Aquatic Familiars will not suffocate on land, and sunlight-sensitive Familiars will not burn in sun."
+            "text": "You can give your Familiar contracts as if it were a bound mob. You can also right-click it with an empty hand to switch between simpler behaviors as though it were a tamed mob.$(br2)Aquatic Familiars will not suffocate on land, and sunlight-sensitive Familiars will not burn in sun. Familiars are immune to zombification."
         },
         {
             "type": "patchouli:text",
-            "text": "If your Familiar is resistant to fire, you will gain permanent fire resistance. However, you will be damaged by water. Wearing a helmet will mostly protect you from rain.$(br2)If your Familiar is aquatic, you will gain permanent water breathing."
+            "text": "If your Familiar is resistant to fire, you will gain permanent fire immunity but be damaged by water. Wearing a helmet will mostly protect you from rain.$(br2)Aquatic Familiars grant permanent water breathing.$(br2)Flying Familiars grant flight of various sorts, noted in their sections."
         },
         {
             "type": "patchouli:text",

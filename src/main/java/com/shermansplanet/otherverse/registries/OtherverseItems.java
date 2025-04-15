@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.registries;
 
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.artifacts.RealmWrackedCoalItem;
 import com.shermansplanet.otherverse.binding.ContractItem;
 import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.demesnes.EscapeRopeItem;
@@ -72,6 +73,8 @@ public class OtherverseItems {
     public static final RegistryObject<Item> IDOL = ITEMS.register("idol", IdolItem::new);
     public static final RegistryObject<Item> SPAWN_ALTAR = ITEMS.register("spawn_altar",
             () -> new BlockItem(OtherverseBlocks.SPAWN_ALTAR.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+    public static final RegistryObject<Item> BIOME_BRAZIER = ITEMS.register("biome_brazier",
+            () -> new BlockItem(OtherverseBlocks.BIOME_BRAZIER.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
     public static final RegistryObject<Item> CINNABAR_BLOCK = ITEMS.register("cinnabar_block",
             () -> new BlockItem(OtherverseBlocks.CINNABAR_BLOCK.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
     public static final RegistryObject<Item> DEMESNE_BEACON = ITEMS.register("demesne_beacon",
@@ -84,6 +87,8 @@ public class OtherverseItems {
             () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> SPIRIT_TABLET = ITEMS.register("spirit_tablet",
             () -> new Item(new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+    public static final RegistryObject<Item> REALM_WRACKED_COAL = ITEMS.register("realm_wracked_coal",
+            () -> new RealmWrackedCoalItem(new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
 
     public static final RegistryObject<Item> PLUM_BRICKS_ITEM = ITEMS.register("plum_bricks",
             () -> new BlockItem(OtherverseBlocks.PLUM_BRICKS.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));

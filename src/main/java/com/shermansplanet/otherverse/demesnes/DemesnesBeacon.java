@@ -11,7 +11,6 @@ import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Structures;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -84,53 +83,10 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
             else if (isSurroundedBy(sl, getBlockPos(), Blocks.FARMLAND)) spiritType = Spirits.FOOD;
             else if (blockBelow.is(Blocks.GOLD_BLOCK) || blockBelow.is(Blocks.EMERALD_BLOCK))
                 spiritType = Spirits.FORTUNE;
-            else if (biome.is(Biomes.DEEP_DARK)) spiritType = Spirits.DARK;
             else if (isSurroundedBy(sl, getBlockPos(), Blocks.GLOWSTONE)) spiritType = Spirits.LIGHT;
-            else if (biome.is(Biomes.SOUL_SAND_VALLEY)) spiritType = Spirits.DEATH;
-            else if (biome.is(Biomes.GROVE)) spiritType = Spirits.FOOD;
-            else if (biome.is(Biomes.OLD_GROWTH_BIRCH_FOREST)
-                    || biome.is(Biomes.OLD_GROWTH_PINE_TAIGA)
-                    || biome.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)) spiritType = Spirits.TIME;
             else if (levelName.equals("overworld") && getBlockPos().getY() < depthCutoff) spiritType = Spirits.EARTH;
             else if (levelName.equals("overworld") && getBlockPos().getY() > 190) spiritType = Spirits.AIR;
-            else spiritType = MobBindingInfluenceUtils.getSpiritType(biome.tags().toList());
-
-            if (spiritType == null) {
-                var keyMaybe = biome.unwrap();
-                var biomeName = "";
-                if (keyMaybe.left().isPresent()) {
-                    biomeName = keyMaybe.left().get().location().getPath();
-                } else if (keyMaybe.right().isPresent()) {
-                    biomeName = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
-                }
-                for (var part : biomeName.split("_")) {
-                    for (var spiritName : Spirits.spiritsByLabel.keySet()) {
-                        if (part.startsWith(spiritName)) spiritType = Spirits.spiritsByLabel.get(spiritName);
-                    }
-                }
-            }
-            if (spiritType == null) {
-                spiritType = switch (levelName) {
-                    case "overworld" -> Spirits.OVERWORLD;
-                    case "the_nether" -> Spirits.NETHER;
-                    case "the_end" -> Spirits.END;
-                    default -> null;
-                };
-            }
-
-            if (spiritType == Spirits.OVERWORLD) {
-                for (var category : biome.get().getMobSettings().getSpawnerTypes()) {
-                    for (var spawnerData : biome.get().getMobSettings().getMobs(category).unwrap()) {
-                        var spirit = MobBindingInfluenceUtils.mobSpirits.get(spawnerData.type);
-                        if (spirit != Spirits.NATURE) continue;
-                        spiritType = Spirits.NATURE;
-                        break;
-                    }
-                }
-            }
-
-            if (biome.is(Biomes.WINDSWEPT_HILLS)
-                    || biome.is(Biomes.WINDSWEPT_GRAVELLY_HILLS)) spiritType = Spirits.OVERWORLD;
+            else spiritType = MobBindingInfluenceUtils.getSpiritTypes(biome, sl).get(0);
 
             demesneData = DemesnesManager.getData(sl, getBlockPos());
             if (demesneData != null) {

@@ -41,6 +41,8 @@ public class FamiliarNameTagItem extends NameTagItem {
         var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
         if (binding == null || binding.mob != entity) return InteractionResult.PASS;
         var diagram = binding.getFocus().getDiagram();
+        var blockFocus = data.allBlockFoci.get(entity.blockPosition());
+        if (blockFocus != null) diagram = blockFocus.getDiagram();
         var playerSet = new HashSet<EntityType<?>>();
         playerSet.add(EntityType.PLAYER);
         var requiredPower = (int) (entity.getMaxHealth() / 2);

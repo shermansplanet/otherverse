@@ -1,11 +1,12 @@
 package com.shermansplanet.otherverse.registries;
 
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.artifacts.BiomeBrazierBlock;
+import com.shermansplanet.otherverse.artifacts.SpawnAltarBlock;
 import com.shermansplanet.otherverse.demesnes.DemesnesBeaconBlock;
 import com.shermansplanet.otherverse.demesnes.DemesnesPortalBlock;
 import com.shermansplanet.otherverse.diagrams.ChalkLineBlock;
 import com.shermansplanet.otherverse.diagrams.SlateScaffoldingBlock;
-import com.shermansplanet.otherverse.spawning.SpawnAltarBlock;
 import com.shermansplanet.otherverse.sympathy.FateWebBlock;
 import com.shermansplanet.otherverse.sympathy.SelectorBlock;
 import net.minecraft.world.level.block.AmethystClusterBlock;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -42,6 +44,9 @@ public class OtherverseBlocks {
                     BlockBehaviour.Properties.copy(Blocks.BONE_BLOCK)));*/
     public static final RegistryObject<Block> SPAWN_ALTAR = BLOCKS.register("spawn_altar",
             () -> new SpawnAltarBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BARS)));
+    public static final RegistryObject<Block> BIOME_BRAZIER = BLOCKS.register("biome_brazier",
+            () -> new BiomeBrazierBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BARS).lightLevel(
+                    (p_50763_) -> p_50763_.getValue(BlockStateProperties.LIT) ? 15 : 0)));
     public static final RegistryObject<Block> CINNABAR_BLOCK = BLOCKS.register("cinnabar_block",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.AMETHYST_BLOCK)));
     public static final RegistryObject<Block> DEMESNE_BEACON = BLOCKS.register("demesne_beacon",

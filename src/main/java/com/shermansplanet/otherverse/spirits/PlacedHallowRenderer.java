@@ -86,7 +86,7 @@ public class PlacedHallowRenderer {
         var poseStack = event.getPoseStack();
         var camera = event.getCamera();
         poseStack.pushPose();
-        var s = 0.999f;
+        var s = 0.995f;
         poseStack.scale(s, s, s);
         poseStack.translate(-camera.getPosition().x(), -camera.getPosition().y(), -camera.getPosition().z());
         var multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();

@@ -40,6 +40,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
+import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.*;
 
@@ -158,7 +159,6 @@ public class BindingRenderer {
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         var isFamiliar = familiars.containsKey(mob.getUUID());
-        Vec3 eyePos = mob.getEyePosition().subtract(mob.position());
         var upnudge = 0.5f;
         if (mob.shouldShowName() && mob.hasCustomName()) {
             double d0 = entityRenderDispatcher.distanceToSqr(mob);
@@ -169,7 +169,7 @@ public class BindingRenderer {
         if (bigHeadMobs.contains(mob.getType())) {
             upnudge += 0.5f;
         }
-        pose.translate(eyePos.x, eyePos.y + upnudge, eyePos.z);
+        pose.translate(0, mob.getBbHeight() / ScaleTypes.HEIGHT.getScaleData(mob).getScale() + upnudge, 0);
         long millis = System.currentTimeMillis();
         float rot = (contractEntities.contains(mob.getUUID()) || isFamiliar) ? (millis % 3600) / 10f : -mob.yHeadRot;
         var s = 10f / 16f;

@@ -38,6 +38,13 @@ public abstract class LivingEntityInjector extends Entity implements net.minecra
         return getHurtSound(src);
     }
 
+    @Shadow
+    protected SoundEvent getDeathSound() {return SoundEvents.GENERIC_DEATH;}
+
+    public SoundEvent publicGetDeathSound() {
+        return getDeathSound();
+    }
+
     @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
     public void onClimbableInject(CallbackInfoReturnable<Boolean> ci) {
         if(self().getType() != EntityType.PLAYER) return;

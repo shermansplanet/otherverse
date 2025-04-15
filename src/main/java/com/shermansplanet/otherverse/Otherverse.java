@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.artifacts.BiomeBrazierBlockEntity;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.binding.LootHelper;
@@ -21,8 +22,8 @@ import com.shermansplanet.otherverse.potions.OtherversePotions;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.resources.OtherverseFeatureGen;
-import com.shermansplanet.otherverse.spawning.SpawnAltarBlockEntity;
-import com.shermansplanet.otherverse.spawning.SpawnAltarRenderer;
+import com.shermansplanet.otherverse.artifacts.SpawnAltarBlockEntity;
+import com.shermansplanet.otherverse.artifacts.SpawnAltarRenderer;
 import com.shermansplanet.otherverse.spirits.*;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -112,6 +113,9 @@ public class Otherverse {
     public static final RegistryObject<BlockEntityType<SpawnAltarBlockEntity>> SPAWN_ALTAR_ENTITY =
             BLOCK_ENTITIES.register("spawn_altar",
                     () -> BlockEntityType.Builder.of(SpawnAltarBlockEntity::new, OtherverseBlocks.SPAWN_ALTAR.get()).build(null));
+    public static final RegistryObject<BlockEntityType<BiomeBrazierBlockEntity>> BIOME_BRAZIER_ENTITY =
+            BLOCK_ENTITIES.register("biome_brazier",
+                    () -> BlockEntityType.Builder.of(BiomeBrazierBlockEntity::new, OtherverseBlocks.BIOME_BRAZIER.get()).build(null));
 
     public static final RegistryObject<BlockEntityType<DemesnesBeacon>> DEMESNES_BEACON_ENTITY =
             BLOCK_ENTITIES.register("demesnes_beacon",

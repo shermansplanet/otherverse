@@ -4,6 +4,7 @@ import com.ibm.icu.impl.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
+import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
@@ -164,7 +165,10 @@ public class ShrineHelper {
             public int overflowBlock(BlockPos pos, Level level, int amount, boolean simulate) {
                 if (!level.isEmptyBlock(pos)) return 0;
                 //if (amount < 3) {
-                if (!simulate) level.setBlockAndUpdate(pos, Blocks.DIRT.defaultBlockState());
+                if (!simulate) {
+                    level.setBlockAndUpdate(pos, Blocks.DIRT.defaultBlockState());
+                    level.playSound(null, pos, SoundEvents.GRAVEL_PLACE, SoundSource.BLOCKS, 1, 1);
+                }
                 return 1;
                 /*}
                 if (amount < 7) {
@@ -368,6 +372,10 @@ public class ShrineHelper {
             @Override
             public int overdrawBlock(BlockPos pos, Level level, int amount, boolean simulate) {
                 var bs = level.getFluidState(pos);
+                if(bs.is(Fluids.FLOWING_WATER)){
+                    if (!simulate) level.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
+                    return 1;
+                }
                 if (bs.is(Fluids.WATER)) {
                     if (!simulate) level.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
                     return waterSpiritAmount();
@@ -988,6 +996,12 @@ public class ShrineHelper {
                     break;
                 }
                 var pos = shrine.targetPositions.get(newIndex);
+                if(level instanceof ServerLevel sl) {
+                    var demesne = DemesnesManager.getData(sl, pos);
+                    if(demesne != null && !demesne.hasSanction(DemesnesManager.DemesnePerk.SANCTION_BUILD, null)){
+                        continue;
+                    }
+                }
                 if (pos.getY() < level.getMinBuildHeight() || pos.getY() > level.getMaxBuildHeight()) continue;
                 var transferred = overflowBehavior.affectBlock(pos, level, remainingAmount, overdraw, simulate);
                 remainingAmount -= transferred;

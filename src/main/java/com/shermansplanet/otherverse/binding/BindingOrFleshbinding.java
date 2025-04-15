@@ -89,15 +89,21 @@ public class BindingOrFleshbinding {
             int newHealth = currentHealth + delta;
             idolTag.putFloat("Health", newHealth);
             if (delta < 0) {
+                var isDead = newHealth <= 0;
                 var instance = IdolRenderer.renderEntities.get(entityType);
                 if (instance instanceof LivingEntity le) {
-                    sl.playSound(null, position, ((ISoundGetter) le).publicGetHurtSound(DamageSource.GENERIC), SoundSource.NEUTRAL, 1, 1);
+                    var sound = isDead ? ((ISoundGetter) le).publicGetDeathSound()
+                            : ((ISoundGetter) le).publicGetHurtSound(DamageSource.GENERIC);
+                    sl.playSound(null, position, sound, SoundSource.NEUTRAL, 1, 1);
                     sl.sendParticles(ParticleTypes.DAMAGE_INDICATOR,
                             position.getX() + 0.5,
                             position.getY() + 0.3,
                             position.getZ() + 0.5,
                             1, 0, 0, 0, 0.1
                     );
+                }
+                if (isDead) {
+                    circle.removeItem();
                 }
             }
         } else {

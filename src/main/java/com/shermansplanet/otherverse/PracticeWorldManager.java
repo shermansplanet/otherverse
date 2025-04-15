@@ -94,9 +94,16 @@ public class PracticeWorldManager {
     }
 
     private static void tryUpdatePlayers() {
-        if (SpiritLabeler.SPIRIT_TYPE_OF.data == null) return;
-        if (SpiritTransfusions.ALL_SPIRIT_TRANSFUSIONS.data == null) return;
-        if (MobTransfusions.ALL_MOB_TRANSFUSIONS.data == null) return;
+        if (SpiritLabeler.SPIRIT_TYPE_OF.data == null) {
+            LOGGER.debug("WORLD MANAGER: NO SPIRIT TYPES");
+        }
+        if (SpiritTransfusions.ALL_SPIRIT_TRANSFUSIONS.data == null) {
+            LOGGER.debug("WORLD MANAGER: NO SPIRIT TRANSFUSIONS");
+        }
+        if (MobTransfusions.ALL_MOB_TRANSFUSIONS.data == null) {
+            LOGGER.debug("WORLD MANAGER: NO MOB TRANSFUSIONS");
+        }
+        if(SpiritLabeler.SPIRIT_TYPE_OF.data == null || SpiritTransfusions.ALL_SPIRIT_TRANSFUSIONS.data == null || MobTransfusions.ALL_MOB_TRANSFUSIONS.data == null) return;
         worldSetUp = true;
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () ->
                 OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), getUpdateMessage())

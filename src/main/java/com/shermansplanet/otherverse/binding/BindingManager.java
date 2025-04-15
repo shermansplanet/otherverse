@@ -11,7 +11,7 @@ import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
-import com.shermansplanet.otherverse.spawning.SpawnAltarManager;
+import com.shermansplanet.otherverse.artifacts.ArtifactManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -454,7 +454,7 @@ public class BindingManager {
 
         if (event.getEntity().isCreative() && item.is(OtherverseItems.SPAWN_ALTAR.get())) {
             event.setResult(Event.Result.ALLOW);
-            SpawnAltarManager.setEntity(item, target.getType());
+            ArtifactManager.setEntity(item, target.getType());
             return;
         }
 

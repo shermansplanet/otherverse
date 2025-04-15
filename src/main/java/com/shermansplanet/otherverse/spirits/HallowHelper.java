@@ -42,6 +42,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.level.PistonEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -148,6 +149,33 @@ public class HallowHelper {
             entity.removeAllEffects();
             event.setCanceled(true);
             return;
+        }
+    }
+
+    @SubscribeEvent
+    static void onPush(PistonEvent.Pre event) {
+        if (event.getLevel().isClientSide()) return;
+        LOGGER.debug(event.getPistonMoveType() == PistonEvent.PistonMoveType.EXTEND ? "EXTENDING" : "RETRACTING");
+        var structureHelper = event.getStructureHelper();
+        if (structureHelper == null) return;
+        structureHelper.resolve();
+        var data = DiagramManager.getOrCreateLevelData((Level) event.getLevel());
+        for (var pos : structureHelper.getToDestroy()) {
+            data.removePlacedItemTag(pos);
+        }
+        var tagsByPosition = new HashMap<BlockPos, CompoundTag>();
+        //LOGGER.debug("toPush: " + structureHelper.getToPush().size());
+        for (var pos : structureHelper.getToPush()) {
+            //LOGGER.debug("pushing: " + pos);
+            var tag = data.getPlacedItemTag(pos);
+            if (tag == null) continue;
+            tagsByPosition.put(pos, tag);
+            data.removePlacedItemTag(pos);
+        }
+        //LOGGER.debug("positions: " + tagsByPosition.size());
+        for (var pos : tagsByPosition.keySet()) {
+            var dest = pos.relative(structureHelper.getPushDirection());
+            data.putPlacedItemTag(dest, tagsByPosition.get(pos));
         }
     }
 

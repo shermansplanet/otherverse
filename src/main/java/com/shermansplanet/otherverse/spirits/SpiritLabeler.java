@@ -51,6 +51,10 @@ public class SpiritLabeler {
             ) {
                 @Override
                 public boolean synthesize() {
+                    LOGGER.debug("SPIRIT LABELER: SYNTHESIZING");
+                    if(SPIRITS_FROM_TAGS.data == null) LOGGER.debug("NO SPIRITS FROM TAGS");
+                    if(SPIRITS_FROM_COLORS.data == null) LOGGER.debug("NO SPIRITS FROM COLORS");
+                    if(SPIRITS_FROM_JSON.data == null) LOGGER.debug("NO SPIRITS FROM JSON");
                     for (var component : components) {
                         if (component.data == null) return false;
                     }
@@ -75,6 +79,7 @@ public class SpiritLabeler {
                             }
                         }
                     }
+                    LOGGER.debug("SPIRIT LABELER: SYNTHESIZED");
                     return true;
                 }
             };

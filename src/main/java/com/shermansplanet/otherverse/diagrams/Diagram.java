@@ -1,10 +1,10 @@
 package com.shermansplanet.otherverse.diagrams;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.artifacts.ArtifactManager;
 import com.shermansplanet.otherverse.binding.*;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
-import com.shermansplanet.otherverse.spawning.SpawnAltarManager;
 import com.shermansplanet.otherverse.spirits.FleshTechManager;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritTransfusions;
@@ -193,7 +193,7 @@ public class Diagram {
             SpiritTransfusions.tryTransfuse(level, focus, this);
             DemesnesManager.tryGrowArchitecture(level, focus, this);
 
-            needsReactivation = SpawnAltarManager.trySpawn(level, focus, this);
+            needsReactivation = ArtifactManager.trySpawn(level, focus, this);
         }
         return needsReactivation;
     }

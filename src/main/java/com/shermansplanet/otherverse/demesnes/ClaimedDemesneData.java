@@ -227,9 +227,10 @@ public class ClaimedDemesneData {
     }
 
     public boolean hasSanction(DemesnesManager.DemesnePerk perk, ServerPlayer recipient) {
-        if (recipient.getAbilities().instabuild || Objects.equals(recipient.getGameProfile().getName(), practitioner))
+        if (recipient != null && (recipient.getAbilities().instabuild || Objects.equals(recipient.getGameProfile().getName(), practitioner)))
             return true;
         if (getPerkLevel(perk) == 0) return true;
+        if (recipient == null) return false;
         var name = recipient.getGameProfile().getName();
         var writs = writsByPlayer.get(name);
         if (writs == null) return false;

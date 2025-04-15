@@ -1,4 +1,4 @@
-package com.shermansplanet.otherverse.spawning;
+package com.shermansplanet.otherverse.artifacts;
 
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;

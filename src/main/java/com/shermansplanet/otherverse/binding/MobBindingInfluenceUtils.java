@@ -16,6 +16,7 @@ import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
@@ -32,6 +33,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
@@ -151,7 +153,7 @@ public class MobBindingInfluenceUtils {
         }*/
     }
 
-    public static String getNatureString(Holder<Biome> biome){
+    public static String getNatureString(Holder<Biome> biome) {
         for (var category : biome.get().getMobSettings().getSpawnerTypes()) {
             for (var spawnerData : biome.get().getMobSettings().getMobs(category).unwrap()) {
                 var spirit = MobBindingInfluenceUtils.mobSpirits.get(spawnerData.type);
@@ -174,6 +176,93 @@ public class MobBindingInfluenceUtils {
         if (tags.contains(Tags.Biomes.IS_HOT) && tags.contains(Tags.Biomes.IS_DRY)) return Spirits.PHLOGISTON;
         if (tags.contains(BiomeTags.IS_OVERWORLD)) return Spirits.OVERWORLD;
         return null;
+    }
+
+    private static final HashMap<ResourceKey<Biome>, SpiritType> biomeSpirits = new HashMap<>();
+
+    static {
+        biomeSpirits.put(Biomes.DEEP_DARK, Spirits.DARK);
+        biomeSpirits.put(Biomes.SOUL_SAND_VALLEY, Spirits.DEATH);
+        biomeSpirits.put(Biomes.GROVE, Spirits.FOOD);
+        biomeSpirits.put(Biomes.OLD_GROWTH_SPRUCE_TAIGA, Spirits.TIME);
+        biomeSpirits.put(Biomes.OLD_GROWTH_BIRCH_FOREST, Spirits.TIME);
+        biomeSpirits.put(Biomes.OLD_GROWTH_PINE_TAIGA, Spirits.TIME);
+    }
+
+    public static List<SpiritType> getSpiritTypes(Holder<Biome> biome, ServerLevel level) {
+        var tags = biome.tags().toList();
+
+        var spiritTypes = new ArrayList<SpiritType>();
+        var hasDimensionSpirit = false;
+
+        if (tags.contains(Tags.Biomes.IS_MAGICAL)) spiritTypes.add(Spirits.FATE);
+        if (tags.contains(Tags.Biomes.IS_DEAD)) spiritTypes.add(Spirits.DEATH);
+        if (tags.contains(Tags.Biomes.IS_LUSH)) spiritTypes.add(Spirits.NATURE);
+        if (tags.contains(BiomeTags.IS_END)) {
+            hasDimensionSpirit = true;
+            spiritTypes.add(Spirits.END);
+        }
+        if (tags.contains(BiomeTags.IS_NETHER)) {
+            hasDimensionSpirit = true;
+            spiritTypes.add(Spirits.NETHER);
+        }
+        if (tags.contains(BiomeTags.IS_OCEAN)) spiritTypes.add(Spirits.WATER);
+        if (tags.contains(BiomeTags.IS_RIVER)) spiritTypes.add(Spirits.WATER);
+        if (tags.contains(Tags.Biomes.IS_UNDERGROUND)) spiritTypes.add(Spirits.EARTH);
+        if (tags.contains(Tags.Biomes.IS_COLD)) spiritTypes.add(Spirits.COLD);
+        if (tags.contains(Tags.Biomes.IS_HOT) && tags.contains(Tags.Biomes.IS_DRY)
+                && !tags.contains(BiomeTags.IS_NETHER)) spiritTypes.add(Spirits.PHLOGISTON);
+        if (tags.contains(BiomeTags.IS_OVERWORLD)) {
+            hasDimensionSpirit = true;
+            spiritTypes.add(Spirits.OVERWORLD);
+        }
+
+        var keyMaybe = biome.unwrap();
+        var biomeName = "";
+        if (keyMaybe.left().isPresent()) {
+            biomeName = keyMaybe.left().get().location().getPath();
+        } else if (keyMaybe.right().isPresent()) {
+            biomeName = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
+        }
+        for (var part : biomeName.split("_")) {
+            for (var spiritName : Spirits.spiritsByLabel.keySet()) {
+                if (part.equals(spiritName)) spiritTypes.add(Spirits.spiritsByLabel.get(spiritName));
+            }
+        }
+
+        if (!hasDimensionSpirit) {
+            var levelName = level.dimensionTypeId().location().getPath();
+            hasDimensionSpirit = true;
+            switch (levelName) {
+                case "overworld" -> spiritTypes.add(Spirits.OVERWORLD);
+                case "the_nether" -> spiritTypes.add(Spirits.NETHER);
+                case "the_end" -> spiritTypes.add(Spirits.END);
+                default -> hasDimensionSpirit = false;
+            }
+        }
+
+        if (!biome.is(Biomes.WINDSWEPT_HILLS) && biome.is(Biomes.WINDSWEPT_GRAVELLY_HILLS)) {
+            for (var category : biome.get().getMobSettings().getSpawnerTypes()) {
+                for (var spawnerData : biome.get().getMobSettings().getMobs(category).unwrap()) {
+                    var spirit = MobBindingInfluenceUtils.mobSpirits.get(spawnerData.type);
+                    if (spirit != Spirits.NATURE) continue;
+                    spiritTypes.add(0, Spirits.NATURE);
+                    break;
+                }
+            }
+        }
+
+        if(biome.is(Biomes.CRIMSON_FOREST) || biome.is(Biomes.WARPED_FOREST)){
+            spiritTypes.add(Spirits.NETHER);
+            spiritTypes.add(Spirits.NATURE);
+        }
+
+        if (keyMaybe.left().isPresent()) {
+            var spiritType = biomeSpirits.get(keyMaybe.left().get());
+            if (spiritType != null) spiritTypes.add(0, spiritType);
+        }
+
+        return spiritTypes;
     }
 
     public static void putFoodsAndInfluences(HashMap<EntityType<? extends LivingEntity>, HashMap<ItemOrEntityType, Integer>> fai) {

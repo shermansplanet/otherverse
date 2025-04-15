@@ -59,11 +59,13 @@ import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.ITeleporter;
@@ -1011,7 +1013,8 @@ public class FamiliarManager {
         var data = DiagramManager.getOrCreateLevelData(player.getServer().overworld());
         var binding = data.bindingsById.get(entityTag.getCompound("ForgeData").getUUID("bindingId"));
         var oldDimensionHash = binding.dimensionHash;
-        var playerDimensionHash = DiagramManager.getDimensionHash(player.getLevel());
+        var level = player.getLevel();
+        var playerDimensionHash = DiagramManager.getDimensionHash(level);
         if (oldDimensionHash != playerDimensionHash) {
             var oldDimension = binding.getLocalLevel();
             if (oldDimension != null) {
@@ -1020,7 +1023,7 @@ public class FamiliarManager {
                     oldEntity.discard();
                 }
             }
-            binding.dimensionHash = DiagramManager.getDimensionHash(player.getLevel());
+            binding.dimensionHash = DiagramManager.getDimensionHash(level);
             if (data.savedData != null) {
                 data.savedData.setDirty();
             }
@@ -1029,10 +1032,34 @@ public class FamiliarManager {
         if (entity == null) {
             LOGGER.debug("CREATING NEW FAMILIAR");
             unloadFamiliar(player);
-            entity = makeMobFromTag(type, familiarData, spawnPos, player.getLevel());
+            entity = makeMobFromTag(type, familiarData, spawnPos, level);
         } else {
             entity.setPos(spawnPos);
         }
+
+        LOGGER.debug("HEIGHT BEFORE: " + entity.getBbHeight());
+
+        setFamiliarSize(entity,1);
+
+        LOGGER.debug("HEIGHT AFTER: " + entity.getBbHeight());
+
+        BlockHitResult hitresultTop = level.clip(new ClipContext(
+                spawnPos, spawnPos.add(0, entity.getBbHeight(), 0),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
+
+        LOGGER.debug(hitresultTop.getType().name());
+
+        if (hitresultTop.getType() == HitResult.Type.BLOCK) {
+            var scale = (float) (hitresultTop.getLocation().y - spawnPos.y) * 0.95f / entity.getBbHeight();
+            setFamiliarSize(entity, scale);
+        }
+    }
+
+    private static void setFamiliarSize(Entity entity, float scale){
+        LOGGER.debug("SETTING SCALE TO " + scale);
+        ScaleTypes.WIDTH.getScaleData(entity).setScale(scale);
+        ScaleTypes.HEIGHT.getScaleData(entity).setScale(scale);
+        ScaleTypes.REACH.getScaleData(entity).setScale(scale);
     }
 
     @SubscribeEvent

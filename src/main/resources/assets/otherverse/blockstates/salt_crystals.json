@@ -18,9 +18,23 @@
       "x": 90,
       "y": 180
     },
-    "facing=up": {
-      "model": "otherverse:block/salt_crystals"
-    },
+    "facing=up": [
+      {
+        "model": "otherverse:block/salt_crystals"
+      },
+      {
+        "model": "otherverse:block/salt_crystals",
+        "y": 90
+      },
+      {
+        "model": "otherverse:block/salt_crystals",
+        "y": 180
+      },
+      {
+        "model": "otherverse:block/salt_crystals",
+        "y": 270
+      }
+    ],
     "facing=west": {
       "model": "otherverse:block/salt_crystals",
       "x": 90,
