@@ -1,0 +1,12 @@
+{
+    "name": "Colors",
+    "sortnum": 170,
+    "icon": "otherverse:spirit_color_black",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you overfill a color shrine, the excess spirits become decorative particles that appear randomly in the shrine's range.$(br2) Each color yields a different particle type."
+        }
+    ]
+}

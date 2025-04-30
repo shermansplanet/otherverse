@@ -1,0 +1,19 @@
+{
+    "name": "War",
+    "sortnum": 100,
+    "icon": "otherverse:spirit_war",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_war"
+            },
+            "text": "When anything takes damage in range of a war shrine, the shrine will try to spend spirits equal to thrice the damage. This will double the damage taken. The effects of multiple shrines stack."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Remember, every point of damage dealt by a war-hallowed weapon will put a War spirit in that weapon.$(br2)War spirits are also the fuel for Spawn Altars."
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "name": "Biome Brazier",
+    "sortnum": 20,
+    "icon": "otherverse:biome_brazier",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:biome_brazier",
+            "text": "The Biome Brazier has the ability to transform biomes and generate natural resources, when fed the right balance of spirits."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+              "item": "otherverse:realm_wracked_coal"
+            },
+            "text": "To use a brazier, you must first toss coal or charcoal through a portal to create realm-wracked coal. Using this in a biome will imprint that biome on the coal. Its tooltip will reveal which spirits will be required to recreate the biome elsewhere."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Use realm-wracked coal on a brazier to light it. Once lit, the brazier will absorb spirits from any hallows influencing it. Once it has enough spirits, it will transform a tiny area around it into the provided biome. Providing the same set of spirits to the brazier again will expand the radius. Once the maximum radius (16 blocks) is reached, the brazier will start generating biome features, such as trees."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/brazier_1.png"],
+            "border": true
+        }
+    ]
+}

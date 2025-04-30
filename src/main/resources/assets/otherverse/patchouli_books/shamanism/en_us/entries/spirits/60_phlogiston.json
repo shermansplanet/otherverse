@@ -1,0 +1,15 @@
+{
+    "name": "Phlogiston",
+    "sortnum": 60,
+    "icon": "otherverse:spirit_phlogiston",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_phlogiston"
+            },
+            "text": "When a phlogiston shrine is overfilled, excess spirits manifest as an explosion. An explosion requires 33 spirits, and will increase in power for every additional 33 spirits. It will not destroy chalk, any blocks below chalk, or any hallow blocks."
+        }
+    ]
+}

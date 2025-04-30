@@ -1,0 +1,6 @@
+{
+    "name": "Shrines",
+    "description": "One step above hallows.",
+    "icon": "minecraft:jack_o_lantern{hallow:{spirit_type:'light'}}",
+    "sortnum": 0
+}

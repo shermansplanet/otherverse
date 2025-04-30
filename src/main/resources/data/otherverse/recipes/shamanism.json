@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+      " a ",
+      "fbw",
+      " e "
+  ],
+  "key": {
+      "b": {"item": "minecraft:book"},
+      "e": {"item": "minecraft:dirt"},
+      "a": {"item": "minecraft:feather"},
+      "f": {"item": "minecraft:flint_and_steel"},
+      "w": {"item": "minecraft:water_bucket"}
+  },
+  "result": {
+    "item": "patchouli:guide_book",
+    "nbt": {
+        "patchouli:book": "otherverse:shamanism"
+    },
+    "count" : 1
+  }
+}

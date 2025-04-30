@@ -1,0 +1,14 @@
+{
+    "name": "Sculk Shrieker",
+    "sortnum": 85,
+    "icon": "minecraft:sculk_shrieker",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"item" : "minecraft:sculk_shrieker"},
+            "title" : "Sculk Shrieker",
+            "text": "You can use a sculk shrieker Implement to summon a Warden anywhere. This costs one level and destroys your Implement; you'll need to spend Self to summon a replacement. The warden is not particularly loyal to you."
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.registries;
 
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.artifacts.BrazierItem;
 import com.shermansplanet.otherverse.artifacts.RealmWrackedCoalItem;
 import com.shermansplanet.otherverse.binding.ContractItem;
 import com.shermansplanet.otherverse.binding.IdolItem;
@@ -74,7 +75,7 @@ public class OtherverseItems {
     public static final RegistryObject<Item> SPAWN_ALTAR = ITEMS.register("spawn_altar",
             () -> new BlockItem(OtherverseBlocks.SPAWN_ALTAR.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
     public static final RegistryObject<Item> BIOME_BRAZIER = ITEMS.register("biome_brazier",
-            () -> new BlockItem(OtherverseBlocks.BIOME_BRAZIER.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+            () -> new BrazierItem(OtherverseBlocks.BIOME_BRAZIER.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
     public static final RegistryObject<Item> CINNABAR_BLOCK = ITEMS.register("cinnabar_block",
             () -> new BlockItem(OtherverseBlocks.CINNABAR_BLOCK.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
     public static final RegistryObject<Item> DEMESNE_BEACON = ITEMS.register("demesne_beacon",

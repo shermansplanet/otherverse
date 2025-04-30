@@ -1,0 +1,15 @@
+{
+    "name": "Nature",
+    "sortnum": 140,
+    "icon": "otherverse:spirit_nature",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_nature"
+            },
+            "text": "When a nature shrine is overfilled, the excess spirits are applied to the surrounding blocks as if they were bonemeal. Thirty-three spirits will bonemeal one block. Farmland will not become trampled in the range of a nature shrine."
+        }
+    ]
+}

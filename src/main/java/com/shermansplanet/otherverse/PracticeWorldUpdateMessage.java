@@ -35,7 +35,6 @@ public record PracticeWorldUpdateMessage(
                 buffer.writeShort(spiritAmounts.getValue());
             }
         }
-
         buffer.writeShort(spiritTransfusions.size());
         for (var transfusions : spiritTransfusions.entrySet()) {
             buffer.writeInt(Item.getId(transfusions.getKey()));
@@ -49,7 +48,6 @@ public record PracticeWorldUpdateMessage(
                 if (hasBlock) buffer.writeResourceLocation(ForgeRegistries.BLOCKS.getKey(transfusion.blockOutput()));
             }
         }
-
         buffer.writeShort(mobTransfusions.size());
         for (var transfusions : mobTransfusions.entrySet()) {
             transfusions.getKey().encode(buffer);
@@ -63,7 +61,6 @@ public record PracticeWorldUpdateMessage(
                 }
             }
         }
-
         buffer.writeShort(bindings.size());
         for (var binding : bindings.entrySet()) {
             buffer.writeInt(Registry.ENTITY_TYPE.getId(binding.getKey()));
@@ -73,7 +70,6 @@ public record PracticeWorldUpdateMessage(
                 buffer.writeShort(influence.getValue());
             }
         }
-
         buffer.writeShort(mobSpirits.size());
         for(var mobSpirit :mobSpirits.entrySet()){
             buffer.writeInt(Registry.ENTITY_TYPE.getId(mobSpirit.getKey()));

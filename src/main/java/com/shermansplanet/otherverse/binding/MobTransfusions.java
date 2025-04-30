@@ -8,7 +8,6 @@ import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.integrations.jei.TransfusionRecipe;
-import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritLabeler;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
@@ -159,7 +158,7 @@ public class MobTransfusions {
     }
 
     public static boolean tryFeedFromMob(ChalkCircle circle, Diagram diagram) {
-        return circle.getItem().is(OtherverseItems.IDOL.get()) && tryFeedFromMob(new BindingOrFleshbinding(circle), circle.getPos(), diagram);
+        return BindingOrFleshbinding.canBeBinding(circle) && tryFeedFromMob(new BindingOrFleshbinding(circle), circle.getPos(), diagram);
     }
 
     public static ItemStack GetEnchantedBook(Enchantment enchantment, int level) {

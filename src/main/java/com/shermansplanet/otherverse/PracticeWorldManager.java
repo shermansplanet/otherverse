@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.binding.MobTransfusions;
 import com.shermansplanet.otherverse.implement.ImplementManager;
+import com.shermansplanet.otherverse.integrations.jei.OtherverseJeiPlugin;
 import com.shermansplanet.otherverse.spirits.SpiritLabeler;
 import com.shermansplanet.otherverse.spirits.SpiritTransfusions;
 import net.minecraft.server.level.ServerLevel;
@@ -86,11 +87,14 @@ public class PracticeWorldManager {
     }
 
     private static PracticeWorldUpdateMessage getUpdateMessage() {
-        return new PracticeWorldUpdateMessage(SpiritLabeler.SPIRIT_TYPE_OF.data,
+        LOGGER.debug("GETTING UPDATE MESSAGE");
+        var message = new PracticeWorldUpdateMessage(SpiritLabeler.SPIRIT_TYPE_OF.data,
                 SpiritTransfusions.ALL_SPIRIT_TRANSFUSIONS.data,
                 MobTransfusions.ALL_MOB_TRANSFUSIONS.data,
                 MobBindingInfluenceUtils.ALL_BINDING_INFLUENCES.data,
                 MobBindingInfluenceUtils.mobSpirits);
+        LOGGER.debug("GOT UPDATE MESSAGE");
+        return message;
     }
 
     private static void tryUpdatePlayers() {
@@ -105,8 +109,20 @@ public class PracticeWorldManager {
         }
         if(SpiritLabeler.SPIRIT_TYPE_OF.data == null || SpiritTransfusions.ALL_SPIRIT_TRANSFUSIONS.data == null || MobTransfusions.ALL_MOB_TRANSFUSIONS.data == null) return;
         worldSetUp = true;
+        LOGGER.debug("WORLD MANAGER: SENDING MESSAGE");
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () ->
-                OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), getUpdateMessage())
+                {
+                    LOGGER.debug("SERVER SENDING...");
+                    OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), getUpdateMessage());
+                    LOGGER.debug("SERVER SENT");
+                }
+        );
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+                {
+                    LOGGER.debug("CLIENT UPDATING...");
+                    OtherverseJeiPlugin.addPracticeRecipes();
+                    LOGGER.debug("UPDATED");
+                }
         );
     }
 

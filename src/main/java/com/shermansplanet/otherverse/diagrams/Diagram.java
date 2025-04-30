@@ -186,7 +186,8 @@ public class Diagram {
         var needsReactivation = MobTransfusions.tryLightningTransform(level, focus, this)
                 || trySummonDragon(level, focus, this)
                 || MobTransfusions.tryFeed(level, focus, this)
-                || FleshTechManager.tryMakeConstruct(level, focus, this);
+                || FleshTechManager.tryMakeConstruct(level, focus, this)
+                || ArtifactManager.tryFillBrazier(level, focus, this);
 
         if (!needsReactivation) {
             HallowHelper.tryFillHallow(level, focus, this);
@@ -333,7 +334,7 @@ public class Diagram {
                                     1, 0, 0, 0, 0.15);
                         }
                     }, EntityType.PLAYER));
-                } else if (circle.item.is(OtherverseItems.IDOL.get())) {
+                } else if (BindingOrFleshbinding.canBeBinding(circle)) {
                     BindingOrFleshbinding fleshbinding = new BindingOrFleshbinding(circle);
                     if (!requiredEntities.contains(fleshbinding.entityType) && !requiredEntities.isEmpty()) continue;
                     int hp = fleshbinding.getHealth();

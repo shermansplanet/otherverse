@@ -1,0 +1,19 @@
+{
+    "name": "Fate",
+    "sortnum": 160,
+    "icon": "otherverse:spirit_fate",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spindle_bloody"
+            },
+            "text": "If you use a spindle to deal damage, it will become a bloody spindle, and maintain a Sympathetic link to the mob it injured.$(br)If a bound mob is influencing a Fate hallow which influences this spindle, any healing or harm the bound mob receives will be divided between itself and the linked mob."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Each point of health gained or lost through this Sympathetic connection costs one fate spirit from the hallow.$(br2)This Practice only works if the target mob is in a loaded chunk."
+        }
+    ]
+}

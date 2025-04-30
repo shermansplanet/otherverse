@@ -55,7 +55,8 @@ public class MobRetexturer {
                     var spiritPixel = correspondingPalette.get(pixelIndex);
                     var mixel = shouldAdjustBrightness ? getPixelBlend(itemPixel, spiritPixel) : spiritPixel;
                     var pixelInt = (mixel.r) | ((mixel.g << 8) & 0xff00) | ((mixel.b << 16) & 0xff0000) | 0xff000000;
-                    tex.setPixelRGBA(itemPixel.x, itemPixel.y + imageIndex * SIZE, pixelInt);
+                    tex.setPixelRGBA(itemPixel.x % tex.getWidth(),
+                            (itemPixel.y + imageIndex * SIZE) % tex.getHeight(), pixelInt);
                 }
             }
         }

@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#o#",
+        "###",
+        "#!#"
+    ],
+    "key": {
+        "#": {"item": "minecraft:iron_bars"},
+        "!": {"item": "otherverse:cinnabar"},
+        "o": {"tag": "minecraft:coals"}
+    },
+    "result": {
+        "item": "otherverse:biome_brazier",
+        "count" : 1
+    }
+}

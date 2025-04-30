@@ -1,0 +1,19 @@
+{
+    "name": "Fire",
+    "sortnum": 30,
+    "icon": "otherverse:spirit_fire",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_fire"
+            },
+            "text": "When a fire shrine is overfilled, excess fire spirits will manifest as lava (the same number of fire spirits as a lava bucket has). Likewise, overdrawing will destroy lava for spirits."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If there aren't enough spirits for lava or there's nowhere to place it, seven excess spirits will overflow as a fireball shot from a random surface of the shrine that isn't covered."
+        }
+    ]
+}

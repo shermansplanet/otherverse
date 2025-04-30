@@ -1,0 +1,22 @@
+{
+    "name": "Flesh/Technology",
+    "sortnum": 130,
+    "icon": "otherverse:contract",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "With flesh or technology shrines, you can make $(bold)homunculi$() and $(bold)golems$() respectively. If a bound mob is in a diagram influencing the shrine, the shrine will attempt to spend spirits equal to thrice the mob's max HP to create a copy of the bound mob, which will behave as if bound but will not require bindings."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/fleshtech.png"],
+            "border": true,
+            "text": "The copies will be retextured with the appropriate spirit type."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Golems and homunculi do not drop items, and will start taking frequent damage if they are not in the range of a shrine of their spirit type.$(br2)Golems have half the speed of their source mob, but overfilling a tech shrine will make all golems in range faster, and with enough spirits you can more than compensate. The same applies to homunculi and attack strength."
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "name": "Light",
+    "sortnum": 70,
+    "icon": "otherverse:spirit_light",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_light"
+            },
+            "text": "When a light shrine is overfilled, all players in its range will receive glowing and night vision for one second per extra spirit."
+        }
+    ]
+}

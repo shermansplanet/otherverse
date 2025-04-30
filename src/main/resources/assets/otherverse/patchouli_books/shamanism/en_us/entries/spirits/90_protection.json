@@ -1,0 +1,19 @@
+{
+    "name": "Protection",
+    "sortnum": 90,
+    "icon": "otherverse:spirit_protection",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_protection"
+            },
+            "text": "When anything takes damage in range of a protection shrine, the shrine will try to spend spirits equal to thrice the damage. This will halve the damage taken. The effects of multiple shrines stack."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "A protection shrine will also spend nine spirits to nullify any creeper explosions in its range.$(br2)Farmland will not become trampled in the range of a protection shrine."
+        }
+    ]
+}

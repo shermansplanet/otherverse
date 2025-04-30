@@ -379,8 +379,10 @@ public class ImplementManager {
         e.setCanceled(true);
         if (!(e.getLevel() instanceof ServerLevel sl)) return;
         var player = e.getEntity();
-        if(player.experienceLevel < 1) return;
-        player.giveExperienceLevels(-1);
+        if(!player.isCreative()) {
+            if (player.experienceLevel < 1) return;
+            player.giveExperienceLevels(-1);
+        }
         var pos = player.blockPosition();
         var didSpawn = SpawnUtil.trySpawnMob(EntityType.WARDEN, MobSpawnType.TRIGGERED, sl, pos, 20, 5, 6, SpawnUtil.Strategy.ON_TOP_OF_COLLIDER).isPresent();
         if (!didSpawn) return;

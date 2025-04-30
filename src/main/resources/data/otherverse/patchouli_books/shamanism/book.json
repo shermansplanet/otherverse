@@ -1,0 +1,9 @@
+{
+    "name": "Shamanism",
+    "landing_text": "A guide working with spirits.",
+    "version": 3,
+    "model" : "otherverse:shamanism",
+    "show_progress" : false,
+    "creative_tab" : "otherverse",
+    "use_resource_pack": true
+}

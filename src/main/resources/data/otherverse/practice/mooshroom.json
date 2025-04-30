@@ -1,0 +1,24 @@
+{
+	"other" : "minecraft:mooshroom",
+	"spirit" : "earth",
+	"binding" : {
+		"minecraft:shears" : 15
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:potato",
+			"health" : 1,
+			"output" : "minecraft:brown_mushroom"
+		},
+		{
+			"input" : "minecraft:carrot",
+			"health" : 1,
+			"output" : "minecraft:red_mushroom"
+		},
+		{
+			"input" : "minecraft:bowl",
+			"health" : 3,
+			"output" : "minecraft:mushroom_stew"
+		}
+	]
+}

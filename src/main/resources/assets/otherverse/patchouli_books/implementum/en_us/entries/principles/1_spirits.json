@@ -1,0 +1,16 @@
+{
+    "name": "Spirit Attunement",
+    "sortnum": 1,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:principles",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "When you claim an Implement, you will permanently gain some affinity for its most plentiful spirit type (favoring non-color spirits). If it's a hallow, you will instead gain affinity for the hallow's spirit type. You will lose affinity for its opposing type."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "See the 'Spirit Affinity' section of Essentials for more information on spirit affinities and a list of opposing spirit types."
+        }
+    ]
+}

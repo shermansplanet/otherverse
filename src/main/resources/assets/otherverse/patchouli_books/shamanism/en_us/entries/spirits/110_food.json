@@ -1,0 +1,15 @@
+{
+    "name": "Food",
+    "sortnum": 110,
+    "icon": "otherverse:spirit_food",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_food"
+            },
+            "text": "When a food shrine is overfilled, the excess spirits fill the hunger bars of players in range. When it is overdrawn, it will drain hunger and turn it into food spirits."
+        }
+    ]
+}

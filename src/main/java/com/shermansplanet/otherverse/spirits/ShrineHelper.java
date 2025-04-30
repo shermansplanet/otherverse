@@ -407,12 +407,12 @@ public class ShrineHelper {
             public int overflowBlock(BlockPos pos, Level level, int amount, boolean simulate) {
                 if (amount < 33) return 0;
                 if (!isBlockExplodable(level, pos, level.getBlockState(pos))) return 0;
-                var extra = (amount / 33) - 1;
+                var extra = (amount / 33);
                 if (!simulate && level instanceof ServerLevel sl) {
                     var player = sl.getRandomPlayer();
                     sl.explode(player, null, damageCalc,
                             pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f,
-                            4 + extra, false, Explosion.BlockInteraction.BREAK);
+                            4 * extra, false, Explosion.BlockInteraction.BREAK);
                 }
                 return (extra + 1) * 33;
             }

@@ -1,0 +1,14 @@
+{
+    "name": "Food",
+    "sortnum": 75,
+    "icon": "minecraft:golden_apple",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"tag" : "minecraft:golden_apple"},
+            "title" : "Food",
+            "text": "Anything that can be eaten can be taken as an Implement. A food Implement can be eaten nine times before being entirely consumed, and when it is, you can summon another with the Implement key."
+        }
+    ]
+}

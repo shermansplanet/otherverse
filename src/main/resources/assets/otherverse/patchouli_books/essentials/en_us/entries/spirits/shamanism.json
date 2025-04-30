@@ -1,0 +1,16 @@
+{
+    "name": "Further Reading",
+    "sortnum": 10,
+    "icon": "patchouli:guide_book{'patchouli:book':'otherverse:shamanism'}",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "In addition to transfusion, different spirit types have unique and powerful uses. To learn more about how to harness spirits, you'll need to craft a book on Shamanism."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:shamanism"
+        }
+    ]
+}

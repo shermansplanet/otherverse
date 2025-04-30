@@ -1,0 +1,7 @@
+{
+	"other" : "minecraft:cat",
+	"spirit" : "overworld",
+	"binding" : {
+		"entity.minecraft.wolf" : 1
+	}
+}

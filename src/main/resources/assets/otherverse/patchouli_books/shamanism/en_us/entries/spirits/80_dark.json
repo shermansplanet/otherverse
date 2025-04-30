@@ -1,0 +1,15 @@
+{
+    "name": "Dark",
+    "sortnum": 80,
+    "icon": "otherverse:spirit_dark",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_dark"
+            },
+            "text": "When a dark shrine is overfilled, all players in its range will receive blindness and invisibility for one second per extra spirit."
+        }
+    ]
+}

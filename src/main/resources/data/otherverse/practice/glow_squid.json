@@ -1,0 +1,15 @@
+{
+	"other" : "minecraft:glow_squid",
+	"spirit" : "light",
+	"healing" : {
+		"entity.minecraft.cod" : 1,
+		"entity.minecraft.salmon" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:ink_sac",
+			"health" : 3,
+			"output" : "minecraft:glow_ink_sac"
+		}
+	]
+}

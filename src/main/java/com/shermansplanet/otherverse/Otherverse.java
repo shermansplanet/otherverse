@@ -156,7 +156,6 @@ public class Otherverse {
         RECIPE_TYPES.register(modEventBus);
         MENU_TYPES.register(modEventBus);
         OtherverseFeatureGen.FEATURES.register(modEventBus);
-        //OtherverseParticles.PARTICLES.register(modEventBus);
         bind(Registry.PARTICLE_TYPE_REGISTRY, OtherverseParticles::registerParticles);
 
         OtherversePotions.EFFECTS.register(modEventBus);

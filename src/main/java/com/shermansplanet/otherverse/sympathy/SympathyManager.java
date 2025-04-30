@@ -166,9 +166,10 @@ public class SympathyManager {
         if (entitiesByUUID.containsKey(uniqueId)) return entitiesByUUID.get(uniqueId);
         for (ServerLevel level : sl.getServer().getAllLevels()) {
             for (Entity entity : level.getAllEntities()) {
-                if (entity.isAddedToWorld() && entity.getUUID().equals(uniqueId))
+                if (entity.isAddedToWorld() && entity.getUUID().equals(uniqueId)) {
                     entitiesByUUID.put(uniqueId, entity);
-                return entity;
+                    return entity;
+                }
             }
         }
 

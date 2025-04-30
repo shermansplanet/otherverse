@@ -81,7 +81,7 @@ public class OtherverseJeiPlugin implements IModPlugin {
         addPracticeRecipes();
     }
 
-    private static void addPracticeRecipes() {
+    public static void addPracticeRecipes() {
         registry.addRecipes(SpiritExtractionRecipeCategory.TYPE, SpiritLabeler.GenerateRecipes());
         registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes());
         registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes());

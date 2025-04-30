@@ -1,0 +1,15 @@
+{
+    "name": "Air",
+    "sortnum": 20,
+    "icon": "otherverse:spirit_air",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_air"
+            },
+            "text": "When an air shrine is overfilled, the air spirits will be expelled as a burst of air that pushes entities away from the shrine. When it is overdrawn, it will pull entities inwards. The strength of the pull or push scales with the number of air spirits."
+        }
+    ]
+}

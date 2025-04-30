@@ -1,0 +1,15 @@
+{
+    "name": "Death",
+    "sortnum": 120,
+    "icon": "otherverse:spirit_death",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_death"
+            },
+            "text": "If anything dies within range of a death shrine, the shrine will attempt to spend 444 spirits to prevent the death."
+        }
+    ]
+}

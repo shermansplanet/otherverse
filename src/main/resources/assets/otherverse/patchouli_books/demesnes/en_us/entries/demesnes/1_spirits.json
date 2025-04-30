@@ -1,0 +1,28 @@
+{
+    "name": "Spirit Affinity",
+    "sortnum": 1,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Like the other big three rituals, your choice of Demesne permanently increases your affinity for a certain spirit type. The type of spirit depends on many factors. You can see it at the top of your Demesne menu, even before you start the ritual. However, some spirit types are only possible if certain conditions are met during the ritual itself."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Earth Demesnes are found underground. Air Demesnes are found high in the air. Fire Demesnes are claimed by killing at least half your challengers with fire or lava. Cold Demesnes are in cold biomes, water Demesnes are in water biomes, and Phlogiston demesnes are in hot dry biomes. Death Demesnes are in soul sand valleys, or claimed by withering at least half your challengers to death."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Food Demesnes are in groves, or have their beacon surrounded by farmland for the claim. To claim a Protection Demesne, no non-flying challengers may encroach more then four blocks from the edge of the claimed area. Putting the beacon in a bastion or pillager outpost yields a War Demesne, and a stronghold, nether fortress, or the central end island yields a Fate Demesne."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The beacons of a Light Demesne must be surrounded by glowstone for the claim. Dark Demesnes must be in the deep dark or dark forest. Flesh Demesnes are claimed if more than half your challengers are killed by other mobs. For technology Demesnes, they must be killed by falling, suffocating, anvils, dripstone, or dispensed arrows. Nature Demesnes are in biomes that spawn Nature-aligned mobs."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Fortune Demesnes have gold block pyramids, and Time Demesnes are in old growth biomes. If none of these conditions apply, the Demesne's spirit type will be the spirit of the dimension it's in. Or, if the name of the Demesne's biome includes a spirit type, that spirit will be chosen."
+        }
+    ]
+}

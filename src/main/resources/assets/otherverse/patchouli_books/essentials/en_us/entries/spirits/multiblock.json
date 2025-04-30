@@ -1,0 +1,18 @@
+{
+    "name": "Multiblock Hallows",
+    "sortnum": 5,
+    "icon": "minecraft:carved_pumpkin{hallow:{spirit_type:'nature'}}",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "When you place multiple hallows with the same spirit type as adjacent blocks, they act as one large hallow with the combined capacity of all the hallows it contains. Spirits can be inserted or extracted from any block."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/shrine.png"],
+            "border": true,
+            "text": "A multiblock Nature hallow."
+        }
+    ]
+}

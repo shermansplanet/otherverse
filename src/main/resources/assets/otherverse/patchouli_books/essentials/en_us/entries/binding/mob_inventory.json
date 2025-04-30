@@ -1,6 +1,6 @@
 {
     "name": "Mob Inventory",
-    "sortnum": 5,
+    "sortnum": 50,
     "icon": "minecraft:chest",
     "category": "otherverse:binding",
     "pages": [

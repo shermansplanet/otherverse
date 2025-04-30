@@ -1,0 +1,10 @@
+{
+	"other" : "minecraft:piglin_brute",
+	"spirit" : "war",
+	"binding" : {
+		"minecraft:soul_torch" : 7
+	},
+	"healing" : {
+		"minecraft:porkchop" : 7
+	}
+}

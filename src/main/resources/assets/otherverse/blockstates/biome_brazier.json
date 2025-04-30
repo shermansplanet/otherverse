@@ -1,0 +1,10 @@
+{
+  "multipart": [
+    {   "when": { "lit": "true"},
+        "apply": { "model": "otherverse:block/biome_brazier_lit"}
+    },
+    {   "when": { "lit": "false"},
+        "apply": { "model": "otherverse:block/biome_brazier"}
+    }
+  ]
+}

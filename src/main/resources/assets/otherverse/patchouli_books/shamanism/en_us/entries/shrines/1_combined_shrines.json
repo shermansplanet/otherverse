@@ -1,0 +1,18 @@
+{
+    "name": "Combining Ranges",
+    "sortnum": 1,
+    "icon": "minecraft:netherite_block{hallow:{spirit_type:'protection'}}",
+    "category": "otherverse:shrines",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you place at least three shrines of the same type in a somewhat evenly spaced circle such that each shrine's range overlaps with its neighbors' ranges, the ranges will combine into one larger range encompassing the whole circle."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/combined.png"],
+            "border": true,
+            "text": "Combined ranges are rainbow in your Sight."
+        }
+    ]
+}

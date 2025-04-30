@@ -30,13 +30,31 @@ public class BindingOrFleshbinding {
     public Level level;
     private CompoundTag idolTag;
     private BindingInfo bindingInfo;
-    public final int efficiencyReduction;
-    private final boolean isCreative;
+    public int efficiencyReduction;
+    private boolean isCreative;
     private ChalkCircle circle;
+
+    private static BindingInfo getFromSpindle(ChalkCircle circle) {
+        if (!(circle.getLevel() instanceof ServerLevel sl)) return null;
+        if (!circle.getItem().hasTag()) return null;
+        if (!circle.getItem().getTag().contains("sympathy_target")) return null;
+        var otherEntity = SympathyManager.getEntityByUniqueId(circle.getItem().getTag().getUUID("sympathy_target"), sl);
+        if (!(otherEntity instanceof LivingEntity le)) return null;
+        if (!le.getPersistentData().contains("bindingId")) return null;
+        var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
+        return data.bindingsById.get(le.getPersistentData().getUUID("bindingId"));
+    }
 
     public BindingOrFleshbinding(ChalkCircle circle) {
         var item = circle.item;
         this.circle = circle;
+        if (item.is(OtherverseItems.SPINDLE_BLOODY.get())) {
+            var binding = getFromSpindle(circle);
+            if (binding != null) {
+                initFromBindingInfo(binding);
+            }
+            return;
+        }
         level = circle.getLevel();
         position = circle.getPos();
         entityType = IdolItem.getType(item);
@@ -57,6 +75,10 @@ public class BindingOrFleshbinding {
     }
 
     public BindingOrFleshbinding(BindingInfo info) {
+        initFromBindingInfo(info);
+    }
+
+    private void initFromBindingInfo(BindingInfo info) {
         entityType = info.mob.getType();
         bindingInfo = info;
         position = info.mob.blockPosition();
@@ -71,10 +93,17 @@ public class BindingOrFleshbinding {
         if (binding != null && binding.mob != null) {
             return new BindingOrFleshbinding(binding);
         }
-        if (sl.getBlockEntity(bp) instanceof ChalkCircle cc && cc.getItem().is(OtherverseItems.IDOL.get())) {
+        if (sl.getBlockEntity(bp) instanceof ChalkCircle cc && BindingOrFleshbinding.canBeBinding(cc)) {
             return new BindingOrFleshbinding(cc);
         }
         return null;
+    }
+
+    public static boolean canBeBinding(ChalkCircle cc) {
+        var item = cc.getItem();
+        if (item.is(OtherverseItems.IDOL.get())) return true;
+        if (item.is(OtherverseItems.SPINDLE_BLOODY.get())) return getFromSpindle(cc) != null;
+        return false;
     }
 
     public int getHealth() {
@@ -109,6 +138,10 @@ public class BindingOrFleshbinding {
         } else {
             if (delta < 0) {
                 bindingInfo.mob.hurt(DamageSource.OUT_OF_WORLD, -delta);
+                bindingInfo.mob.invulnerableTime = MobTransfusions.MOB_DRAIN_COOLDOWN;
+                if (circle != null && circle.getDiagram() != null) {
+                    circle.getDiagram().mobsOnCooldown.add(bindingInfo.mob);
+                }
             } else {
                 bindingInfo.mob.heal(delta);
             }
