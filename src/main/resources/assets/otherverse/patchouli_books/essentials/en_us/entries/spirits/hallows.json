@@ -32,17 +32,18 @@
         {
             "title": "Hallows in Diagrams",
             "type": "patchouli:text",
-            "text": "In item or block foci, hallows will try to extract spirits from their influences. This will destroy normal blocks and items, and drain other hallows.$(br2)Hallows can be \"overfilled\" over capacity if they break down an item that yields more spirits than they can hold. However, they only absorb half the \"extra\" spirits."
+            "text": "When placed in either item or block foci, hallows will try to extract spirits from their influences. This will destroy non-hallowed blocks or items, and drain other hallows."
         },
         {
+            "title": "Placed Hallows",
             "type": "patchouli:text",
-            "text": "Many hallows can be placed in the world as blocks. When in block foci, they extract or transfer spirits just like item hallows in item foci.$(br2)You can use a held hallow on a placed hallow to extract spirits from it (hold shift to insert spirits instead).$(br2)When breaking a placed hallow, it will only remain a hallow if the block drops itself."
+            "text": "Many hallows can be placed in the world as blocks. You can use a held hallow on a placed hallow to extract spirits from it (hold shift to insert spirits instead).$(br2)When breaking a placed hallow, it will only remain a hallow if the block drops itself."
         },
         {
             "type": "patchouli:image",
             "images": ["otherverse:textures/gui/entries/hallow_2.png"],
             "border": true,
-            "text": "Most hallows maintain their spirit colors, but some ignore or distort them."
+            "text": "Most hallows maintain their spirit colors when placed as blocks."
         }
     ]
 }

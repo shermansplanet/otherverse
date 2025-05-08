@@ -9,7 +9,7 @@
 		{
 			"input" : "minecraft:stone",
 			"mob" : "minecraft:iron_golem",
-			"health" : 66,
+			"health" : 42,
 			"output" : "minecraft:iron_ore"
 		}
 	]

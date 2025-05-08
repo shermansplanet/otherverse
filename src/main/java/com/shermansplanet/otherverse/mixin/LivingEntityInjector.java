@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.artifacts.ConnectionBlockManager;
 import com.shermansplanet.otherverse.binding.ISoundGetter;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import net.minecraft.core.BlockPos;
@@ -55,5 +56,13 @@ public abstract class LivingEntityInjector extends Entity implements net.minecra
         if (state.getCollisionShape(player.level, pos).isEmpty()) return;
         ci.setReturnValue(true);
         ci.cancel();
+    }
+
+    @Inject(method = "canBeSeenAsEnemy", at = @At("HEAD"), cancellable = true)
+    public void canBeSeenAsEnemy(CallbackInfoReturnable<Boolean> ci) {
+        if(ConnectionBlockManager.isBlocked(self())){
+            ci.setReturnValue(false);
+            ci.cancel();
+        }
     }
 }

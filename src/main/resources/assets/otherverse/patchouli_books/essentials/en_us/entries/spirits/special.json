@@ -10,7 +10,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "There's also a special way to get War spirits: every point of damage dealt by a hallowed weapon will put a War spirit in that weapon.$(br2)With some clever setup and a $(l:otherverse:items/spawn_altar)spawn altar$(), this can make for a self-contained mob farm."
+            "text": "There's also a special way to get War spirits: every point of damage dealt by a hallowed weapon will put a War spirit in that weapon. With some clever setup and a $(l:otherverse:items/spawn_altar)spawn altar$(), this can make for a self-contained mob farm.$(br2)Shield hallows will also convert blocked damage into Protection spirits."
         },
         {
             "type": "patchouli:text",

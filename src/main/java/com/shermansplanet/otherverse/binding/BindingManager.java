@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -39,9 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent.EnderEntity;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHealEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -76,6 +75,29 @@ public class BindingManager {
     }
 
     @SubscribeEvent
+    public static void onVexTick(LivingEvent.LivingTickEvent event){
+        var e = event.getEntity();
+        if(e.getType() != EntityType.VEX) return;
+        for(var other : e.getLevel().getEntities(e, e.getBoundingBox().inflate(0.5f))){
+            if(other instanceof ItemEntity ie && ie.getItem().is(OtherverseItems.SALT.get())){
+                e.hurt(DamageSource.MAGIC, ie.getItem().getCount() * 14);
+                ie.discard();
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onVexHurt(LivingHurtEvent event){
+        var e = event.getEntity();
+        if(e.getType() != EntityType.VEX) return;
+        if(!(event.getSource().getEntity() instanceof LivingEntity le)) return;
+        var stack = le.getMainHandItem();
+        if(!stack.is(OtherverseItems.SALT.get())) return;
+        event.setAmount(14);
+        stack.shrink(1);
+    }
+
+    @SubscribeEvent
     public static void onTooltip(ItemTooltipEvent event) {
         if (event.getItemStack().getItem() instanceof IdolItem ii) {
             event.getToolTip().clear();
@@ -84,6 +106,7 @@ public class BindingManager {
             event.getToolTip().add(entityType.getDescription());
             if (event.getItemStack().getTag().contains("mob_data")) {
                 try {
+                    event.getToolTip().add(Component.literal(event.getItemStack().getTag().getString("material")));
                     int maxHp = (int) DefaultAttributes.getSupplier((EntityType<? extends LivingEntity>) entityType).getValue(Attributes.MAX_HEALTH);
                     int hp = (int) event.getItemStack().getTag().getCompound("mob_data").getCompound("EntityTag").getFloat("Health");
                     event.getToolTip().add(Component.literal(hp + "/" + maxHp + " Health"));

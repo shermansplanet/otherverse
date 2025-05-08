@@ -1039,7 +1039,7 @@ public class FamiliarManager {
 
         LOGGER.debug("HEIGHT BEFORE: " + entity.getBbHeight());
 
-        setFamiliarSize(entity,1);
+        setFamiliarSize(entity, 1);
 
         LOGGER.debug("HEIGHT AFTER: " + entity.getBbHeight());
 
@@ -1055,7 +1055,7 @@ public class FamiliarManager {
         }
     }
 
-    private static void setFamiliarSize(Entity entity, float scale){
+    private static void setFamiliarSize(Entity entity, float scale) {
         LOGGER.debug("SETTING SCALE TO " + scale);
         ScaleTypes.WIDTH.getScaleData(entity).setScale(scale);
         ScaleTypes.HEIGHT.getScaleData(entity).setScale(scale);
@@ -1385,9 +1385,7 @@ public class FamiliarManager {
                 var price = possibleTransfusion.price();
                 for (var itemstack : player.getInventory().items) {
                     if (itemstack == null) continue;
-                    var types = MobBindingInfluenceUtils.allFoods.get(new ItemOrEntityType(itemstack.getItem()));
-                    if (types == null) continue;
-                    var hp = types.get(et);
+                    var hp = MobBindingInfluenceUtils.allFoods.get(et).get(new ItemOrEntityType(itemstack.getItem()));
                     if (hp == null) continue;
                     var itemsToRemove = Math.min(itemstack.getCount(), (int) Math.ceil(price / (float) hp));
                     itemstack.shrink(itemsToRemove);
@@ -1414,14 +1412,14 @@ public class FamiliarManager {
                 if (!player.addItem(stack)) {
                     player.drop(stack, false);
                 }
+                item.shrink(1);
             } else {
                 player.setItemInHand(hand, stack);
             }
 
-            var instance = IdolRenderer.renderEntities.get(et);
-            if (instance instanceof LivingEntity le) {
-                player.level.playSound(null, player, ((ISoundGetter) le).publicGetHurtSound(DamageSource.GENERIC), SoundSource.NEUTRAL, 1, 1);
-            }
+            var temp = et.create(player.level);
+            player.level.playSound(null, player, ((ISoundGetter) temp).publicGetHurtSound(DamageSource.GENERIC), SoundSource.NEUTRAL, 1, 1);
+            temp.discard();
 
             return true;
         }
@@ -1477,10 +1475,17 @@ public class FamiliarManager {
     public static void onInteract(PlayerInteractEvent.EntityInteractSpecific event) {
         var target = event.getTarget();
         if (target instanceof EnderDragonPart ep) target = ep.parentMob;
-        if (!getPractitionerForFamiliar(target).equals(event.getEntity().getGameProfile().getName())) return;
+        var name = event.getEntity().getGameProfile().getName();
+        if (FamiliarManager.isFamiliar(target)) {
+            if (!getPractitionerForFamiliar(target).equals(name)) return;
+        } else if (target.getPersistentData().contains("last_bound_by")) {
+            if (!target.getPersistentData().getString("last_bound_by").equals(name)) return;
+        }
         if (!(target instanceof Mob mob)) return;
+        if (!event.getEntity().getMainHandItem().isEmpty()) return;
         for (var g : mob.goalSelector.getAvailableGoals()) {
             if (g.getGoal() instanceof BoundGoal bg) {
+                bg.practitioner = event.getEntity();
                 bg.toggleFamiliarBehavior();
                 return;
             }

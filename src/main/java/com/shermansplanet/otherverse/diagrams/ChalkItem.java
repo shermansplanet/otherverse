@@ -99,7 +99,6 @@ public class ChalkItem extends Item implements DyeableLeatherItem {
         if (player != null && !player.getAbilities().instabuild) {
             if (!level.isClientSide) {
                 ctx.getItemInHand().hurtAndBreak(1, player, (p_150845_) -> {
-                    DiagramSightRenderer.setCenter(null, useCtx.getPlayer());
                     p_150845_.broadcastBreakEvent(useCtx.getHand());
                 });
             }

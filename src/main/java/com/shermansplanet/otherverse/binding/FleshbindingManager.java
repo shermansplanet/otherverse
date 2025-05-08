@@ -72,7 +72,9 @@ public class FleshbindingManager {
     }
 
     public static boolean tryFleshbindMob(Mob mob, BlockFocus focus, ServerLevel level) {
-        if (mob.getHealth() > 10) return false;
+        if (mob.getHealth() > 10) {
+            return false;
+        }
         ChalkCircle circleWithDrop = null;
         ChalkCircle circleWithPrime = null;
         ChalkCircle circleWithMaterial = null;
@@ -118,16 +120,11 @@ public class FleshbindingManager {
         }
         sl.playSound(null, mob.blockPosition(), SoundEvents.PUFFER_FISH_DEATH, SoundSource.AMBIENT, 1, 1);
         mob.remove(Entity.RemovalReason.KILLED);
+        mob.discard();
         var item = IdolItem.makeFrom(mob, material);
         ItemEntity itementity = new ItemEntity(mob.level, mob.getX(), mob.getY(0.5f), mob.getZ(), item);
         itementity.setDefaultPickUpDelay();
         mob.level.addFreshEntity(itementity);
-    }
-
-    public static void onTextureForItem(Item item, ResourceLocation location) {
-        var instance = item.getDefaultInstance();
-        if (!instance.is(ItemTags.PLANKS) && !instance.is(ItemTags.LOGS)) return;
-        texturesByLabel.put(ForgeRegistries.ITEMS.getKey(item).toString(), location);
     }
 
     public static boolean tryCinnabind(ServerLevel level, ChalkCircle circle, Diagram diagram) {
@@ -140,5 +137,16 @@ public class FleshbindingManager {
         fleshbindMob(targetBinding.mob, "otherverse:cinnabar_block", level);
         circle.removeItem();
         return true;
+    }
+
+    public static void addWoodTextures() {
+        for(var item : ForgeRegistries.ITEMS){
+            var instance = item.getDefaultInstance();
+            if (!instance.is(ItemTags.PLANKS) && !instance.is(ItemTags.LOGS)) continue;
+            var key = ForgeRegistries.ITEMS.getKey(item);
+            var val = new ResourceLocation(key.getNamespace(),"textures/block/" + key.getPath() + ".png");
+            LOGGER.info(key + " -> " + val);
+            texturesByLabel.put(key.toString(), val);
+        }
     }
 }

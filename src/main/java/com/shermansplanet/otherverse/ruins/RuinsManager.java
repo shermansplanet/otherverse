@@ -174,7 +174,7 @@ public class RuinsManager {
     @SubscribeEvent
     public static void onClick(PlayerInteractEvent.RightClickBlock event) {
         if (event.getLevel().isClientSide()
-                || event.getLevel().getBlockState(event.getPos()).getBlock() != Blocks.SCULK
+                || event.getLevel().getBlockState(event.getPos()).getBlock() != Blocks.REINFORCED_DEEPSLATE
                 || !event.getItemStack().is(Items.FLINT_AND_STEEL))
             return;
 

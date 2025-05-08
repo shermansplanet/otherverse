@@ -4,7 +4,6 @@ import com.shermansplanet.otherverse.Otherverse;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -22,6 +21,15 @@ public class OtherAttributeSupplier {
                         .add(Attributes.ATTACK_DAMAGE, 16)
                         .add(Attributes.ATTACK_KNOCKBACK)
                         .add(Attributes.ATTACK_SPEED)
+                        .build());
+
+        event.put(Otherverse.TYPHLOTIC_JELLYFISH.get(),
+                LivingEntity.createLivingAttributes()
+                        .add(Attributes.FOLLOW_RANGE)
+                        .add(Attributes.FLYING_SPEED, 0.5f)
+                        .add(Attributes.ATTACK_DAMAGE, 1)
+                        .add(Attributes.ATTACK_KNOCKBACK, -1)
+                        .add(Attributes.ATTACK_SPEED, 4)
                         .build());
     }
 

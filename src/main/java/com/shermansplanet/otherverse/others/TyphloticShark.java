@@ -11,8 +11,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -75,13 +73,13 @@ public class TyphloticShark extends FlyingMob {
     }
 
     public void customServerAiStep() {
-        var p = level.getNearestPlayer(TargetingConditions
-                        .forCombat()
-                        .range(64)
-                        .ignoreLineOfSight()
-                        .selector(e -> e.getHealth() < e.getMaxHealth()),
-                this);
         if (getTarget() == null) {
+            var p = level.getNearestPlayer(TargetingConditions
+                            .forCombat()
+                            .range(64)
+                            .ignoreLineOfSight()
+                            .selector(e -> e.getHealth() < e.getMaxHealth()),
+                    this);
             setTarget(p);
         } else if (getTarget().distanceTo(this) > 64 || !this.canAttack(getTarget())) {
             setTarget(null);

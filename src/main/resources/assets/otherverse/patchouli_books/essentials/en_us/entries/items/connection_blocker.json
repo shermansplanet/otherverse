@@ -1,0 +1,19 @@
+{
+    "name": "Connection Blockers",
+    "sortnum": 40,
+    "icon": "otherverse:connection_blocker",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+              "item": "otherverse:connection_blocker"
+            },
+            "text": "Connection blockers are handy little runes that prevent you from being noticed. Create one by influencing paper with a golden carrot, a fermented spider eye, and power from any source. The more power you feed the diagram, the more durable the connection blocker will be."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "While you hold the connection blocker, hostile mobs will ignore you unless you harm them. Each time such notice is evaded, the page will twitch and lose durability.$(br2)But be warned: when you are no longer holding it, the deferred connections will rebound, and all hostile mobs in a wide area will target you for the same amount of time you were holding the blocker."
+        }
+    ]
+}

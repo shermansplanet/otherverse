@@ -26,7 +26,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class SpiritAmountRenderer {
 
     private static BlockPos labelPosition;
@@ -50,22 +50,13 @@ public class SpiritAmountRenderer {
             }
             var tag = DiagramManager.getOrCreateLevelData(lvl).getPlacedItemTag(labelPosition);
             if (tag == null) return;
-            if (tag.contains("shrine")) {
-                var typeString = tag.getString("spirit_type");
-                var countAndCapacity = HallowHelper.getShrineSpiritCountAndCapacity(lvl, labelPosition, Spirits.spiritsByLabel.get(typeString));
-                labelTextLines = new MutableComponent[]{
-                        Component.literal("Shrine:"),
-                        Component.literal( countAndCapacity.first + "/"
-                                + countAndCapacity.second + " " + typeString)
-                };
-            } else {
-                labelTextLines = new MutableComponent[]{
-                        Component.literal("Hallow:"),
-                        Component.literal(tag.getInt("spirit_count") + "/"
-                                + tag.getInt("capacity") + " "
-                                + tag.getString("spirit_type"))
-                };
-            }
+            var typeString = tag.getString("spirit_type");
+            var countAndCapacity = HallowHelper.getShrineSpiritCountAndCapacity(lvl, labelPosition, Spirits.spiritsByLabel.get(typeString));
+            labelTextLines = new MutableComponent[]{
+                    Component.literal(tag.contains("shrine") ? "Shrine:" : "Hallow:"),
+                    Component.literal(countAndCapacity.getFirst() + "/"
+                            + countAndCapacity.getSecond() + " " + typeString)
+            };
             shouldRenderLabel = true;
         }
     }

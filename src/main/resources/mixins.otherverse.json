@@ -9,7 +9,6 @@
     "AllayInjector",
     "LivingEntityInjector",
     "GrindstoneMenuInjector",
-    "ContainerInjector",
     "ItemStackInjector",
     "BucketItemInjector",
     "BlockItemInjector",
@@ -29,7 +28,10 @@
     "LevelChunkInjector",
     "ItemEntityInjector",
     "LivingEntityRendererInjector",
-    "ServerLevelInjector"
+    "ServerLevelInjector",
+    "NearestAttackableTargetGoalInjector",
+    "SensorInjector",
+    "FlowingFluidInjector"
   ],
   "client":[
     "ModelBakeryInjector",

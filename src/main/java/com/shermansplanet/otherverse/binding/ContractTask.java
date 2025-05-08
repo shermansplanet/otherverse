@@ -44,10 +44,7 @@ import net.minecraftforge.items.IItemHandler;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 public class ContractTask {
     private static final int COBWEB_DAMAGE = 3;
@@ -80,6 +77,8 @@ public class ContractTask {
     private Recipe<?> recipe;
     private static final Logger LOGGER = LogUtils.getLogger();
     private boolean harvesting = false;
+    public int lookIndex;
+    public ArrayList<BlockPos> potentialTargets = new ArrayList<>();
 
     public enum TaskType {
         MOVE, TAKE, PUT, BREAK, ATTACK, CRAFT, OBSERVE
@@ -285,20 +284,23 @@ public class ContractTask {
         if (!isBlockAcceptableTarget(pos, inPositionFilter)) return false;
 
         var h = mob.getBbHeight();
+        var potentialMovePositions = new ArrayList<BlockPos>();
+        var mobPos = mob.blockPosition();
         for (var i = 0; i <= h; i++) {
             var verticalOffset = pos.offset(0, -i, 0);
-            if (canReachBlock(verticalOffset)) {
-                targetMovePos = verticalOffset;
-                return true;
-            }
+            potentialMovePositions.add(verticalOffset);
             for (var dir : Direction.values()) {
                 if (i > 0 && dir == Direction.UP) continue;
                 if (i + 1 <= h && dir == Direction.DOWN) continue;
                 var offset = verticalOffset.relative(dir);
-                if (!canReachBlock(offset)) continue;
-                targetMovePos = offset;
-                return true;
+                potentialMovePositions.add(offset);
             }
+        }
+        potentialMovePositions.sort(Comparator.comparingDouble(mobPos::distSqr));
+        for (var potentialPos : potentialMovePositions) {
+            if (!canReachBlock(potentialPos)) continue;
+            targetMovePos = potentialPos;
+            return true;
         }
         return false;
         //return internalAcceptableTarget(pos, inPositionFilter) && canReachBlock(pos);
@@ -430,6 +432,7 @@ public class ContractTask {
 
     private boolean canReachBlock(BlockPos pos) {
         if (taskType == TaskType.ATTACK || taskType == TaskType.OBSERVE) return true;
+        if (mob.blockPosition().distSqr(pos) > 16 * 16) return true;
         var path = mob.getNavigation().createPath(pos, 0);
         return path != null && path.getEndNode().asBlockPos().equals(pos);
     }
@@ -664,7 +667,7 @@ public class ContractTask {
             int newBlockDamage = destroyTime < 0 ? -1 : destroyTime == 0 ? 10
                     : (int) Math.floor(doActionTicks * attackDamage / destroyTime / 20);
             if (newBlockDamage != blockDamage) {
-                if (newBlockDamage == 10) {
+                if (newBlockDamage >= 10) {
                     mob.level.playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
                     this.mob.level.destroyBlock(targetPos, false, mob);
                     if (tool.isEmpty() && mob instanceof EnderMan em) {
@@ -828,6 +831,7 @@ public class ContractTask {
                 mob.level.destroyBlockProgress(mob.getId(), targetPos, -1);
             }
         }
+        resetLookIndex();
         isTakingFromGround = false;
         targetItem = null;
         targetPos = null;
@@ -835,6 +839,11 @@ public class ContractTask {
         boundGoal.stopAttacking();
         decider = decider != null ? decider : onEither != null ? onEither : boundGoal.rootDecider;
         boundGoal.switchToDecider(decider);
+    }
+
+    public void resetLookIndex() {
+        lookIndex = 0;
+        potentialTargets.clear();
     }
 
     private boolean moveTo(int x, int y, int z) {

@@ -37,7 +37,7 @@ public class BindingOrFleshbinding {
     private static BindingInfo getFromSpindle(ChalkCircle circle) {
         if (!(circle.getLevel() instanceof ServerLevel sl)) return null;
         if (!circle.getItem().hasTag()) return null;
-        if (!circle.getItem().getTag().contains("sympathy_target")) return null;
+        if (!circle.getItem().getTag().contains("sympathy_target", 11)) return null;
         var otherEntity = SympathyManager.getEntityByUniqueId(circle.getItem().getTag().getUUID("sympathy_target"), sl);
         if (!(otherEntity instanceof LivingEntity le)) return null;
         if (!le.getPersistentData().contains("bindingId")) return null;
@@ -119,7 +119,8 @@ public class BindingOrFleshbinding {
             idolTag.putFloat("Health", newHealth);
             if (delta < 0) {
                 var isDead = newHealth <= 0;
-                var instance = IdolRenderer.renderEntities.get(entityType);
+                //var instance = IdolRenderer.renderEntities.get(entityType);
+                var instance = entityType.create(sl);
                 if (instance instanceof LivingEntity le) {
                     var sound = isDead ? ((ISoundGetter) le).publicGetDeathSound()
                             : ((ISoundGetter) le).publicGetHurtSound(DamageSource.GENERIC);
@@ -131,6 +132,7 @@ public class BindingOrFleshbinding {
                             1, 0, 0, 0, 0.1
                     );
                 }
+                instance.discard();
                 if (isDead) {
                     circle.removeItem();
                 }

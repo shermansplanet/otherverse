@@ -1,7 +1,7 @@
 package com.shermansplanet.otherverse.diagrams;
 
-import com.ibm.icu.impl.Pair;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.SightManager;
@@ -113,14 +113,14 @@ public class DiagramSightRenderer {
                         continue;*/
 
                     var dirs = validDirectionPairs.get(random.nextInt(validDirectionPairs.size()));
-                    v1 = v1.relative(dirs.first, 0.6f);
-                    var normal = dirs.first.getNormal().cross(dirs.second.getNormal());
+                    v1 = v1.relative(dirs.getFirst(), 0.6f);
+                    var normal = dirs.getFirst().getNormal().cross(dirs.getSecond().getNormal());
                     var offset = random.nextFloat() * 0.5f;
                     v1 = v1.add(normal.getX() * offset, normal.getY() * offset, normal.getZ() * offset);
                     camera.level.addParticle(
                             new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
                                     Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
-                            dirs.second.getStepX() * speed, dirs.second.getStepY() * speed, dirs.second.getStepZ() * speed);
+                            dirs.getSecond().getStepX() * speed, dirs.getSecond().getStepY() * speed, dirs.getSecond().getStepZ() * speed);
 
                 } else {
                     if (camera.level.getGameTime() % 16 != 0) continue;

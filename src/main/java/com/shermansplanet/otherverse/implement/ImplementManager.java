@@ -15,6 +15,7 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.diagrams.SelfManager;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -344,7 +345,8 @@ public class ImplementManager {
     private static boolean canBeImplement(ItemStack item) {
         return item.is(Tags.Items.TOOLS) || item.is(Tags.Items.ARMORS) || item.is(Tags.Items.DYES)
                 || durabilities.containsKey(item.getItem()) || item.isEdible() || item.is(Items.SCULK_SHRIEKER)
-                || item.is(Items.CHAIN) || item.is(Items.BUCKET) || item.is(Items.FLINT_AND_STEEL);
+                || item.is(Items.CHAIN) || item.is(Items.BUCKET) || item.is(Items.FLINT_AND_STEEL)
+                || item.is(Items.CLOCK) || item.is(OtherverseItems.HOMUNCULUS_HEART.get());
     }
 
     @SubscribeEvent

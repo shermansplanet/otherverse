@@ -12,6 +12,8 @@
     "item.otherverse.escape_rope": "Escape Rope",
     "item.otherverse.charcoal_stick": "Charcoal Stick",
     "item.otherverse.realm_wracked_coal" : "Realm-Wracked Coal",
+    "item.otherverse.connection_blocker" : "Connection Blocker",
+    "item.otherverse.homunculus_heart" : "Homunculus Heart",
 
     "item.otherverse.spindle_black": "Black Spindle",
     "item.otherverse.spindle_blue": "Blue Spindle",
@@ -55,11 +57,11 @@
 
     "effect.otherverse.heaviness" : "Heaviness",
     "effect.otherverse.familiar_blessing" : "Familiar's Blessing",
+    "effect.otherverse.connection_rebound" : "Connection Rebound",
     "item.minecraft.potion.effect.heaviness" : "Potion of Heaviness",
     "item.minecraft.splash_potion.effect.heaviness" : "Splash Potion of Heaviness",
     "item.minecraft.tipped_arrow.effect.heaviness" : "Arrow of Heaviness",
     "item.minecraft.lingering_potion.effect.heaviness" : "Lingering Potion of Heaviness",
-
     
     "death.attack.otherverse_self": "%1$s was drained of Self",
 

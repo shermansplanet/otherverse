@@ -76,8 +76,8 @@ public class BlockFocus implements IFocus {
             var newHallowTag = hallowTag.copy();
             var spiritType = Spirits.spiritsByLabel.get(newHallowTag.getString("spirit_type"));
             var countcap = HallowHelper.getShrineSpiritCountAndCapacity(level, blockPos, spiritType);
-            newHallowTag.putInt("spirit_count", countcap.first);
-            newHallowTag.putInt("capacity", countcap.second);
+            newHallowTag.putInt("spirit_count", countcap.getFirst());
+            newHallowTag.putInt("capacity", countcap.getSecond());
             stack.getOrCreateTag().put("hallow", newHallowTag);
             HallowHelper.addFakeEnchantment(stack.getTag());
         }

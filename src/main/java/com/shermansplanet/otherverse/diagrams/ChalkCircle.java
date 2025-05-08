@@ -317,7 +317,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         var spiritCount = hallowTag.getInt("spirit_count");
         if (mustMeetFullPrice && spiritCount < price) return 0;
         var drained = Math.min(price, spiritCount);
-        if (!simulate) {
+        if (!simulate && drained > 0) {
             hallowTag.putInt("spirit_count", spiritCount - drained);
             if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
         }

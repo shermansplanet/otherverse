@@ -1,0 +1,14 @@
+{
+    "name": "Clock",
+    "sortnum": 65,
+    "icon": "minecraft:clock",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"item" : "minecraft:clock"},
+            "title" : "Clock",
+            "text": "A clock Implement can be used to pause everything around you for ten seconds. This expends the Implement; you must spend a Self to restore it before further use."
+        }
+    ]
+}

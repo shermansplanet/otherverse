@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
-import com.shermansplanet.otherverse.binding.FleshbindingManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -83,7 +82,6 @@ public class SpiritColorAnalyzer {
         colorCutoffs.put(15, v -> (326 + (1 - v) * 14) / 360f);
         colorCutoffs.put(5, v -> (354 - (1 - v) * 14) / 360f);
 
-        LOGGER.debug("ANALYZING COLORS");
         HashMap<Item, SpiritLabeler.SpiritAmount[]> allColorSpirits = new HashMap<>();
         for (var item : ForgeRegistries.ITEMS) {
             var amounts = getColorCounts(item);
@@ -153,7 +151,6 @@ public class SpiritColorAnalyzer {
                 }
                 try {
                     textures.add(NativeImage.read(resource));
-                    FleshbindingManager.onTextureForItem(item, location);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

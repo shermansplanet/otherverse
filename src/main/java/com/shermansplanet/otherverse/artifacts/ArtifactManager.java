@@ -10,6 +10,7 @@ import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
@@ -74,10 +76,20 @@ public class ArtifactManager {
         if (!(event.getLevel() instanceof ServerLevel sl) || !event.getItemStack().is(OtherverseItems.REALM_WRACKED_COAL.get()))
             return;
         var biome = sl.getBiome(event.getEntity().blockPosition());
+
+        var keyMaybe = biome.unwrap();
+        var biomeName = "";
+        if (keyMaybe.left().isPresent()) {
+            biomeName = keyMaybe.left().get().location().getPath();
+        } else if (keyMaybe.right().isPresent()) {
+            biomeName = event.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
+        }
+        LOGGER.warn(biomeName);
+
         var spiritTypes = MobBindingInfluenceUtils.getSpiritTypes(biome, sl);
         if (spiritTypes.isEmpty()) return;
         spiritTypes.addAll(new ArrayList<>(spiritTypes));
-        spiritTypes.addAll(getColorsFor(biome));
+        spiritTypes.addAll(getColorsFor(biome, sl));
         var total = 120;
         var spiritsPerType = (total / spiritTypes.size());
         var spiritAmountTag = new CompoundTag();
@@ -94,20 +106,55 @@ public class ArtifactManager {
         event.getItemStack().getOrCreateTag().put("wracked_biome", tag);
     }
 
-    private static Collection<SpiritType> getColorsFor(Holder<Biome> biome) {
-        if(biome.is(Biomes.WARPED_FOREST)) return List.of(Spirits.COLOR_CYAN, Spirits.COLOR_CYAN, Spirits.COLOR_RED);
-        if(biome.is(Biomes.CRIMSON_FOREST)) return List.of(Spirits.COLOR_RED, Spirits.COLOR_RED, Spirits.COLOR_ORANGE);
-        if(biome.is(Biomes.SOUL_SAND_VALLEY)) return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
-        if(biome.is(Biomes.DEEP_DARK)) return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLACK, Spirits.COLOR_CYAN);
-        if(biome.is(Biomes.LUSH_CAVES)) return List.of(Spirits.COLOR_LIME, Spirits.COLOR_PINK, Spirits.COLOR_GRAY);
-        if(biome.is(Biomes.DRIPSTONE_CAVES)) return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_GRAY, Spirits.COLOR_LIGHT_GRAY);
+    private static Collection<SpiritType> getColorsFor(Holder<Biome> biome, Level level) {
+        if (biome.is(Biomes.WARPED_FOREST)) return List.of(Spirits.COLOR_CYAN, Spirits.COLOR_CYAN, Spirits.COLOR_RED);
+        if (biome.is(Biomes.CRIMSON_FOREST)) return List.of(Spirits.COLOR_RED, Spirits.COLOR_RED, Spirits.COLOR_ORANGE);
+        if (biome.is(Biomes.SOUL_SAND_VALLEY))
+            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
+        if (biome.is(Biomes.DEEP_DARK)) return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLACK, Spirits.COLOR_CYAN);
+        if (biome.is(Biomes.LUSH_CAVES)) return List.of(Spirits.COLOR_LIME, Spirits.COLOR_PINK, Spirits.COLOR_GRAY);
+        if (biome.is(Biomes.DRIPSTONE_CAVES))
+            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_GRAY, Spirits.COLOR_LIGHT_GRAY);
 
-        if(biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return List.of(Spirits.COLOR_BLUE, Spirits.COLOR_LIGHT_BLUE, Spirits.COLOR_CYAN);
-        if (biome.is(Tags.Biomes.IS_SNOWY)) return List.of(Spirits.COLOR_WHITE, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
-        if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH)) return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_YELLOW, Spirits.COLOR_GRAY);
-        if (biome.is(Tags.Biomes.IS_CAVE)) return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_LIGHT_GRAY, Spirits.COLOR_GRAY);
+        var biomeName = MobBindingInfluenceUtils.getBiomeName(biome, level);
+        if (biomeName.equals("erupting_inferno"))
+            return List.of(Spirits.COLOR_YELLOW, Spirits.COLOR_ORANGE, Spirits.COLOR_RED);
+        if (biomeName.equals("withered_abyss"))
+            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLACK, Spirits.COLOR_PURPLE);
+        if (biomeName.equals("undergrowth"))
+            return List.of(Spirits.COLOR_RED, Spirits.COLOR_ORANGE, Spirits.COLOR_GREEN);
+        if (biomeName.equals("crystalline_chasm"))
+            return List.of(Spirits.COLOR_RED, Spirits.COLOR_PINK, Spirits.COLOR_PINK);
+        if (biomeName.equals("ominous_woods"))
+            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_GRAY, Spirits.COLOR_PURPLE);
+        if (biomeName.equals("pumpkin_patch"))
+            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_ORANGE, Spirits.COLOR_GREEN);
+        if (biomeName.equals("maple_woods"))
+            return List.of(Spirits.COLOR_RED, Spirits.COLOR_BROWN, Spirits.COLOR_GREEN);
+        if (biomeName.equals("lavender_fields") || biomeName.equals("jacaranda_glade"))
+            return List.of(Spirits.COLOR_GRAY, Spirits.COLOR_GREEN, Spirits.COLOR_PURPLE);
+        if (biomeName.equals("hot_springs"))
+            return List.of(Spirits.COLOR_ORANGE, Spirits.COLOR_YELLOW, Spirits.COLOR_WHITE);
+        if (biomeName.equals("tundra"))
+            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
+        if (biomeName.equals("volcanic_plains"))
+            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_GREEN, Spirits.COLOR_BROWN);
+        if (biomeName.equals("volcano"))
+            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_ORANGE, Spirits.COLOR_GRAY);
 
-        if (biome.is(BiomeTags.IS_OVERWORLD)) return List.of(Spirits.COLOR_GREEN, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
+        if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER))
+            return List.of(Spirits.COLOR_BLUE, Spirits.COLOR_LIGHT_BLUE, Spirits.COLOR_CYAN);
+        if (biome.is(Tags.Biomes.IS_SNOWY))
+            return List.of(Spirits.COLOR_WHITE, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
+        if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH))
+            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_YELLOW, Spirits.COLOR_GRAY);
+        if (biome.is(Tags.Biomes.IS_CAVE))
+            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_LIGHT_GRAY, Spirits.COLOR_GRAY);
+        if (biome.is(Tags.Biomes.IS_DEAD))
+            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_LIGHT_GRAY, Spirits.COLOR_GRAY);
+
+        if (biome.is(BiomeTags.IS_OVERWORLD))
+            return List.of(Spirits.COLOR_GREEN, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
         if (biome.is(BiomeTags.IS_NETHER)) return List.of(Spirits.COLOR_RED, Spirits.COLOR_ORANGE, Spirits.COLOR_BLACK);
         if (biome.is(BiomeTags.IS_END)) return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLACK, Spirits.COLOR_PURPLE);
         return new ArrayList<>();
@@ -169,14 +216,10 @@ public class ArtifactManager {
     }
 
     public static boolean trySpawn(ServerLevel level, BlockFocus focus, Diagram diagram) {
-        var item = focus.getItem();
-        if (!(level.getBlockEntity(focus.getPos()) instanceof SpawnAltarBlockEntity altar)) {
+        if (!(level.getBlockEntity(focus.getPos()) instanceof SpawnAltarBlockEntity altar) || altar.spawnType == null) {
             return false;
         }
-        if (!item.hasTag() || !item.getTag().contains("hallow")) {
-            return false;
-        }
-        var hallowTag = item.getTag().getCompound("hallow");
+        var hallowTag = DiagramManager.getOrCreateLevelData(level).getPlacedItemTag(focus.getPos());
         int hp = (int) DefaultAttributes.getSupplier(altar.spawnType).getValue(Attributes.MAX_HEALTH);
         var count = hallowTag.getInt("spirit_count");
         var mobCount = count / hp;
@@ -184,6 +227,7 @@ public class ArtifactManager {
             return false;
         }
         hallowTag.putInt("spirit_count", count - hp * mobCount);
+        DiagramManager.getOrCreateLevelData(level).putPlacedItemTag(focus.getPos(), hallowTag);
 
         var spawnPos = focus.getPos();
 

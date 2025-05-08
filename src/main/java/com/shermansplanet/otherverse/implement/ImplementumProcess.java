@@ -6,9 +6,7 @@ import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramProcess;
 import com.shermansplanet.otherverse.diagrams.IFocus;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -30,7 +28,7 @@ public class ImplementumProcess extends DiagramProcess {
                 sourcePos.getY() + 2.5f,
                 sourcePos.getZ() + 0.5);
         player.getLevel().playSound(null, center.x, center.y, center.z,
-                new SoundEvent(new ResourceLocation(Otherverse.MODID, "implement")),
+                Otherverse.IMPLEMENT_RITUAL.get(),
                 SoundSource.BLOCKS, 1, 1);
     }
 

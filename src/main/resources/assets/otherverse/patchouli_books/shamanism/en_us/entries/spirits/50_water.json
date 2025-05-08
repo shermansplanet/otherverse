@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_water"
             },
-            "text": "When a water shrine is overfilled, excess water spirits will manifest as water (the same number of fire spirits as a water bucket has). Likewise, overdrawing will destroy water for spirits (flowing water only yields one spirit)."
+            "text": "When a water shrine is overfilled, excess water spirits will manifest as water (the same number of water spirits as a water bucket has). Likewise, overdrawing will destroy water for spirits (flowing water only yields one spirit)."
         },
         {
             "type": "patchouli:text",

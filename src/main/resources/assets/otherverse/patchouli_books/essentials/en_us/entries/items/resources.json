@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Salt, sulfur, and quicksilver are substances that are naturally attuned to their home dimensions: the Overworld, Nether, and End respectively. Their primary use is for $(l:otherverse:binding/fleshbinding)fleshbinding$()."
+            "text": "Salt, sulfur, and quicksilver are substances that are naturally attuned to their home dimensions: the Overworld, Nether, and End respectively. Their primary use is for $(l:otherverse:binding/fleshbinding)fleshbinding$(). Salt, swung or thrown, is deadly to vexes."
         },
         {
             "type": "patchouli:image",

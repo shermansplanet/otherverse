@@ -32,6 +32,7 @@ import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraftforge.common.Tags;
@@ -217,18 +218,12 @@ public class MobBindingInfluenceUtils {
             spiritTypes.add(Spirits.OVERWORLD);
         }
 
-        var keyMaybe = biome.unwrap();
-        var biomeName = "";
-        if (keyMaybe.left().isPresent()) {
-            biomeName = keyMaybe.left().get().location().getPath();
-        } else if (keyMaybe.right().isPresent()) {
-            biomeName = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
-        }
-        for (var part : biomeName.split("_")) {
-            for (var spiritName : Spirits.spiritsByLabel.keySet()) {
-                if (part.equals(spiritName)) spiritTypes.add(Spirits.spiritsByLabel.get(spiritName));
-            }
-        }
+        var biomeName = getBiomeName(biome, level);
+        if (biomeName.equals("visceral_heap")) spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
+        if (biomeName.equals("erupting_inferno")) spiritTypes.add(0, Spirits.FIRE);
+        if (biomeName.equals("withered_abyss")) spiritTypes.add(0, Spirits.DEATH);
+        if (biomeName.equals("undergrowth")) spiritTypes.add(0, Spirits.NATURE);
+        if (biomeName.equals("crystalline_chasm")) spiritTypes.add(0, Spirits.FORTUNE);
 
         if (!hasDimensionSpirit) {
             var levelName = level.dimensionTypeId().location().getPath();
@@ -252,17 +247,34 @@ public class MobBindingInfluenceUtils {
             }
         }
 
-        if(biome.is(Biomes.CRIMSON_FOREST) || biome.is(Biomes.WARPED_FOREST)){
+        if (biome.is(Biomes.CRIMSON_FOREST) || biome.is(Biomes.WARPED_FOREST)) {
             spiritTypes.add(Spirits.NETHER);
             spiritTypes.add(Spirits.NATURE);
         }
 
-        if (keyMaybe.left().isPresent()) {
-            var spiritType = biomeSpirits.get(keyMaybe.left().get());
+        for (var part : biomeName.split("_")) {
+            for (var spiritName : Spirits.spiritsByLabel.keySet()) {
+                if (part.equals(spiritName)) spiritTypes.add(Spirits.spiritsByLabel.get(spiritName));
+            }
+        }
+
+        if (biome.unwrap().left().isPresent()) {
+            var spiritType = biomeSpirits.get(biome.unwrap().left().get());
             if (spiritType != null) spiritTypes.add(0, spiritType);
         }
 
         return spiritTypes;
+    }
+
+    public static String getBiomeName(Holder<Biome> biome, Level level) {
+        var keyMaybe = biome.unwrap();
+        var biomeName = "";
+        if (keyMaybe.left().isPresent()) {
+            biomeName = keyMaybe.left().get().location().getPath();
+        } else if (keyMaybe.right().isPresent()) {
+            biomeName = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
+        }
+        return biomeName;
     }
 
     public static void putFoodsAndInfluences(HashMap<EntityType<? extends LivingEntity>, HashMap<ItemOrEntityType, Integer>> fai) {

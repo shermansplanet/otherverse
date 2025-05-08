@@ -15,9 +15,7 @@ import com.shermansplanet.otherverse.familiar.ThrownTNT;
 import com.shermansplanet.otherverse.integrations.jei.BindingRecipe;
 import com.shermansplanet.otherverse.integrations.jei.SpiritExtractionRecipe;
 import com.shermansplanet.otherverse.integrations.jei.TransfusionRecipe;
-import com.shermansplanet.otherverse.others.TyphloticShark;
-import com.shermansplanet.otherverse.others.TyphloticSharkModel;
-import com.shermansplanet.otherverse.others.TyphloticSharkRenderer;
+import com.shermansplanet.otherverse.others.*;
 import com.shermansplanet.otherverse.potions.OtherversePotions;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
@@ -31,6 +29,7 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.inventory.MenuType;
@@ -88,6 +87,11 @@ public class Otherverse {
         }
     };
 
+    private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(
+            ForgeRegistries.SOUND_EVENTS, MODID);
+    public static final RegistryObject<SoundEvent> IMPLEMENT_RITUAL = SOUND_EVENTS.register("implement",
+            () -> new SoundEvent(new ResourceLocation(Otherverse.MODID, "implement")));
+
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(
             ForgeRegistries.ENTITY_TYPES, MODID);
     public static final RegistryObject<EntityType<EchoEntity>> ENTITY_ECHO = ENTITIES.register("echo",
@@ -97,6 +101,11 @@ public class Otherverse {
             () -> EntityType.Builder.of(TyphloticShark::new, MobCategory.MONSTER)
                     .immuneTo(Blocks.POWDER_SNOW).sized(0.9F, 0.5F)
                     .build(String.valueOf(new ResourceLocation(MODID, "typhlotic_shark"))));
+
+    public static final RegistryObject<EntityType<TyphloticJellyfish>> TYPHLOTIC_JELLYFISH = ENTITIES.register("typhlotic_jellyfish",
+            () -> EntityType.Builder.of(TyphloticJellyfish::new, MobCategory.MONSTER)
+                    .sized(1F, 2.5F)
+                    .build(String.valueOf(new ResourceLocation(MODID, "typhlotic_jellyfish"))));
 
     public static final RegistryObject<EntityType<ThrownTNT>> ENTITY_THROWN_TNT = ENTITIES.register("thrown_tnt",
             () -> EntityType.Builder.<ThrownTNT>of(ThrownTNT::new, MobCategory.MISC)
@@ -153,6 +162,7 @@ public class Otherverse {
         }
         OtherverseItems.ITEMS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
+        SOUND_EVENTS.register(modEventBus);
         RECIPE_TYPES.register(modEventBus);
         MENU_TYPES.register(modEventBus);
         OtherverseFeatureGen.FEATURES.register(modEventBus);
@@ -236,6 +246,8 @@ public class Otherverse {
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ENTITY_ECHO.get(), EchoRenderer::new);
             event.registerEntityRenderer(TYPHLOTIC_SHARK.get(), TyphloticSharkRenderer::new);
+            event.registerEntityRenderer(TYPHLOTIC_JELLYFISH.get(), TyphloticJellyfishRenderer::new);
+
             event.registerEntityRenderer(ENTITY_THROWN_TNT.get(), ThrownItemRenderer::new);
             event.registerBlockEntityRenderer(CHALK_CIRCLE.get(), ChalkCircleRenderer::new);
             event.registerBlockEntityRenderer(DEMESNES_BEACON_ENTITY.get(), DemesnesBeaconRenderer::new);
@@ -246,6 +258,7 @@ public class Otherverse {
         @SubscribeEvent
         public static void registerLayerDefinition(EntityRenderersEvent.RegisterLayerDefinitions event) {
             event.registerLayerDefinition(TyphloticSharkModel.LAYER_LOCATION, TyphloticSharkModel::createBodyLayer);
+            event.registerLayerDefinition(TyphloticJellyfishModel.LAYER_LOCATION, TyphloticJellyfishModel::createBodyLayer);
         }
 
         @SubscribeEvent

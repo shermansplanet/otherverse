@@ -142,6 +142,6 @@ public class BlockItemInjector {
 
     @Shadow
     protected SoundEvent getPlaceSound(BlockState state, Level world, BlockPos pos, Player entity) {
-        return null;
+        return state.getSoundType(world, pos, entity).getPlaceSound();
     }
 }

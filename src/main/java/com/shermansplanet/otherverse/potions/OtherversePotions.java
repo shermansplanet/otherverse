@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.potions;
 
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.artifacts.ConnectionReboundEffect;
 import com.shermansplanet.otherverse.familiar.FamiliarBlessingEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -18,6 +19,8 @@ public class OtherversePotions {
             () -> new HeavinessEffect(MobEffectCategory.HARMFUL, 0x774411));
     public static final RegistryObject<MobEffect> FAMILIAR_BLESSING_EFFECT = EFFECTS.register("familiar_blessing",
             () -> new FamiliarBlessingEffect(MobEffectCategory.BENEFICIAL, 0xffe300));
+    public static final RegistryObject<MobEffect> REBOUND_EFFECT = EFFECTS.register("connection_rebound",
+            () -> new ConnectionReboundEffect(MobEffectCategory.HARMFUL, 0xbb0000));
 
     public static final DeferredRegister<Potion> POTIONS =
             DeferredRegister.create(ForgeRegistries.POTIONS, Otherverse.MODID);

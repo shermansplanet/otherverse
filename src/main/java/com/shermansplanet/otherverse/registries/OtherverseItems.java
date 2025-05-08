@@ -90,6 +90,10 @@ public class OtherverseItems {
             () -> new Item(new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
     public static final RegistryObject<Item> REALM_WRACKED_COAL = ITEMS.register("realm_wracked_coal",
             () -> new RealmWrackedCoalItem(new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+    public static final RegistryObject<Item> CONNECTION_BLOCKER = ITEMS.register("connection_blocker",
+            () -> new Item(new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+    public static final RegistryObject<Item> HOMUNCULUS_HEART = ITEMS.register("homunculus_heart",
+            () -> new Item(new Item.Properties().tab(Otherverse.TAB_PRACTICE).durability(20)));
 
     public static final RegistryObject<Item> PLUM_BRICKS_ITEM = ITEMS.register("plum_bricks",
             () -> new BlockItem(OtherverseBlocks.PLUM_BRICKS.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));

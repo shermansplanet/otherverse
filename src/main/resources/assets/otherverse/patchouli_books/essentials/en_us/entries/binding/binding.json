@@ -16,7 +16,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "If the diagram ever changes such that there is no longer enough valid influence, the binding will break. Mobs that break their binding become either hostile or panicked towards the closest player, and receive a brief power-up.$(br2)Mobs can leave their binding focus while remaining bound, but only if the chalk of the diagram is not tampered with at all."
+            "text": "Mobs can leave their binding focus while remaining bound, but only if the chalk of the diagram is not tampered with at all.$(br2)If the diagram ever changes such that there is no longer enough valid influence, the binding will break. Mobs that break their binding become either hostile or panicked towards the closest player, and receive a brief power-up."
         },
         {
             "type": "patchouli:image",
@@ -34,7 +34,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "For mobs that attack their bindings, a crossed chain icon indicates how often and severely they do so. \"4/164s\" means that every 164 seconds, it will destroy one item, drain 4 spirits from a hallow, or do 4 damage to a mob that's helping bind it."
+            "text": "For mobs that attack their bindings, a crossed chain icon indicates how often and severely they do so. \"4/164s\" means that every 164 seconds, it will destroy one item, drain 4 spirits from a hallow, or do 4 damage to a mob that's helping bind it.$(br2)You can right-click a bound mob with an empty hand to switch between simple behaviors. But for more complex routines, you'll need a contract."
         }
     ]
 }

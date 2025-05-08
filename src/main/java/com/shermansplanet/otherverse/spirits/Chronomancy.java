@@ -5,6 +5,7 @@ import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
+import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -13,7 +14,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -24,6 +28,27 @@ public class Chronomancy {
 
     public static HashSet<Entity> frozenEntitiesForClient = new HashSet<>();
     public static HashSet<Entity> frozenEntitiesForServer = new HashSet<>();
+
+    @SubscribeEvent
+    public static void onUse(PlayerInteractEvent.RightClickItem event) {
+        tryUseClock(event);
+    }
+
+    @SubscribeEvent
+    public static void onUse(PlayerInteractEvent.RightClickBlock event) {
+        tryUseClock(event);
+    }
+
+    private static void tryUseClock(PlayerInteractEvent event) {
+        if (event.getLevel().isClientSide()) return;
+        var stack = event.getItemStack();
+        if (!stack.is(Items.CLOCK) || !ImplementManager.isImplement(stack)) return;
+        var player = event.getEntity();
+        for (var other : player.getLevel().getEntities(player, player.getBoundingBox().inflate(16))) {
+            other.getPersistentData().putInt("chronomancy_ticks", 20 * 10);
+        }
+        player.getInventory().removeItem(stack);
+    }
 
     public record ChronomancyMessage(int entityId, boolean shouldTick) {
         public void encode(FriendlyByteBuf buffer) {
@@ -66,7 +91,7 @@ public class Chronomancy {
             var speed = (float) Math.sqrt(speedSqr);
             var steps = Math.ceil(speed);
             for (var i = 1; i <= steps; i++) {
-                var pos = entity.position().subtract(vel.scale(i/steps));
+                var pos = entity.position().subtract(vel.scale(i / steps));
                 blockPositions.add(new BlockPos(pos));
             }
         }

@@ -1,6 +1,6 @@
 package com.shermansplanet.otherverse.spirits;
 
-import com.ibm.icu.impl.Pair;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
@@ -240,11 +240,11 @@ public class ShrineHelper {
             @Override
             public int overflowShrine(Shrine shrine, Level level, int amount, boolean simulate) {
                 if (amount < 7) return 0;
-                var possibleBlocks = new ArrayList<com.ibm.icu.impl.Pair<BlockPos, Direction>>();
+                var possibleBlocks = new ArrayList<Pair<BlockPos, Direction>>();
                 for (var shrinePos : shrine.hallowPositions) {
                     for (var dir : Direction.values()) {
                         var newpos = shrinePos.relative(dir);
-                        if (level.isEmptyBlock(newpos)) possibleBlocks.add(Pair.of(newpos, dir));
+                        if (level.isEmptyBlock(newpos)) possibleBlocks.add(new Pair<>(newpos, dir));
                     }
                 }
                 if (possibleBlocks.isEmpty()) return 0;
@@ -252,9 +252,9 @@ public class ShrineHelper {
                 if (level instanceof ServerLevel sl && !simulate) {
                     var loc = possibleBlocks.get(level.getRandom().nextInt(possibleBlocks.size()));
                     SmallFireball smallfireball = new SmallFireball(sl,
-                            loc.first.getX() + 0.5f, loc.first.getY() + 0.5f, loc.first.getZ() + 0.5f,
-                            loc.second.getStepX(), loc.second.getStepY(), loc.second.getStepZ());
-                    level.playSound(null, loc.first, SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 1, 1);
+                            loc.getFirst().getX() + 0.5f, loc.getFirst().getY() + 0.5f, loc.getFirst().getZ() + 0.5f,
+                            loc.getSecond().getStepX(), loc.getSecond().getStepY(), loc.getSecond().getStepZ());
+                    level.playSound(null, loc.getFirst(), SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 1, 1);
                     sl.addFreshEntity(smallfireball);
                 }
                 return 7;

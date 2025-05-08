@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.binding.FleshbindingManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.binding.MobTransfusions;
 import com.shermansplanet.otherverse.implement.ImplementManager;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 public class PracticeWorldManager {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static boolean noJeiPending = false;
+    public static boolean jeiInitialized = false;
     public static boolean worldSetUp = false;
 
     public static abstract class WorldTraitComponent<T> {
@@ -142,6 +144,7 @@ public class PracticeWorldManager {
         MobBindingInfluenceUtils.mobSpirits.clear();
         worldSetUp = false;
         noJeiPending = false;
+        jeiInitialized = false;
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -151,5 +154,6 @@ public class PracticeWorldManager {
 
     public static void onColorsReceived(HashMap<Item, SpiritLabeler.SpiritAmount[]> mappings, NetworkEvent.Context context) {
         SpiritLabeler.onColorsUpdated(mappings);
+        FleshbindingManager.addWoodTextures();
     }
 }

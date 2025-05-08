@@ -1,20 +1,28 @@
 package com.shermansplanet.otherverse.spirits;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.Diagram;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.implement.ImplementManager;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -36,7 +44,36 @@ public class FleshTechManager {
         var ct = le.getPersistentData().getString("construct_type");
         if (ct.isEmpty()) return;
         if (!ShrineHelper.getShrinesFor(le, Spirits.spiritsByLabel.get(ct)).isEmpty()) return;
+        if (getClosestHeart(le) != null) return;
         le.hurt(DamageSource.MAGIC, 7);
+    }
+
+    @SubscribeEvent
+    public static void onTick(LivingDamageEvent event) {
+        if (!event.getEntity().getPersistentData().getString("construct_type").equals("flesh")) return;
+        var playerHeart = getClosestHeart(event.getEntity());
+        if (playerHeart == null) return;
+        var heart = playerHeart.getSecond();
+        var transferredDamage = Math.min(heart.getMaxDamage() - heart.getDamageValue(), Math.round(event.getAmount()));
+        heart.setDamageValue(heart.getDamageValue() + transferredDamage);
+        if (heart.getDamageValue() >= heart.getMaxDamage()) {
+            playerHeart.getFirst().getInventory().removeItem(heart);
+        }
+        var newAmount = event.getAmount() - transferredDamage;
+        if (newAmount <= 0) event.setCanceled(true);
+        event.setAmount(newAmount);
+    }
+
+    private static Pair<Player, ItemStack> getClosestHeart(LivingEntity le) {
+        for (var p : le.getLevel().getEntities(EntityType.PLAYER, le.getBoundingBox().inflate(16), (Player p) -> true)) {
+            for (var hand : InteractionHand.values()) {
+                var item = p.getItemInHand(hand);
+                if (!item.is(OtherverseItems.HOMUNCULUS_HEART.get())) continue;
+                if (!ImplementManager.isImplement(item)) continue;
+                return new Pair<>(p, item);
+            }
+        }
+        return null;
     }
 
     @SubscribeEvent

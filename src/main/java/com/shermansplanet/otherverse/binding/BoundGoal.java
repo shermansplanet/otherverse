@@ -60,7 +60,7 @@ public class BoundGoal extends Goal {
     private final int bindingWearInterval;
     public int cooldown = 0;
     private int currentMode = 0;
-    private Player practitioner;
+    public Player practitioner;
     private boolean isAttacking;
     private boolean isPartOfSwarm;
     private boolean isLoyaltyBound;
@@ -129,7 +129,7 @@ public class BoundGoal extends Goal {
     }
 
     private void displayFamiliarMode() {
-        var name = mob.getCustomName().copy();
+        var name = (mob.hasCustomName() ? mob.getCustomName() : mob.getType().getDescription()).copy();
         var atk = mob.getAttribute(Attributes.ATTACK_DAMAGE);
         var s = switch (currentMode) {
             case 0 -> " is now obeying its contract.";
@@ -206,7 +206,7 @@ public class BoundGoal extends Goal {
             mob.getNavigation().stop();
         } else if (currentMode == 0 && currentDecider != null) {
             tickContract();
-            if(isTamed && cooldown == 1000){
+            if (isTamed && cooldown == 1000) {
                 cooldown = 0;
                 OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                         new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), true));
@@ -224,7 +224,7 @@ public class BoundGoal extends Goal {
             return;
         }
         var demesne = DemesnesManager.getData(binding.getLocalLevel(), binding.position);
-        if(demesne != null && demesne.getPerkLevel(DemesnesManager.DemesnePerk.CAGE) > 0) return;
+        if (demesne != null && demesne.getPerkLevel(DemesnesManager.DemesnePerk.CAGE) > 0) return;
         LOGGER.debug("BINDING WEAR");
         if (!binding.getLocalLevel().isLoaded(binding.position)) {
             LOGGER.debug("BREAKING BINDING BECAUSE NOT LOADED");
@@ -440,7 +440,7 @@ public class BoundGoal extends Goal {
                 if (otherMob.getTarget() == mob) {
                     targetMob = otherMob;
                 }
-                if(mob.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
+                if (mob.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
                     var otherMobTarget = mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
                     if (otherMobTarget.isPresent() && otherMobTarget.get() == practitioner) {
                         targetMob = otherMob;
@@ -506,8 +506,14 @@ public class BoundGoal extends Goal {
 
     private void tickContract() {
         if (cooldown > 0) cooldown--;
-        if (currentTask == null && !lookAround()) {
-            return;
+        if (currentTask == null) {
+            if (lookAround()) {
+                for (var task : currentDecider.tasks) {
+                    task.resetLookIndex();
+                }
+            } else {
+                return;
+            }
         }
         if (--nextTick > 0) return;
         nextTick = mob.getRandom().nextInt(10) + 5;
@@ -531,30 +537,34 @@ public class BoundGoal extends Goal {
                 }
             }
             if (task.corner0 != null) {
-                BlockPos closestAcceptableTarget = null;
-                double closestDist = Float.POSITIVE_INFINITY;
                 var eyePos = mob.getEyePosition();
-                var corner0 = task.corner0.getPos(mob.level);
-                var corner1 = task.corner1.getPos(mob.level);
-                var minCorner = new Vec3i(Math.min(corner0.getX(), corner1.getX()), Math.min(corner0.getY(), corner1.getY()), Math.min(corner0.getZ(), corner1.getZ()));
-                var maxCorner = new Vec3i(Math.max(corner0.getX(), corner1.getX()), Math.max(corner0.getY(), corner1.getY()), Math.max(corner0.getZ(), corner1.getZ()));
-                for (int x = minCorner.getX(); x <= maxCorner.getX(); x++) {
-                    for (int y = minCorner.getY(); y <= maxCorner.getY(); y++) {
-                        for (int z = minCorner.getZ(); z <= maxCorner.getZ(); z++) {
-                            var dist = eyePos.distanceToSqr(new Vec3(x + 0.5f, y + 0.5f, z + 0.5f));
-                            if (dist > closestDist) continue;
-                            var pos = new BlockPos(x, y, z);
-                            if (task.isAcceptableTarget(pos, true)) {
-                                closestDist = dist;
-                                closestAcceptableTarget = pos;
+                if (task.potentialTargets.isEmpty()) {
+                    var corner0 = task.corner0.getPos(mob.level);
+                    var corner1 = task.corner1.getPos(mob.level);
+                    var minCorner = new Vec3i(Math.min(corner0.getX(), corner1.getX()), Math.min(corner0.getY(), corner1.getY()), Math.min(corner0.getZ(), corner1.getZ()));
+                    var maxCorner = new Vec3i(Math.max(corner0.getX(), corner1.getX()), Math.max(corner0.getY(), corner1.getY()), Math.max(corner0.getZ(), corner1.getZ()));
+                    for (int x = minCorner.getX(); x <= maxCorner.getX(); x++) {
+                        for (int y = minCorner.getY(); y <= maxCorner.getY(); y++) {
+                            for (int z = minCorner.getZ(); z <= maxCorner.getZ(); z++) {
+                                task.potentialTargets.add(new BlockPos(x, y, z));
                             }
                         }
                     }
-                }
-                if (closestAcceptableTarget != null) {
-                    currentTask = task;
-                    currentTask.targetPos = closestAcceptableTarget;
-                    return true;
+                    task.potentialTargets.sort(Comparator.comparingDouble(bp -> eyePos.distanceToSqr(new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))));
+                } else {
+                    for (var i = 0; i < 8; i++) {
+                        var index = task.lookIndex + i;
+                        if (index >= task.potentialTargets.size()) {
+                            task.resetLookIndex();
+                            break;
+                        }
+                        var target = task.potentialTargets.get(index);
+                        if (!task.isAcceptableTarget(target, true)) continue;
+                        currentTask = task;
+                        currentTask.targetPos = target;
+                        return true;
+                    }
+                    task.lookIndex += 8;
                 }
             }
             if (task.taskType == ContractTask.TaskType.TAKE) {
@@ -611,7 +621,7 @@ public class BoundGoal extends Goal {
         binding.setContract(contract);
         applyContract();
 
-        if (fromPlayerClick && FamiliarManager.isFamiliar(mob) && currentMode != 0) {
+        if (fromPlayerClick && currentMode != 0) {
             currentMode = 0;
             displayFamiliarMode();
         }

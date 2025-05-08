@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.diagrams;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.artifacts.ArtifactManager;
+import com.shermansplanet.otherverse.artifacts.ConnectionBlockManager;
 import com.shermansplanet.otherverse.binding.*;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
@@ -173,7 +174,8 @@ public class Diagram {
                 || MobTransfusions.tryFeedFromMob(circle, this)
                 || ContractManager.tryMakeContract(level, circle, this)
                 || FleshbindingManager.tryCinnabind(level, circle, this)
-                || DemesnesManager.tryMakePortal(level, circle, this);
+                || DemesnesManager.tryMakePortal(level, circle, this)
+                || ConnectionBlockManager.tryMakeBlocker(level, circle, this);
 
         if (!needsReactivation) {
             HallowHelper.tryFillHallow(level, circle, this);
@@ -224,6 +226,11 @@ public class Diagram {
 
     public boolean trySpendPower(ServerLevel level, BlockPos targetPos, int requiredPower,
                                  HashSet<EntityType<?>> requiredEntities) {
+        return getPowerSpent(level, targetPos, requiredPower, requiredEntities) > 0;
+    }
+
+    public int getPowerSpent(ServerLevel level, BlockPos targetPos, int requiredPower,
+                                 HashSet<EntityType<?>> requiredEntities) {
         List<PowerSource> powerSources =
                 powerSourceCache.containsKey(targetPos) ? powerSourceCache.get(targetPos).get(requiredEntities) : null;
         int availablePower = 0;
@@ -242,8 +249,7 @@ public class Diagram {
         }
 
         if (requiredPower > availablePower) {
-            LOGGER.debug("need " + requiredPower + ", only have " + availablePower);
-            return false;
+            return 0;
         }
 
         if (requiredEntities.size() > 1 || requiredPower == 0) {
@@ -256,7 +262,7 @@ public class Diagram {
                     }
                 }
                 if (!hasCorrectEntity) {
-                    return false;
+                    return 0;
                 }
             }
         }
@@ -264,21 +270,28 @@ public class Diagram {
         powerSources.sort((a, b) -> (b.totalPower().compareTo(a.totalPower())));
 
         float contributionPerSource = (float) requiredPower / availablePower;
+        int powerDrained = 0;
 
         for (PowerSource powerSource : powerSources) {
+            if(requiredPower < 0){
+                powerDrained += powerSource.unitsOfPower() * powerSource.powerPerUnit();
+                powerSource.drainPower().accept(powerSource.unitsOfPower());
+                continue;
+            }
             int unitsToDrain = (int) Math.ceil(powerSource.unitsOfPower() * contributionPerSource);
             if (unitsToDrain * powerSource.powerPerUnit() > requiredPower) {
                 unitsToDrain = (int) Math.ceil((float) requiredPower / powerSource.powerPerUnit());
             }
-            requiredPower -= unitsToDrain * powerSource.powerPerUnit();
+            var drained = unitsToDrain * powerSource.powerPerUnit();
+            powerDrained += drained;
+            requiredPower -= drained;
             powerSource.drainPower().accept(unitsToDrain);
             if (requiredPower <= 0) {
                 break;
             }
         }
 
-        LOGGER.debug("power spent");
-        return true;
+        return powerDrained;
     }
 
     private int getPowerSources(ServerLevel level, BlockPos targetPos, List<PowerSource> powerSources,
@@ -529,6 +542,10 @@ public class Diagram {
     }
 
     public boolean processMobInFocus(ServerLevel sl, Mob mob, BlockFocus focus) {
+        if(mob.isRemoved() || !mob.isAddedToWorld()){
+            focus.mostRecentMob = null;
+            return false;
+        }
         if (mob.getPersistentData().hasUUID("bindingId")) {
             var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
             var binding = data.bindingsById.get(mob.getPersistentData().getUUID("bindingId"));

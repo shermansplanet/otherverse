@@ -1,6 +1,6 @@
 package com.shermansplanet.otherverse.spirits;
 
-import com.ibm.icu.impl.Pair;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
@@ -24,10 +24,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -36,6 +33,7 @@ import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
@@ -153,6 +151,22 @@ public class HallowHelper {
     }
 
     @SubscribeEvent
+    static void onPreventDamage(ShieldBlockEvent event) {
+        var item = event.getEntity().getMainHandItem();
+        if (!(item.getItem() instanceof ShieldItem)) {
+            item = event.getEntity().getOffhandItem();
+        }
+        if (item.isEmpty() || !item.hasTag() || !item.getTag().contains("hallow")) return;
+        var hallowTag = item.getTag().getCompound("hallow");
+        if (!hallowTag.getString("spirit_type").equals("protection")) return;
+        int capacity = hallowTag.getInt("capacity");
+        int count = hallowTag.getInt("spirit_count");
+        if (count >= capacity) return;
+        var blocked = (int) event.getBlockedDamage();
+        hallowTag.putInt("spirit_count", Math.min(capacity, count + blocked));
+    }
+
+    @SubscribeEvent
     static void onPush(PistonEvent.Pre event) {
         if (event.getLevel().isClientSide()) return;
         LOGGER.debug(event.getPistonMoveType() == PistonEvent.PistonMoveType.EXTEND ? "EXTENDING" : "RETRACTING");
@@ -204,8 +218,7 @@ public class HallowHelper {
         var initialHp = (int) event.getEntity().getHealth();
         var finalHp = (int) Math.max(0, initialHp - event.getAmount());
         var hpDelta = initialHp - finalHp;
-        LOGGER.debug("Current health: " + event.getEntity().getHealth() + ", -" + hpDelta);
-        hallowTag.putInt("spirit_count", count + (int) hpDelta);
+        hallowTag.putInt("spirit_count", Math.min(capacity, count + hpDelta));
     }
 
     @SubscribeEvent
@@ -346,8 +359,8 @@ public class HallowHelper {
             var spiritCapacity = hallowTag.getInt("capacity");
 
             var amountAndCapacity = getShrineSpiritCountAndCapacity(sl, event.getPos(), blockSpiritType);
-            var otherAmount = amountAndCapacity.first;
-            var otherCapacity = amountAndCapacity.second;
+            var otherAmount = amountAndCapacity.getFirst();
+            var otherCapacity = amountAndCapacity.getSecond();
             var depositing = otherAmount == 0 || spiritCount == spiritCapacity || event.getEntity().isShiftKeyDown();
             if (depositing) {
                 spiritCount -= fillBlockHallow(sl, event.getPos(), itemSpiritType,
@@ -614,6 +627,7 @@ public class HallowHelper {
                 var ht = data.getPlacedItemTag(sourcePos);
                 var count = ht.getInt("spirit_count");
                 count = Math.min(count, remainingPrice);
+                if (count == 0) continue;
                 drainPositions.put(sourcePos, count);
                 remainingPrice -= count;
             }

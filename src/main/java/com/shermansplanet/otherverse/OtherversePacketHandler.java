@@ -154,6 +154,13 @@ public class OtherversePacketHandler {
                 Chronomancy.ChronomancyMessage::decode,
                 OtherversePacketHandler::handleChronomancyMessage
         );
+        OtherversePacketHandler.INSTANCE.registerMessage(
+                id++,
+                SightToggleMessage.class,
+                SightToggleMessage::encode,
+                SightToggleMessage::decode,
+                SightManager::onToggleServer
+        );
     }
 
     private static void handleChronomancyMessage(Chronomancy.ChronomancyMessage msg, Supplier<Context> ctx) {

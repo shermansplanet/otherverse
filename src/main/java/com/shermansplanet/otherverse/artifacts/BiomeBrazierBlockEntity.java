@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.artifacts;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritType;
@@ -41,6 +42,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 
@@ -157,6 +159,11 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
     }
 
     private Block getBlockStone(Holder<Biome> biome) {
+        var biomeName = MobBindingInfluenceUtils.getBiomeName(biome, level);
+        if (biomeName.equals("visceral_heap")) return ForgeRegistries.BLOCKS.getValue(new ResourceLocation("biomesoplenty","flesh"));
+        if (biomeName.equals("erupting_inferno")) return ForgeRegistries.BLOCKS.getValue(new ResourceLocation("biomesoplenty","brimstone"));
+        if (biomeName.equals("withered_abyss")) return ForgeRegistries.BLOCKS.getValue(new ResourceLocation("biomesoplenty","blackstone"));
+
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
         if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH)) return Blocks.SANDSTONE;
 

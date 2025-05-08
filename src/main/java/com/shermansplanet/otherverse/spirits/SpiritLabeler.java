@@ -132,7 +132,9 @@ public class SpiritLabeler {
     public static void loadJsonSpirits(JsonObject practice) {
         var spirits = practice.get("spirits").getAsJsonObject();
         for (var itemstring : spirits.keySet()) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemstring));
+            var loc = new ResourceLocation(itemstring);
+            if(!ForgeRegistries.ITEMS.containsKey(loc)) continue;
+            Item item = ForgeRegistries.ITEMS.getValue(loc);
             var spiritcounts = spirits.get(itemstring).getAsJsonArray();
             SpiritAmount[] amounts = new SpiritAmount[spiritcounts.size()];
             for (var i = 0; i < spiritcounts.size(); i++) {

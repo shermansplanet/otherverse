@@ -1,0 +1,14 @@
+{
+    "name": "Heart",
+    "sortnum": 90,
+    "icon": "otherverse:homunculus_heart",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"item" : "otherverse:homunculus_heart"},
+            "title" : "Homunculus Heart",
+            "text": "While holding a homunculus heart Implement, all homunculi around you will be sustained even outside the range of a Flesh shrine. Also, any damage they take will be transferred to the heart."
+        }
+    ]
+}

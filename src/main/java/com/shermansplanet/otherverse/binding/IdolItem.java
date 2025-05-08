@@ -30,13 +30,21 @@ public class IdolItem extends Item {
     public InteractionResult useOn(UseOnContext useCtx) {
         if (!(useCtx.getPlayer() instanceof ServerPlayer sp)) return InteractionResult.SUCCESS;
         ItemStack stack = useCtx.getItemInHand();
-        FamiliarManager.makeMobFromTag(getType(stack), stack.getTag(), useCtx.getClickLocation(), sp.getLevel());
-        stack.shrink(1);
-        if(stack.getTag().getString("material").equals("otherverse:cinnabar_block")){
-            var player = useCtx.getPlayer();
-            var item = new ItemStack(OtherverseItems.CINNABAR_BLOCK.get(), 1);
-            if (!player.addItem(item)) {
-                player.drop(item, false);
+        var type = getType(stack);
+        var location = useCtx.getClickLocation();
+        if (!stack.hasTag() || !stack.getTag().contains("material")) {
+            var entity = type.create(sp.getLevel());
+            entity.setPos(location);
+            sp.getLevel().addFreshEntityWithPassengers(entity);
+        } else {
+            FamiliarManager.makeMobFromTag(type, stack.getTag(), location, sp.getLevel());
+            stack.shrink(1);
+            if (stack.getTag().getString("material").equals("otherverse:cinnabar_block")) {
+                var player = useCtx.getPlayer();
+                var item = new ItemStack(OtherverseItems.CINNABAR_BLOCK.get(), 1);
+                if (!player.addItem(item)) {
+                    player.drop(item, false);
+                }
             }
         }
 
@@ -56,7 +64,7 @@ public class IdolItem extends Item {
         }
     }
 
-    public static CompoundTag mobToTag(Mob mob){
+    public static CompoundTag mobToTag(Mob mob) {
         var data = new CompoundTag();
         data.put("EntityTag", mob.saveWithoutId(new CompoundTag()));
         var tag = new CompoundTag();

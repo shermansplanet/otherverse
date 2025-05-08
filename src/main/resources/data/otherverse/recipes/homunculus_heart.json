@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aba",
+        "bcb",
+        "aba"
+    ],
+    "key": {
+        "a": {"item": "minecraft:nether_wart"},
+        "b": {"item": "minecraft:rotten_flesh"},
+        "c": [{"item": "minecraft:porkchop"}, {"item": "minecraft:beef"}, {"item": "minecraft:mutton"}, {"item": "minecraft:chicken"}]
+    },
+    "result": {
+        "item": "otherverse:homunculus_heart",
+        "count" : 1
+    }
+}
