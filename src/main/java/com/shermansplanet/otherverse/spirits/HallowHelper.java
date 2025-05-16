@@ -23,12 +23,15 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.GrindstoneEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -79,6 +82,14 @@ public class HallowHelper {
     @SubscribeEvent
     public static void startup(ServerAboutToStartEvent event) {
         ShrineHelper.onStartup();
+    }
+
+    @SubscribeEvent
+    public static void onGrindstoneChange(GrindstoneEvent.OnplaceItem event) {
+        if (!event.getTopItem().hasTag() || !event.getTopItem().getTag().contains("hallow")) return;
+        var newstack = event.getTopItem().copy();
+        newstack.getTag().remove("hallow");
+        event.setOutput(newstack);
     }
 
     @SubscribeEvent
@@ -241,8 +252,8 @@ public class HallowHelper {
         CompoundTag hallowTag = tag.getCompound("hallow");
         int capacity = hallowTag.getInt("capacity");
         int count = hallowTag.getInt("spirit_count");
-        event.getToolTip().add(Component.literal("Hallow: " + count + "/" + capacity + " "
-                + hallowTag.getString("spirit_type").replace("_", " ") + " spirits"));
+        event.getToolTip().add(Component.literal(count + "/" + capacity + " "
+                + hallowTag.getString("spirit_type").replace("_", " ")));
     }
 
     public static boolean tryHallow(ServerLevel level, ChalkCircle circle, Diagram diagram) {
@@ -418,6 +429,25 @@ public class HallowHelper {
         }
     }
 
+    @SubscribeEvent
+    public static void mobDie(LivingDeathEvent event) {
+        if (!(event.getEntity().getLevel() instanceof ServerLevel sl)) return;
+        EntityType<? extends LivingEntity> type = (EntityType<? extends LivingEntity>) event.getEntity().getType();
+        var spiritType = MobBindingInfluenceUtils.mobSpirits.get(type);
+        if (spiritType == null) return;
+        var data = DiagramManager.getOrCreateLevelData(sl);
+        for(var offset : new float[]{0f,-1f}) {
+            var pos = new BlockPos(event.getEntity().position().add(0, offset, 0));
+            var tag = data.getPlacedItemTag(pos);
+            if (tag == null) continue;
+            if (!tag.getString("spirit_type").equals(spiritType.label())) continue;
+            int hp = Math.round((float) DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH) / 3f);
+            tag.putInt("capacity", tag.getInt("capacity") + hp);
+            data.putPlacedItemTag(pos, tag);
+            return;
+        }
+    }
+
     public static void addFakeEnchantment(CompoundTag tag) {
         /*if (!tag.contains("Enchantments", 9)) {
             tag.put("Enchantments", new ListTag());
@@ -436,7 +466,7 @@ public class HallowHelper {
         Set<SpiritType> originalSpirits = new HashSet<>(possibleSpirits);
         for (IFocus sourceFocus : influences) {
             Item item = sourceFocus.getItem().getItem();
-            if (sourceFocus.getItem().isEmpty() || item == Items.AIR || item == OtherverseItems.CHALK.get()) {
+            if (sourceFocus.getItem().isEmpty() || item == Items.AIR || item == OtherverseItems.CHALK.get() || item == OtherverseItems.SPINDLE_BLOODY.get()) {
                 continue;
             }
             var spiritCount = SpiritLabeler.getSpiritsFor(item);
@@ -505,12 +535,22 @@ public class HallowHelper {
             }
         }
 
-        if (sourceItem.is(OtherverseItems.IDOL.get()) && source.getFocusLevel() instanceof ServerLevel sl) {
-            var et = IdolItem.getType(sourceItem);
-            if (MobBindingInfluenceUtils.mobSpirits.get(et) != spiritType) return false;
-            var binding = BindingOrFleshbinding.getFromPosition(sl, source.getPos());
-            if (binding == null) return false;
-            return binding.getHealth() > 1;
+        if (source.getFocusLevel() instanceof ServerLevel sl) {
+            if (sourceItem.is(OtherverseItems.IDOL.get())) {
+                var et = IdolItem.getType(sourceItem);
+                if (MobBindingInfluenceUtils.mobSpirits.get(et) != spiritType) return false;
+                var binding = BindingOrFleshbinding.getFromPosition(sl, source.getPos());
+                if (binding == null) return false;
+                return binding.getHealth() > 1;
+            }
+
+            if (source instanceof ChalkCircle cc && sourceItem.is(OtherverseItems.SPINDLE_BLOODY.get())) {
+                var binding = BindingOrFleshbinding.getFromSpindle(cc);
+                if (binding == null) return false;
+                if (binding.mob == null) return false;
+                if (MobBindingInfluenceUtils.mobSpirits.get(binding.mob.getType()) != spiritType) return false;
+                return binding.mob.getHealth() > 1;
+            }
         }
 
         var spirits = SpiritLabeler.getSpiritsFor(sourceItem.getItem());

@@ -14,11 +14,14 @@
         },
         {
             "type": "patchouli:text",
-            "text": "If you use a spirit tablet on a shrine, every spirit in that shrine will be spent to turn the tablet into a hallow.$(br2)The new hallow will be empty, but its capacity will be equal to the number of spent spirits.$(br2)There is no limit to the potential capacity of these hallows."
+            "text": "These overflow/overdraw abilities only trigger if they have enough fuel/capacity to have an effect. For instance, nature shrines can use 33 overflow spirits to grow crops, so they won't break down seeds directly since seeds only have 30 nature spirits. To make this work, you'd need an intermediate nature hallow that can hold at least 33 spirits to be drained all at once."
         },
         {
-            "type": "patchouli:crafting",
-            "recipe": "otherverse:spirit_tablet"
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_tablet"
+            },
+            "text": "If you use a spirit tablet on a shrine, every spirit in that shrine will be spent to turn the tablet into a hallow.$(br2)The new hallow will be empty, but its capacity will be equal to the number of spent spirits.$(br2)There is no limit to the potential capacity of these hallows."
         }
     ]
 }

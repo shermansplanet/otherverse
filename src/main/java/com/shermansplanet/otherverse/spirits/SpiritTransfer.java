@@ -143,7 +143,7 @@ public class SpiritTransfer extends DiagramProcess {
                 transferAmount = source.drainHallow(spiritType, effectiveCapacity, false, true);
                 onTransfer = x -> source.drainHallow(spiritType, x, false, false);
             } else {
-                if (sourceItem.is(OtherverseItems.IDOL.get())) {
+                if (sourceItem.is(OtherverseItems.IDOL.get()) || sourceItem.is(OtherverseItems.SPINDLE_BLOODY.get())) {
                     var binding = BindingOrFleshbinding.getFromPosition(sl, source.getPos());
                     if (binding == null) {
                         if (firstFrameCheck) abandon();

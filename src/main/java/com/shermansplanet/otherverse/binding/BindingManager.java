@@ -106,7 +106,6 @@ public class BindingManager {
             event.getToolTip().add(entityType.getDescription());
             if (event.getItemStack().getTag().contains("mob_data")) {
                 try {
-                    event.getToolTip().add(Component.literal(event.getItemStack().getTag().getString("material")));
                     int maxHp = (int) DefaultAttributes.getSupplier((EntityType<? extends LivingEntity>) entityType).getValue(Attributes.MAX_HEALTH);
                     int hp = (int) event.getItemStack().getTag().getCompound("mob_data").getCompound("EntityTag").getFloat("Health");
                     event.getToolTip().add(Component.literal(hp + "/" + maxHp + " Health"));
@@ -386,6 +385,7 @@ public class BindingManager {
     }
 
     public static void startAttacking(Mob mob, LivingEntity targetMob) {
+        if(mob == targetMob) return;
         mob.setTarget(targetMob);
         mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, targetMob);
         mob.getBrain().setMemory(MemoryModuleType.ANGRY_AT, targetMob.getUUID());

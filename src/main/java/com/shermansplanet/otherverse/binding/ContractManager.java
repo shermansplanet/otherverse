@@ -146,7 +146,7 @@ public class ContractManager {
                 continue;
             }
             if (level.getBlockEntity(influencePos.getKey()) instanceof ChalkCircle sourceCircle) {
-                if (sourceCircle.item.is(Items.RED_DYE)) {
+                if (sourceCircle.item.is(Items.ORANGE_DYE)) {
                     CompoundTag deciderTag = makeDeciderTag(level, sourceCircle, diagram, originalPos);
                     if (!deciderTag.isEmpty()) {
                         tag.put("fallback", deciderTag);

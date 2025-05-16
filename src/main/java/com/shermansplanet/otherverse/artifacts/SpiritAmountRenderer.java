@@ -6,6 +6,7 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.SightManager;
+import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.Spirits;
@@ -15,6 +16,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -42,9 +45,21 @@ public class SpiritAmountRenderer {
             labelPosition = ((BlockHitResult) hit).getBlockPos();
             var lvl = Minecraft.getInstance().level;
             if (lvl == null) return;
-            if (lvl.getBlockEntity(labelPosition) instanceof BiomeBrazierBlockEntity brazier) {
+            var blockEntity = lvl.getBlockEntity(labelPosition);
+            if (blockEntity instanceof BiomeBrazierBlockEntity brazier) {
                 if (brazier.labels == null) return;
                 labelTextLines = brazier.labels;
+                shouldRenderLabel = true;
+                return;
+            }
+            if (blockEntity instanceof ChalkCircle cc) {
+                if (cc.isEmpty() || cc.getItem().is(Items.AIR)) return;
+                var item = cc.getItem();
+                var lines = item.getTooltipLines(Minecraft.getInstance().player, TooltipFlag.Default.NORMAL);
+                labelTextLines = new MutableComponent[lines.size()];
+                for (var i = 0; i < lines.size(); i++) {
+                    labelTextLines[i] = lines.get(i).copy();
+                }
                 shouldRenderLabel = true;
                 return;
             }

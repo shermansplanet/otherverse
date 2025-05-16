@@ -3,5 +3,12 @@
 	"binding" : {
 		"minecraft:note_block" : 13,
 		"minecraft:dark_oak_fence" : 7
-	}
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:quartz",
+			"health" : 18,
+			"output" : "minecraft:amethyst_shard"
+		}
+	]
 }

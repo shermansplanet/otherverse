@@ -121,7 +121,7 @@ public class Diagram {
         for (BlockPos pos : blockFocusPositions) {
             BlockFocus focus = data.allBlockFoci.get(pos);
             if (focus == null) {
-                LOGGER.error("No data for block focus at " + pos);
+                LOGGER.warn("No data for block focus at " + pos);
                 return false;
             }
             BindingInfo bindingInfo = data.bindingsByPosition.get(pos);
@@ -148,7 +148,7 @@ public class Diagram {
         return false;
     }
 
-    public static boolean isEntityAtPosition(Entity e, BlockPos pos){
+    public static boolean isEntityAtPosition(Entity e, BlockPos pos) {
         var bb = e.getBoundingBox();
         return (pos.getX() + 1 >= bb.minX && pos.getX() <= bb.maxX && pos.getZ() + 1 >= bb.minZ && pos.getZ() <= bb.maxZ);
     }
@@ -186,6 +186,7 @@ public class Diagram {
 
     private boolean tryActivateBlockFocus(ServerLevel level, BlockFocus focus) {
         var needsReactivation = MobTransfusions.tryLightningTransform(level, focus, this)
+                || MobTransfusions.tryTransfuse(level, focus, this)
                 || trySummonDragon(level, focus, this)
                 || MobTransfusions.tryFeed(level, focus, this)
                 || FleshTechManager.tryMakeConstruct(level, focus, this)
@@ -230,7 +231,7 @@ public class Diagram {
     }
 
     public int getPowerSpent(ServerLevel level, BlockPos targetPos, int requiredPower,
-                                 HashSet<EntityType<?>> requiredEntities) {
+                             HashSet<EntityType<?>> requiredEntities) {
         List<PowerSource> powerSources =
                 powerSourceCache.containsKey(targetPos) ? powerSourceCache.get(targetPos).get(requiredEntities) : null;
         int availablePower = 0;
@@ -273,7 +274,7 @@ public class Diagram {
         int powerDrained = 0;
 
         for (PowerSource powerSource : powerSources) {
-            if(requiredPower < 0){
+            if (requiredPower < 0) {
                 powerDrained += powerSource.unitsOfPower() * powerSource.powerPerUnit();
                 powerSource.drainPower().accept(powerSource.unitsOfPower());
                 continue;
@@ -542,9 +543,12 @@ public class Diagram {
     }
 
     public boolean processMobInFocus(ServerLevel sl, Mob mob, BlockFocus focus) {
-        if(mob.isRemoved() || !mob.isAddedToWorld()){
+        if (mob.isRemoved() || !mob.isAddedToWorld()) {
             focus.mostRecentMob = null;
             return false;
+        }
+        if (FleshbindingManager.tryFleshbindMob(mob, focus, sl)) {
+            return true;
         }
         if (mob.getPersistentData().hasUUID("bindingId")) {
             var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
@@ -552,7 +556,7 @@ public class Diagram {
             return MobTransfusions.tryFeedFromMob(new BindingOrFleshbinding(binding), focus.getPos(), this)
                     || FleshTechManager.tryMakeConstruct(sl, focus, focus.getDiagram());
         }
-        return BindingManager.tryBindMob(mob, focus, sl) || FleshbindingManager.tryFleshbindMob(mob, focus, sl);
+        return BindingManager.tryBindMob(mob, focus, sl);
     }
 
     public String getOwnerName() {

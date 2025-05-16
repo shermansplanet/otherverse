@@ -1,0 +1,11 @@
+{
+	"other" : "minecraft:villager",
+	"spirit" : "fortune",
+	"transfusion" : [
+		{
+			"input" : "minecraft:flint",
+			"health" : 76,
+			"output" : "minecraft:emerald"
+		}
+	]
+}

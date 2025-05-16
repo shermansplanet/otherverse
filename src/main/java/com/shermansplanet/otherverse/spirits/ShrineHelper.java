@@ -959,7 +959,6 @@ public class ShrineHelper {
     public static int onOverdrawOrOverflow(Level level, BlockPos focusPos, SpiritType spiritType, int amount, boolean overdraw, boolean simulate) {
         var overflowBehavior = overflowBehaviors.get(spiritType);
         if (overflowBehavior == null) {
-            LOGGER.error("TRYING TO OVERDRAW ILLEGAL SPIRIT");
             return 0;
         }
         var shrine = getShrine(level, focusPos, spiritType);

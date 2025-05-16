@@ -274,7 +274,7 @@ public class SpiritTransfusions {
             return;
         }
 
-        ItemStack sourceItem = sourceFocus.getItem();
+        ItemStack sourceItem = sourceFocus.getItemNotMob();
         if (sourceItem == null || !sourceItem.hasTag() || !sourceItem.getTag().contains("hallow")) {
             return;
         }

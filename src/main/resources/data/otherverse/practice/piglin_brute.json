@@ -6,5 +6,12 @@
 	},
 	"healing" : {
 		"minecraft:porkchop" : 7
-	}
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:gold_ingot",
+			"health" : 3,
+			"output" : "minecraft:golden_axe"
+		}
+	]
 }

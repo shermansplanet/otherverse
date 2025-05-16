@@ -142,6 +142,11 @@ public class ArtifactManager {
         if (biomeName.equals("volcano"))
             return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_ORANGE, Spirits.COLOR_GRAY);
 
+        if (biomeName.equals("ruins_shock"))
+            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
+        if (biomeName.equals("ruins_shock"))
+            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
+
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER))
             return List.of(Spirits.COLOR_BLUE, Spirits.COLOR_LIGHT_BLUE, Spirits.COLOR_CYAN);
         if (biome.is(Tags.Biomes.IS_SNOWY))
@@ -188,7 +193,8 @@ public class ArtifactManager {
         if (!event.getItemStack().is(OtherverseItems.SPAWN_ALTAR.get())) return;
         if (!(be instanceof SpawnerBlockEntity spawner)) return;
 
-        var etstring = spawner.saveWithoutMetadata().getCompound("SpawnData").getString("id");
+        var etstring = ((SpawnDataGetter)spawner.getSpawner()).getNextSpawnData().getEntityToSpawn().getString("id");
+        LOGGER.debug(etstring);
         var et = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(etstring));
 
         event.getLevel().destroyBlock(event.getPos(), false);
@@ -207,12 +213,13 @@ public class ArtifactManager {
         hallowTag.putString("spirit_type", "war");
         hallowTag.putInt("spirit_amount", 0);
         hallowTag.putInt("capacity", hp * 3);
+        var typeString = ForgeRegistries.ENTITY_TYPES.getKey(et).toString();
+        hallowTag.putString("spawn_altar_type", typeString);
         altar.getOrCreateTag().put("hallow", hallowTag);
 
         HallowHelper.addFakeEnchantment(altar.getOrCreateTag());
 
-        altar.getOrCreateTagElement("BlockEntityTag")
-                .putString("spawn_altar_type", ForgeRegistries.ENTITY_TYPES.getKey(et).toString());
+        altar.getOrCreateTagElement("BlockEntityTag").putString("spawn_altar_type", typeString);
     }
 
     public static boolean trySpawn(ServerLevel level, BlockFocus focus, Diagram diagram) {

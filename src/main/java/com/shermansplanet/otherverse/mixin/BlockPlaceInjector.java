@@ -37,6 +37,9 @@ public abstract class BlockPlaceInjector {
             if (drop.is(itemToMatch)) {
                 tag.remove("shrine");
                 drop.getOrCreateTag().put("hallow", tag);
+                if(tag.contains("spawn_altar_type")) {
+                    drop.getOrCreateTagElement("BlockEntityTag").putString("spawn_altar_type", tag.getString("spawn_altar_type"));
+                }
                 HallowHelper.addFakeEnchantment(drop.getTag());
                 break;
             }

@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
@@ -97,11 +98,14 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
             builder.addInvisibleIngredients(RecipeIngredientRole.OUTPUT).addItemStack(stack);
             if (slotsByAmount.containsKey(influence.getValue())) {
                 slotsByAmount.get(influence.getValue()).addItemStack(stack);
+                if (stack.is(Items.WATER_BUCKET))
+                    slotsByAmount.get(influence.getValue()).addFluidStack(Fluids.WATER, 1000);
                 continue;
             }
             var slot = builder.addSlot(RecipeIngredientRole.INPUT, column * 22 + 2, row++ * 30 + 24);
             slot.addItemStack(stack);
             slotsByAmount.put(influence.getValue(), slot);
+            if (stack.is(Items.WATER_BUCKET)) slot.addFluidStack(Fluids.WATER, 1000);
             if (row >= columns) {
                 row = 0;
                 column++;

@@ -33,6 +33,7 @@ public class BlockFocus implements IFocus {
     private DiagramProcess activeProcess;
 
     public Mob mostRecentMob;
+    public int mostRecentMobHealth;
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -56,13 +57,18 @@ public class BlockFocus implements IFocus {
 
     @Override
     public ItemStack getItem() {
-        var levelData = DiagramManager.getOrCreateLevelData(level);
         if (level instanceof ServerLevel sl) {
             BindingInfo binding = DiagramManager.getBindingOrBoundMobAt(sl, blockPos);
             if (binding != null && binding.mob != null) {
                 return MobBindingInfluenceUtils.getIdol(binding.mob.getType());
             }
         }
+        return getItemNotMob();
+    }
+
+    @Override
+    public ItemStack getItemNotMob() {
+        var levelData = DiagramManager.getOrCreateLevelData(level);
         BlockState blockstate = level.getBlockState(blockPos);
         Item item = blockReplacements.getOrDefault(blockstate.getBlock(), blockstate.getBlock().asItem());
         ItemStack stack = new ItemStack(item);

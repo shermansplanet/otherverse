@@ -1,7 +1,6 @@
 package com.shermansplanet.otherverse.binding;
 
 import com.mojang.logging.LogUtils;
-import com.shermansplanet.otherverse.ItemOrEntityType;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.SightManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
@@ -41,12 +40,12 @@ public class FleshbindingManager {
     static {
         texturesByLabel.put("minecraft:lapis_block", new ResourceLocation("textures/block/lapis_block.png"));
         texturesByLabel.put("minecraft:diamond", new ResourceLocation("textures/block/diamond_block.png"));
-        texturesByLabel.put("otherverse:cinnabar_block", new ResourceLocation("otherverse","textures/block/cinnabar_block.png"));
+        texturesByLabel.put("otherverse:cinnabar_block", new ResourceLocation("otherverse", "textures/block/cinnabar_block.png"));
     }
 
     @SubscribeEvent
     public static void onEntityHurt(LivingDamageEvent event) {
-        if(!SightManager.shouldRenderSight()) return;
+        if (!SightManager.shouldRenderSight()) return;
         var entity = event.getEntity();
         if (entity.getType() == EntityType.PLAYER) return;
         var level = entity.getLevel();
@@ -62,13 +61,11 @@ public class FleshbindingManager {
 
     private static boolean canItemFleshbindEntity(Item item, EntityType<?> entityType) {
         var entities = LootHelper.entitiesThatDropItem.get(item);
-        if (entities != null && entities.contains(entityType)) return true;
-        var transfusions = MobTransfusions.ALL_MOB_TRANSFUSIONS.data.get(new ItemOrEntityType(item));
-        if (transfusions == null) return false;
-        for (var transfusion : transfusions) {
-            if (transfusion.entityTypes().contains(entityType)) return true;
+        if (entities != null && entities.contains(entityType)) {
+            return true;
         }
-        return false;
+        var entitiesThatTransfuseItem = MobTransfusions.transfusionsByResult.get(item);
+        return entitiesThatTransfuseItem != null && entitiesThatTransfuseItem.contains(entityType);
     }
 
     public static boolean tryFleshbindMob(Mob mob, BlockFocus focus, ServerLevel level) {
@@ -92,7 +89,7 @@ public class FleshbindingManager {
                 circleWithPrime = cc;
             }
             var path = ForgeRegistries.ITEMS.getKey(cc.item.getItem()).toString();
-            if (texturesByLabel.containsKey(path)) {
+            if (texturesByLabel.containsKey(path) || cc.item.is(ItemTags.PLANKS) || cc.item.is(ItemTags.LOGS)) {
                 material = path;
                 circleWithMaterial = cc;
             }
@@ -128,24 +125,23 @@ public class FleshbindingManager {
     }
 
     public static boolean tryCinnabind(ServerLevel level, ChalkCircle circle, Diagram diagram) {
-        if(!circle.item.is(OtherverseItems.CINNABAR_BLOCK.get())) return false;
+        if (!circle.item.is(OtherverseItems.CINNABAR_BLOCK.get())) return false;
         var targetPos = diagram.influences.get(circle.getPos());
-        if(targetPos == null) return false;
+        if (targetPos == null) return false;
         var targetBinding = DiagramManager.getOrCreateLevelData(level).bindingsByPosition.get(targetPos);
-        if(targetBinding == null) return false;
-        if(targetBinding.mob == null || targetBinding.mob.isRemoved()) return false;
+        if (targetBinding == null) return false;
+        if (targetBinding.mob == null || targetBinding.mob.isRemoved()) return false;
         fleshbindMob(targetBinding.mob, "otherverse:cinnabar_block", level);
         circle.removeItem();
         return true;
     }
 
     public static void addWoodTextures() {
-        for(var item : ForgeRegistries.ITEMS){
+        for (var item : ForgeRegistries.ITEMS) {
             var instance = item.getDefaultInstance();
             if (!instance.is(ItemTags.PLANKS) && !instance.is(ItemTags.LOGS)) continue;
             var key = ForgeRegistries.ITEMS.getKey(item);
-            var val = new ResourceLocation(key.getNamespace(),"textures/block/" + key.getPath() + ".png");
-            LOGGER.info(key + " -> " + val);
+            var val = new ResourceLocation(key.getNamespace(), "textures/block/" + key.getPath() + ".png");
             texturesByLabel.put(key.toString(), val);
         }
     }

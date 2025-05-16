@@ -1,0 +1,13 @@
+{
+	"other" : "minecraft:vex",
+	"binding" : {
+		"minecraft:salt" : 9
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_ingot",
+			"health" : 3,
+			"output" : "minecraft:iron_sword"
+		}
+	]
+}

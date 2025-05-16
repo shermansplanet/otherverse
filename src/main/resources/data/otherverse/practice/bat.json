@@ -1,0 +1,11 @@
+{
+	"other" : "minecraft:bat",
+	"spirit" : "dark",
+	"transfusion" : [
+		{
+			"input" : "minecraft:feather",
+			"health" : 10,
+			"output" : "minecraft:leather"
+		}
+	]
+}

@@ -8,7 +8,6 @@
     "WitherBossInjector",
     "AllayInjector",
     "LivingEntityInjector",
-    "GrindstoneMenuInjector",
     "ItemStackInjector",
     "BucketItemInjector",
     "BlockItemInjector",
@@ -31,7 +30,8 @@
     "ServerLevelInjector",
     "NearestAttackableTargetGoalInjector",
     "SensorInjector",
-    "FlowingFluidInjector"
+    "FlowingFluidInjector",
+    "BaseSpawnerInjector"
   ],
   "client":[
     "ModelBakeryInjector",

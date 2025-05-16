@@ -63,6 +63,8 @@ public class MobTransfusions {
     public final static PracticeWorldManager.WorldTraitComponent<HashMap<ItemOrEntityType, List<MobTransfusionData>>> TRANSFUSIONS_FROM_RECIPES = new PracticeWorldManager.WorldTraitComponent<>() {
     };
 
+    public static HashMap<Item, HashSet<EntityType<?>>> transfusionsByResult = new HashMap<>();
+
     public final static PracticeWorldManager.WorldTrait<HashMap<ItemOrEntityType, List<MobTransfusionData>>> ALL_MOB_TRANSFUSIONS =
             new PracticeWorldManager.WorldTrait<>(new PracticeWorldManager.WorldTraitComponent[]{
                     TRANSFUSIONS_FROM_JSON, TRANSFUSIONS_FROM_RECIPES
@@ -74,11 +76,17 @@ public class MobTransfusions {
                         if (component.data == null) return false;
                     }
                     data = new HashMap<>();
+                    transfusionsByResult = new HashMap<>();
                     for (var component : Arrays.stream(components).map(t -> (HashMap<ItemOrEntityType, List<MobTransfusionData>>) t.data).toList()) {
                         for (var itemData : component.entrySet()) {
                             var key = itemData.getKey();
                             if (!data.containsKey(key)) data.put(key, new ArrayList<>());
                             data.get(key).addAll(itemData.getValue());
+                            for (var transfusionData : itemData.getValue()) {
+                                var item = transfusionData.destItem.getItem();
+                                var entityTypes = transfusionsByResult.computeIfAbsent(item, x -> new HashSet<>());
+                                entityTypes.addAll(transfusionData.entityTypes);
+                            }
                         }
                     }
                     return true;
@@ -207,8 +215,8 @@ public class MobTransfusions {
         return true;
     }
 
-    public static boolean tryTransfuse(ServerLevel level, ChalkCircle circle, Diagram diagram) {
-        var ioe = new ItemOrEntityType(circle.getItem().getItem());
+    public static boolean tryTransfuse(ServerLevel level, IFocus focus, Diagram diagram) {
+        var ioe = new ItemOrEntityType(focus.getItemNotMob().getItem());
         var possibleTransfusions = ALL_MOB_TRANSFUSIONS.data;
         if (!possibleTransfusions.containsKey(ioe)) {
             return false;
@@ -218,17 +226,24 @@ public class MobTransfusions {
             var possibleInfusion = transfusions.get(i);
             if (possibleInfusion.entityTypes.size() == 1 && possibleInfusion.entityTypes.contains(EntityType.BLAZE)
                     && SpiritLabeler.doubleSmeltItems.contains(possibleInfusion.destItem.getItem())
-                    && noFurnaceInfluence(level, circle.getPos(), diagram)
+                    && noFurnaceInfluence(level, focus.getPos(), diagram)
             ) {
                 continue;
             }
-            if (diagram.trySpendPower(level, circle.getBlockPos(), possibleInfusion.price,
+            var destItem = possibleInfusion.destItem.copy();
+            if (focus.isBlock() && !(destItem.getItem() instanceof BlockItem)) continue;
+            if (diagram.trySpendPower(level, focus.getPos(), possibleInfusion.price,
                     possibleInfusion.entityTypes)) {
-                circle.item = possibleInfusion.destItem.copy();
-                circle.markUpdated();
-                var bp = circle.getBlockPos();
+                var bp = focus.getPos();
+                if (focus.isBlock()) {
+                    level.setBlockAndUpdate(bp, ((BlockItem) destItem.getItem()).getBlock().defaultBlockState());
+                } else {
+                    var circle = (ChalkCircle) focus;
+                    circle.item = possibleInfusion.destItem.copy();
+                    circle.markUpdated();
+                }
                 for (var p = 0; p < 8; p++) {
-                    level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, circle.getItem()),
+                    level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, focus.getItem()),
                             bp.getX() + 0.5, bp.getY() + 0.1, bp.getZ() + 0.5, 1, 0, 0, 0, 0.1D);
                 }
                 return true;
@@ -277,7 +292,7 @@ public class MobTransfusions {
         if (sourceFocus.getItem().hasTag() && sourceFocus.getItem().getTag().contains("hallow")) {
             CompoundTag ht = sourceFocus.getItem().getTag().getCompound("hallow");
             spiritType = Spirits.spiritsByLabel.get(ht.getString("spirit_type"));
-            if(spiritType == null){
+            if (spiritType == null) {
                 LOGGER.error("HALLOW WITHOUT SPIRIT TYPE");
                 return false;
             }

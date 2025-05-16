@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.demesnes.ClaimedDemesneData;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
+import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -73,6 +74,12 @@ public class SavedPracticeData extends SavedData {
                 SpiritAffinityTracker.load(tag.getCompound("spiritAffinities"));
             }
         }
+        if (tag.contains("hitlist")) {
+            var hitlist = tag.getCompound("hitlist");
+            for (var id : hitlist.getAllKeys()) {
+                FamiliarManager.hitList.add(hitlist.getUUID(id));
+            }
+        }
     }
 
     @Override
@@ -80,6 +87,13 @@ public class SavedPracticeData extends SavedData {
         LOGGER.debug("SAVING PRACTICE DATA");
         TransientDiagramData diagramData = DiagramManager.getOrCreateLevelData(level);
         diagramData.save(tag);
+        var hitlist = new CompoundTag();
+        int i = 0;
+        for (var id : FamiliarManager.hitList) {
+            hitlist.putUUID(Integer.toString(i), id);
+            i++;
+        }
+        if (i > 0) tag.put("hitlist", hitlist);
         return tag;
     }
 }

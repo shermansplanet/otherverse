@@ -99,13 +99,15 @@ public class FamiliarManager {
     private static final String HARBINGER_KEY = "harbinger_timer";
     public static float TETHER_DISTANCE = 16;
 
+    public static Set<UUID> hitList = new HashSet<>();
+
     public static boolean isChestedHorseFamiliar(LivingEntity entity) {
         if (!isFamiliar(entity)) return false;
         var t = entity.getType();
         return t.equals(EntityType.DONKEY) || t.equals(EntityType.LLAMA) || t.equals(EntityType.MULE) || t.equals(EntityType.TRADER_LLAMA);
     }
 
-    private enum MobBenefitCondition {ANYTIME, UNDERWATER, IN_WATER, DARK, COLD, IN_LAVA}
+    private enum MobBenefitCondition {ANYTIME, UNDERWATER, IN_WATER, DARK, COLD}
 
     private record MobBenefit(MobBenefitCondition condition, MobEffect effect, int amplifier) {
     }
@@ -413,6 +415,12 @@ public class FamiliarManager {
             var inv = event.player.getInventory();
             var heaviness = inv.items.size() / (float) inv.getContainerSize();
             event.player.push(0, -0.01f * heaviness, 0);
+        } else if (type.equals(EntityType.STRIDER)) {
+            event.player.clearFire();
+            var pos = event.player.position().add(0, 0.5f, 0);
+            if (event.player.getLevel().getBlockState(new BlockPos(pos)).is(Blocks.LAVA)) {
+                event.player.push(0, 0.1f, 0);
+            }
         }
 
         if (!(event.player instanceof ServerPlayer sp)) return;
@@ -555,7 +563,8 @@ public class FamiliarManager {
                 }
             }
         } else if (type.equals(EntityType.STRIDER)) {
-            var inLava = sp.getLevel().getBlockState(sp.blockPosition()).is(Blocks.LAVA);
+            var positionBelow = sp.position().add(0, -0.5f, 0);
+            var inLava = sp.getLevel().getFluidState(new BlockPos(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
             var attr = sp.getAttribute(Attributes.MOVEMENT_SPEED);
             attr.removePermanentModifier(FAMILIAR_MODIFIER);
             if (inLava) {
@@ -582,7 +591,10 @@ public class FamiliarManager {
         }
 
         var benefits = new ArrayList<>(familiarEffects.getOrDefault(type, new ArrayList<>()));
-        if (type.fireImmune()) benefits.add(new MobBenefit(MobBenefitCondition.ANYTIME, MobEffects.FIRE_RESISTANCE, 0));
+        if (type.fireImmune()) {
+            benefits.add(new MobBenefit(MobBenefitCondition.ANYTIME, MobEffects.FIRE_RESISTANCE, 0));
+            sp.clearFire();
+        }
         var mobInstance = getMobInstance(sp.getLevel(), type);
         if (mobInstance != null) {
             if (mobInstance.getMobType() == MobType.WATER && !mobInstance.canDrownInFluidType(ForgeMod.WATER_TYPE.get())) {
@@ -606,8 +618,6 @@ public class FamiliarManager {
                 if (!sp.isUnderWater()) continue;
             } else if (benefit.condition == MobBenefitCondition.COLD) {
                 if (!sp.getLevel().getBiome(sp.blockPosition()).value().coldEnoughToSnow(sp.blockPosition())) continue;
-            } else if (benefit.condition == MobBenefitCondition.IN_LAVA) {
-                if (!sp.getLevel().getBlockState(sp.blockPosition()).is(Blocks.LAVA)) return;
             }
             var effect = sp.getEffect(benefit.effect);
             if (effect != null && effect.getDuration() > 21 * 12) continue;
@@ -871,6 +881,10 @@ public class FamiliarManager {
         }
         var practitioner = getPractitionerForFamiliar(event.getEntity());
         if (practitioner.isEmpty()) return;
+        if (hitList.contains(event.getEntity().getUUID())) {
+            event.getEntity().discard();
+            return;
+        }
         if (getPlayerFromName(sl, practitioner) == null) {
             LOGGER.debug("NULL PLAYER FOR FAMILIAR");
             event.setCanceled(true);
@@ -1032,17 +1046,15 @@ public class FamiliarManager {
         if (entity == null) {
             LOGGER.debug("CREATING NEW FAMILIAR");
             unloadFamiliar(player);
+            hitList.add(id);
+            data.savedData.setDirty();
+            entityTag.putUUID("UUID", UUID.randomUUID());
             entity = makeMobFromTag(type, familiarData, spawnPos, level);
         } else {
             entity.setPos(spawnPos);
         }
 
-        LOGGER.debug("HEIGHT BEFORE: " + entity.getBbHeight());
-
         setFamiliarSize(entity, 1);
-
-        LOGGER.debug("HEIGHT AFTER: " + entity.getBbHeight());
-
         BlockHitResult hitresultTop = level.clip(new ClipContext(
                 spawnPos, spawnPos.add(0, entity.getBbHeight(), 0),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
@@ -1118,7 +1130,7 @@ public class FamiliarManager {
             return;
         }
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (event.getItemStack().is(Items.SHEARS)) {
+        if (event.getItemStack().is(Items.SHEARS) && FamiliarManager.hasFamiliarType(player, EntityType.MOOSHROOM)) {
             event.setResult(Event.Result.ALLOW);
             player.hurt(DamageSource.MAGIC, 1);
             var dropped = player.getRandom().nextInt(4) + 1;
@@ -1340,6 +1352,10 @@ public class FamiliarManager {
             }
         } else if (familiarType.equals(EntityType.WITHER) && event.getSource() == DamageSource.WITHER) {
             event.setCanceled(true);
+        } else if (familiarType.equals(EntityType.STRIDER) && event.getSource().isFall()) {
+            var positionBelow = sp.position().add(0, -0.5f, 0);
+            var inLava = sp.getLevel().getFluidState(new BlockPos(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
+            if (inLava) event.setCanceled(true);
         }
     }
 

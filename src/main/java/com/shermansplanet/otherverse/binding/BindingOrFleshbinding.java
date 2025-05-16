@@ -34,7 +34,7 @@ public class BindingOrFleshbinding {
     private boolean isCreative;
     private ChalkCircle circle;
 
-    private static BindingInfo getFromSpindle(ChalkCircle circle) {
+    public static BindingInfo getFromSpindle(ChalkCircle circle) {
         if (!(circle.getLevel() instanceof ServerLevel sl)) return null;
         if (!circle.getItem().hasTag()) return null;
         if (!circle.getItem().getTag().contains("sympathy_target", 11)) return null;
@@ -117,6 +117,7 @@ public class BindingOrFleshbinding {
             delta = SympathyManager.distributeHpChange(circle, delta, DamageSource.OUT_OF_WORLD);
             int newHealth = currentHealth + delta;
             idolTag.putFloat("Health", newHealth);
+            circle.markUpdated();
             if (delta < 0) {
                 var isDead = newHealth <= 0;
                 //var instance = IdolRenderer.renderEntities.get(entityType);

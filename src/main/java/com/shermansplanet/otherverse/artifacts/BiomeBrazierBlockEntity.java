@@ -24,6 +24,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
@@ -120,32 +121,55 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             }
         }
 
-        if (activations > MAX_ACTIVATIONS) {
+        var makingFeatures = activations > MAX_ACTIVATIONS;
+
+        var feature_range = 64;
+
+        if(makingFeatures){
+            biomeConversionBox = biomeConversionBox.inflatedBy(feature_range);
+        }
+
+        List<ChunkAccess> list = new ArrayList<>();
+        var minK = SectionPos.blockToSectionCoord(biomeConversionBox.minZ());
+        var minL = SectionPos.blockToSectionCoord(biomeConversionBox.minX());
+        var maxK = SectionPos.blockToSectionCoord(biomeConversionBox.maxZ());
+        var maxL = makingFeatures ? (minL + (maxK - minK)) : SectionPos.blockToSectionCoord(biomeConversionBox.maxX());
+        var hasNullChunks = false;
+        for (int k = minK; k <= maxK; ++k) {
+            for (int l = minL; l <= maxL; ++l) {
+                ChunkAccess chunkaccess = serverLevel.getChunk(l, k, ChunkStatus.FULL, false);
+                if (chunkaccess == null) {
+                    hasNullChunks = true;
+                    break;
+                }else{
+                    list.add(chunkaccess);
+                }
+            }
+        }
+
+        if(hasNullChunks){
+            return;
+        }
+
+        if (makingFeatures) {
+            var region = new WorldGenRegion(serverLevel, list, ChunkStatus.FEATURES, feature_range);
             for (var featureSet : targetBiome.get().getGenerationSettings().features()) {
                 for (var feature : featureSet) {
                     if(r.nextBoolean()) continue;
                     var x = getBlockPos().getX() + serverLevel.getRandom().nextInt(-radius, radius);
                     var z = getBlockPos().getZ() + serverLevel.getRandom().nextInt(-radius, radius);
                     var y = serverLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-                    feature.get().placeWithBiomeCheck(serverLevel, serverLevel.getChunkSource().getGenerator(),
+                    feature.get().placeWithBiomeCheck(region, serverLevel.getChunkSource().getGenerator(),
                             serverLevel.getRandom(), new BlockPos(x, y - 1, z));
                 }
             }
-            return;
         }
 
-        List<ChunkAccess> list = new ArrayList<>();
-        for (int k = SectionPos.blockToSectionCoord(biomeConversionBox.minZ()); k <= SectionPos.blockToSectionCoord(biomeConversionBox.maxZ()); ++k) {
-            for (int l = SectionPos.blockToSectionCoord(biomeConversionBox.minX()); l <= SectionPos.blockToSectionCoord(biomeConversionBox.maxX()); ++l) {
-                ChunkAccess chunkaccess = serverLevel.getChunk(l, k, ChunkStatus.FULL, false);
-                if (chunkaccess != null) {
-                    list.add(chunkaccess);
-                }
-            }
-        }
         MutableInt mutableint = new MutableInt(0);
         for (ChunkAccess chunkaccess1 : list) {
-            chunkaccess1.fillBiomesFromNoise(makeResolver(mutableint, chunkaccess1, biomeConversionBox, radius * radius, targetBiome, getBlockPos()), serverLevel.getChunkSource().randomState().sampler());
+            if(!makingFeatures) {
+                chunkaccess1.fillBiomesFromNoise(makeResolver(mutableint, chunkaccess1, biomeConversionBox, radius * radius, targetBiome, getBlockPos()), serverLevel.getChunkSource().randomState().sampler());
+            }
             chunkaccess1.setUnsaved(true);
             for (var player : serverLevel.getServer().getPlayerList().getPlayers()) {
                 player.connection.send(new ClientboundLevelChunkWithLightPacket((LevelChunk) chunkaccess1, level.getLightEngine(),

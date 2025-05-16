@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Most items contain spirits of several types. The easiest way to harness these spirits is by turning an item into a $(bold)hallow$(): an item that can store and transfer spirits of a specific type. Hallowed items also retain their original functionality.$(br2)A hallow's default spirit capacity is equal to the total number of spirits its base item contains."
+            "text": "Most items contain spirits of several types. The easiest way to harness these spirits is by turning an item into a $(bold)hallow$(): an item that can store and transfer spirits of a specific type. Hallowed items also retain their original functionality.$(br2)A hallow's spiritual capacity is equal to the total number of spirits of ALL types its base item contains."
         },
         {
             "type": "patchouli:image",

@@ -9,6 +9,8 @@ public interface IFocus {
 
   ItemStack getItem();
 
+  ItemStack getItemNotMob();
+
   Diagram getDiagram();
 
   BlockPos getPos();

@@ -41,7 +41,7 @@ public abstract class ServerLevelInjector extends Level implements WorldGenLevel
 
     @Inject(method = "onBlockStateChange", at = @At("HEAD"))
     public void onBSC(BlockPos p_8751_, BlockState p_8752_, BlockState p_8753_, CallbackInfo ci) {
-        DiagramManager.BlockChanged(p_8751_, (ServerLevel) (Object) this);
+        DiagramManager.blockChanged(p_8751_, (ServerLevel) (Object) this);
     }
 
     @Inject(

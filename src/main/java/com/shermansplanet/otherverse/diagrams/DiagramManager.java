@@ -303,7 +303,7 @@ public class DiagramManager {
         }
     }
 
-    public static void BlockChanged(BlockPos pos, ServerLevel sl) {
+    public static void blockChanged(BlockPos pos, ServerLevel sl) {
         var data = getOrCreateLevelData(sl);
         var tag = data.getPlacedItemTag(pos);
         if (tag == null) {
@@ -321,7 +321,7 @@ public class DiagramManager {
     private static void BlockBreak(Level level, BlockPos pos) {
         TransientDiagramData diagramData = getOrCreateLevelData(level);
         if (level instanceof ServerLevel sl) {
-            BlockChanged(pos, sl);
+            blockChanged(pos, sl);
             if (sl.getBlockState(pos).is(OtherverseBlocks.DEMESNE_BEACON.get())) {
                 DemesnesManager.onBeaconBroken(sl, pos);
             }
@@ -335,8 +335,16 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void waterproofChalk(BlockEvent.FluidPlaceBlockEvent event) {
-        if (!event.getOriginalState().is(OtherverseBlocks.CHALK_LINE.get())) return;
-        event.setCanceled(true);
+        if (event.getOriginalState().is(OtherverseBlocks.CHALK_LINE.get())){
+            event.setCanceled(true);
+            return;
+        }
+        if (event.getLevel() instanceof ServerLevel sl) blockChanged(event.getPos(), sl);
+    }
+
+    @SubscribeEvent
+    public static void onFluidPlaceBlock(BlockEvent.FluidPlaceBlockEvent event) {
+        if (event.getLevel() instanceof ServerLevel sl) blockChanged(event.getPos(), sl);
     }
 
     @SubscribeEvent
@@ -381,7 +389,7 @@ public class DiagramManager {
                 ItemStack mainHandItem = player.getItemInHand(InteractionHand.MAIN_HAND);
                 ItemStack offHandItem = player.getItemInHand(InteractionHand.OFF_HAND);
                 if (mainHandItem.is(offHandItem.getItem())) {
-                    BlockChanged(pos, sl);
+                    blockChanged(pos, sl);
                     return;
                 }
                 if (mainHandItem.is(block.asItem())) {
@@ -396,7 +404,7 @@ public class DiagramManager {
                         .getOrCreateLevelData(event.getLevel());
                 levelData.putPlacedItemTag(pos, tag);
             }
-            BlockChanged(pos, sl);
+            blockChanged(pos, sl);
         }
     }
 
@@ -410,7 +418,7 @@ public class DiagramManager {
     @SubscribeEvent
     public static void entityUpdates(LivingEvent.LivingTickEvent event) {
         Level level = event.getEntity().getLevel();
-        if (level.getGameTime() % 5 != 0 || !(level instanceof ServerLevel sl) || !(event.getEntity() instanceof Mob mob)) {
+        if (level.getGameTime() % 10 != 0 || !(level instanceof ServerLevel sl) || !(event.getEntity() instanceof Mob mob)) {
             return;
         }
         CompoundTag entityData = event.getEntity().getPersistentData();
@@ -439,10 +447,12 @@ public class DiagramManager {
         if (focus == null) {
             return;
         }
-        if (focus.mostRecentMob != null && mob.getId() == focus.mostRecentMob.getId()) {
+        var hp = Math.round(mob.getHealth());
+        if (focus.mostRecentMob != null && mob.getId() == focus.mostRecentMob.getId() && hp == focus.mostRecentMobHealth) {
             return;
         }
         focus.mostRecentMob = mob;
+        focus.mostRecentMobHealth = hp;
         if (!PracticeWorldManager.worldSetUp) {
             DiagramManager.markDiagramActive(sl, focus.getDiagram());
             return;
@@ -452,11 +462,12 @@ public class DiagramManager {
     }
 
     public static BlockFocus getFocusInBoundingBox(TransientDiagramData data, AABB bb) {
-        var y = Mth.floor(bb.minY + 0.1f);
-        for (var x = Mth.floor(bb.minX); x <= Mth.floor(bb.maxX); x++) {
-            for (var z = Mth.floor(bb.minZ); z <= Mth.floor(bb.maxZ); z++) {
-                var focus = data.allBlockFoci.get(new BlockPos(x, y, z));
-                if (focus != null) return focus;
+        for (var y = Mth.floor(bb.minY); y <= Mth.floor(bb.maxY); y++) {
+            for (var x = Mth.floor(bb.minX); x <= Mth.floor(bb.maxX); x++) {
+                for (var z = Mth.floor(bb.minZ); z <= Mth.floor(bb.maxZ); z++) {
+                    var focus = data.allBlockFoci.get(new BlockPos(x, y, z));
+                    if (focus != null) return focus;
+                }
             }
         }
         return null;

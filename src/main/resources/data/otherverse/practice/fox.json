@@ -1,0 +1,10 @@
+{
+	"other" : "minecraft:fox",
+	"transfusion" : [
+		{
+			"input" : "minecraft:stick",
+			"health" : 3,
+			"output" : "minecraft:sweet_berries"
+		}
+	]
+}

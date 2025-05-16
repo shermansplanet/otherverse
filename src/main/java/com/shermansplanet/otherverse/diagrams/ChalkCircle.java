@@ -258,6 +258,11 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     public ItemStack getItem() {
         return item;
     }
+    @Override
+    public ItemStack getItemNotMob() {
+        if(item.getItem() instanceof IdolItem) return ItemStack.EMPTY;
+        return item;
+    }
 
     @Override
     public Diagram getDiagram() {
@@ -321,6 +326,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
             hallowTag.putInt("spirit_count", spiritCount - drained);
             if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
         }
+        if (!simulate) markUpdated();
         return drained;
     }
 
@@ -336,6 +342,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         if (mustAcceptAll && transferAmount < amount) return 0;
         if (!simulate) hallowTag.putInt("spirit_count", spiritCount + transferAmount);
         if (getLevel() instanceof ServerLevel sl) DiagramManager.markDiagramActive(sl, getDiagram());
+        if (!simulate) markUpdated();
         return transferAmount;
     }
 

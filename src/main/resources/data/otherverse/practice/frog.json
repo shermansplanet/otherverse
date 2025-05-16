@@ -5,6 +5,21 @@
 			"input" : "minecraft:slime_block",
 			"health" : 1,
 			"output" : "minecraft:verdant_froglight"
+		},
+		{
+			"input" : "minecraft:honey_block",
+			"health" : 1,
+			"output" : "minecraft:ochre_froglight"
+		},
+		{
+			"input" : "minecraft:amethyst_shard",
+			"health" : 1,
+			"output" : "minecraft:pearlescent_froglight"
+		},
+		{
+			"input" : "minecraft:slime_ball",
+			"health" : 1,
+			"output" : "minecraft:frogspawn"
 		}
 	]
 }

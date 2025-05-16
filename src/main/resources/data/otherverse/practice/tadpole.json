@@ -1,0 +1,13 @@
+{
+	"other" : "minecraft:tadpole",
+	"binding" : {
+		"minecraft:bucket" : 18
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:magma_cream",
+			"health" : 1,
+			"output" : "minecraft:slime_ball"
+		}
+	]
+}

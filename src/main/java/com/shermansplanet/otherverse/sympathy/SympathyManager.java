@@ -105,7 +105,7 @@ public class SympathyManager {
         if (!(entity.level instanceof ServerLevel sl)) return amount;
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
-        if (binding == null) return amount;
+        if (binding == null || binding.getFocus() == null) return amount;
         amount = distributeHpChange(binding.getFocus(), (int) amount, damageSource);
         var inFocus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
         if (inFocus != null) amount = distributeHpChange(inFocus, (int) amount, damageSource);

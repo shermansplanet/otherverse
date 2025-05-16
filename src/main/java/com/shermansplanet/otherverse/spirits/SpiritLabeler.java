@@ -227,7 +227,7 @@ public class SpiritLabeler {
 
             AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.END, 3);
 
-            AddForTag(item, spiritAmounts, BlockTags.CORAL_BLOCKS, Spirits.WATER, 1);
+            AddForTag(item, spiritAmounts, BlockTags.CORAL_BLOCKS, Spirits.WATER, 2);
             AddForTag(item, spiritAmounts, BlockTags.UNDERWATER_BONEMEALS, Spirits.WATER, 1);
 
             AddForTag(item, spiritAmounts, Items.TOOLS_AXES, Spirits.OVERWORLD, tierFunc);

@@ -84,7 +84,7 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
         RenderSystem.enableBlend();
         overlay.draw(stack, 18, 8);
         RenderSystem.disableBlend();
-        String s = recipe.cost + (recipe.isMob ? " HP" : "");
+        String s = recipe.cost + (recipe.isMob ? (recipe.transfusionSources.size() > 1 ? " total HP" : " HP") : "");
         mc.font.draw(stack, s, 50 - s.length() * 3, 20, 0x333333);
     }
 }

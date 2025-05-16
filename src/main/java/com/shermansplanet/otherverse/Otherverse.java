@@ -231,6 +231,11 @@ public class Otherverse {
         public static void onClientJoin(ClientPlayerNetworkEvent.LoggingIn event) {
             SpiritColorAnalyzer.AnalyzeAllColors();
         }
+
+        @SubscribeEvent
+        public static void onClientLeave(ClientPlayerNetworkEvent.LoggingOut event) {
+            PracticeWorldManager.jeiInitialized = false;
+        }
 /*
         @SubscribeEvent
         public static void levelLoad(LevelEvent.Load event) {

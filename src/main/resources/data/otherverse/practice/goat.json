@@ -1,0 +1,10 @@
+{
+	"other" : "minecraft:goat",
+	"transfusion" : [
+		{
+			"input" : "minecraft:bone",
+			"health" : 3,
+			"output" : "minecraft:goat_horn"
+		}
+	]
+}

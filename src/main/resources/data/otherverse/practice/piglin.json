@@ -6,5 +6,27 @@
 	},
 	"healing" : {
 		"minecraft:porkchop" : 7
-	}
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:gold_nugget",
+			"health" : 1,
+			"output" : "minecraft:blackstone"
+		},
+		{
+			"input" : "minecraft:gold_ingot",
+			"health" : 3,
+			"output" : "minecraft:obsidian"
+		},
+		{
+			"input" : "minecraft:raw_gold",
+			"health" : 3,
+			"output" : "minecraft:fire_charge"
+		},
+		{
+			"input" : "minecraft:gold_block",
+			"health" : 9,
+			"output" : "minecraft:ender_pearl"
+		}
+	]
 }

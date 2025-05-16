@@ -1,0 +1,13 @@
+{
+	"other" : "minecraft:axolotl",
+	"binding" : {
+		"minecraft:bucket" : 21
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:mud",
+			"health" : 7,
+			"output" : "minecraft:clay"
+		}
+	]
+}

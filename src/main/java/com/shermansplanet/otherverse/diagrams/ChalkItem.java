@@ -53,7 +53,7 @@ public class ChalkItem extends Item implements DyeableLeatherItem {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
-        DiagramSightRenderer.setCenter(null, p);
+        if(l.isClientSide()) DiagramSightRenderer.setCenter(null, p);
         return InteractionResultHolder.pass(p.getItemInHand(h));
     }
 

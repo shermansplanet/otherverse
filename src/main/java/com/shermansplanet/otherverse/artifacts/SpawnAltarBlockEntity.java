@@ -39,10 +39,8 @@ public class SpawnAltarBlockEntity extends BlockEntity {
 
     @Override
     public void load(CompoundTag tag) {
-        LOGGER.debug("LOADING ALTAR");
         super.load(tag);
         if (tag.contains("spawn_altar_type")) {
-            LOGGER.debug(tag.getString("spawn_altar_type"));
             spawnType = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(tag.getString("spawn_altar_type")));
             if (displayEntity != null) {
                 displayEntity.discard();

@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "A mob will attempt to do any possible action influencing its root contract. Red dye, when placed as an action, denotes a $(bold)fallback$(); if none of the other actions are possible, the mob switches to choosing from all the actions influencing the red dye (as if the red dye were the contract)"
+            "text": "A mob will attempt to do any possible action influencing its root contract. Orange dye, when placed as an action, denotes a $(bold)fallback$(); if none of the other actions are possible, the mob switches to choosing from all the actions influencing the dye (as if the dye were the contract)"
         },
         {
             "type": "patchouli:image",
@@ -15,7 +15,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "This can be nested as many times as desired to create an explicit order of priority (e.g. \"go to sand if possible; if not, go to red sand; if neither, go to soul sand.\")$(br2)If a set of actions has no fallback and none are possible, the logic will start again from the beginning."
+            "text": "This can be nested as many times as desired to create an explicit order of priority (e.g. \"go to sand if possible; if not, go to red sand; if you can't do that, go to soul sand.\")$(br2)If a set of actions has no fallback and none are possible, the logic will start again from the base contract."
         },
         {
             "type": "patchouli:image",
@@ -34,7 +34,7 @@
         },
         {
         "type": "patchouli:text",
-            "text": "Remember, a $(italic)fallback$() (red dye as an action) activates if none of its neighboring actions are possible, e.g. there is no sand around to walk towards.$(br2)A conditional (green/yellow/red dye as a filter) activates if its parent action ends, e.g. a mob has reached the sand or the sand has become inaccessible."
+            "text": "To summarize: a $(italic)fallback$() (orange dye as an action) activates if none of its neighboring actions are possible, e.g. there is no sand around to walk towards. A conditional (green/yellow/red dye as a filter) activates if its parent action ends, e.g. a mob has reached the sand or the sand has become inaccessible."
         }
     ]
 }
