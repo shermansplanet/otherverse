@@ -36,6 +36,8 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -79,6 +81,18 @@ public class ContractTask {
     private boolean harvesting = false;
     public int lookIndex;
     public ArrayList<BlockPos> potentialTargets = new ArrayList<>();
+    public final String taskId;
+    private Path directPath;
+
+    public void getDebugMessage(StringBuilder s) {
+        s.append("task: ").append(taskType).append("\n");
+        s.append("my position: ").append(mob.blockPosition()).append("\n");
+        s.append("task target: ").append(targetPos).append("\n");
+        s.append("move target: ").append(targetMovePos).append("\n");
+        s.append("phase: ").append(directPath == null ? "initial" : "final").append("\n");
+        s.append("path: ").append(mob.getNavigation().getPath() == null ? "null" : "not null")
+                .append(", ").append(mob.getNavigation().getPath().isDone() ? "done" : "not done");
+    }
 
     public enum TaskType {
         MOVE, TAKE, PUT, BREAK, ATTACK, CRAFT, OBSERVE
@@ -90,25 +104,20 @@ public class ContractTask {
     public ContractTask(CompoundTag tag, Mob mob, BoundGoal boundGoal) {
         this.mob = mob;
         this.boundGoal = boundGoal;
-        if (tag.getString("type").equals("go")) {
-            taskType = TaskType.MOVE;
-        } else if (tag.getString("type").equals("take")) {
-            taskType = TaskType.TAKE;
-        } else if (tag.getString("type").equals("put")) {
-            taskType = TaskType.PUT;
-        } else if (tag.getString("type").equals("break")) {
-            taskType = TaskType.BREAK;
-        } else if (tag.getString("type").equals("harvest")) {
-            taskType = TaskType.BREAK;
-            harvesting = true;
-        } else if (tag.getString("type").equals("attack")) {
-            taskType = TaskType.ATTACK;
-        } else if (tag.getString("type").equals("craft")) {
-            taskType = TaskType.CRAFT;
-        } else if (tag.getString("type").equals("observe")) {
-            taskType = TaskType.OBSERVE;
-        } else {
-            taskType = null;
+        StringBuilder id = new StringBuilder(tag.getString("type"));
+        switch (id.toString()) {
+            case "go" -> taskType = TaskType.MOVE;
+            case "take" -> taskType = TaskType.TAKE;
+            case "put" -> taskType = TaskType.PUT;
+            case "break" -> taskType = TaskType.BREAK;
+            case "harvest" -> {
+                taskType = TaskType.BREAK;
+                harvesting = true;
+            }
+            case "attack" -> taskType = TaskType.ATTACK;
+            case "craft" -> taskType = TaskType.CRAFT;
+            case "observe" -> taskType = TaskType.OBSERVE;
+            default -> taskType = null;
         }
         if (tag.contains("success")) {
             onSuccess = boundGoal.makeDecider(tag.getCompound("success"));
@@ -165,10 +174,12 @@ public class ContractTask {
                         }
                     }
                 }
+                id.append(tag.getInt(key));
             } else if (key.startsWith("block") || key.startsWith("inventory")) {
                 var filterList = (taskType == TaskType.MOVE) ? itemFilters : blockFilters;
                 filterList.add(Item.byId(tag.getInt(key)));
                 if (key.startsWith("block")) onlyHasInventoryBlockFilters = false;
+                id.append(tag.getInt(key));
             } else if (key.startsWith("position")) {
                 positionFilters.add(new ContractManager.PositionOrSpindle(tag.getCompound(key)));
             } else if (key.startsWith("offset")) {
@@ -181,6 +192,7 @@ public class ContractTask {
             offsets.add(new ContractManager.PositionOrSpindle(new BlockPos(0, -127, 0)));
             offsetBases.add(new BlockPos(0, -128, 0));
         }
+        taskId = id.toString();
     }
 
     private boolean isValidItem(ItemStack stack) {
@@ -210,9 +222,9 @@ public class ContractTask {
 
     public ItemEntity getClosestDroppedItem() {
         ItemEntity closest = null;
-        float closestDist = BoundGoal.LOOK_RADIUS * 2;
-        for (Entity e : mob.level.getEntities(mob, AABB.ofSize(mob.position(),
-                BoundGoal.LOOK_RADIUS * 2, BoundGoal.LOOK_HEIGHT * 2, BoundGoal.LOOK_RADIUS * 2))) {
+        var lookDiameter = boundGoal.range * 2;
+        float closestDist = lookDiameter;
+        for (Entity e : mob.level.getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
             if (e instanceof ItemEntity ie && isValidItem(ie.getItem())) {
                 if (!positionFilters.isEmpty() && !positionFilters.contains(ie.blockPosition())) {
                     continue;
@@ -241,9 +253,9 @@ public class ContractTask {
 
     public LivingEntity getClosestValidLivingTarget() {
         LivingEntity closest = null;
-        float closestDist = BoundGoal.LOOK_RADIUS * 2;
-        for (Entity e : mob.level.getEntities(mob, AABB.ofSize(mob.position(),
-                BoundGoal.LOOK_RADIUS * 2, BoundGoal.LOOK_HEIGHT * 2, BoundGoal.LOOK_RADIUS * 2))) {
+        var lookDiameter = boundGoal.range * 2;
+        float closestDist = lookDiameter;
+        for (Entity e : mob.level.getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
             if (e == mob) {
                 continue;
             }
@@ -286,12 +298,13 @@ public class ContractTask {
         var h = mob.getBbHeight();
         var potentialMovePositions = new ArrayList<BlockPos>();
         var mobPos = mob.blockPosition();
-        for (var i = 0; i <= h; i++) {
+        var canDoCenter = taskType != TaskType.PUT;
+        for (var i = -1; i <= h + 1; i++) {
             var verticalOffset = pos.offset(0, -i, 0);
-            potentialMovePositions.add(verticalOffset);
+            if (canDoCenter) potentialMovePositions.add(verticalOffset);
             for (var dir : Direction.values()) {
-                if (i > 0 && dir == Direction.UP) continue;
-                if (i + 1 <= h && dir == Direction.DOWN) continue;
+                if (dir == Direction.UP) continue;
+                if (dir == Direction.DOWN) continue;
                 var offset = verticalOffset.relative(dir);
                 potentialMovePositions.add(offset);
             }
@@ -313,7 +326,7 @@ public class ContractTask {
                     var anyMatches = false;
                     for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
                         Block block = mob.level.getBlockState(pos.subtract(processOffset(offsetIndex))).getBlock();
-                        if (!blockFilters.contains(block.asItem()) && !blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
+                        if (blockFilters.contains(block.asItem()) || blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
                             anyMatches = true;
                         }
                     }
@@ -433,8 +446,16 @@ public class ContractTask {
     private boolean canReachBlock(BlockPos pos) {
         if (taskType == TaskType.ATTACK || taskType == TaskType.OBSERVE) return true;
         if (mob.blockPosition().distSqr(pos) > 16 * 16) return true;
-        var path = mob.getNavigation().createPath(pos, 0);
-        return path != null && path.getEndNode().asBlockPos().equals(pos);
+        if (mob.getType() == EntityType.ENDERMAN || mob.getType() == EntityType.SHULKER) {
+            if (mob.level.getBlockState(pos.below()).getCollisionShape(mob.level, pos.below()).isEmpty()) return false;
+        } else {
+            var path = mob.getNavigation().createPath(pos, 0);
+            if (path == null || !path.getEndNode().asBlockPos().equals(pos)) return false;
+        }
+        return !mob.level.collidesWithSuffocatingBlock(mob, new AABB(
+                pos.getX() + 0.1f, pos.getY() + 0.5f, pos.getZ() + 0.1f,
+                pos.getX() + 0.9f, pos.getY() + mob.getBbHeight(), pos.getZ() + 0.0f
+        ));
     }
 
     private boolean findCraftingIngredient(Ingredient ingredient, BlockPos pos, HashMap<ItemStack, Integer> usedIngredients) {
@@ -550,16 +571,30 @@ public class ContractTask {
             return fail();
         }
 
-        if (moveTo(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ())) {
-            return false;
+//        LOGGER.debug(mob.blockPosition() + " -> " + targetMovePos + " (" + targetPos + ")");
+
+        if (directPath == null) {
+            if (moveTo(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ())) {
+                return false;
+            }
         }
         if (mob.getNavigation().isStuck()) {
             return fail();
         }
-
         if (mob.getNavigation().getPath() == null || !mob.getNavigation().getPath().isDone()) {
             return false;
         }
+
+        if (directPath == null && !mob.blockPosition().equals(targetMovePos)) {
+            directPath = new Path(List.of(
+//                    new Node(mob.blockPosition().getX(), mob.blockPosition().getY(), mob.blockPosition().getZ()),
+                    new Node(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ())
+            ), targetMovePos, false);
+            mob.getNavigation().moveTo(directPath, 1);
+            return false;
+        }
+
+        mob.moveTo(targetMovePos.getX() + 0.5f, mob.position().y, targetMovePos.getZ() + 0.5f);
 
         if (taskType == TaskType.TAKE) {
             if (targetItem == null) {
@@ -786,37 +821,36 @@ public class ContractTask {
     }
 
     private boolean tryPlaceBlock(BlockPos placePos, ItemStack stack, boolean depleteHand, boolean actuallyPlace) {
-        if (stack.getItem() instanceof BlockItem bi && mob.level.isEmptyBlock(placePos)) {
-            BlockPlaceContext ctx = new BlockPlaceContext(mob.level, null, InteractionHand.MAIN_HAND, stack,
-                    new BlockHitResult(
-                            new Vec3(placePos.getX() + 0.5f, placePos.getY(), placePos.getZ() + 0.5f),
-                            Direction.UP, placePos, false));
-            if (!ctx.canPlace()) {
-                return false;
-            }
-            BlockState blockstate = bi.getBlock().getStateForPlacement(ctx);
-            if (blockstate == null) {
-                return false;
-            }
-            if (!actuallyPlace) {
-                return true;
-            }
-            if (!this.placeBlock(ctx, blockstate)) {
-                return false;
-            }
-            BlockPos blockpos = ctx.getClickedPos();
-            Level level = ctx.getLevel();
-            level.gameEvent(null, GameEvent.BLOCK_PLACE, blockpos);
-            stack.setCount(stack.getCount() - 1);
-            if (depleteHand) {
-                BindingManager.setHeldItem(mob, stack);
-            } else {
-                boundGoal.cooldown = 20 * 2;
-                mob.hurt(DamageSource.OUT_OF_WORLD, COBWEB_DAMAGE);
-            }
+        if (!(stack.getItem() instanceof BlockItem bi) || !mob.level.isEmptyBlock(placePos)) {
+            return false;
+        }
+        BlockPlaceContext ctx = new BlockPlaceContext(mob.level, null, InteractionHand.MAIN_HAND, stack,
+                new BlockHitResult(
+                        new Vec3(placePos.getX() + 0.5f, placePos.getY(), placePos.getZ() + 0.5f),
+                        Direction.UP, placePos, false));
+        if (!ctx.canPlace()) {
+            return false;
+        }
+        BlockState blockstate = bi.getBlock().getStateForPlacement(ctx);
+        if (blockstate == null) {
+            return false;
+        }
+        if (!actuallyPlace) {
             return true;
         }
-        return false;
+        if (!this.placeBlock(ctx, blockstate)) {
+            return false;
+        }
+        Level level = ctx.getLevel();
+        level.gameEvent(null, GameEvent.BLOCK_PLACE, placePos);
+        stack.setCount(stack.getCount() - 1);
+        if (depleteHand) {
+            BindingManager.setHeldItem(mob, stack);
+        } else {
+            boundGoal.cooldown = 20 * 2;
+            mob.hurt(DamageSource.OUT_OF_WORLD, COBWEB_DAMAGE);
+        }
+        return true;
     }
 
     protected boolean placeBlock(BlockPlaceContext p_40578_, BlockState p_40579_) {
@@ -836,6 +870,7 @@ public class ContractTask {
         targetItem = null;
         targetPos = null;
         targetMob = null;
+        directPath = null;
         boundGoal.stopAttacking();
         decider = decider != null ? decider : onEither != null ? onEither : boundGoal.rootDecider;
         boundGoal.switchToDecider(decider);

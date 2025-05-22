@@ -1,12 +1,16 @@
 {
-    "name": "Detection",
+    "name": "Detection Range",
     "icon": "minecraft:spyglass",
     "category": "otherverse:contracts",
     "sortnum": 3,
     "pages": [
         {
             "type": "patchouli:text",        
-            "text": "When deciding on an action to take, a bound mob will spend up to a few seconds \"looking around\" in a 8-block radius (without actually moving its head).$(br2)The exception is if an action specifies a block position or range, in which case it will check the position(s) so long as they are loaded."
+            "text": "Without a specific target position or range, bound mobs will look for potential target blocks within 8 blocks. If they find an eligible block, they will remember and check its position next time they do the task, even if they're more than 8 blocks away."
+        },
+        {
+            "type": "patchouli:text",        
+            "text": "This 8-block detection radius will be increased by another 8 blocks for every spyglass influencing the contract upon its creation. Just be warned - as potential targets get further away, mobs will spend exponentially more time trying to detect them."
         }
     ]
 }

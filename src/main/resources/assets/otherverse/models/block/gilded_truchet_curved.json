@@ -1,0 +1,7 @@
+{
+  "parent": "otherverse:block/truchet",
+  "textures": {
+    "particle": "otherverse:block/gilded_truchet_curved",
+    "all": "otherverse:block/gilded_truchet_curved"
+  }
+}

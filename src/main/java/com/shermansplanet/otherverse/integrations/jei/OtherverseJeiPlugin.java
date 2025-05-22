@@ -24,8 +24,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.fml.util.thread.SidedThreadGroups;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.slf4j.Logger;
 
@@ -90,18 +91,20 @@ public class OtherverseJeiPlugin implements IModPlugin {
     }
 
     public static void addPracticeRecipes() {
-        if(Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) return;
-        //debugPracticeRecipes();
-        LOGGER.debug("ADDING PRACTICE RECIPES...");
-        if(PracticeWorldManager.jeiInitialized) return;
-        PracticeWorldManager.jeiInitialized = true;
-        LOGGER.debug("JEI SET AS INITIALIZED");
-        registry.addRecipes(SpiritExtractionRecipeCategory.TYPE, SpiritLabeler.GenerateRecipes());
-        registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes());
-        registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes());
-        registry.addRecipes(BindingRecipeCategory.TYPE, MobBindingInfluenceUtils.GenerateRecipes());
-        FleshbindingManager.addWoodTextures();
-        LOGGER.debug("PRACTICE RECIPES ADDED");
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+        {
+            //debugPracticeRecipes();
+            LOGGER.debug("ADDING PRACTICE RECIPES...");
+            if (PracticeWorldManager.jeiInitialized) return;
+            PracticeWorldManager.jeiInitialized = true;
+            LOGGER.debug("JEI SET AS INITIALIZED");
+            registry.addRecipes(SpiritExtractionRecipeCategory.TYPE, SpiritLabeler.GenerateRecipes());
+            registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes());
+            registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes());
+            registry.addRecipes(BindingRecipeCategory.TYPE, MobBindingInfluenceUtils.GenerateRecipes());
+            FleshbindingManager.addWoodTextures();
+            LOGGER.debug("PRACTICE RECIPES ADDED");
+        });
     }
 
     private static void debugPracticeRecipes() {

@@ -37,12 +37,10 @@ public class LootHelper extends SimpleJsonResourceReloadListener {
             var dropCount = 0;
             var lootTable = map.get(et.getDefaultLootTable());
             if (lootTable == null) {
-                LOGGER.debug("NO LOOT TABLE FOR " + et);
                 continue;
             }
             JsonObject table = lootTable.getAsJsonObject();
             if (!table.has("pools")) {
-                LOGGER.debug("NO LOOT POOLS FOR " + et);
                 continue;
             }
             for (var pool : table.get("pools").getAsJsonArray()) {
@@ -59,7 +57,6 @@ public class LootHelper extends SimpleJsonResourceReloadListener {
                     dropCount++;
                 }
             }
-            if(dropCount == 0) LOGGER.debug("NO DROPS FOR " + et);
         }
         for (var item : ForgeRegistries.ITEMS) {
             if (item.getDefaultInstance().is(ItemTags.WOOL)) addItemToType(item, EntityType.SHEEP);

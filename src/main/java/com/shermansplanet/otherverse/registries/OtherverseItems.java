@@ -127,4 +127,13 @@ public class OtherverseItems {
             () -> new BlockItem(OtherverseBlocks.GHOSTLY_NETHERRACK.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
     public static final RegistryObject<Item> MUSTARD_DIRT_ITEM = ITEMS.register("mustard_dirt",
             () -> new BlockItem(OtherverseBlocks.MUSTARD_DIRT.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+
+    public static final RegistryObject<Item> INTESTINES = ITEMS.register("intestines",
+            () -> new BlockItem(OtherverseBlocks.INTESTINES.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+    public static final RegistryObject<Item> TRUCHET = ITEMS.register("truchet",
+            () -> new BlockItem(OtherverseBlocks.TRUCHET.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+    public static final RegistryObject<Item> GILDED_TRUCHET = ITEMS.register("gilded_truchet",
+            () -> new BlockItem(OtherverseBlocks.GILDED_TRUCHET.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
+    public static final RegistryObject<Item> CANDYCANE = ITEMS.register("candycane",
+            () -> new BlockItem(OtherverseBlocks.CANDYCANE.get(), new Item.Properties().tab(Otherverse.TAB_PRACTICE)));
 }

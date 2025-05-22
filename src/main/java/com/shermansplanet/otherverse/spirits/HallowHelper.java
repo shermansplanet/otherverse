@@ -301,7 +301,7 @@ public class HallowHelper {
         var data = DiagramManager.getOrCreateLevelData(event.getLevel());
         var tag = data.getPlacedItemTag(event.getPos());
         if (tag == null || tag.contains("shrine")) return;
-        if (!event.getEntity().getAbilities().instabuild) event.getEntity().hurt(DamageSource.OUT_OF_WORLD, 3);
+        if (!event.getEntity().getAbilities().instabuild) event.getEntity().hurt(DamageSource.MAGIC, 3);
         for (var pos : ShrineHelper.getAllHallows(event.getPos(), tag.getString("spirit_type"), data)) {
             tag = data.getPlacedItemTag(pos);
             tag.putBoolean("shrine", true);
@@ -433,14 +433,15 @@ public class HallowHelper {
     public static void mobDie(LivingDeathEvent event) {
         if (!(event.getEntity().getLevel() instanceof ServerLevel sl)) return;
         EntityType<? extends LivingEntity> type = (EntityType<? extends LivingEntity>) event.getEntity().getType();
-        var spiritType = MobBindingInfluenceUtils.mobSpirits.get(type);
+        var ct = event.getEntity().getPersistentData().getString("construct_type");
+        var spiritType = ct.isEmpty() ? MobBindingInfluenceUtils.mobSpirits.get(type).label() : ct;
         if (spiritType == null) return;
         var data = DiagramManager.getOrCreateLevelData(sl);
         for(var offset : new float[]{0f,-1f}) {
             var pos = new BlockPos(event.getEntity().position().add(0, offset, 0));
             var tag = data.getPlacedItemTag(pos);
             if (tag == null) continue;
-            if (!tag.getString("spirit_type").equals(spiritType.label())) continue;
+            if (!tag.getString("spirit_type").equals(spiritType)) continue;
             int hp = Math.round((float) DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH) / 3f);
             tag.putInt("capacity", tag.getInt("capacity") + hp);
             data.putPlacedItemTag(pos, tag);

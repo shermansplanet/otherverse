@@ -86,4 +86,13 @@ public class OtherverseBlocks {
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.NETHERRACK)));
     public static final RegistryObject<Block> MUSTARD_DIRT = BLOCKS.register("mustard_dirt",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)));
+
+    public static final RegistryObject<Block> INTESTINES = BLOCKS.register("intestines",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.MUD)));
+    public static final RegistryObject<Block> TRUCHET = BLOCKS.register("truchet",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.BLACKSTONE)));
+    public static final RegistryObject<Block> GILDED_TRUCHET = BLOCKS.register("gilded_truchet",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.GILDED_BLACKSTONE)));
+    public static final RegistryObject<Block> CANDYCANE = BLOCKS.register("candycane",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)));
 }

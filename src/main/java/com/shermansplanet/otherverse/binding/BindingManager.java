@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherverseClientPacketHandler;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
+import com.shermansplanet.otherverse.artifacts.ArtifactManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
@@ -11,7 +12,6 @@ import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
-import com.shermansplanet.otherverse.artifacts.ArtifactManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -118,6 +118,7 @@ public class BindingManager {
     @SubscribeEvent
     public static void onGrief(EntityMobGriefingEvent event) {
         if (event.getEntity() != null && event.getEntity().getType() == EntityType.ENDERMAN && event.getEntity().getPersistentData().hasUUID("bindingId")) {
+            event.setResult(Event.Result.DENY);
             event.setCanceled(true);
         }
     }
@@ -455,13 +456,14 @@ public class BindingManager {
         lastGiveAttempt = time;
         var item = event.getItemStack();
 
-        if (item.isEmpty()) {
-            FamiliarManager.onInteract(event);
-        }
-
         var target = event.getTarget();
         if (target instanceof EnderDragonPart ep) {
             target = ep.parentMob;
+        }
+
+        if (item.isEmpty() && event.getTarget() instanceof LivingEntity le && getHeldItem(le).isEmpty()) {
+            FamiliarManager.onInteract(event);
+            return;
         }
 
         if (isOverrideItem(event.getItemStack()) && target instanceof LivingEntity le) {
@@ -483,6 +485,15 @@ public class BindingManager {
 
         if (!(target.getPersistentData().hasUUID("bindingId") || target.getPersistentData().contains("unbound_contract"))
                 || !(target instanceof Mob mob)) return;
+
+        if(event.getItemStack().is(OtherverseItems.CHALK.get())){
+            for(var goal : mob.goalSelector.getAvailableGoals()){
+                if(goal.getGoal() instanceof BoundGoal bg){
+                    bg.sendDebugMessage(event.getEntity());
+                    return;
+                }
+            }
+        }
 
         if (item.is(OtherverseItems.CINNABAR_BLOCK.get())) {
             FleshbindingManager.fleshbindMob(mob, "otherverse:cinnabar_block", (ServerLevel) event.getLevel());

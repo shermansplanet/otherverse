@@ -1,0 +1,7 @@
+{
+  "parent": "otherverse:block/truchet",
+  "textures": {
+    "particle": "otherverse:block/candycane",
+    "all": "otherverse:block/candycane"
+  }
+}

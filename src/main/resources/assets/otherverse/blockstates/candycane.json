@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "otherverse:block/candycane"
+      },
+      {
+        "model": "otherverse:block/candycane",
+        "y": 90
+      },
+      {
+        "model": "otherverse:block/candycane",
+        "y": 180
+      },
+      {
+        "model": "otherverse:block/candycane",
+        "y": 270
+      }
+    ]
+  }
+}

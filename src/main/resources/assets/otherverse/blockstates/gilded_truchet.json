@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "otherverse:block/gilded_truchet_straight"
+      },
+      {
+        "model": "otherverse:block/gilded_truchet_straight",
+        "y": 90
+      },
+      {
+        "model": "otherverse:block/gilded_truchet_curved"
+      },
+      {
+        "model": "otherverse:block/gilded_truchet_curved",
+        "y": 90
+      },
+      {
+        "model": "otherverse:block/gilded_truchet_curved",
+        "y": 180
+      },
+      {
+        "model": "otherverse:block/gilded_truchet_curved",
+        "y": 270
+      }
+    ]
+  }
+}

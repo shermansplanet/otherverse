@@ -141,6 +141,7 @@ public class ContractManager {
     public static CompoundTag makeDeciderTag(ServerLevel level, ChalkCircle circle, Diagram diagram, BlockPos originalPos) {
         CompoundTag tag = new CompoundTag();
         int i = 0;
+        int range = 8;
         for (var influencePos : diagram.influences.entrySet()) {
             if (!influencePos.getValue().equals(circle.getPos()) || influencePos.getKey().equals(originalPos)) {
                 continue;
@@ -153,6 +154,10 @@ public class ContractManager {
                     }
                     continue;
                 }
+                if (sourceCircle.item.is(Items.SPYGLASS)) {
+                    range += 8;
+                    continue;
+                }
                 CompoundTag taskTag = makeTaskTag(level, sourceCircle, diagram, originalPos);
                 if (taskTag.isEmpty()) {
                     continue;
@@ -161,6 +166,7 @@ public class ContractManager {
                 i++;
             }
         }
+        tag.putInt("range", range);
         return tag;
     }
 
@@ -364,6 +370,8 @@ public class ContractManager {
             return;
         }
         CompoundTag contractTag = tag.getCompound("contract");
+        var range = contractTag.getInt("range");
+        if(range > 8) event.getToolTip().add(Component.literal("Range: " + range + " blocks"));
         makeTooltipRecursive(event.getToolTip(), contractTag, "");
     }
 
@@ -389,7 +397,7 @@ public class ContractManager {
             toolTip.add(Component.literal(prefix).append(item.getDescription()));
         }
         for (String key : contractTag.getAllKeys()) {
-            if (key.startsWith("corner") || key.startsWith("tag") || key.startsWith("recipe") || key.equals("min") || key.equals("max")) {
+            if (key.startsWith("corner") || key.startsWith("tag") || key.startsWith("recipe") || key.equals("min") || key.equals("max") || key.equals("range")) {
                 continue;
             }
             if (key.endsWith("_basis")) {

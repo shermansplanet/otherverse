@@ -18,6 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -54,6 +55,8 @@ import java.util.*;
 
 public class BoundGoal extends Goal {
 
+    private static final String REMEMBERED_BLOCKS = "remembered_blocks";
+
     private Mob mob;
     private BindingInfo binding;
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -66,10 +69,14 @@ public class BoundGoal extends Goal {
     private boolean isLoyaltyBound;
     public int nextTick = 0;
     public boolean isTamed;
+    public int range = 8;
 
     public BoundGoal(Mob m, BindingInfo binding) {
         mob = m;
         currentMode = mob.getPersistentData().getInt("familiar_mode");
+        if (!mob.getPersistentData().contains(REMEMBERED_BLOCKS)) {
+            mob.getPersistentData().put(REMEMBERED_BLOCKS, new CompoundTag());
+        }
         this.binding = binding;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.TARGET));
         bindingWearInterval = BindingManager.getBindingWearInterval(mob.getMaxHealth());
@@ -94,10 +101,6 @@ public class BoundGoal extends Goal {
     public boolean requiresUpdateEveryTick() {
         return true;
     }
-
-    public static final int LOOK_RADIUS = 8;
-    public static final int LOOK_HEIGHT = 4;
-    private static List<Vec3i> lookBlocks = new ArrayList<>();
 
     public HashSet<Item> itemDropDenyList = new HashSet<>();
     public boolean takesAll;
@@ -164,22 +167,6 @@ public class BoundGoal extends Goal {
     public ContractDecider rootDecider = null;
     private ContractTask currentTask = null;
     private int lookIndex;
-
-    static {
-        for (int x = -LOOK_RADIUS; x <= LOOK_RADIUS; x++) {
-            for (int y = -LOOK_HEIGHT; y <= LOOK_HEIGHT; y++) {
-                for (int z = -LOOK_RADIUS; z <= LOOK_RADIUS; z++) {
-                    Vec3 diff =
-                            new Vec3(x / (float) LOOK_RADIUS, y / (float) LOOK_HEIGHT, z / (float) LOOK_RADIUS);
-                    if (diff.lengthSqr() >= 1.01f) {
-                        continue;
-                    }
-                    lookBlocks.add(new Vec3i(x, y, z));
-                }
-            }
-        }
-        lookBlocks.sort(Comparator.comparingDouble(a -> a.distSqr(Vec3i.ZERO)));
-    }
 
     private IFocus GetFocus(BlockPos pos) {
         if (mob.level.getBlockEntity(pos) instanceof ChalkCircle cc) {
@@ -504,6 +491,16 @@ public class BoundGoal extends Goal {
         mob.discard();
     }
 
+    public void sendDebugMessage(Player entity) {
+        var s = new StringBuilder();
+        if(currentTask == null){
+            s.append("no task");
+        }else{
+            currentTask.getDebugMessage(s);
+        }
+        entity.sendSystemMessage(Component.literal(s.toString()));
+    }
+
     private void tickContract() {
         if (cooldown > 0) cooldown--;
         if (currentTask == null) {
@@ -519,6 +516,41 @@ public class BoundGoal extends Goal {
         nextTick = mob.getRandom().nextInt(10) + 5;
         currentTask.tick();
     }
+
+    private static final Direction[][] otherDirections = new Direction[][]{
+            new Direction[]{Direction.SOUTH, Direction.EAST},
+            new Direction[]{Direction.SOUTH, Direction.EAST},
+            new Direction[]{Direction.EAST, Direction.UP},
+            new Direction[]{Direction.EAST, Direction.UP},
+            new Direction[]{Direction.SOUTH, Direction.UP},
+            new Direction[]{Direction.SOUTH, Direction.UP}
+    };
+
+    private static final Direction[][] edgeDirections = new Direction[][]{
+            new Direction[]{Direction.UP, Direction.SOUTH, Direction.EAST},
+            new Direction[]{Direction.UP, Direction.NORTH, Direction.EAST},
+            new Direction[]{Direction.UP, Direction.EAST, Direction.SOUTH},
+            new Direction[]{Direction.UP, Direction.WEST, Direction.SOUTH},
+            new Direction[]{Direction.DOWN, Direction.SOUTH, Direction.EAST},
+            new Direction[]{Direction.DOWN, Direction.NORTH, Direction.EAST},
+            new Direction[]{Direction.DOWN, Direction.EAST, Direction.SOUTH},
+            new Direction[]{Direction.DOWN, Direction.WEST, Direction.SOUTH},
+            new Direction[]{Direction.SOUTH, Direction.WEST, Direction.UP},
+            new Direction[]{Direction.SOUTH, Direction.EAST, Direction.UP},
+            new Direction[]{Direction.NORTH, Direction.WEST, Direction.UP},
+            new Direction[]{Direction.NORTH, Direction.EAST, Direction.UP},
+    };
+
+    private static final Vec3i[] cornerDirections = new Vec3i[]{
+            new Vec3i(1, 1, 1),
+            new Vec3i(1, 1, -1),
+            new Vec3i(1, -1, 1),
+            new Vec3i(1, -1, -1),
+            new Vec3i(-1, 1, 1),
+            new Vec3i(-1, 1, -1),
+            new Vec3i(-1, -1, 1),
+            new Vec3i(-1, -1, -1)
+    };
 
     private boolean lookAround() {
         BlockPos basePos = mob.blockPosition();
@@ -585,19 +617,22 @@ public class BoundGoal extends Goal {
                     return true;
                 }
             }
-        }
-        for (int i = 0; i < 64; i++) {
-            BlockPos pos = basePos.offset(lookBlocks.get(lookIndex));
-            for (ContractTask task : currentDecider.tasks) {
-                if (task.positionFilters.isEmpty() && task.corner0 == null && task.isPossible() && task.isAcceptableTarget(pos, false)) {
+            var rememberedBlocks = mob.getPersistentData().getCompound(REMEMBERED_BLOCKS);
+            if (rememberedBlocks.contains(task.taskId)) {
+                var ints = rememberedBlocks.getIntArray(task.taskId);
+                var pos = new BlockPos(ints[0], ints[1], ints[2]);
+                if (task.isAcceptableTarget(pos, false)) {
                     currentTask = task;
                     currentTask.targetPos = pos;
                     lookIndex = 0;
-                    return true;
                 }
             }
-            lookIndex++;
-            if (lookIndex >= lookBlocks.size()) {
+        }
+        for (int i = 0; i < 64; i++) {
+            int shellIndex = Mth.floor((Math.pow(lookIndex, 1f / 3f) + 1) / 2);
+            if (shellIndex > range) {
+                shellIndex = 0;
+                lookIndex = 0;
                 for (ContractTask task : currentDecider.tasks) {
                     if (task.taskType == ContractTask.TaskType.OBSERVE) {
                         task.fail();
@@ -606,8 +641,44 @@ public class BoundGoal extends Goal {
                 }
                 ContractDecider decider = currentDecider.fallback == null ? rootDecider : currentDecider.fallback;
                 switchToDecider(decider);
-                lookIndex = 0;
             }
+            BlockPos lookOffset = BlockPos.ZERO;
+            if (shellIndex > 0) {
+                int priorSideLength = shellIndex * 2 - 1;
+                int indexWithinShell = lookIndex - (int) Math.pow(priorSideLength, 3);
+                int priorSquareArea = (int) Math.pow(priorSideLength, 2);
+                if (indexWithinShell < priorSquareArea * 6) {
+                    var squareIndex = (int) (indexWithinShell / priorSquareArea);
+                    var direction = Direction.values()[squareIndex];
+                    var indexWithinSquare = indexWithinShell - squareIndex * priorSquareArea;
+                    lookOffset = lookOffset.relative(direction, shellIndex)
+                            .relative(otherDirections[squareIndex][0], indexWithinSquare / priorSideLength - priorSideLength / 2)
+                            .relative(otherDirections[squareIndex][1], indexWithinSquare % priorSideLength - priorSideLength / 2);
+                } else if (indexWithinShell < priorSquareArea * 6 + priorSideLength * 12) {
+                    indexWithinShell -= priorSquareArea * 6;
+                    var edgeIndex = indexWithinShell / priorSideLength;
+                    var edgeDirection = edgeDirections[edgeIndex];
+                    lookOffset = lookOffset
+                            .relative(edgeDirection[0], priorSideLength / 2 + 1)
+                            .relative(edgeDirection[1], priorSideLength / 2 + 1)
+                            .relative(edgeDirection[2], indexWithinShell - edgeIndex * priorSideLength - priorSideLength / 2);
+                } else {
+                    indexWithinShell -= priorSquareArea * 6 + priorSideLength * 12;
+                    lookOffset = new BlockPos(cornerDirections[indexWithinShell].multiply(priorSideLength / 2 + 1));
+                }
+            }
+            BlockPos pos = basePos.offset(lookOffset);
+            for (ContractTask task : currentDecider.tasks) {
+                if (task.positionFilters.isEmpty() && task.corner0 == null && task.isPossible() && task.isAcceptableTarget(pos, false)) {
+                    currentTask = task;
+                    currentTask.targetPos = pos;
+                    mob.getPersistentData().getCompound(REMEMBERED_BLOCKS).putIntArray(task.taskId,
+                            new int[]{pos.getX(), pos.getY(), pos.getZ()});
+                    lookIndex = 0;
+                    return true;
+                }
+            }
+            lookIndex++;
         }
         return false;
     }
@@ -636,12 +707,14 @@ public class BoundGoal extends Goal {
         takesAll = false;
         rootDecider = makeDecider(contractTag);
         currentDecider = rootDecider;
+        range = contractTag.contains("range") ? contractTag.getInt("range") : 8;
         currentTask = null;
     }
 
     public ContractDecider makeDecider(CompoundTag tag) {
         ContractDecider decider = new ContractDecider();
         for (String key : tag.getAllKeys()) {
+            if(key.equals("range")) continue;
             if (key.equals("fallback")) {
                 decider.fallback = makeDecider(tag.getCompound(key));
             } else {

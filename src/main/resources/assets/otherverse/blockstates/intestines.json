@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "otherverse:block/intestines"
+      },
+      {
+        "model": "otherverse:block/intestines",
+        "y": 90
+      },
+      {
+        "model": "otherverse:block/intestines",
+        "y": 180
+      },
+      {
+        "model": "otherverse:block/intestines",
+        "y": 270
+      }
+    ]
+  }
+}
