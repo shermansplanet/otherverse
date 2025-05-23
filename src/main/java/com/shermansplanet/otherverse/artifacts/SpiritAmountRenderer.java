@@ -54,11 +54,15 @@ public class SpiritAmountRenderer {
             }
             if (blockEntity instanceof ChalkCircle cc) {
                 if (cc.isEmpty() || cc.getItem().is(Items.AIR)) return;
-                var item = cc.getItem();
-                var lines = item.getTooltipLines(Minecraft.getInstance().player, TooltipFlag.Default.NORMAL);
-                labelTextLines = new MutableComponent[lines.size()];
-                for (var i = 0; i < lines.size(); i++) {
-                    labelTextLines[i] = lines.get(i).copy();
+                if (cc.isNumber) {
+                    labelTextLines = new MutableComponent[]{Component.literal(String.valueOf(cc.getItem().getCount()))};
+                } else {
+                    var item = cc.getItem();
+                    var lines = item.getTooltipLines(Minecraft.getInstance().player, TooltipFlag.Default.NORMAL);
+                    labelTextLines = new MutableComponent[lines.size()];
+                    for (var i = 0; i < lines.size(); i++) {
+                        labelTextLines[i] = lines.get(i).copy();
+                    }
                 }
                 shouldRenderLabel = true;
                 return;
