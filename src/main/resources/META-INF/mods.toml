@@ -1,39 +1,61 @@
 # The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
-modLoader="javafml"
+modLoader = "javafml"
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
 # Forge for 1.19 is version 41
-loaderVersion="[41,)"
+loaderVersion = "[41,)"
 # The license for your mod. This is mandatory and allows for easier comprehension of your redistributive properties.
 # Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
-license="All Rights Reserved"
+license = "MIT"
 # A URL to refer people to when problems occur with this mod
-issueTrackerURL="https://github.com/MinecraftForge/MinecraftForge/issues"
+issueTrackerURL = "https://github.com/MinecraftForge/MinecraftForge/issues"
 # If the mods defined in this file should show as separate resource packs
-showAsResourcePack=false
+showAsResourcePack = false
 
 [[mods]]
-  modId="otherverse"
-  version="0.0.1"
-  displayName="Pact Magic"
-  #updateJSONURL="minecraftforge.net/versions.json"
-  displayURL="minecraftforge.net"
-  logoFile="logo.png"
-  authors="Tickbug"
-  description='''
-  A mod about the Otherverse.
+modId = "otherverse"
+version = "1.0.2"
+displayName = "Pact Magic"
+#updateJSONURL="minecraftforge.net/versions.json"
+displayURL = "minecraftforge.net"
+logoFile = "logo.png"
+authors = "Tickbug"
+description = '''
+  A powerful open-ended magic mod.
   '''
-  displayTest="MATCH_VERSION"
+displayTest = "MATCH_VERSION"
 
-  [[dependencies.otherverse]]
-    modId="forge"
-    mandatory=true
-    versionRange="[41,)"
-    ordering="NONE"
-    side="BOTH"
+[[dependencies.otherverse]]
+modId = "forge"
+mandatory = true
+versionRange = "[41,)"
+ordering = "NONE"
+side = "BOTH"
 
-  [[dependencies.otherverse]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.19,1.20)"
-    ordering="NONE"
-    side="BOTH"
+[[dependencies.otherverse]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.19,1.20)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.otherverse]]
+modId = "pehkui"
+mandatory = true
+versionRange = "[1.0,)"
+
+[[dependencies.otherverse]]
+modId = "caelus"
+mandatory = true
+versionRange = "[1.0,)"
+
+[[dependencies.otherverse]]
+modId = "patchouli"
+mandatory = false
+side = "CLIENT"
+versionRange = "[1.0,)"
+
+[[dependencies.otherverse]]
+modId = "jei"
+mandatory = false
+side = "CLIENT"
+versionRange = "[1.0,)"

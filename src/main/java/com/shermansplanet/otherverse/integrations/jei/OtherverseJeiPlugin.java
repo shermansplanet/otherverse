@@ -96,14 +96,14 @@ public class OtherverseJeiPlugin implements IModPlugin {
             //debugPracticeRecipes();
             LOGGER.debug("ADDING PRACTICE RECIPES...");
             if (PracticeWorldManager.jeiInitialized) return;
-            PracticeWorldManager.jeiInitialized = true;
-            LOGGER.debug("JEI SET AS INITIALIZED");
             registry.addRecipes(SpiritExtractionRecipeCategory.TYPE, SpiritLabeler.GenerateRecipes());
             registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes());
             registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes());
             registry.addRecipes(BindingRecipeCategory.TYPE, MobBindingInfluenceUtils.GenerateRecipes());
             FleshbindingManager.addWoodTextures();
             LOGGER.debug("PRACTICE RECIPES ADDED");
+            PracticeWorldManager.jeiInitialized = true;
+            LOGGER.debug("JEI SET AS INITIALIZED");
         });
     }
 
