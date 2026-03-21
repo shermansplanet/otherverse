@@ -30,8 +30,8 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void registerFactories(RegisterParticleProvidersEvent evt) {
-        evt.register(OtherverseParticles.SPIRIT_PARTICLE_TYPE, new SpiritParticle.Provider());
-        evt.register(OtherverseParticles.HALLOW_PARTICLE_TYPE, new HallowParticle.Provider());
+        evt.registerSpecial(OtherverseParticles.SPIRIT_PARTICLE_TYPE, new SpiritParticle.Provider());
+        evt.registerSpecial(OtherverseParticles.HALLOW_PARTICLE_TYPE, new HallowParticle.Provider());
     }
 
     @SubscribeEvent

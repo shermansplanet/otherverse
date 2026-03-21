@@ -75,7 +75,7 @@ public class SelfManager {
     public static void onAdvancement(AdvancementEarnEvent event) {
         Player player = event.getEntity();
         var display = event.getAdvancement().getDisplay();
-        if (player.level.isClientSide() || display == null || display.isHidden()) {
+        if (player.level().isClientSide() || display == null || display.isHidden()) {
             return;
         }
         if (ChangeSelf(player, SELF_TOTAL)) {

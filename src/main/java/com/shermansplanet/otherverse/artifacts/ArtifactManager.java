@@ -12,6 +12,7 @@ import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -82,7 +83,7 @@ public class ArtifactManager {
         if (keyMaybe.left().isPresent()) {
             biomeName = keyMaybe.left().get().location().getPath();
         } else if (keyMaybe.right().isPresent()) {
-            biomeName = event.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
+            biomeName = event.getLevel().registryAccess().registryOrThrow(Registries.BIOME).getKey(keyMaybe.right().get()).getPath();
         }
         LOGGER.warn(biomeName);
 
@@ -195,7 +196,7 @@ public class ArtifactManager {
 
         var etstring = ((SpawnDataGetter)spawner.getSpawner()).getNextSpawnData().getEntityToSpawn().getString("id");
         LOGGER.debug(etstring);
-        var et = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(etstring));
+        var et = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(etstring));
 
         event.getLevel().destroyBlock(event.getPos(), false);
 
@@ -240,7 +241,7 @@ public class ArtifactManager {
 
         for (var i = 0; i < mobCount; i++) {
             var e = altar.spawnType.create(level, null, null, null,
-                    spawnPos, MobSpawnType.SPAWN_EGG, false, false);
+                    MobSpawnType.SPAWN_EGG, false, false);
             e.setPos(new Vec3(
                     spawnPos.getX() + 0.4f + level.random.nextFloat() * 0.2f,
                     spawnPos.getY() + 0.25f,

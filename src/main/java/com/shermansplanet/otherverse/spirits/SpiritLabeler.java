@@ -10,6 +10,7 @@ import com.shermansplanet.otherverse.diagrams.ChalkItem;
 import com.shermansplanet.otherverse.integrations.jei.SpiritExtractionRecipe;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -114,12 +115,12 @@ public class SpiritLabeler {
                 spiritAmounts.add(new SpiritAmount(k2, spiritsForItem.get(k2)));
             }
             spiritAmounts.sort((a, b) -> b.amount.compareTo(a.amount));
-            recipes.add(new SpiritExtractionRecipe(new ResourceLocation(Otherverse.MODID, k.toString()),
+            recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.toString()),
                     spiritAmounts, k.getDefaultInstance()));
         }
         for (var k : MobBindingInfluenceUtils.mobSpirits.entrySet()) {
             var item = MobBindingInfluenceUtils.getIdol(k.getKey());
-            recipes.add(new SpiritExtractionRecipe(new ResourceLocation(Otherverse.MODID, k.getKey().toString()),
+            recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.getKey().toString()),
                     List.of(new SpiritAmount(k.getValue(), 1)), item));
         }
         return recipes;
@@ -132,7 +133,7 @@ public class SpiritLabeler {
     public static void loadJsonSpirits(JsonObject practice) {
         var spirits = practice.get("spirits").getAsJsonObject();
         for (var itemstring : spirits.keySet()) {
-            var loc = new ResourceLocation(itemstring);
+            var loc = ResourceLocation.parse(itemstring);
             if(!ForgeRegistries.ITEMS.containsKey(loc)) continue;
             Item item = ForgeRegistries.ITEMS.getValue(loc);
             var spiritcounts = spirits.get(itemstring).getAsJsonArray();
@@ -230,10 +231,7 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, BlockTags.CORAL_BLOCKS, Spirits.WATER, 2);
             AddForTag(item, spiritAmounts, BlockTags.UNDERWATER_BONEMEALS, Spirits.WATER, 1);
 
-            AddForTag(item, spiritAmounts, Items.TOOLS_AXES, Spirits.OVERWORLD, tierFunc);
-            AddForTag(item, spiritAmounts, Items.TOOLS_SHOVELS, Spirits.EARTH, tierFunc);
-            AddForTag(item, spiritAmounts, Items.TOOLS_HOES, Spirits.NATURE, tierFunc);
-            AddForTag(item, spiritAmounts, Items.TOOLS_PICKAXES, Spirits.FORTUNE, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS, Spirits.OVERWORLD, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_BOWS, Spirits.AIR, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_CROSSBOWS, Spirits.AIR, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_FISHING_RODS, Spirits.WATER, tierFunc);
@@ -314,21 +312,21 @@ public class SpiritLabeler {
         SPIRITS_FROM_TAGS.setData(spiritsFromTags);
     }
 
-    public static void analyzeSmeltingRecipes(List<SmeltingRecipe> smeltingRecipes) {
+    public static void analyzeSmeltingRecipes(List<SmeltingRecipe> smeltingRecipes, ServerLevel sl) {
         HashSet<Item> products = new HashSet<>();
         doubleSmeltItems = new HashSet<>();
         SpiritTransfusions.TRANSFUSIONS_FROM_RECIPES.data = new HashMap<>();
         MobTransfusions.TRANSFUSIONS_FROM_RECIPES.data = new HashMap<>();
         for (var recipe : smeltingRecipes) {
-            products.add(recipe.getResultItem().getItem());
-            SpiritTransfusions.analyzeSmeltingRecipe(recipe);
-            MobTransfusions.analyzeSmeltingRecipe(recipe);
+            products.add(recipe.getResultItem(sl.registryAccess()).getItem());
+            SpiritTransfusions.analyzeSmeltingRecipe(recipe, sl);
+            MobTransfusions.analyzeSmeltingRecipe(recipe, sl);
         }
         for (var recipe : smeltingRecipes) {
             for (Ingredient ingredient : recipe.getIngredients()) {
                 for (ItemStack input : ingredient.getItems()) {
                     if (products.contains(input.getItem())) {
-                        doubleSmeltItems.add(recipe.getResultItem().getItem());
+                        doubleSmeltItems.add(recipe.getResultItem(sl.registryAccess()).getItem());
                     }
                 }
             }

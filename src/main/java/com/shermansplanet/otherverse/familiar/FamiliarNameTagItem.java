@@ -28,7 +28,7 @@ public class FamiliarNameTagItem extends NameTagItem {
             LOGGER.debug("Name tag has no name!");
             return InteractionResult.PASS;
         }
-        if (player.level.isClientSide) {
+        if (player.level().isClientSide) {
             return InteractionResult.SUCCESS;
         }
         if (!FamiliarManager.isEligibleFamiliar(entity)) {
@@ -36,7 +36,7 @@ public class FamiliarNameTagItem extends NameTagItem {
             LOGGER.debug(entity.getType() + " cannot be a familiar");
             return InteractionResult.PASS;
         }
-        var sl = (ServerLevel) player.level;
+        var sl = (ServerLevel) player.level();
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
         if (binding == null || binding.mob != entity) return InteractionResult.PASS;

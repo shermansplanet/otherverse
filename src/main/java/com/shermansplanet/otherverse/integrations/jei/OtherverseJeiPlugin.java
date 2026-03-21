@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 public class OtherverseJeiPlugin implements IModPlugin {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static IRecipeRegistration registry;
-    private static final ResourceLocation UID = new ResourceLocation(Otherverse.MODID, "jei_plugin");
+    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "jei_plugin");
 
     public static void handleWorldUpdate(PracticeWorldUpdateMessage msg, Supplier<NetworkEvent.Context> ctx) {
         SpiritLabeler.SPIRIT_TYPE_OF.data = msg.spiritMappings();

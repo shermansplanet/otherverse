@@ -20,7 +20,7 @@ public class BindingUpdateMessage {
     public BindingUpdateMessage(Mob mob, BindingUpdateType updateType, boolean silent) {
         this.mobId = mob.getId();
         this.updateType = updateType;
-        this.levelValue = DiagramManager.getDimensionHash(mob.level);
+        this.levelValue = DiagramManager.getDimensionHash(mob.level());
         this.data = new CompoundTag();
         this.silent = silent;
     }
@@ -28,7 +28,7 @@ public class BindingUpdateMessage {
     public BindingUpdateMessage(Mob mob, BindingUpdateType updateType, CompoundTag data, boolean silent) {
         this.mobId = mob.getId();
         this.updateType = updateType;
-        this.levelValue = DiagramManager.getDimensionHash(mob.level);
+        this.levelValue = DiagramManager.getDimensionHash(mob.level());
         this.data = data;
         this.silent = silent;
     }

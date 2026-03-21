@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -33,11 +34,11 @@ public class IdolItem extends Item {
         var type = getType(stack);
         var location = useCtx.getClickLocation();
         if (!stack.hasTag() || !stack.getTag().contains("material")) {
-            var entity = type.create(sp.getLevel());
+            var entity = type.create(sp.level());
             entity.setPos(location);
-            sp.getLevel().addFreshEntityWithPassengers(entity);
+            sp.level().addFreshEntity(entity);
         } else {
-            FamiliarManager.makeMobFromTag(type, stack.getTag(), location, sp.getLevel());
+            FamiliarManager.makeMobFromTag(type, stack.getTag(), location, sp.serverLevel());
             stack.shrink(1);
             if (stack.getTag().getString("material").equals("otherverse:cinnabar_block")) {
                 var player = useCtx.getPlayer();
@@ -95,7 +96,7 @@ public class IdolItem extends Item {
     }
 
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> list) {
-        if (tab != Otherverse.TAB_OTHERS) {
+        if (tab != Otherverse.TAB_OTHERS.get()) {
             return;
         }
         var encounteredTypes = new HashSet<EntityType<?>>();

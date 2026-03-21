@@ -101,7 +101,7 @@ public class MobTransfusions {
         for (var transfusionSet : ALL_MOB_TRANSFUSIONS.data.entrySet()) {
             for (var transfusionData : transfusionSet.getValue()) {
                 recipes.add(
-                        new TransfusionRecipe(new ResourceLocation(Otherverse.MODID, "mob_transfusion_" + i++),
+                        new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "mob_transfusion_" + i++),
                                 MobBindingInfluenceUtils.getIdols(transfusionData.entityTypes),
                                 transfusionSet.getKey().getItemStack(), transfusionData.destItem,
                                 transfusionData.price));
@@ -110,9 +110,9 @@ public class MobTransfusions {
         return recipes;
     }
 
-    public static void analyzeSmeltingRecipe(SmeltingRecipe recipe) {
+    public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
         register(EntityType.BLAZE, recipe.getIngredients().get(0).getItems()[0].getItem(),
-                recipe.getResultItem(), 1, true);
+                recipe.getResultItem(sl.registryAccess()), 1, true);
     }
 
     public static boolean tryLightningTransform(ServerLevel level, BlockFocus focus, Diagram diagram) {

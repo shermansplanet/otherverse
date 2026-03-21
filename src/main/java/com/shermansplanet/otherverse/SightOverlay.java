@@ -3,21 +3,21 @@ package com.shermansplanet.otherverse;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.familiar.MobRetexturer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import org.joml.Quaternionf;
 import org.slf4j.Logger;
 
 public class SightOverlay implements IGuiOverlay {
 
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final ResourceLocation SIGHT_LOCATION = new ResourceLocation(Otherverse.MODID, "textures/overlay/sight.png");
+    private static final ResourceLocation SIGHT_LOCATION = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/overlay/sight.png");
     public static final SightOverlay instance = new SightOverlay();
 
     private float sightR = 1, sightG = 1, sightB = 1;
@@ -25,10 +25,11 @@ public class SightOverlay implements IGuiOverlay {
     private float opacity = 0f;
 
     @Override
-    public void render(ForgeGui gui, PoseStack poseStack, float partialTick, int screenWidth, int screenHeight) {
+    public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
         var dt = Minecraft.getInstance().getDeltaFrameTime() / 8f;
         opacity = Mth.clamp(opacity + (SightManager.shouldRenderSight() ? dt : -dt), 0, 1);
         if (opacity == 0) return;
+        var poseStack = guiGraphics.pose();
         poseStack.pushPose();
         RenderSystem.enableBlend();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -40,9 +41,9 @@ public class SightOverlay implements IGuiOverlay {
         poseStack.translate(screenWidth / 2f, screenHeight / 2f, 0);
         var scale = screenWidth * (1.5f - opacity * 0.3f) / 256f;
         poseStack.scale(scale, scale, scale);
-        poseStack.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, 0, rot)));
+        poseStack.mulPose(new Quaternionf().rotateZ(rot));
         poseStack.translate(-128, -128, 0);
-        gui.blit(poseStack, 0, 0, 0, 0, 256, 256);
+        guiGraphics.blit(SIGHT_LOCATION, 0, 0, 0, 0, 256, 256);
         poseStack.popPose();
     }
 

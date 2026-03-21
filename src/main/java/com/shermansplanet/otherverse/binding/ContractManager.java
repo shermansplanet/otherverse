@@ -21,6 +21,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -346,14 +347,14 @@ public class ContractManager {
                 }
                 var width = maxX - minX + 1;
                 var height = maxZ - minZ + 1;
-                CraftingContainer craftingContainer = new CraftingContainer(new DiagramCraftingMenu(), width, height);
+                CraftingContainer craftingContainer = new TransientCraftingContainer(new DiagramCraftingMenu(), width, height);
                 for (var pair : craftingItemPositions) {
                     craftingContainer.setItem((pair.getA().getX() - minX) + (maxZ - pair.getA().getZ()) * width, pair.getB());
                 }
                 Optional<CraftingRecipe> recipe = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, level);
                 if (recipe.isPresent()) {
                     tag.putString("recipe_id", recipe.get().getId().toString());
-                    tag.putInt("recipe_result", Item.getId(recipe.get().getResultItem().getItem()));
+                    tag.putInt("recipe_result", Item.getId(recipe.get().getResultItem(level.registryAccess()).getItem()));
                 }
             }
         }

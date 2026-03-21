@@ -2,8 +2,6 @@ package com.shermansplanet.otherverse.binding;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.ReskinManager;
 import com.shermansplanet.otherverse.registries.CrownBlock;
@@ -27,6 +25,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -39,6 +38,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Quaternionf;
 import org.slf4j.Logger;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -76,7 +76,7 @@ public class BindingRenderer {
             var type = familiarsByPract.get(player.getGameProfile().getName());
             if (type == null) continue;
             if (type.equals(EntityType.ENDER_DRAGON)) {
-                List<EndCrystal> list = player.level.getEntitiesOfClass(EndCrystal.class, player.getBoundingBox().inflate(32.0D));
+                List<EndCrystal> list = player.level().getEntitiesOfClass(EndCrystal.class, player.getBoundingBox().inflate(32.0D));
                 EndCrystal endcrystal = null;
                 double d0 = Double.MAX_VALUE;
 
@@ -140,9 +140,9 @@ public class BindingRenderer {
         var entityId = event.getEntity().getUUID();
         var contractOnly = false;
         if (!boundEntities.contains(entityId)) {
-            if(contractEntities.contains(entityId)){
+            if (contractEntities.contains(entityId)) {
                 contractOnly = true;
-            }else {
+            } else {
                 return;
             }
         }
@@ -174,7 +174,7 @@ public class BindingRenderer {
         float rot = (contractEntities.contains(mob.getUUID()) || isFamiliar) ? (millis % 3600) / 10f : -mob.yHeadRot;
         var s = 10f / 16f;
         pose.scale(s, s, s);
-        pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, rot, 0)));
+        pose.mulPose(new Quaternionf().rotateY(rot));
         pose.pushPose();
         if (isFamiliar || contractOnly) {
             pose.translate(-0.5f, -0.4f, -0.5f);
@@ -183,28 +183,28 @@ public class BindingRenderer {
                     pose, event.getMultiBufferSource(),
                     event.getPackedLight(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
         } else {
-            pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, 0, 90)));
+            pose.mulPose(new Quaternionf().rotateZ(90));
             for (int i = 0; i < 4; i++) {
                 pose.pushPose();
-                pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(90, 90, 90 * i)));
+                pose.mulPose(new Quaternionf().rotateXYZ(90, 90, 90 * i));
                 pose.translate(0.4f, 0f, 0f);
-                pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, 90, 0)));
-                itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemTransforms.TransformType.FIXED, event.getPackedLight(),
-                        OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), event.hashCode());
+                pose.mulPose(new Quaternionf().rotateXYZ(0, 90, 0));
+                itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemDisplayContext.FIXED, event.getPackedLight(),
+                        OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
                 pose.popPose();
             }
         }
         pose.popPose();
         if (!BindingManager.getHeldItem(mob).isEmpty()) {
             pose.translate(0, Math.sin(millis / 250.0) * 0.2, 0);
-            itemRenderer.renderStatic(BindingManager.getHeldItem(mob), ItemTransforms.TransformType.FIXED, event.getPackedLight(),
-                    OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), event.hashCode());
+            itemRenderer.renderStatic(BindingManager.getHeldItem(mob), ItemDisplayContext.FIXED, event.getPackedLight(),
+                    OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
         }
         pose.popPose();
     }
 
     public static void updateBinding(LivingEntity le, BindingUpdateMessage update) {
-        RandomSource r = le.level.random;
+        RandomSource r = le.level().random;
         var updateType = update.updateType;
         var silent = update.silent;
         if (updateType == BindingUpdateMessage.BindingUpdateType.BIND) {
@@ -214,18 +214,18 @@ public class BindingRenderer {
             }
             Vec3 v1 = le.getEyePosition();
             for (int i = 0; i < 8; i++) {
-                le.level.addParticle(ParticleTypes.INSTANT_EFFECT,
+                le.level().addParticle(ParticleTypes.INSTANT_EFFECT,
                         v1.x + (r.nextFloat() - 0.5) * 0.3,
                         v1.y + 0.5,
                         v1.z + (r.nextFloat() - 0.5) * 0.3,
                         0, 0, 0);
             }
-            le.level.playSound(Minecraft.getInstance().player, le, SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 1, 1);
+            le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 1, 1);
         } else if (updateType == BindingUpdateMessage.BindingUpdateType.CONTRACT) {
             LOGGER.debug("CONSTRUCT TYPE: " + update.data.getString("construct_type"));
-            if(update.data.contains("construct_type")){
+            if (update.data.contains("construct_type")) {
                 ReskinManager.reskinMob(le, update.data.getString("construct_type"));
-            }else {
+            } else {
                 contractEntities.add(le.getUUID());
             }
             if (silent) {
@@ -233,13 +233,13 @@ public class BindingRenderer {
             }
             Vec3 v1 = le.position();
             for (int i = 0; i < 16; i++) {
-                le.level.addParticle(ParticleTypes.INSTANT_EFFECT,
+                le.level().addParticle(ParticleTypes.INSTANT_EFFECT,
                         v1.x + (r.nextFloat() - 0.5) * le.getBoundingBox().getXsize(),
                         v1.y + r.nextFloat() * le.getBoundingBox().getYsize(),
                         v1.z + (r.nextFloat() - 0.5) * le.getBoundingBox().getZsize(),
                         0, 0, 0);
             }
-            le.level.playSound(Minecraft.getInstance().player, le, SoundEvents.BOOK_PAGE_TURN, SoundSource.NEUTRAL, 1, 1);
+            le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.BOOK_PAGE_TURN, SoundSource.NEUTRAL, 1, 1);
         } else if (updateType == BindingUpdateMessage.BindingUpdateType.FAMILIAR) {
             LOGGER.info("RECEIVED FAMILIAR UPDATE");
             var name = update.data.getString("practitioner");
@@ -261,7 +261,7 @@ public class BindingRenderer {
                 double d0 = r.nextGaussian() * 0.02D;
                 double d1 = r.nextGaussian() * 0.02D;
                 double d2 = r.nextGaussian() * 0.02D;
-                le.level.addParticle(ParticleTypes.HEART, le.getRandomX(1.0D), le.getRandomY() + 0.5D, le.getRandomZ(1.0D), d0, d1, d2);
+                le.level().addParticle(ParticleTypes.HEART, le.getRandomX(1.0D), le.getRandomY() + 0.5D, le.getRandomZ(1.0D), d0, d1, d2);
             }
         } else {
             boundEntities.remove(le.getUUID());

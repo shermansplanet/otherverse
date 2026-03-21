@@ -77,7 +77,7 @@ public class PracticeWorldManager {
         if (!(event.getLevel() instanceof ServerLevel sl)) return;
         if (sl.getServer().overworld() != sl) return;
         var smeltingRecipes = sl.getServer().getRecipeManager().getAllRecipesFor(RecipeType.SMELTING);
-        SpiritLabeler.analyzeSmeltingRecipes(smeltingRecipes);
+        SpiritLabeler.analyzeSmeltingRecipes(smeltingRecipes, sl);
         MobBindingInfluenceUtils.analyzeMobInstances(sl.getServer().overworld());
     }
 

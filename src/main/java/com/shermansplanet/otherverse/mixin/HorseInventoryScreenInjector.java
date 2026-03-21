@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -25,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(HorseInventoryScreen.class)
 public abstract class HorseInventoryScreenInjector extends AbstractContainerScreen<HorseInventoryMenu> {
-    private static final ResourceLocation FAMILIAR_INVENTORY_LOCATION = new ResourceLocation(Otherverse.MODID, "textures/gui/familiar_mule.png");
+    private static final ResourceLocation FAMILIAR_INVENTORY_LOCATION = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/familiar_mule.png");
     @Shadow
     private final AbstractHorse horse;
 
@@ -35,10 +36,10 @@ public abstract class HorseInventoryScreenInjector extends AbstractContainerScre
     }
 
     @Override
-    protected void renderLabels(PoseStack p_97808_, int p_97809_, int p_97810_) {
+    protected void renderLabels(GuiGraphics p_97808_, int p_97809_, int p_97810_) {
         if (FamiliarManager.isChestedHorseFamiliar(this.horse)) return;
-        this.font.draw(p_97808_, this.title, (float) this.titleLabelX, (float) this.titleLabelY, 4210752);
-        this.font.draw(p_97808_, this.playerInventoryTitle, (float) this.inventoryLabelX, (float) this.inventoryLabelY, 4210752);
+        p_97808_.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752);
+        p_97808_.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752);
     }
 
     @Override
@@ -48,14 +49,14 @@ public abstract class HorseInventoryScreenInjector extends AbstractContainerScre
     }
 
     @Inject(method = "renderBg", at = @At("HEAD"), cancellable = true)
-    protected void renderMuleBg(PoseStack p_98821_, float p_98822_, int p_98823_, int p_98824_, CallbackInfo ci) {
+    protected void renderMuleBg(GuiGraphics p_98821_, float p_98822_, int p_98823_, int p_98824_, CallbackInfo ci) {
         if (!FamiliarManager.isChestedHorseFamiliar(this.horse)) return;
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, FAMILIAR_INVENTORY_LOCATION);
         int i = (this.width - this.imageWidth) / 2;
         int j = (this.height - this.imageHeight) / 2;
-        this.blit(p_98821_, i, j, 0, 0, this.imageWidth, this.imageHeight);
+        p_98821_.blit(FAMILIAR_INVENTORY_LOCATION, i, j, 0, 0, this.imageWidth, this.imageHeight);
         ci.cancel();
     }
 }

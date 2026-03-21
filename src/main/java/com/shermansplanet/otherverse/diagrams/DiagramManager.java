@@ -362,7 +362,7 @@ public class DiagramManager {
                 return;
             }
         }
-        Level level = event.getPlayer().getLevel();
+        Level level = event.getPlayer().level();
         BlockBreak(level, event.getPos());
         if (event.getPlayer().isCreative()) {
             getOrCreateLevelData(level).removePlacedItemTag(event.getPos());
@@ -371,7 +371,7 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void onBlockDestroyed(LivingDestroyBlockEvent event) {
-        BlockBreak(event.getEntity().getLevel(), event.getPos());
+        BlockBreak(event.getEntity().level(), event.getPos());
     }
 
     @SubscribeEvent
@@ -384,7 +384,7 @@ public class DiagramManager {
         if (event.getLevel() instanceof ServerLevel sl) {
             Block block = event.getContext().affectedState().getBlock();
             ItemStack item = null;
-            BlockPos pos = new BlockPos(event.getEventPosition());
+            BlockPos pos = BlockPos.containing(event.getEventPosition());
             if (event.getContext().sourceEntity() instanceof Player player) {
                 ItemStack mainHandItem = player.getItemInHand(InteractionHand.MAIN_HAND);
                 ItemStack offHandItem = player.getItemInHand(InteractionHand.OFF_HAND);
@@ -417,7 +417,7 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void entityUpdates(LivingEvent.LivingTickEvent event) {
-        Level level = event.getEntity().getLevel();
+        Level level = event.getEntity().level();
         if (level.getGameTime() % 10 != 0 || !(level instanceof ServerLevel sl) || !(event.getEntity() instanceof Mob mob)) {
             return;
         }

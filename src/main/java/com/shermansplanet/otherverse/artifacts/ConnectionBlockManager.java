@@ -44,7 +44,7 @@ public class ConnectionBlockManager {
 
     @SubscribeEvent
     public static void onTick(LivingEvent.LivingTickEvent event) {
-        var level = event.getEntity().getLevel();
+        var level = event.getEntity().level();
         if (level.isClientSide()) return;
         if (level.getGameTime() % 20 != 0) return;
         var blockedSeconds = event.getEntity().getPersistentData().getInt("connection_blocked_seconds");

@@ -13,12 +13,15 @@ import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -48,6 +51,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -78,9 +82,9 @@ public class BindingManager {
     public static void onVexTick(LivingEvent.LivingTickEvent event){
         var e = event.getEntity();
         if(e.getType() != EntityType.VEX) return;
-        for(var other : e.getLevel().getEntities(e, e.getBoundingBox().inflate(0.5f))){
+        for(var other : e.level().getEntities(e, e.getBoundingBox().inflate(0.5f))){
             if(other instanceof ItemEntity ie && ie.getItem().is(OtherverseItems.SALT.get())){
-                e.hurt(DamageSource.MAGIC, ie.getItem().getCount() * 14);
+                e.hurt(e.level().damageSources().indirectMagic(ie.getOwner() == null ? ie : ie.getOwner(), ie), ie.getItem().getCount() * 14);
                 ie.discard();
             }
         }
@@ -169,14 +173,14 @@ public class BindingManager {
                 continue;
             }
             BlockPos sourcePos = influence.getKey();
-            if (mob.level.getBlockEntity(sourcePos) instanceof ChalkCircle cc) {
+            if (mob.level().getBlockEntity(sourcePos) instanceof ChalkCircle cc) {
                 influenceItems.add(cc.item);
                 if (cc.item.is(OtherverseItems.CONTRACT.get()) && cc.item.hasTag() && cc.item.getTag().contains("contract")) {
                     contract = cc.item.getTag().getCompound("contract");
                 }
                 continue;
             }
-            BlockFocus bf = DiagramManager.getOrCreateLevelData(mob.level).allBlockFoci.get(sourcePos);
+            BlockFocus bf = DiagramManager.getOrCreateLevelData(mob.level()).allBlockFoci.get(sourcePos);
             if (bf != null) {
                 influenceItems.add(bf.getItem());
             }
@@ -199,7 +203,7 @@ public class BindingManager {
         if (rebinding) {
             return true;
         }
-        if (mob.level instanceof ServerLevel sl) {
+        if (mob.level() instanceof ServerLevel sl) {
             BindingInfo binding = new BindingInfo(UUID.randomUUID(), focus.getPos(), mob, sl, new CompoundTag(), DiagramManager.getDimensionHash(sl));
             mob.setPersistenceRequired();
             mob.getPersistentData().putUUID("bindingId", binding.bindingId);
@@ -224,7 +228,7 @@ public class BindingManager {
     }
 
     private static void tryRefreshDiagram(LivingEntity entity) {
-        if (entity instanceof Mob mob && mob.level instanceof ServerLevel sl) {
+        if (entity instanceof Mob mob && mob.level() instanceof ServerLevel sl) {
             if (mob.getPersistentData().hasUUID("bindingId")) {
                 TransientDiagramData data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
                 BindingInfo binding = data.bindingsById.get(mob.getPersistentData().getUUID("bindingId"));
@@ -291,7 +295,7 @@ public class BindingManager {
 
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof Mob mob && mob.level instanceof ServerLevel sl) {
+        if (event.getEntity() instanceof Mob mob && mob.level() instanceof ServerLevel sl) {
             if (mob.getPersistentData().hasUUID("bindingId")) {
                 TransientDiagramData data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
                 data.bindingsById.get(mob.getPersistentData().getUUID("bindingId")).unload();
@@ -359,7 +363,7 @@ public class BindingManager {
         if (!binding.contract.isEmpty()) {
             boundGoal.applyContract();
         }
-        if (mob.level instanceof ServerLevel sl) {
+        if (mob.level() instanceof ServerLevel sl) {
             LOGGER.debug("SENDING BINDING PACKET");
             TransientDiagramData.updateClientBinding(binding);
 
@@ -409,7 +413,7 @@ public class BindingManager {
             binding.unload();
             return;
         }
-        Player closest = mob.level.getNearestPlayer(mob, 16);
+        Player closest = mob.level().getNearestPlayer(mob, 16);
         if(closest != null) {
             mob.setLastHurtByPlayer(closest);
             mob.setLastHurtByMob(closest);
@@ -433,7 +437,7 @@ public class BindingManager {
         mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 200));
         mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 200));
         binding.unload();
-        if (mob.level instanceof ServerLevel sl) {
+        if (mob.level() instanceof ServerLevel sl) {
             LOGGER.error("SENDING BROKEN BINDING PACKET");
             OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.BREAK, false));
@@ -503,11 +507,11 @@ public class BindingManager {
 
         if (ImplementManager.isImplement(item)) return;
         if (!getHeldItem(mob).isEmpty()) {
-            ItemEntity itementity = new ItemEntity(mob.level,
+            ItemEntity itementity = new ItemEntity(mob.level(),
                     mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f),
                     getHeldItem(mob).copy());
             itementity.setDefaultPickUpDelay();
-            mob.level.addFreshEntity(itementity);
+            mob.level().addFreshEntity(itementity);
         }
         setHeldItem(mob, item.copy());
         event.getEntity().setItemInHand(event.getHand(), ItemStack.EMPTY);

@@ -15,6 +15,7 @@ import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -100,10 +101,10 @@ public class MobBindingInfluenceUtils {
         HashMap<EntityType<?>, Set<TagKey<Biome>>> mobTags = new HashMap<>();
         HashMap<EntityType<?>, Set<TagKey<Biome>>> forbiddenMobTags = new HashMap<>();
 
-        var registry = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        var registry = level.registryAccess().registryOrThrow(Registries.BIOME);
 
         for (var biomeKey : registry.registryKeySet()) {
-            var biome = registry.getOrCreateHolderOrThrow(biomeKey);
+            var biome = registry.getHolderOrThrow(biomeKey);
             var tags = new HashSet<TagKey<Biome>>();
             var antiTags = new HashSet<TagKey<Biome>>();
             for (var tag : biomeTags) {
@@ -272,7 +273,7 @@ public class MobBindingInfluenceUtils {
         if (keyMaybe.left().isPresent()) {
             biomeName = keyMaybe.left().get().location().getPath();
         } else if (keyMaybe.right().isPresent()) {
-            biomeName = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
+            biomeName = level.registryAccess().registryOrThrow(Registries.BIOME).getKey(keyMaybe.right().get()).getPath();
         }
         return biomeName;
     }
@@ -437,14 +438,14 @@ public class MobBindingInfluenceUtils {
 
         var implementData = ImplementManager.getImplementData(focus);
         boolean hasChain = !implementData.isEmpty()
-                && ForgeRegistries.ITEMS.getValue(new ResourceLocation(implementData.getString("item"))) == Items.CHAIN;
+                && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.CHAIN;
 
         if (!hasChain && mob instanceof TamableAnimal ta && ta.isTame()) {
             return totalInfluence >= 0;
         }
 
         var demesneCoeff = 1f;
-        var demesne = DemesnesManager.getData((ServerLevel) mob.level, focus.getPos());
+        var demesne = DemesnesManager.getData((ServerLevel) mob.level(), focus.getPos());
         if (demesne != null) {
             demesneCoeff = (float) Math.pow(2f / 3f, demesne.getPerkLevel(DemesnesManager.DemesnePerk.BINDING));
         }
@@ -463,7 +464,7 @@ public class MobBindingInfluenceUtils {
                 continue; //IntelliJ says this can't be null, but it can be!!
             }
 
-            recipes.add(new BindingRecipe(new ResourceLocation(Otherverse.MODID, et.toString()), et, influenceMap));
+            recipes.add(new BindingRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, et.toString()), et, influenceMap));
         }
         return recipes;
     }

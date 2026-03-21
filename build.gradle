@@ -5,7 +5,7 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-version = '1.19.2-1.0.2'
+version = '1.20.1-1.0.2'
 group = 'com.shermansplanet.otherverse' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'otherverse'
 
@@ -27,7 +27,7 @@ minecraft {
     //
     // Use non-default mappings at your own risk. They may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'official', version: '1.19.2'
+    mappings channel: 'official', version: '1.20.1'
 
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 
@@ -140,34 +140,52 @@ repositories {
     maven {
         url = "https://jitpack.io"
     }
+    maven {
+        name = "CurseForge"
+        url = "https://minecraft.curseforge.com/api/maven/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+    maven {
+        name = "CurseMaven"
+        url = "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.19.2-43.1.65'
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.1'
 
     // compile against the JEI API but do not include it at runtime
-    compileOnly(fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}"))
-    compileOnly(fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}"))
+    compileOnly("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
+    compileOnly("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
     // at runtime, use the full JEI jar for Forge
-    runtimeOnly(fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}"))
+    runtimeOnly("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+//
+//    compileOnly ("vazkii.patchouli:Patchouli:${mc_version}-85:api")
+//    runtimeOnly ("vazkii.patchouli:Patchouli:${mc_version}-85")
 
-    compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.19.2-76:api")
-    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:1.19.2-76")
+    implementation fg.deobf("vazkii.patchouli:Patchouli:1.20.1-83-FORGE")
 
     // Compile against only the API artifact
     //compileOnly(fg.deobf("top.theillusivec4.curios:curios-forge:1.19.2-5.1.6.2:api"))
     // Use the full Curios API jar at runtime
     //runtimeOnly(fg.deobf("top.theillusivec4.curios:curios-forge:1.19.2-5.1.6.2"))
 
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
 
-    runtimeOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:${caelus_version}")
     compileOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:${caelus_version}:api")
+    runtimeOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:${caelus_version}")
 
-    implementation fg.deobf("com.github.Virtuoel:Pehkui:3.8.2-1.19.2-forge")
+    implementation ("com.github.Virtuoel:Pehkui:3.8.2-1.20.1-forge")
 }
 
 mixin {

@@ -4,6 +4,7 @@ import com.shermansplanet.otherverse.demesnes.DemesnesRenderer;
 import com.shermansplanet.otherverse.spirits.Chronomancy;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -24,15 +25,15 @@ import java.util.function.Supplier;
 public abstract class ClientLevelInjector extends Level {
     private boolean wasInDemesne = false;
 
+    protected ClientLevelInjector(WritableLevelData p_270739_, ResourceKey<Level> p_270683_, RegistryAccess p_270200_, Holder<DimensionType> p_270240_, Supplier<ProfilerFiller> p_270692_, boolean p_270904_, boolean p_270470_, long p_270248_, int p_270466_) {
+        super(p_270739_, p_270683_, p_270200_, p_270240_, p_270692_, p_270904_, p_270470_, p_270248_, p_270466_);
+    }
+
     @Inject(method = "tickNonPassenger", at = @At("HEAD"), cancellable = true)
     public void tickNonPassenger(Entity e, CallbackInfo ci) {
         if (Chronomancy.frozenEntitiesForClient.contains(e)) {
             ci.cancel();
         }
-    }
-
-    protected ClientLevelInjector(WritableLevelData p_220352_, ResourceKey<Level> p_220353_, Holder<DimensionType> p_220354_, Supplier<ProfilerFiller> p_220355_, boolean p_220356_, boolean p_220357_, long p_220358_, int p_220359_) {
-        super(p_220352_, p_220353_, p_220354_, p_220355_, p_220356_, p_220357_, p_220358_, p_220359_);
     }
 
     @Inject(method = "getSkyColor", at = @At("HEAD"), cancellable = true)

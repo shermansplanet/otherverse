@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -13,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -48,7 +50,7 @@ public class DemesnesClaimRitual {
     public DemesnesClaimRitual(DemesnesClaimStartMessage msg, ServerPlayer player) {
         LOGGER.debug("DEMESNES: STARTING");
         this.claimant = player;
-        this.level = player.getLevel();
+        this.level = player.serverLevel();
         if (!(this.level.getBlockEntity(msg.centerPos()) instanceof DemesnesBeacon beacon)) return;
         beacon.recalculatePositions();
         range = beacon.range;
@@ -161,19 +163,19 @@ public class DemesnesClaimRitual {
     public void onChallengerDeath(LivingDeathEvent event) {
         allKills++;
         var source = event.getSource();
-        if (source == DamageSource.IN_FIRE || source == DamageSource.ON_FIRE || source == DamageSource.HOT_FLOOR || source == DamageSource.LAVA) {
+        if (source.is(DamageTypes.IN_FIRE) || source.is(DamageTypes.ON_FIRE)|| source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.LAVA)) {
             burnKills++;
-        } else if (source == DamageSource.CRAMMING || source == DamageSource.FALL || source == DamageSource.FALLING_BLOCK
-                || source == DamageSource.IN_WALL || source == DamageSource.FALLING_STALACTITE || source == DamageSource.ANVIL) {
+        } else if (source.is(DamageTypes.CRAMMING) || source.is(DamageTypes.FALL) || source.is(DamageTypes.FALLING_BLOCK) || source.is(DamageTypes.FALLING_ANVIL)
+                || source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.FALLING_STALACTITE) || source.is(DamageTypes.STALAGMITE)) {
             techKills++;
-        } else if (source == DamageSource.WITHER) {
+        } else if (source.is(DamageTypes.WITHER)) {
             witherKills++;
-        } else if (source.getMsgId().equals("arrow") && source.getEntity() == null) {
+        } else if (event.getSource().equals("arrow") && event.getSource().getEntity() == null) {
             techKills++;
         }
 
-        if (source.getEntity() != null && source.getEntity().getType() != EntityType.PLAYER) {
-            if (source.getEntity().getPersistentData().getString("construct_type").equals("technology")) {
+        if (event.getSource().getEntity() != null && event.getSource().getEntity().getType() != EntityType.PLAYER) {
+            if (event.getSource().getEntity().getPersistentData().getString("construct_type").equals("technology")) {
                 techKills++;
             } else {
                 otherMobKills++;

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EntityType;
@@ -42,11 +43,6 @@ public class TransfusionRecipe implements Recipe<Container> {
     }
 
     @Override
-    public ItemStack getResultItem() {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
     public ResourceLocation getId() {
         return id;
     }
@@ -69,12 +65,17 @@ public class TransfusionRecipe implements Recipe<Container> {
     }
 
     @Override
-    public ItemStack assemble(Container p_44001_) {
+    public ItemStack assemble(Container p_44001_, RegistryAccess p_267165_) {
         return null;
     }
 
     @Override
     public boolean canCraftInDimensions(int p_43999_, int p_44000_) {
         return false;
+    }
+
+    @Override
+    public ItemStack getResultItem(RegistryAccess p_267052_) {
+        return ItemStack.EMPTY;
     }
 }

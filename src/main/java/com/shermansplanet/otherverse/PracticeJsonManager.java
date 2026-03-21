@@ -60,7 +60,7 @@ public class PracticeJsonManager extends SimpleJsonResourceReloadListener {
                         break;
                 }
             } else if (practice.has("other")) {
-                EntityType<? extends LivingEntity> other = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(practice.get("other").getAsString()));
+                EntityType<? extends LivingEntity> other = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(practice.get("other").getAsString()));
                 MobTransfusions.processOther(other, practice);
                 MobBindingInfluenceUtils.processOther(other, practice);
             }
@@ -73,13 +73,13 @@ public class PracticeJsonManager extends SimpleJsonResourceReloadListener {
 
     private void loadMobEnchants(JsonObject enchantments) {
         for (var enchantment : enchantments.entrySet()) {
-            var enchantmentId = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantment.getKey()));
+            var enchantmentId = ForgeRegistries.ENCHANTMENTS.getValue(ResourceLocation.parse(enchantment.getKey()));
             var enchantmentData = enchantment.getValue().getAsJsonObject();
             var levels = enchantmentData.get("health").getAsJsonArray();
             var required = new HashSet<EntityType<?>>();
             if (enchantmentData.has("required")) {
                 for (var mobId : enchantmentData.get("required").getAsJsonArray()) {
-                    EntityType<?> mob = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(mobId.getAsString()));
+                    EntityType<?> mob = ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(mobId.getAsString()));
                     required.add(mob);
                 }
             }
@@ -107,7 +107,7 @@ public class PracticeJsonManager extends SimpleJsonResourceReloadListener {
 
     private void loadSpiritEnchants(JsonObject enchantments) {
         for (var enchantment : enchantments.entrySet()) {
-            var enchantmentId = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantment.getKey()));
+            var enchantmentId = ForgeRegistries.ENCHANTMENTS.getValue(ResourceLocation.parse(enchantment.getKey()));
             var enchantmentData = enchantment.getValue().getAsJsonObject();
             var levels = enchantmentData.get("price").getAsJsonArray();
             var spiritType = Spirits.spiritsByLabel.get(enchantmentData.get("spirit").getAsString());

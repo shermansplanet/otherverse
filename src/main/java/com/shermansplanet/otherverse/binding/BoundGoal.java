@@ -43,6 +43,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -124,7 +125,7 @@ public class BoundGoal extends Goal {
     private void getPractitioner() {
         if (practitioner != null) return;
         var playerName = isLoyaltyBound ? mob.getPersistentData().getString("practitioner_loyalty") : FamiliarManager.getPractitionerForFamiliar(mob);
-        for (var player : mob.getLevel().players()) {
+        for (var player : mob.level().players()) {
             if (!player.getGameProfile().getName().equals(playerName)) continue;
             practitioner = player;
             break;
@@ -169,10 +170,10 @@ public class BoundGoal extends Goal {
     private int lookIndex;
 
     private IFocus GetFocus(BlockPos pos) {
-        if (mob.level.getBlockEntity(pos) instanceof ChalkCircle cc) {
+        if (mob.level().getBlockEntity(pos) instanceof ChalkCircle cc) {
             return cc;
         }
-        BlockFocus bf = DiagramManager.getOrCreateLevelData(mob.level).allBlockFoci.get(pos);
+        BlockFocus bf = DiagramManager.getOrCreateLevelData(mob.level()).allBlockFoci.get(pos);
         if (bf != null) {
             return bf;
         }
@@ -199,7 +200,7 @@ public class BoundGoal extends Goal {
                         new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), true));
             }
         }
-        if (mob.level instanceof ServerLevel sl) {
+        if (mob.level() instanceof ServerLevel sl) {
             mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
         }
         if (FamiliarManager.isFamiliar(mob)) return;
@@ -207,7 +208,7 @@ public class BoundGoal extends Goal {
             return;
         }
         //if (currentDecider == null) return;
-        if (mob.level.getGameTime() % (20L * bindingWearInterval) != 0) {
+        if (mob.level().getGameTime() % (20L * bindingWearInterval) != 0) {
             return;
         }
         var demesne = DemesnesManager.getData(binding.getLocalLevel(), binding.position);
@@ -256,21 +257,21 @@ public class BoundGoal extends Goal {
             CompoundTag hallowTag = mostUniqueItem.getTag().getCompound("hallow");
             hallowTag.putInt("spirit_count", hallowTag.getInt("spirit_count") - SPIRIT_DRAIN);
             if (mostUniqueFocus.isBlock()) {
-                DiagramManager.getOrCreateLevelData(mob.level)
+                DiagramManager.getOrCreateLevelData(mob.level())
                         .putPlacedItemTag(mostUniqueFocus.getPos(), hallowTag);
             }
         } else if (mostUniqueItem.getItem() instanceof IdolItem) {
-            BindingInfo bindingInfo = DiagramManager.getOrCreateLevelData(mob.level).bindingsByPosition.get(mostUniqueFocus.getPos());
+            BindingInfo bindingInfo = DiagramManager.getOrCreateLevelData(mob.level()).bindingsByPosition.get(mostUniqueFocus.getPos());
             if (bindingInfo == null || bindingInfo.mob == null) {
                 LOGGER.debug("NULL BINDING INFO");
             } else {
-                bindingInfo.mob.hurt(DamageSource.OUT_OF_WORLD, SPIRIT_DRAIN);
+                bindingInfo.mob.hurt(mob.level().damageSources().fellOutOfWorld(), SPIRIT_DRAIN);
             }
         } else {
             mostUniqueFocus.removeItem();
         }
 
-        if (mob.level instanceof ServerLevel sl) {
+        if (mob.level() instanceof ServerLevel sl) {
             BlockPos bp = mostUniqueFocus.getPos();
             for (int i = 0; i < 10; ++i) {
                 sl.sendParticles(ParticleTypes.POOF, bp.getX() + 0.5, bp.getY() + 0.25, bp.getZ() + 0.5,
@@ -308,7 +309,7 @@ public class BoundGoal extends Goal {
     }
 
     private void makeDye() {
-        if (mob.level.getGameTime() % 200 != 0 || !(mob.getLevel() instanceof ServerLevel sl)) return;
+        if (mob.level().getGameTime() % 200 != 0 || !(mob.level() instanceof ServerLevel sl)) return;
         if (!BindingManager.getHeldItem(mob).isEmpty()) return;
         var dyeItem = switch (((Sheep) mob).getColor()) {
             case WHITE -> Items.WHITE_DYE;
@@ -332,7 +333,7 @@ public class BoundGoal extends Goal {
     }
 
     private void goFish() {
-        if (mob.level.getGameTime() % 20 != 0 || !(mob.getLevel() instanceof ServerLevel sl)) return;
+        if (mob.level().getGameTime() % 20 != 0 || !(mob.level() instanceof ServerLevel sl)) return;
         if (!BindingManager.getHeldItem(mob).isEmpty()) return;
         var FISH_KEY = "fishing_timer";
         var data = mob.getPersistentData();
@@ -353,14 +354,14 @@ public class BoundGoal extends Goal {
         List<ItemStack> list;
 
         if (isPiglin) {
-            LootTable loottable = sl.getServer().getLootTables().get(BuiltInLootTables.PIGLIN_BARTERING);
-            list = loottable.getRandomItems(new LootContext.Builder(sl).withParameter(LootContextParams.THIS_ENTITY, mob).withRandom(mob.level.random).create(LootContextParamSets.PIGLIN_BARTER));
+            LootTable loottable = sl.getServer().getLootData().getLootTable(BuiltInLootTables.PIGLIN_BARTERING);
+            list = loottable.getRandomItems(new LootParams.Builder(sl).withParameter(LootContextParams.THIS_ENTITY, mob).create(LootContextParamSets.PIGLIN_BARTER));
         } else {
-            var tempFishingHook = new FishingHook(null, mob.level, 0, 0);
-            LootContext.Builder lootcontext$builder = (new LootContext.Builder(sl)).withParameter(LootContextParams.ORIGIN, mob.position()).withParameter(LootContextParams.TOOL, Items.FISHING_ROD.getDefaultInstance())
-                    .withParameter(LootContextParams.THIS_ENTITY, tempFishingHook).withRandom(mob.getRandom()).withLuck(0);
+            var tempFishingHook = new FishingHook(null, mob.level(), 0, 0);
+            LootParams.Builder lootcontext$builder = (new LootParams.Builder(sl)).withParameter(LootContextParams.ORIGIN, mob.position()).withParameter(LootContextParams.TOOL, Items.FISHING_ROD.getDefaultInstance())
+                    .withParameter(LootContextParams.THIS_ENTITY, tempFishingHook).withLuck(0f);
             lootcontext$builder.withParameter(LootContextParams.KILLER_ENTITY, mob).withParameter(LootContextParams.THIS_ENTITY, tempFishingHook);
-            LootTable loottable = sl.getServer().getLootTables().get(BuiltInLootTables.FISHING);
+            LootTable loottable = sl.getServer().getLootData().getLootTable(BuiltInLootTables.FISHING);
             list = loottable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
             tempFishingHook.discard();
         }
@@ -392,9 +393,9 @@ public class BoundGoal extends Goal {
                         if (dist > 12 * 12) {
                             var pos = FamiliarManager.getSpaceAroundPlayer(practitioner, 16);
                             if (pos != null) {
-                                var bp = new BlockPos(pos);
+                                var bp = BlockPos.containing(pos);
                                 for (var dir : Direction.values()) {
-                                    if (mob.level.loadedAndEntityCanStandOnFace(bp.relative(dir), mob, dir.getOpposite())) {
+                                    if (mob.level().loadedAndEntityCanStandOnFace(bp.relative(dir), mob, dir.getOpposite())) {
                                         shulker.teleportTo(pos.x, pos.y, pos.z);
                                         ((FaceSetter) shulker).setFace(dir);
                                         break;
@@ -418,7 +419,7 @@ public class BoundGoal extends Goal {
             targetMob = practitioner.getLastHurtByMob();
         }
         if (targetMob == null || targetMob.isDeadOrDying()) {
-            for (var e : mob.level.getEntities(mob, mob.getBoundingBox().inflate(16))) {
+            for (var e : mob.level().getEntities(mob, mob.getBoundingBox().inflate(16))) {
                 if (!(e instanceof Mob otherMob)) continue;
                 if (otherMob.getTarget() == practitioner) {
                     targetMob = otherMob;
@@ -476,8 +477,8 @@ public class BoundGoal extends Goal {
     }
 
     private void poof() {
-        if (!(mob.getLevel() instanceof ServerLevel sl)) return;
-        var r = mob.getLevel().random;
+        if (!(mob.level() instanceof ServerLevel sl)) return;
+        var r = mob.level().random;
         for (int i = 0; i < 10; ++i) {
             double d0 = r.nextGaussian() * 0.02D;
             double d1 = r.nextGaussian() * 0.02D;
@@ -559,7 +560,7 @@ public class BoundGoal extends Goal {
                 continue;
             }
             for (ContractManager.PositionOrSpindle positionFilter : task.positionFilters) {
-                var pos = positionFilter.getPos(mob.level);
+                var pos = positionFilter.getPos(mob.level());
                 if (task.isAcceptableTarget(pos, true)) {
                     if (!positionFilter.isPosition) task.spindle = positionFilter;
                     currentTask = task;
@@ -571,8 +572,8 @@ public class BoundGoal extends Goal {
             if (task.corner0 != null) {
                 var eyePos = mob.getEyePosition();
                 if (task.potentialTargets.isEmpty()) {
-                    var corner0 = task.corner0.getPos(mob.level);
-                    var corner1 = task.corner1.getPos(mob.level);
+                    var corner0 = task.corner0.getPos(mob.level());
+                    var corner1 = task.corner1.getPos(mob.level());
                     var minCorner = new Vec3i(Math.min(corner0.getX(), corner1.getX()), Math.min(corner0.getY(), corner1.getY()), Math.min(corner0.getZ(), corner1.getZ()));
                     var maxCorner = new Vec3i(Math.max(corner0.getX(), corner1.getX()), Math.max(corner0.getY(), corner1.getY()), Math.max(corner0.getZ(), corner1.getZ()));
                     for (int x = minCorner.getX(); x <= maxCorner.getX(); x++) {

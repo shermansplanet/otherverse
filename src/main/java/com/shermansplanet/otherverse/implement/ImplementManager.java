@@ -140,7 +140,7 @@ public class ImplementManager {
                     AttributeModifier.Operation.ADDITION);
 
     private static final Supplier<Multimap<Attribute, AttributeModifier>> rangeModifier = Suppliers.memoize(() ->
-            ImmutableMultimap.of(ForgeMod.REACH_DISTANCE.get(), singleRangeAttributeModifier));
+            ImmutableMultimap.of(ForgeMod.BLOCK_REACH.get(), singleRangeAttributeModifier));
 
     @SubscribeEvent
     public static void fillBucket(FillBucketEvent event) {
@@ -228,7 +228,7 @@ public class ImplementManager {
         var implementData = getImplementData(event.getEntity());
         if (implementData.isEmpty()) return;
         var itemName = implementData.getString("item");
-        if (event.getState().getBlock().asItem() == ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))) {
+        if (event.getState().getBlock().asItem() == ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(itemName))) {
             event.setNewSpeed(event.getNewSpeed() * 3);
         }
     }
@@ -255,7 +255,7 @@ public class ImplementManager {
     public static void attributeChange(ItemAttributeModifierEvent event) {
         if (!isImplement(event.getItemStack())) return;
         if (event.getItemStack().getItem() instanceof ArmorItem armor) {
-            if (event.getSlotType() != armor.getSlot()) return;
+            if (event.getSlotType() != armor.getEquipmentSlot()) return;
             event.addModifier(event.getItemStack().is(Tags.Items.ARMORS_BOOTS)
                     ? Attributes.MOVEMENT_SPEED : Attributes.ARMOR, implementModifier);
         } else if (event.getItemStack().is(Tags.Items.TOOLS)) {
@@ -320,7 +320,7 @@ public class ImplementManager {
     @SubscribeEvent
     public static void wakeUp(PlayerWakeUpEvent e) {
         var player = e.getEntity();
-        if (player.level.isClientSide) return;
+        if (player.level().isClientSide) return;
         if (!getImplementData(player).isEmpty() && !player.isCreative()) return;
         var positionsToCheck = new ArrayList<BlockPos>();
         positionsToCheck.add(player.blockPosition());
@@ -330,11 +330,11 @@ public class ImplementManager {
         positionsToCheck.add(player.blockPosition().west());
 
         for (var pos : positionsToCheck) {
-            var focus = DiagramManager.getOrCreateLevelData(player.getLevel()).allBlockFoci.get(pos);
+            var focus = DiagramManager.getOrCreateLevelData(player.level()).allBlockFoci.get(pos);
             if (focus == null) continue;
             for (var influence : focus.getDiagram().influences.entrySet()) {
                 if (!influence.getValue().equals(focus.getPos())) continue;
-                if (!(player.level.getBlockEntity(influence.getKey()) instanceof ChalkCircle cc)) continue;
+                if (!(player.level().getBlockEntity(influence.getKey()) instanceof ChalkCircle cc)) continue;
                 if (!canBeImplement(cc.getItem())) continue;
                 new ImplementumProcess(cc, 200, (ServerPlayer) player);
                 return;
@@ -381,7 +381,7 @@ public class ImplementManager {
         e.setCanceled(true);
         if (!(e.getLevel() instanceof ServerLevel sl)) return;
         var player = e.getEntity();
-        if(!player.isCreative()) {
+        if (!player.isCreative()) {
             if (player.experienceLevel < 1) return;
             player.giveExperienceLevels(-1);
         }
@@ -406,7 +406,7 @@ public class ImplementManager {
         var tag = getImplementData(player);
         if (!tag.contains("item")) return ItemStack.EMPTY;
         var itemName = tag.getString("item");
-        var stack = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)));
+        var stack = new ItemStack(ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(itemName)));
         addImplementTag(stack, tag);
         return stack;
     }
@@ -492,7 +492,7 @@ public class ImplementManager {
 
     public static void fetchImplement(ServerPlayer player) {
         var demesne = DemesnesManager.getData(player);
-        if (demesne != null && demesne == DemesnesManager.getData(player.getLevel(), player.blockPosition())
+        if (demesne != null && demesne == DemesnesManager.getData(player.serverLevel(), player.blockPosition())
                 && demesne.getPerkLevel(DemesnesManager.DemesnePerk.VEIN_MINE) > 0
                 && player.getMainHandItem().getItem() instanceof DiggerItem) {
             changeImplementMode(player.getMainHandItem(), player);

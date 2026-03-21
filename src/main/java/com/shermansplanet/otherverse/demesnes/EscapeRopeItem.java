@@ -101,7 +101,7 @@ public class EscapeRopeItem extends Item {
             var newy = itemstack.getTag().getFloat("escape_rope_y");
             var newz = itemstack.getTag().getFloat("escape_rope_z");
             var levelId = itemstack.getTag().getInt("level_id");
-            if (levelId == demesne.levelId && DemesnesManager.getData(destLevel, new BlockPos(newx, newy, newz)) == demesne) {
+            if (levelId == demesne.levelId && DemesnesManager.getData(destLevel, BlockPos.containing(newx, newy, newz)) == demesne) {
                 x = newx;
                 y = newy;
                 z = newz;

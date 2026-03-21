@@ -33,7 +33,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -140,7 +139,7 @@ public class ChalkLineBlock extends Block implements EntityBlock {
     }
 
     public ChalkLineBlock() {
-        super(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().instabreak());
+        super(BlockBehaviour.Properties.copy(Blocks.REDSTONE_WIRE));
         registerDefaultState(stateDefinition.any()
                 .setValue(chalkCircle, false)
                 .setValue(chalkN, false)
@@ -312,8 +311,8 @@ public class ChalkLineBlock extends Block implements EntityBlock {
             return;
         }
         if (event.getPlacedBlock().getBlock() instanceof ChalkLineBlock cb) {
-            cb.blockWasPlacedBy(event.getEntity().getLevel(), event.getPos());
-            if (event.getEntity() instanceof Player p && p.getLevel().getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
+            cb.blockWasPlacedBy(event.getEntity().level(), event.getPos());
+            if (event.getEntity() instanceof Player p && p.level().getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
                 cc.setPlayer(p);
             }
             return;

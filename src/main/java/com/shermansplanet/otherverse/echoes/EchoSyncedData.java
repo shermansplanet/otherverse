@@ -34,7 +34,7 @@ public class EchoSyncedData extends EchoData {
   public EntityType<?> getInnerEntityType() {
     String entityName = dataManager.get(EchoEntity.WATCHERID_INNER);
     return entityName.isEmpty() ? null
-        : ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityName));
+        : ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(entityName));
   }
 
   @Override

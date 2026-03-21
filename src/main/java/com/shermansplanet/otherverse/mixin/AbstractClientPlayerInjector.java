@@ -24,7 +24,7 @@ public class AbstractClientPlayerInjector extends Player implements ITextureSett
     private ResourceLocation overrideTexture;
 
     public AbstractClientPlayerInjector(Level p_219727_, BlockPos p_219728_, float p_219729_, GameProfile p_219730_, @Nullable ProfilePublicKey p_219731_) {
-        super(p_219727_, p_219728_, p_219729_, p_219730_, p_219731_);
+        super(p_219727_, p_219728_, p_219729_, p_219730_);
     }
 
     @Override

@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
@@ -31,7 +32,7 @@ public class TreeStripper {
         if (!(state.is(BlockTags.LEAVES)) && !(state.is(BlockTags.LOGS))) return;
         var isLeaves = state.is(BlockTags.LEAVES);
         if (!FamiliarManager.hasFamiliarType(event.getPlayer(), EntityType.PANDA)
-                && !(ImplementManager.isImplement(tool) && tool.is(isLeaves ? Tags.Items.SHEARS : Tags.Items.TOOLS_AXES)))
+                && !(ImplementManager.isImplement(tool) && tool.is(isLeaves ? Tags.Items.SHEARS : ItemTags.AXES)))
             return;
         stripping = true;
         for (var pos : getConnectedTree(event, sl, isLeaves ? BlockTags.LEAVES : BlockTags.LOGS)) {

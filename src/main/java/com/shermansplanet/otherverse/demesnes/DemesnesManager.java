@@ -18,6 +18,7 @@ import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
@@ -28,6 +29,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
@@ -44,7 +46,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -196,9 +198,9 @@ public class DemesnesManager {
         if (ritual.range == -1) return;
         player.giveExperienceLevels(-Mth.square(ritual.range * 2 + 1));
         activeRituals.put(player.getGameProfile().getName(), ritual);
-        player.getLevel().playSound(null, msg.centerPos(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1, 0.5f);
-        player.getLevel().playSound(null, msg.centerPos(), SoundEvents.TRIDENT_RETURN, SoundSource.BLOCKS, 1, 0.5f);
-        player.getLevel().playSound(null, msg.centerPos(), SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1, 0.5f);
+        player.level().playSound(null, msg.centerPos(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1, 0.5f);
+        player.level().playSound(null, msg.centerPos(), SoundEvents.TRIDENT_RETURN, SoundSource.BLOCKS, 1, 0.5f);
+        player.level().playSound(null, msg.centerPos(), SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1, 0.5f);
 
         OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new DemesnesClientboundMessage(DemesnesClientboundMessage.EventType.START, ritual.minBlock, ritual.maxBlock, ritual.levelId, ritual.claimant.getGameProfile().getName()));
@@ -210,17 +212,17 @@ public class DemesnesManager {
             var stack = new ItemStack(OtherverseItems.WRIT.get(), 1);
             stack.getOrCreateTag().putInt("sanction", msg.perkIndex());
             player.drop(stack, false);
-            player.level.playSound(null, player, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS, 1f, 1f);
+            player.level().playSound(null, player, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS, 1f, 1f);
             return;
         }
         var demesne = demesnesByPlayer.get(player.getGameProfile().getName());
         if (demesne == null) return;
         if (perk == DemesnePerk.BLOCK_GEN) {
-            if (!trySetBlock(demesne, player.getLevel(), msg.beaconPos())) {
+            if (!trySetBlock(demesne, player.serverLevel(), msg.beaconPos())) {
                 return;
             }
         } else if (perk == DemesnePerk.SPIRITS) {
-            if (!trySetSpirit(demesne, player.getLevel(), msg.beaconPos())) {
+            if (!trySetSpirit(demesne, player.serverLevel(), msg.beaconPos())) {
                 return;
             }
         } else if (perk == DemesnePerk.HOME) {
@@ -236,7 +238,7 @@ public class DemesnesManager {
         }
         player.giveExperienceLevels(-getLevelCost(perksClaimed));
         demesne.setPerkValue(perk, msg.newValue());
-        DiagramManager.getOrCreateLevelData(player.getLevel().getServer().overworld()).savedData.setDirty();
+        DiagramManager.getOrCreateLevelData(player.level().getServer().overworld()).savedData.setDirty();
     }
 
     private static void updateMiningLevel(ServerPlayer player, int perkValue) {
@@ -278,7 +280,7 @@ public class DemesnesManager {
         var x = item.getTag().getFloat("escape_rope_x");
         var y = item.getTag().getFloat("escape_rope_y");
         var z = item.getTag().getFloat("escape_rope_z");
-        var destination = new BlockPos(Math.floor(x), Math.round(y), Math.floor(z));
+        var destination = new BlockPos(Mth.floor(x), Math.round(y), Mth.floor(z));
         var destLevelId = item.getTag().getInt("level_id");
         var owner = diagram.getOwner(level);
         if (owner == null) return false;
@@ -301,7 +303,7 @@ public class DemesnesManager {
     @SubscribeEvent
     public static void playerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
-        var gameTime = event.player.level.getGameTime();
+        var gameTime = event.player.level().getGameTime();
         if (gameTime % 20 != 0) return;
         if (!(event.player instanceof ServerPlayer sp)) return;
         var abilities = sp.getAbilities();
@@ -313,7 +315,7 @@ public class DemesnesManager {
             sp.getFoodData().eat(1, 1);
         }
         if (demesnes.getPerkLevel(DemesnePerk.FLIGHT) == 0) return;
-        var inDemesnes = demesnes == getData(sp.getLevel(), sp.blockPosition());
+        var inDemesnes = demesnes == getData(sp.serverLevel(), sp.blockPosition());
         var fastFlying = abilities.mayfly && abilities.getFlyingSpeed() == 0.05f;
         if (inDemesnes && !fastFlying) {
             abilities.mayfly = true;
@@ -398,8 +400,8 @@ public class DemesnesManager {
     public static void onPlayerTickInDemesne(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp)) return;
         var demesne = getData(sp);
-        if (demesne == null || demesne != getData(sp.getLevel(), sp.blockPosition())) return;
-        if (sp.getLevel().getGameTime() % 20 == 0 && demesne.getPerkLevel(DemesnePerk.TOOL_REPAIR) > 0) {
+        if (demesne == null || demesne != getData(sp.serverLevel(), sp.blockPosition())) return;
+        if (sp.serverLevel().getGameTime() % 20 == 0 && demesne.getPerkLevel(DemesnePerk.TOOL_REPAIR) > 0) {
             for (var stack : sp.getInventory().items) {
                 if (!stack.isDamageableItem()) continue;
                 var damage = stack.getDamageValue();
@@ -420,7 +422,7 @@ public class DemesnesManager {
     @SubscribeEvent
     public static void onSleep(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        var sl = sp.getLevel();
+        var sl = sp.serverLevel();
         if (sl.dimensionType().bedWorks()) return;
         if (!(sl.getBlockState(event.getPos()).getBlock() instanceof BedBlock)) return;
         var demesne = getData(sl, event.getPos());
@@ -456,7 +458,7 @@ public class DemesnesManager {
         var demesneData = getData(demesneOwner);
         if (demesneData == null) return;
         var hasPermission = demesneData.toggleSanction(perk, recipient);
-        var sl = recipient.getLevel();
+        var sl = recipient.serverLevel();
         sl.playSound(null, recipient, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1f, 1f);
         var r = sl.random;
         for (var i = 0; i < (hasPermission ? 10 : 5); i++) {
@@ -531,7 +533,7 @@ public class DemesnesManager {
                         new DemesnesClientboundMessage(DemesnesClientboundMessage.EventType.LOAD_RITUAL,
                                 ritual.minBlock, ritual.maxBlock, ritual.levelId, ritual.claimant.getGameProfile().getName()));
             }
-            for (var demesne : DiagramManager.getOrCreateLevelData(sp.getLevel()).claimedDemesnes.values()) {
+            for (var demesne : DiagramManager.getOrCreateLevelData(sp.serverLevel()).claimedDemesnes.values()) {
                 sendDemesneDataToClient(demesne, sp);
             }
         }
@@ -571,19 +573,19 @@ public class DemesnesManager {
             event.setCancellationResult(InteractionResult.CONSUME);
             event.setUseBlock(Event.Result.DENY);
             event.setCanceled(true);
-            var data = DiagramManager.getOrCreateLevelData(sp.getLevel().getServer().overworld());
+            var data = DiagramManager.getOrCreateLevelData(sp.serverLevel().getServer().overworld());
             data.claimedDemesnes.remove(sp.getGameProfile().getName());
             data.savedData.setDirty();
         }
         if (event.getItemStack().is(Items.CLOCK) && bs.is(OtherverseBlocks.DEMESNE_BEACON.get())) {
             if (event.getEntity() instanceof ServerPlayer sp) {
                 var demesne = getData(sp);
-                if (demesne == null || demesne != getData(sp.getLevel(), event.getPos())
+                if (demesne == null || demesne != getData(sp.serverLevel(), event.getPos())
                         || demesne.getPerkLevel(DemesnePerk.WEATHER) == 0) return;
                 if (sp.isShiftKeyDown()) {
                     demesne.fixedTime = -1;
                 } else if (demesne.fixedTime == -1) {
-                    demesne.fixedTime = sp.getLevel().getDayTime();
+                    demesne.fixedTime = sp.serverLevel().getDayTime();
                 } else {
                     demesne.fixedTime += 1000;
                 }
@@ -591,7 +593,7 @@ public class DemesnesManager {
                 event.setCancellationResult(InteractionResult.CONSUME);
                 event.setUseBlock(Event.Result.DENY);
                 event.setCanceled(true);
-                DiagramManager.getOrCreateLevelData(sp.getLevel().getServer().overworld()).savedData.setDirty();
+                DiagramManager.getOrCreateLevelData(sp.serverLevel().getServer().overworld()).savedData.setDirty();
                 return;
             } else {
                 event.setCancellationResult(InteractionResult.FAIL);
@@ -606,13 +608,13 @@ public class DemesnesManager {
         }
         if (bs.is(OtherverseBlocks.DEMESNE_BEACON.get()) && event.getEntity() instanceof ServerPlayer sp) {
             var demesne = getData(sp);
-            if (demesne != null && demesne == getData(sp.getLevel(), event.getPos())
+            if (demesne != null && demesne == getData(sp.serverLevel(), event.getPos())
                     && demesne.getPerkLevel(DemesnePerk.WEATHER) > 0) {
                 demesne.adjustSkyColor(dye.getDyeColor());
                 sendWeatherUpdate(demesne);
                 event.setCancellationResult(InteractionResult.CONSUME);
                 event.setUseBlock(Event.Result.DENY);
-                DiagramManager.getOrCreateLevelData(sp.getLevel().getServer().overworld()).savedData.setDirty();
+                DiagramManager.getOrCreateLevelData(sp.serverLevel().getServer().overworld()).savedData.setDirty();
             }
         }
     }
@@ -645,30 +647,30 @@ public class DemesnesManager {
         var demesne = getData(sender);
         if (demesne == null) return;
         if (demesne.getPerkLevel(DemesnePerk.BASE_TELEPORT) == 0) return;
-        if (getData(sender.getLevel(), sender.blockPosition()) != demesne) return;
-        if (!(sender.getLevel().getBlockEntity(msg.beaconPosition()) instanceof DemesnesBeacon beacon)) return;
+        if (getData(sender.serverLevel(), sender.blockPosition()) != demesne) return;
+        if (!(sender.level().getBlockEntity(msg.beaconPosition()) instanceof DemesnesBeacon beacon)) return;
         if (!beacon.inDemesneOf.equals(sender.getGameProfile().getName())) return;
-        sender.getLevel().playSound(sender, sender.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1, 1);
+        sender.level().playSound(sender, sender.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1, 1);
         sender.teleportTo(beacon.getBlockPos().getX() + 0.5f,
                 beacon.getBlockPos().getY() + 1,
                 beacon.getBlockPos().getZ() + 0.5f);
-        sender.getLevel().playSound(null, beacon.getBlockPos(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1, 1);
+        sender.level().playSound(null, beacon.getBlockPos(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1, 1);
     }
 
     @SubscribeEvent
     public static void onGetHurt(LivingAttackEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        var demesne = getData(sp.getLevel(), sp.blockPosition());
+        var demesne = getData(sp.serverLevel(), sp.blockPosition());
         if (demesne == null
                 || !Objects.equals(demesne.practitioner, sp.getGameProfile().getName())
                 || demesne.getPerkLevel(DemesnePerk.PROTECTION) == 0) return;
-        if (event.getSource() == DamageSource.FALL
-                || event.getSource() == DamageSource.ON_FIRE
-                || event.getSource() == DamageSource.IN_FIRE
-                || event.getSource() == DamageSource.LAVA
-                || event.getSource() == DamageSource.FREEZE
-                || event.getSource() == DamageSource.DROWN
-                || event.getSource() == DamageSource.HOT_FLOOR) {
+        if (event.getSource().is(DamageTypes.FALL)
+                || event.getSource().is(DamageTypes.ON_FIRE)
+                || event.getSource().is(DamageTypes.IN_FIRE)
+                || event.getSource().is(DamageTypes.LAVA)
+                || event.getSource().is(DamageTypes.FREEZE)
+                || event.getSource().is(DamageTypes.DROWN)
+                || event.getSource().is(DamageTypes.HOT_FLOOR)) {
             event.setCanceled(true);
         }
     }
@@ -706,7 +708,7 @@ public class DemesnesManager {
         demesne.addToChunks(claimedDemesnes, ritual.level);
         if (ritual.spiritType != null) SpiritAffinityTracker.setDemesneAffinity(ritual.spiritType, ritual.claimant);
         demesnesByPlayer.put(ritual.claimant.getGameProfile().getName(), demesne);
-        DiagramManager.getOrCreateLevelData(ritual.claimant.getLevel().getServer().overworld()).registerClaimedDemesne(demesne);
+        DiagramManager.getOrCreateLevelData(ritual.claimant.level().getServer().overworld()).registerClaimedDemesne(demesne);
         Otherverse.ADVANCEMENTS.trigger(ritual.claimant, "demesnes");
     }
 
@@ -742,25 +744,25 @@ public class DemesnesManager {
 
     @SubscribeEvent
     public static void onLevelLoad(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity().getLevel() instanceof ServerLevel sl) loadDemesnesFor(sl);
+        if (event.getEntity().level() instanceof ServerLevel sl) loadDemesnesFor(sl);
     }
 
     @SubscribeEvent
     public static void onChangeDim(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (event.getEntity().getLevel() instanceof ServerLevel sl) loadDemesnesFor(sl);
+        if (event.getEntity().level() instanceof ServerLevel sl) loadDemesnesFor(sl);
     }
 
     @SubscribeEvent
-    public static void onSpawn(LivingSpawnEvent.SpecialSpawn event) {
+    public static void onSpawn(MobSpawnEvent.FinalizeSpawn event) {
         var mob = event.getEntity();
-        if (event.getSpawnReason() != MobSpawnType.NATURAL
-                && event.getSpawnReason() != MobSpawnType.REINFORCEMENT
-                && event.getSpawnReason() != MobSpawnType.CHUNK_GENERATION
-                && event.getSpawnReason() != MobSpawnType.PATROL
-                && event.getSpawnReason() != MobSpawnType.EVENT
-                && event.getSpawnReason() != MobSpawnType.JOCKEY) return;
-        if (!(mob.getLevel() instanceof ServerLevel sl)) return;
-        var demesne = getData(sl, new BlockPos(event.getX(), event.getY(), event.getZ()));
+        if (event.getSpawnType() != MobSpawnType.NATURAL
+                && event.getSpawnType() != MobSpawnType.REINFORCEMENT
+                && event.getSpawnType() != MobSpawnType.CHUNK_GENERATION
+                && event.getSpawnType() != MobSpawnType.PATROL
+                && event.getSpawnType() != MobSpawnType.EVENT
+                && event.getSpawnType() != MobSpawnType.JOCKEY) return;
+        if (!(mob.level() instanceof ServerLevel sl)) return;
+        var demesne = getData(sl, BlockPos.containing(event.getX(), event.getY(), event.getZ()));
         if (demesne == null || demesne.getPerkLevel(DemesnePerk.MOB_REPOSITION) == 0 || demesne.spawnDestinations.isEmpty())
             return;
         var arr = demesne.spawnDestinations.toArray(new BlockPos[0]);
@@ -797,7 +799,7 @@ public class DemesnesManager {
     @SubscribeEvent
     public static void pickupItem(EntityItemPickupEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        var demesne = getData(sp.getLevel(), event.getItem().blockPosition());
+        var demesne = getData(sp.serverLevel(), event.getItem().blockPosition());
         if (demesne == null) return;
         if (!demesne.hasSanction(DemesnePerk.SANCTION_TAKE, sp)) event.setCanceled(true);
     }
@@ -806,7 +808,7 @@ public class DemesnesManager {
     public static void breakBlock(PlayerEvent.BreakSpeed event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (event.getPosition().isEmpty()) return;
-        var demesne = getData(sp.getLevel(), event.getPosition().get());
+        var demesne = getData(sp.serverLevel(), event.getPosition().get());
         if (demesne == null) return;
         if (!demesne.hasSanction(DemesnePerk.SANCTION_BUILD, sp)) event.setCanceled(true);
     }
@@ -814,7 +816,7 @@ public class DemesnesManager {
     @SubscribeEvent
     public static void placeBlock(BlockEvent.EntityPlaceEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        var demesne = getData(sp.getLevel(), event.getPos());
+        var demesne = getData(sp.serverLevel(), event.getPos());
         if (demesne == null) return;
         if (!demesne.hasSanction(DemesnePerk.SANCTION_BUILD, sp)) event.setCanceled(true);
     }
@@ -822,7 +824,7 @@ public class DemesnesManager {
     @SubscribeEvent
     public static void onHurt(LivingAttackEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer sp)) return;
-        var demesne = getData(sp.getLevel(), event.getEntity().blockPosition());
+        var demesne = getData(sp.serverLevel(), event.getEntity().blockPosition());
         if (demesne == null) return;
         if (!demesne.hasSanction(DemesnePerk.SANCTION_FIGHT, sp)) event.setCanceled(true);
     }
@@ -830,7 +832,7 @@ public class DemesnesManager {
     @SubscribeEvent
     public static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        var demesne = getData(sp.getLevel(), event.getPos());
+        var demesne = getData(sp.serverLevel(), event.getPos());
         if (demesne == null) return;
         if (!demesne.hasSanction(DemesnePerk.SANCTION_INTERACT, sp)) event.setCanceled(true);
     }

@@ -43,8 +43,8 @@ public class DemesnesRenderer {
     public static final HashMap<Integer, HashMap<BlockPos, Integer>> chronoBeams = new HashMap<>();
     public static ClientDemesnesData myDemesne;
     public static int demesneMineAmount = 1;
-    public static final ResourceLocation BEAM_LOCATION = new ResourceLocation("textures/entity/beacon_beam.png");
-    public static final ResourceLocation BEAM_LOCATION_COLORLESS = new ResourceLocation(Otherverse.MODID, "textures/portal/beam.png");
+    public static final ResourceLocation BEAM_LOCATION = ResourceLocation.parse("textures/entity/beacon_beam.png");
+    public static final ResourceLocation BEAM_LOCATION_COLORLESS = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/portal/beam.png");
     private static final float[] beamColor = new float[]{0.7f, 1f, 0f};
     private static final float[] chronoBeamColor = new float[]{1f, 0.8f, 0f};
 
@@ -81,18 +81,18 @@ public class DemesnesRenderer {
             this.bounds = bounds;
             this.minPos = minPos;
             var positionList = new ArrayList<Vec3i>();
-            positionList.add(new Vec3i(bounds.minX, bounds.minY, bounds.minZ));
-            positionList.add(new Vec3i(bounds.minX, bounds.minY, bounds.maxZ));
-            positionList.add(new Vec3i(bounds.maxX, bounds.minY, bounds.minZ));
-            positionList.add(new Vec3i(bounds.maxX, bounds.minY, bounds.maxZ));
+            positionList.add(new Vec3i(Mth.floor(bounds.minX), Mth.floor(bounds.minY), Mth.floor(bounds.minZ)));
+            positionList.add(new Vec3i(Mth.floor(bounds.minX), Mth.floor(bounds.minY), Mth.floor(bounds.maxZ)));
+            positionList.add(new Vec3i(Mth.floor(bounds.maxX), Mth.floor(bounds.minY), Mth.floor(bounds.minZ)));
+            positionList.add(new Vec3i(Mth.floor(bounds.maxX), Mth.floor(bounds.minY), Mth.floor(bounds.maxZ)));
             var size = (int) (bounds.maxX - bounds.minX);
             var divisions = size / 5;
             for (var i = 1; i < divisions; i++) {
                 var offset = i * size / (float) divisions;
-                positionList.add(new Vec3i(bounds.minX + offset, bounds.minY, bounds.minZ));
-                positionList.add(new Vec3i(bounds.maxX - offset, bounds.minY, bounds.maxZ));
-                positionList.add(new Vec3i(bounds.minX, bounds.minY, bounds.maxZ - offset));
-                positionList.add(new Vec3i(bounds.maxX, bounds.minY, bounds.minZ + offset));
+                positionList.add(new Vec3i(Mth.floor(bounds.minX + offset),Mth.floor( bounds.minY), Mth.floor(bounds.minZ)));
+                positionList.add(new Vec3i(Mth.floor(bounds.maxX - offset),Mth.floor( bounds.minY), Mth.floor(bounds.maxZ)));
+                positionList.add(new Vec3i(Mth.floor(bounds.minX), Mth.floor(bounds.minY), Mth.floor(bounds.maxZ - offset)));
+                positionList.add(new Vec3i(Mth.floor(bounds.maxX), Mth.floor(bounds.minY), Mth.floor(bounds.minZ + offset)));
             }
             positions = positionList.toArray(new Vec3i[0]);
             this.levelId = levelId;
@@ -208,9 +208,8 @@ public class DemesnesRenderer {
                 for (var ritual : claimedDemesnes) {
                     if (ritual.minPos.equals(message.minPos())) return;
                 }
-                var clientData = new ClientDemesnesData(message.minPos(), new AABB(
-                        message.minPos().offset(0.5f, 0.5f, 0.5f),
-                        message.maxPos().offset(0.5f, 0.5f, 0.5f)), message.levelId());
+                var clientData = new ClientDemesnesData(message.minPos(), new AABB( // 1.20.1 demands integer AABBs, keep an eye on this one
+                        message.minPos(), message.maxPos().offset(1,1,1)), message.levelId());
                 clientData.timeRendered = DemesnesClaimRitual.INTRO_TIME_TICKS * 10;
                 claimedDemesnes.add(clientData);
                 if (Objects.equals(message.playerName(), Minecraft.getInstance().player.getGameProfile().getName())) {

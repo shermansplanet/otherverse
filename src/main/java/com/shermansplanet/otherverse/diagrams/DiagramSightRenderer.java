@@ -71,9 +71,9 @@ public class DiagramSightRenderer {
             return;
         }
 
-        TransientDiagramData levelData = DiagramManager.getOrCreateLevelData(camera.level);
-        if (camera.level.getGameTime() % 8 == 0) {
-            RandomSource random = camera.level.random;
+        TransientDiagramData levelData = DiagramManager.getOrCreateLevelData(camera.level());
+        if (camera.level().getGameTime() % 8 == 0) {
+            RandomSource random = camera.level().random;
             for (BlockPos pos : levelData.getAllPlacedItemPositions()) {
                 CompoundTag tag = levelData.getPlacedItemTag(pos);
                 SpiritType spiritType = Spirits.spiritsByLabel.get(tag.getString("spirit_type"));
@@ -82,12 +82,12 @@ public class DiagramSightRenderer {
                 if (isShrine) {
                     var emptyDirections = new ArrayList<Direction>();
                     var hallowDirections = new HashSet<Direction>();
-                    var shrineToMatch = ShrineHelper.getShrine(camera.level, pos);
+                    var shrineToMatch = ShrineHelper.getShrine(camera.level(), pos);
                     for (var dir : Direction.values()) {
                         var newpos = pos.relative(dir);
-                        if (camera.level.isEmptyBlock(newpos) || camera.level.getBlockState(newpos).is(OtherverseBlocks.CHALK_LINE.get())) {
+                        if (camera.level().isEmptyBlock(newpos) || camera.level().getBlockState(newpos).is(OtherverseBlocks.CHALK_LINE.get())) {
                             emptyDirections.add(dir);
-                        } else if (ShrineHelper.getShrine(camera.level, newpos) == shrineToMatch) {
+                        } else if (ShrineHelper.getShrine(camera.level(), newpos) == shrineToMatch) {
                             hallowDirections.add(dir);
                         }
                     }
@@ -106,7 +106,7 @@ public class DiagramSightRenderer {
                         v1 = v1.add(dir.getStepX() == 0 ? random.nextFloat() - 0.5f : 0,
                                 dir.getStepY() == 0 ? random.nextFloat() - 0.5f : 0,
                                 dir.getStepZ() == 0 ? random.nextFloat() - 0.5f : 0);
-                        camera.level.addParticle(
+                        camera.level(.addParticle(
                                 new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
                                         Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
                                 dir.getStepX() * speed, dir.getStepY() * speed, dir.getStepZ() * speed);
@@ -117,20 +117,20 @@ public class DiagramSightRenderer {
                     var normal = dirs.getFirst().getNormal().cross(dirs.getSecond().getNormal());
                     var offset = random.nextFloat() * 0.5f;
                     v1 = v1.add(normal.getX() * offset, normal.getY() * offset, normal.getZ() * offset);
-                    camera.level.addParticle(
+                    camera.level().addParticle(
                             new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
                                     Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
                             dirs.getSecond().getStepX() * speed, dirs.getSecond().getStepY() * speed, dirs.getSecond().getStepZ() * speed);
 
                 } else {
-                    if (camera.level.getGameTime() % 16 != 0) continue;
+                    if (camera.level().getGameTime() % 16 != 0) continue;
                     Vec3 offset = random.nextBoolean()
                             ? new Vec3(random.nextBoolean() ? -0.6D : 0.6D,
                             random.nextDouble() - 0.5D, random.nextDouble() - 0.5D)
                             : new Vec3(random.nextDouble() - 0.5D, random.nextDouble() - 0.5D,
                             random.nextBoolean() ? -0.6D : 0.6D);
                     v1 = v1.add(offset);
-                    camera.level.addParticle(
+                    camera.level().addParticle(
                             new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
                                     Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
                             0, 0.04D, 0);
@@ -138,7 +138,7 @@ public class DiagramSightRenderer {
             }
         }
 
-        if (camera.level.getGameTime() % 20 != 0) {
+        if (camera.level().getGameTime() % 20 != 0) {
             return;
         }
 
@@ -156,7 +156,7 @@ public class DiagramSightRenderer {
                 continue;
             }
             Diagram diagram = levelData.diagramsByPrimary.get(pos);
-            if (!(player.level.getBlockEntity(pos) instanceof ChalkCircle cc) || cc.diagram != diagram) {
+            if (!(player.level().getBlockEntity(pos) instanceof ChalkCircle cc) || cc.diagram != diagram) {
                 toUnload.add(diagram);
                 continue;
             }
@@ -169,13 +169,13 @@ public class DiagramSightRenderer {
                 Vec3 v1 = new Vec3(p1.getX() + 0.5, p1.getY() + 0.5, p1.getZ() + 0.5);
                 BlockPos diff = p2.subtract(p1);
                 Vec3 v2 = new Vec3(diff.getX(), diff.getY(), diff.getZ()).scale(0.095);
-                camera.level
+                camera.level()
                         .addParticle(ParticleTypes.END_ROD, v1.x, v1.y - 0.45, v1.z, v2.x, 0.02D, v2.z);
             }
         }
         for (Diagram diagram : toUnload) {
             LOGGER.debug("unloading diagram from sight renderer");
-            DiagramManager.unloadDiagram(diagram, player.level);
+            DiagramManager.unloadDiagram(diagram, player.level());
         }
         toUnload.clear();
     }
@@ -203,7 +203,7 @@ public class DiagramSightRenderer {
             return;
         }
 
-        Level level = event.getCamera().getEntity().level;
+        Level level = event.getCamera().getEntity().level();
         Camera camera = event.getCamera();
 
         if (symmetryCenter != null) {
@@ -237,7 +237,7 @@ public class DiagramSightRenderer {
 
         if (!SightManager.shouldRenderSight()) return;
 
-        TransientDiagramData levelData = DiagramManager.getOrCreateLevelData(player.level);
+        TransientDiagramData levelData = DiagramManager.getOrCreateLevelData(player.level());
 
         Diagram diagram;
         if (level.getBlockEntity(selectedBlockPosition) instanceof ChalkCircle cc) {

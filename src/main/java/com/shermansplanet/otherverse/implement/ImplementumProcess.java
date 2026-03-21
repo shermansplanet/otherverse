@@ -27,7 +27,7 @@ public class ImplementumProcess extends DiagramProcess {
         Vec3 center = new Vec3(sourcePos.getX() + 0.5,
                 sourcePos.getY() + 2.5f,
                 sourcePos.getZ() + 0.5);
-        player.getLevel().playSound(null, center.x, center.y, center.z,
+        player.level().playSound(null, center.x, center.y, center.z,
                 Otherverse.IMPLEMENT_RITUAL.get(),
                 SoundSource.BLOCKS, 1, 1);
     }
@@ -60,17 +60,17 @@ public class ImplementumProcess extends DiagramProcess {
         Vec3 center = new Vec3(sourcePos.getX() + 0.5,
                 sourcePos.getY() + 2.5f,
                 sourcePos.getZ() + 0.5);
-        var r = player.getLevel().random;
+        var r = player.serverLevel().random;
 
         for (var i = 0; i < 8; i++) {
-            player.getLevel().sendParticles(ParticleTypes.POOF, center.x, center.y, center.z, 1,
+            player.serverLevel().sendParticles(ParticleTypes.POOF, center.x, center.y, center.z, 1,
                     (r.nextFloat() - 0.5f) * 0.2f,
                     (r.nextFloat() - 0.5f) * 0.2f,
                     (r.nextFloat() - 0.5f) * 0.2f,
                     0.02D);
         }
 
-        player.getLevel().sendParticles(ParticleTypes.FLASH, center.x, center.y, center.z, 1,
+        player.serverLevel().sendParticles(ParticleTypes.FLASH, center.x, center.y, center.z, 1,
                 0, 0, 0, 0.02D);
     }
 
@@ -84,13 +84,13 @@ public class ImplementumProcess extends DiagramProcess {
         Vec3 center = new Vec3(sourcePos.getX() + 0.5,
                 sourcePos.getY() + 2.5f - remainingDuration * 2f / totalDuration,
                 sourcePos.getZ() + 0.5);
-        var r = player.getLevel().random;
-        player.getLevel().sendParticles(ParticleTypes.GLOW, center.x, center.y, center.z, 1,
+        var r = player.serverLevel().random;
+        player.serverLevel().sendParticles(ParticleTypes.GLOW, center.x, center.y, center.z, 1,
                 (r.nextFloat() - 0.5f) * 0.2f,
                 (r.nextFloat() - 0.5f) * 0.2f,
                 (r.nextFloat() - 0.5f) * 0.2f,
                 0.02D);
-        player.getLevel().sendParticles(ParticleTypes.ENCHANT, center.x, center.y, center.z, 1,
+        player.serverLevel().sendParticles(ParticleTypes.ENCHANT, center.x, center.y, center.z, 1,
                 (r.nextFloat() - 0.5f) * 0.2f,
                 (r.nextFloat() - 0.5f) * 0.2f,
                 (r.nextFloat() - 0.5f) * 0.2f,

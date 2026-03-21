@@ -12,6 +12,7 @@ import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
@@ -86,9 +87,9 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
     public void activate(ServerLevel serverLevel) {
         resetSpiritCounts();
 
-        var registry = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-        var key = ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeTag.getString("location")));
-        var targetBiome = registry.getOrCreateHolderOrThrow(key);
+        var registry = level.registryAccess().registryOrThrow(Registries.BIOME);
+        var key = ResourceKey.create(Registries.BIOME, ResourceLocation.parse(biomeTag.getString("location")));
+        var targetBiome = registry.getHolderOrThrow(key);
 
         activations++;
         var radius = Math.min(activations, MAX_ACTIVATIONS);
@@ -99,8 +100,8 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         if(originalBiomeString == null){
             originalBiomeString = registry.getKey(level.getBiome(getBlockPos()).get()).toString();
         }
-        var originalBiomeKey = ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(originalBiomeString));
-        var originalBiome = registry.getOrCreateHolderOrThrow(originalBiomeKey);
+        var originalBiomeKey = ResourceKey.create(Registries.BIOME, ResourceLocation.parse(originalBiomeString));
+        var originalBiome = registry.getHolderOrThrow(originalBiomeKey);
         addIfNotNull(blockReplacements, getBlockStone(originalBiome), getBlockStone(targetBiome));
         addIfNotNull(blockReplacements, getBlockDirt(originalBiome), getBlockDirt(targetBiome));
         addIfNotNull(blockReplacements, getBlockSurface(originalBiome), getBlockSurface(targetBiome));
@@ -173,7 +174,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             chunkaccess1.setUnsaved(true);
             for (var player : serverLevel.getServer().getPlayerList().getPlayers()) {
                 player.connection.send(new ClientboundLevelChunkWithLightPacket((LevelChunk) chunkaccess1, level.getLightEngine(),
-                        new BitSet(), new BitSet(), false));
+                        new BitSet(), new BitSet()));
             }
         }
     }
@@ -184,9 +185,9 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
 
     private Block getBlockStone(Holder<Biome> biome) {
         var biomeName = MobBindingInfluenceUtils.getBiomeName(biome, level);
-        if (biomeName.equals("visceral_heap")) return ForgeRegistries.BLOCKS.getValue(new ResourceLocation("biomesoplenty","flesh"));
-        if (biomeName.equals("erupting_inferno")) return ForgeRegistries.BLOCKS.getValue(new ResourceLocation("biomesoplenty","brimstone"));
-        if (biomeName.equals("withered_abyss")) return ForgeRegistries.BLOCKS.getValue(new ResourceLocation("biomesoplenty","blackstone"));
+        if (biomeName.equals("visceral_heap")) return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty","flesh"));
+        if (biomeName.equals("erupting_inferno")) return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty","brimstone"));
+        if (biomeName.equals("withered_abyss")) return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty","blackstone"));
 
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
         if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH)) return Blocks.SANDSTONE;
@@ -232,7 +233,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         resetSpiritCounts();
         activations = 0;
         setLabels();
-        var registry = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        var registry = level.registryAccess().registryOrThrow(Registries.BIOME);
         originalBiomeString = registry.getKey(level.getBiome(getBlockPos()).get()).toString();
         setChanged();
     }

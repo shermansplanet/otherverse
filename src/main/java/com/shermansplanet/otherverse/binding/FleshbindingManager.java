@@ -38,9 +38,9 @@ public class FleshbindingManager {
     public static final HashMap<String, ResourceLocation> texturesByLabel = new HashMap<>();
 
     static {
-        texturesByLabel.put("minecraft:lapis_block", new ResourceLocation("textures/block/lapis_block.png"));
-        texturesByLabel.put("minecraft:diamond", new ResourceLocation("textures/block/diamond_block.png"));
-        texturesByLabel.put("otherverse:cinnabar_block", new ResourceLocation("otherverse", "textures/block/cinnabar_block.png"));
+        texturesByLabel.put("minecraft:lapis_block", ResourceLocation.parse("textures/block/lapis_block.png"));
+        texturesByLabel.put("minecraft:diamond", ResourceLocation.parse("textures/block/diamond_block.png"));
+        texturesByLabel.put("otherverse:cinnabar_block", ResourceLocation.fromNamespaceAndPath("otherverse", "textures/block/cinnabar_block.png"));
     }
 
     @SubscribeEvent
@@ -48,7 +48,7 @@ public class FleshbindingManager {
         if (!SightManager.shouldRenderSight()) return;
         var entity = event.getEntity();
         if (entity.getType() == EntityType.PLAYER) return;
-        var level = entity.getLevel();
+        var level = entity.level();
         if (!(level instanceof ServerLevel sl)) return;
         var hp = entity.getHealth();
         if (hp > FLESHBINDING_HP && hp - event.getAmount() <= FLESHBINDING_HP) {
@@ -119,9 +119,9 @@ public class FleshbindingManager {
         mob.remove(Entity.RemovalReason.KILLED);
         mob.discard();
         var item = IdolItem.makeFrom(mob, material);
-        ItemEntity itementity = new ItemEntity(mob.level, mob.getX(), mob.getY(0.5f), mob.getZ(), item);
+        ItemEntity itementity = new ItemEntity(mob.level(), mob.getX(), mob.getY(0.5f), mob.getZ(), item);
         itementity.setDefaultPickUpDelay();
-        mob.level.addFreshEntity(itementity);
+        mob.level().addFreshEntity(itementity);
     }
 
     public static boolean tryCinnabind(ServerLevel level, ChalkCircle circle, Diagram diagram) {
@@ -141,7 +141,7 @@ public class FleshbindingManager {
             var instance = item.getDefaultInstance();
             if (!instance.is(ItemTags.PLANKS) && !instance.is(ItemTags.LOGS)) continue;
             var key = ForgeRegistries.ITEMS.getKey(item);
-            var val = new ResourceLocation(key.getNamespace(), "textures/block/" + key.getPath() + ".png");
+            var val = ResourceLocation.fromNamespaceAndPath(key.getNamespace(), "textures/block/" + key.getPath() + ".png");
             texturesByLabel.put(key.toString(), val);
         }
     }

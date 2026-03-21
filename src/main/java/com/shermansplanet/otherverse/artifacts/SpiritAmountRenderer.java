@@ -1,9 +1,6 @@
 package com.shermansplanet.otherverse.artifacts;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.SightManager;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
@@ -27,6 +24,8 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
@@ -94,7 +93,7 @@ public class SpiritAmountRenderer {
         var camRot = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
         var axis = look.cross(diff);
         var angle = Math.asin(axis.length()) * 4;
-        pose.mulPose(new Quaternion(new Vector3f((float) axis.x, (float) axis.y, (float) axis.z), (float) angle, false));
+        pose.mulPose(new Quaternionf(new AxisAngle4f((float) angle, (float) axis.x, (float) axis.y, (float) axis.z)));
         pose.mulPose(camRot);
         render(pose, Minecraft.getInstance().renderBuffers().bufferSource());
         event.getPoseStack().popPose();
@@ -113,14 +112,14 @@ public class SpiritAmountRenderer {
             float dx = (float) (-font.width(hoverName) / 2);
             float dy = (float) (-font.lineHeight / 2);
             pose.translate(0, dy * (i - (labelTextLines.length - 1) / 2f) * -4, 0);
-            Matrix4f matrix4f = pose.last().pose();
+            var matrix4f = pose.last().pose();
             pose.pushPose();
             pose.scale((dx - 4) / dx, (dy - 4) / dy, 1);
             pose.translate(0, 0, 12);
             var newMatrix = pose.last().pose();
-            font.drawInBatch(blankName, dx, dy, 0, false, newMatrix, buffers, true, 0xff000000, 0);
+            font.drawInBatch(blankName, dx, dy, 0, false, newMatrix, buffers, Font.DisplayMode.NORMAL, 0xff000000, 0);
             pose.popPose();
-            font.drawInBatch(hoverName, dx, dy, 0xffffff, false, matrix4f, buffers, true, 0, 0xf000f0);
+            font.drawInBatch(hoverName, dx, dy, 0xffffff, false, matrix4f, buffers, Font.DisplayMode.NORMAL, 0, 0xf000f0);
             pose.popPose();
         }
         pose.popPose();

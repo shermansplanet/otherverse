@@ -321,7 +321,7 @@ public class Diagram {
                 powerSources.add(new PowerSource((int) mob.getHealth() - 1, 1,
                         i -> {
                             if (i > 0) {
-                                mob.hurt(DamageSource.OUT_OF_WORLD, i);
+                                mob.hurt(level.damageSources().fellOutOfWorld(), i);
                                 mob.invulnerableTime = MobTransfusions.MOB_DRAIN_COOLDOWN;
                                 mobsOnCooldown.add(mob);
                             }

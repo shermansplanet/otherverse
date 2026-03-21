@@ -27,6 +27,8 @@ import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -71,48 +73,50 @@ public class Otherverse {
     public static final LootHelper LOOT_HELPER = new LootHelper();
     public static final PracticeTrigger ADVANCEMENTS = new PracticeTrigger();
 
-    public static final CreativeModeTab TAB_PRACTICE = new CreativeModeTab("otherverse") {
-        public @NotNull ItemStack makeIcon() {
-            return OtherverseItems.CHALK.get().getDefaultInstance();
-        }
-    };
-    public static final CreativeModeTab TAB_OTHERS = new CreativeModeTab("others") {
-        public @NotNull ItemStack makeIcon() {
-            return OtherverseItems.IDOL.get().getDefaultInstance();
-        }
-    };
-    public static final CreativeModeTab TAB_SPIRITS = new CreativeModeTab("spirits") {
-        public @NotNull ItemStack makeIcon() {
-            return Spirits.spiritItems.get(Spirits.COLOR_GRAY).get().getDefaultInstance();
-        }
-    };
+    private static final DeferredRegister<CreativeModeTab> REGISTRAR = DeferredRegister.create(
+            Registries.CREATIVE_MODE_TAB, MODID);
+    public static final RegistryObject<CreativeModeTab> TAB_PRACTICE = REGISTRAR.register("example", () -> CreativeModeTab.builder()
+            .title(Component.literal("Practice Items"))
+            .icon(() -> OtherverseItems.CHALK.get().getDefaultInstance())
+            .build()
+    );
+    public static final RegistryObject<CreativeModeTab> TAB_OTHERS = REGISTRAR.register("example", () -> CreativeModeTab.builder()
+            .title(Component.literal("Mobs"))
+            .icon(() -> OtherverseItems.IDOL.get().getDefaultInstance())
+            .build()
+    );
+    public static final RegistryObject<CreativeModeTab> TAB_SPIRITS = REGISTRAR.register("example", () -> CreativeModeTab.builder()
+            .title(Component.literal("Spirit Types"))
+            .icon(() -> Spirits.spiritItems.get(Spirits.COLOR_GRAY).get().getDefaultInstance())
+            .build()
+    );
 
     private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(
             ForgeRegistries.SOUND_EVENTS, MODID);
     public static final RegistryObject<SoundEvent> IMPLEMENT_RITUAL = SOUND_EVENTS.register("implement",
-            () -> new SoundEvent(new ResourceLocation(Otherverse.MODID, "implement")));
+            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "implement")));
 
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(
             ForgeRegistries.ENTITY_TYPES, MODID);
     public static final RegistryObject<EntityType<EchoEntity>> ENTITY_ECHO = ENTITIES.register("echo",
             () -> EntityType.Builder.<EchoEntity>of(EchoEntity::new, MobCategory.MISC)
-                    .build(String.valueOf(new ResourceLocation(MODID, "echo"))));
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "echo"))));
     public static final RegistryObject<EntityType<TyphloticShark>> TYPHLOTIC_SHARK = ENTITIES.register("typhlotic_shark",
             () -> EntityType.Builder.of(TyphloticShark::new, MobCategory.MONSTER)
                     .immuneTo(Blocks.POWDER_SNOW).sized(0.9F, 0.5F)
-                    .build(String.valueOf(new ResourceLocation(MODID, "typhlotic_shark"))));
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "typhlotic_shark"))));
 
     public static final RegistryObject<EntityType<TyphloticJellyfish>> TYPHLOTIC_JELLYFISH = ENTITIES.register("typhlotic_jellyfish",
             () -> EntityType.Builder.of(TyphloticJellyfish::new, MobCategory.MONSTER)
                     .sized(1F, 2.5F)
-                    .build(String.valueOf(new ResourceLocation(MODID, "typhlotic_jellyfish"))));
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "typhlotic_jellyfish"))));
 
     public static final RegistryObject<EntityType<ThrownTNT>> ENTITY_THROWN_TNT = ENTITIES.register("thrown_tnt",
             () -> EntityType.Builder.<ThrownTNT>of(ThrownTNT::new, MobCategory.MISC)
                     .sized(0.25F, 0.25F)
                     .clientTrackingRange(4)
                     .updateInterval(10)
-                    .build(String.valueOf(new ResourceLocation(MODID, "thrown_tnt"))));
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "thrown_tnt"))));
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
             DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
@@ -151,13 +155,13 @@ public class Otherverse {
             MENU_TYPES.register("demesnes_menu",
                     () -> IForgeMenuType.create(DemesnesMenu::new));
 
-    public Otherverse() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public Otherverse(FMLJavaModLoadingContext context) {
+        IEventBus modEventBus = context.getModEventBus();
         ENTITIES.register(modEventBus);
         OtherverseBlocks.BLOCKS.register(modEventBus);
         for (SpiritType st : Spirits.allSpiritTypes) {
             RegistryObject<Item> item = OtherverseItems.ITEMS.register(st.GetResourceLocation(),
-                    () -> new SpiritItem(st, new Item.Properties().tab(TAB_SPIRITS)));
+                    () -> new SpiritItem(st, new Item.Properties()));
             Spirits.spiritItems.put(st, item);
         }
         OtherverseItems.ITEMS.register(modEventBus);
@@ -166,7 +170,7 @@ public class Otherverse {
         RECIPE_TYPES.register(modEventBus);
         MENU_TYPES.register(modEventBus);
         OtherverseFeatureGen.FEATURES.register(modEventBus);
-        bind(Registry.PARTICLE_TYPE_REGISTRY, OtherverseParticles::registerParticles);
+        bind(context, Registries.PARTICLE_TYPE, OtherverseParticles::registerParticles);
 
         OtherversePotions.EFFECTS.register(modEventBus);
         OtherversePotions.POTIONS.register(modEventBus);
@@ -180,8 +184,8 @@ public class Otherverse {
         OtherversePacketHandler.register();
     }
 
-    private static <T> void bind(ResourceKey<Registry<T>> registry, Consumer<BiConsumer<T, ResourceLocation>> source) {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((RegisterEvent event) -> {
+    private static <T> void bind(FMLJavaModLoadingContext ctx, ResourceKey<Registry<T>> registry, Consumer<BiConsumer<T, ResourceLocation>> source) {
+        ctx.getModEventBus().addListener((RegisterEvent event) -> {
             if (registry.equals(event.getRegistryKey())) {
                 source.accept((t, rl) -> event.register(registry, rl, () -> t));
             }
@@ -213,9 +217,9 @@ public class Otherverse {
 
     public static ItemStack toItem(String s) {
         if (s.startsWith("entity")) {
-            return MobBindingInfluenceUtils.getIdol(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(s.substring(7))));
+            return MobBindingInfluenceUtils.getIdol(ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(s.substring(7))));
         } else {
-            return ForgeRegistries.ITEMS.getValue(new ResourceLocation(s.substring(5))).getDefaultInstance();
+            return ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(s.substring(5))).getDefaultInstance();
         }
     }
 

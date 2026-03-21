@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -18,9 +19,6 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.slf4j.Logger;
@@ -95,7 +93,7 @@ public class EchoEntity extends Entity {
       }
     }
     try {
-      innerEntity = (Mob) (entityType.create(level));
+      innerEntity = (Mob) (entityType.create(level()));
       innerEntity.setPose(Pose.DYING);
       innerEntity.copyPosition(this);
       return innerEntity;
@@ -143,7 +141,7 @@ public class EchoEntity extends Entity {
       glitchOffset = Vec3.ZERO;
       glitchCountdown = random.nextInt(60);
 
-      Player p = level.getNearestPlayer(this, 10f);
+      Player p = level().getNearestPlayer(this, 10f);
       if (p != null) {
         setYRot(
             (float) (Math.atan2(p.position().x - position().x, p.position().z - position().z) * 180f
@@ -195,7 +193,7 @@ public class EchoEntity extends Entity {
   }
 
   @Override
-  public Packet<?> getAddEntityPacket() {
+  public Packet<ClientGamePacketListener> getAddEntityPacket() {
     return null;
   }
 

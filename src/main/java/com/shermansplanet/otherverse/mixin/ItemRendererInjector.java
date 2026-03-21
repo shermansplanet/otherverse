@@ -20,10 +20,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HalfTransparentBlock;
@@ -75,7 +72,7 @@ public class ItemRendererInjector {
     }
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    public void onRender(ItemStack stack, ItemTransforms.TransformType transformType, boolean p_115146_, PoseStack poseStack, MultiBufferSource p_115148_, int packedLight, int p_115150_, BakedModel bakedModel, CallbackInfo ci) {
+    public void onRender(ItemStack stack, ItemDisplayContext transformType, boolean p_115146_, PoseStack poseStack, MultiBufferSource p_115148_, int packedLight, int p_115150_, BakedModel bakedModel, CallbackInfo ci) {
         if (stack.isEmpty() || !stack.hasTag()) return;
         if (!stack.getTag().contains("hallow")) return;
         var spiritType = stack.getTag().getCompound("hallow").getString("spirit_type");
@@ -85,12 +82,12 @@ public class ItemRendererInjector {
         if (pair == null) return;
         var testRenderType = pair.getSecond();
         poseStack.pushPose();
-        boolean flag = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
+        boolean flag = transformType == ItemDisplayContext.GUI || transformType == ItemDisplayContext.GROUND || transformType == ItemDisplayContext.FIXED;
         if (flag) {
             if (stack.is(Items.TRIDENT)) {
-                bakedModel = this.getItemModelShaper().getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
+                bakedModel = this.getItemModelShaper().getModelManager().getModel(ModelResourceLocation.parse("minecraft:trident#inventory"));
             } else if (stack.is(Items.SPYGLASS)) {
-                bakedModel = this.getItemModelShaper().getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass#inventory"));
+                bakedModel = this.getItemModelShaper().getModelManager().getModel(ModelResourceLocation.parse("minecraft:spyglass#inventory"));
             }
         }
 
@@ -98,7 +95,7 @@ public class ItemRendererInjector {
         poseStack.translate(-0.5D, -0.5D, -0.5D);
         if (!bakedModel.isCustomRenderer() && (!stack.is(Items.TRIDENT) || flag)) {
             boolean flag1;
-            if (transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && stack.getItem() instanceof BlockItem) {
+            if (transformType != ItemDisplayContext.GUI && !transformType.firstPerson() && stack.getItem() instanceof BlockItem) {
                 Block block = ((BlockItem) stack.getItem()).getBlock();
                 flag1 = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
             } else {
@@ -109,10 +106,10 @@ public class ItemRendererInjector {
                 if (stack.is(ItemTags.COMPASSES) && stack.hasFoil()) {
                     poseStack.pushPose();
                     PoseStack.Pose posestack$pose = poseStack.last();
-                    if (transformType == ItemTransforms.TransformType.GUI) {
-                        posestack$pose.pose().multiply(0.5F);
+                    if (transformType == ItemDisplayContext.GUI) {
+                        posestack$pose.pose().scale(0.5F);
                     } else if (transformType.firstPerson()) {
-                        posestack$pose.pose().multiply(0.75F);
+                        posestack$pose.pose().scale(0.75F);
                     }
 
                     if (flag1) {
@@ -188,6 +185,7 @@ public class ItemRendererInjector {
         var modelLocation = new ModelResourceLocation(itemKey.getNamespace(), itemKey.getPath(), "inventory");
         var model = bakery.getModel(modelLocation);
         var set = new HashSet<Pair<String, String>>();
+
         var materials = model.getMaterials(bakery::getModel, set);
         List<ResourceLocation> locations = new ArrayList<>();
         for (var m : materials){

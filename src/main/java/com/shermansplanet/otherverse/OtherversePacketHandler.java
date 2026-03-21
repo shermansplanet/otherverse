@@ -34,7 +34,7 @@ public class OtherversePacketHandler {
 
     private static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(Otherverse.MODID, "main"),
+            ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "main"),
             () -> PROTOCOL_VERSION,
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals

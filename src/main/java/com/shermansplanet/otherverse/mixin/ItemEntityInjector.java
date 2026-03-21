@@ -42,7 +42,7 @@ public abstract class ItemEntityInjector extends Entity {
         var item = getItem();
         if (item.isEmpty() || !item.hasTag() || !item.getTag().contains("hallow")) return;
 
-        var state = level.getBlockState(blockPosition());
+        var state = level().getBlockState(blockPosition());
         if (!state.getFluidState().is(Fluids.WATER)) return;
         var maxy = seek(1) + 1;
         var miny = seek(-1);
@@ -62,7 +62,7 @@ public abstract class ItemEntityInjector extends Entity {
         int y = pos.getY();
         for (var i = 1; i < 64; i++) {
             pos.setY(y + i * dy);
-            var state = level.getBlockState(pos);
+            var state = level().getBlockState(pos);
             if (!state.getFluidState().is(Fluids.WATER)) return y + (i - 1) * dy;
         }
         return y + 64 * dy;

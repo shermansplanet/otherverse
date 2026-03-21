@@ -24,7 +24,7 @@ public abstract class BlockPlaceInjector {
     @Inject(method = "getDrops", at = @At("RETURN"))
     protected void onGetDrops(BlockState blockState, LootContext.Builder context,
                               CallbackInfoReturnable<List<ItemStack>> ci) {
-        BlockPos pos = new BlockPos(context.getParameter(LootContextParams.ORIGIN));
+        BlockPos pos = BlockPos.containing(context.create(null).getParam(LootContextParams.ORIGIN));
         TransientDiagramData diagramData = DiagramManager.getOrCreateLevelData(context.getLevel());
         CompoundTag tag = diagramData.getPlacedItemTag(pos);
         if (tag == null) {

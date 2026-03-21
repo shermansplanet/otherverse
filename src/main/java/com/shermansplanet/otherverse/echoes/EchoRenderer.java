@@ -12,8 +12,6 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.authlib.properties.Property;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
@@ -33,6 +31,7 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
+import org.joml.Quaternionf;
 
 public class EchoRenderer extends EntityRenderer<EchoEntity> {
 
@@ -70,7 +69,7 @@ public class EchoRenderer extends EntityRenderer<EchoEntity> {
     }
 
     matrixStackIn.translate(echo.glitchOffset.x, echo.glitchOffset.y, echo.glitchOffset.z);
-    matrixStackIn.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, echo.getYRot(), 0)));
+    matrixStackIn.mulPose(new Quaternionf().rotateY(echo.getYRot()));
 
     MultiBufferSource bufferSub = renderType -> {
       ResourceLocation texLoc = (echo.isPlayer() ? playerRenderer : render).getTextureLocation(innerEntity);
@@ -113,11 +112,7 @@ public class EchoRenderer extends EntityRenderer<EchoEntity> {
         playerRenderer.render(innerEntity, entityYaw, partialTicks, matrixStackIn, bufferSub,
             packedLightIn);
       } else {
-        // Make new PoseStack, to fix stack invalidity when a crash occurs.
-        PoseStack poseStackInner = new PoseStack();
-        poseStackInner.last().pose().load(matrixStackIn.last().pose());
-        poseStackInner.last().normal().load(matrixStackIn.last().normal());
-        render.render(innerEntity, entityYaw, 0, poseStackInner, bufferSub, packedLightIn);
+        render.render(innerEntity, entityYaw, 0, matrixStackIn, bufferSub, packedLightIn);
       }
     } catch (Exception e) {
       // Invalid entity, so set as swarm.
@@ -137,9 +132,9 @@ public class EchoRenderer extends EntityRenderer<EchoEntity> {
 
     public RenderPlayerSpirit(EntityRendererProvider.Context context) {
       super(context, new PlayerModel<>(context.bakeLayer(ModelLayers.PLAYER), false), 0.5F);
-      this.addLayer(new HumanoidArmorLayer<>(this,
-          new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
-          new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR))));
+//      this.addLayer(new HumanoidArmorLayer<>(this,
+//          new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
+//          new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR))));
       this.addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
       this.addLayer(new ArrowLayer<>(context, this));
       this.addLayer(

@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.spirits.SpiritTransfusions;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -57,13 +58,13 @@ public record PracticeWorldUpdateMessage(
                 buffer.writeShort(transfusion.price());
                 buffer.writeShort(transfusion.entityTypes().size());
                 for (var et : transfusion.entityTypes()) {
-                    buffer.writeInt(Registry.ENTITY_TYPE.getId(et));
+                    buffer.writeInt(BuiltInRegistries.ENTITY_TYPE.getId(et));
                 }
             }
         }
         buffer.writeShort(bindings.size());
         for (var binding : bindings.entrySet()) {
-            buffer.writeInt(Registry.ENTITY_TYPE.getId(binding.getKey()));
+            buffer.writeInt(BuiltInRegistries.ENTITY_TYPE.getId(binding.getKey()));
             buffer.writeShort(binding.getValue().size());
             for (var influence : binding.getValue().entrySet()) {
                 influence.getKey().encode(buffer);
@@ -72,7 +73,7 @@ public record PracticeWorldUpdateMessage(
         }
         buffer.writeShort(mobSpirits.size());
         for(var mobSpirit :mobSpirits.entrySet()){
-            buffer.writeInt(Registry.ENTITY_TYPE.getId(mobSpirit.getKey()));
+            buffer.writeInt(BuiltInRegistries.ENTITY_TYPE.getId(mobSpirit.getKey()));
             buffer.writeByte(mobSpirit.getValue().id());
         }
     }
@@ -125,7 +126,7 @@ public record PracticeWorldUpdateMessage(
                 var etcount = buffer.readShort();
                 var etset = new HashSet<EntityType<?>>();
                 for (var iii = 0; iii < etcount; iii++) {
-                    etset.add(Registry.ENTITY_TYPE.byId(buffer.readInt()));
+                    etset.add(BuiltInRegistries.ENTITY_TYPE.byId(buffer.readInt()));
                 }
                 list.add(new MobTransfusions.MobTransfusionData(etset, item, price));
             }
@@ -135,7 +136,7 @@ public record PracticeWorldUpdateMessage(
         HashMap<EntityType<? extends LivingEntity>, HashMap<ItemOrEntityType, Integer>> bindings = new HashMap<>();
         var bindingsSize = buffer.readShort();
         for (var i = 0; i < bindingsSize; i++) {
-            var et = (EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.byId(buffer.readInt());
+            var et = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.byId(buffer.readInt());
             var influenceSize = buffer.readShort();
             var map = new HashMap<ItemOrEntityType, Integer>();
             for (var ii = 0; ii < influenceSize; ii++) {
@@ -149,7 +150,7 @@ public record PracticeWorldUpdateMessage(
         HashMap<EntityType<? extends LivingEntity>, SpiritType> mobSpirits = new HashMap<>();
         var mobSpiritsSize = buffer.readShort();
         for(var i=0; i<mobSpiritsSize; i++){
-            var et = (EntityType<? extends LivingEntity>) Registry.ENTITY_TYPE.byId(buffer.readInt());
+            var et = (EntityType<? extends LivingEntity>) BuiltInRegistries.ENTITY_TYPE.byId(buffer.readInt());
             var spiritType = Spirits.spiritsById.get((int) buffer.readByte());
             mobSpirits.put(et, spiritType);
         }

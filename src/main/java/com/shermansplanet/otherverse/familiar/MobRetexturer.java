@@ -31,7 +31,7 @@ public class MobRetexturer {
 
         for (int imageIndex = 0; imageIndex < textureSet.size(); imageIndex++) {
             var oldTexture = textureSet.get(imageIndex);
-            var image = getNativeImage(new ResourceLocation(oldTexture.getNamespace(), oldTexture.getPath()));
+            var image = getNativeImage( ResourceLocation.fromNamespaceAndPath(oldTexture.getNamespace(), oldTexture.getPath()));
             if (image == null) {
                 LOGGER.error("COULDN'T LOAD TEXTURE " + oldTexture.getPath());
                 return null;
@@ -63,7 +63,7 @@ public class MobRetexturer {
         DynamicTexture newTex = new DynamicTexture(tex);
         var textureManager = Minecraft.getInstance().getTextureManager();
         var nameTex = textureSet.get(0);
-        var newTexLoc = new ResourceLocation(Otherverse.MODID, "hallow_" + nameTex.getNamespace() + "_" + nameTex.getPath() + "_" + spiritType);
+        var newTexLoc = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "hallow_" + nameTex.getNamespace() + "_" + nameTex.getPath() + "_" + spiritType);
         textureManager.register(newTexLoc, newTex);
         return Pair.of(newTexLoc, newTex);
     }
@@ -88,11 +88,11 @@ public class MobRetexturer {
     }
 
     private static Palette paletteFromSpirit(String s) {
-        var image = getNativeImage(new ResourceLocation(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
+        var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
         return new Palette(Collections.singleton(image), true);
     }
     private static Palette paletteFromSpiritSplit(String s) {
-        var image = getNativeImage(new ResourceLocation(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
+        var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
         return new Palette(Collections.singleton(image), false);
     }
 
@@ -101,7 +101,7 @@ public class MobRetexturer {
         var originalTexture = getNativeImage(originalTextureLoc);
         var originalPalettes = new Palette(Collections.singleton(originalTexture));
         var rawTex = MakeTexture(originalTexture, originalPalettes, spiritPalettes);
-        var newTexLoc = new ResourceLocation(Otherverse.MODID,
+        var newTexLoc = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID,
                 "skin_" + originalTextureLoc.getNamespace() + "_" + originalTextureLoc.getPath() + "_" + spiritType);
         DynamicTexture newTex = new DynamicTexture(rawTex);
         var textureManager = Minecraft.getInstance().getTextureManager();
@@ -128,7 +128,7 @@ public class MobRetexturer {
         }
         DynamicTexture newTex = new DynamicTexture(rawTex);
         var textureManager = Minecraft.getInstance().getTextureManager();
-        var newTexLoc = new ResourceLocation(Otherverse.MODID, player.getGameProfile().getName().toLowerCase() + "_familiar_texture");
+        var newTexLoc = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, player.getGameProfile().getName().toLowerCase() + "_familiar_texture");
         textureManager.register(newTexLoc, newTex);
         ((ITextureSetter) player).setTexture(newTexLoc);
         paletteCache.put(newTexLoc, palette);

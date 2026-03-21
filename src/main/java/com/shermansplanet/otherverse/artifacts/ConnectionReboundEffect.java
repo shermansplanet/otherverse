@@ -15,7 +15,7 @@ public class ConnectionReboundEffect extends MobEffect {
     @Override
     public void applyEffectTick(LivingEntity entity, int p_19468_) {
         if(entity instanceof Player p && p.isCreative()) return;
-        var level = entity.getLevel();
+        var level = entity.level();
         if(level.isClientSide() || level.getGameTime() % 20 != 10) return;
         for(var other : level.getEntities(entity, entity.getBoundingBox().inflate(32))){
             if(!(other instanceof Mob mob)) return;

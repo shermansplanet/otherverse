@@ -167,9 +167,9 @@ public class SpiritTransfusions {
         TRANSFUSIONS_FROM_JSON.setData(TRANSFUSIONS_FROM_JSON.data);
     }
 
-    public static void analyzeSmeltingRecipe(SmeltingRecipe recipe) {
+    public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
         register(recipe.getIngredients().get(0).getItems()[0].getItem(),
-                Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem().getItem(), true);
+                Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem(sl.registryAccess()).getItem(), true);
     }
 
     private static void registerDyableBlocks(Block[] blocks) {

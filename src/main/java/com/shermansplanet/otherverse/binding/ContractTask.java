@@ -145,7 +145,7 @@ public class ContractTask {
             corner1 = null;
         }
         if (tag.contains("recipe_id")) {
-            recipe = mob.level.getServer().getRecipeManager().byKey(new ResourceLocation(tag.getString("recipe_id"))).get();
+            recipe = mob.level().getServer().getRecipeManager().byKey(ResourceLocation.parse(tag.getString("recipe_id"))).get();
         }
         for (String key : tag.getAllKeys()) {
             if (key.startsWith("filter")) {
@@ -224,7 +224,7 @@ public class ContractTask {
         ItemEntity closest = null;
         var lookDiameter = boundGoal.range * 2;
         float closestDist = lookDiameter;
-        for (Entity e : mob.level.getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
+        for (Entity e : mob.level().getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
             if (e instanceof ItemEntity ie && isValidItem(ie.getItem())) {
                 if (!positionFilters.isEmpty() && !positionFilters.contains(ie.blockPosition())) {
                     continue;
@@ -232,7 +232,7 @@ public class ContractTask {
                 if (!BindingManager.getHeldItem(mob).isEmpty() && !BindingManager.getHeldItem(mob).is(ie.getItem().getItem()))
                     continue;
                 for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
-                    Block block = mob.level.getBlockState(e.blockPosition().subtract(processOffset(offsetIndex))).getBlock();
+                    Block block = mob.level().getBlockState(e.blockPosition().subtract(processOffset(offsetIndex))).getBlock();
                     if (!blockFilters.isEmpty() && !blockFilters.contains(block.asItem()) && !blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
                         continue;
                     }
@@ -248,14 +248,14 @@ public class ContractTask {
     }
 
     private Vec3i processOffset(int offsetIndex) {
-        return offsets.get(offsetIndex).getPos(mob.level).subtract(offsetBases.get(offsetIndex));
+        return offsets.get(offsetIndex).getPos(mob.level()).subtract(offsetBases.get(offsetIndex));
     }
 
     public LivingEntity getClosestValidLivingTarget() {
         LivingEntity closest = null;
         var lookDiameter = boundGoal.range * 2;
         float closestDist = lookDiameter;
-        for (Entity e : mob.level.getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
+        for (Entity e : mob.level().getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
             if (e == mob) {
                 continue;
             }
@@ -325,7 +325,7 @@ public class ContractTask {
                 if (!blockFilters.isEmpty()) {
                     var anyMatches = false;
                     for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
-                        Block block = mob.level.getBlockState(pos.subtract(processOffset(offsetIndex))).getBlock();
+                        Block block = mob.level().getBlockState(pos.subtract(processOffset(offsetIndex))).getBlock();
                         if (blockFilters.contains(block.asItem()) || blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
                             anyMatches = true;
                         }
@@ -335,24 +335,24 @@ public class ContractTask {
                     }
                 }
 
-                if (mob.level.isEmptyBlock(pos)) {
+                if (mob.level().isEmptyBlock(pos)) {
                     return false;
                 }
                 // fall back to MOVE
             case MOVE:
-                return isValidBlock(mob.level.getBlockState(pos));
+                return isValidBlock(mob.level().getBlockState(pos));
             case PUT:
-                if (blockFilters.isEmpty() && inPositionFilter && mob.level.isEmptyBlock(pos)) {
+                if (blockFilters.isEmpty() && inPositionFilter && mob.level().isEmptyBlock(pos)) {
                     return true;
                 }
                 ItemStack heldItem = BindingManager.getHeldItem(mob);
-                BlockEntity putTarget = mob.level.getBlockEntity(pos);
+                BlockEntity putTarget = mob.level().getBlockEntity(pos);
                 boolean validPutBlockBelow = false;
                 for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
                     var otherpos = pos.subtract(processOffset(offsetIndex));
-                    validPutBlockBelow = blockFilters.contains(mob.level.getBlockState(otherpos).getBlock().asItem());
+                    validPutBlockBelow = blockFilters.contains(mob.level().getBlockState(otherpos).getBlock().asItem());
                     if (validPutBlockBelow) {
-                        BlockEntity beBelow = mob.level.getBlockEntity(otherpos);
+                        BlockEntity beBelow = mob.level().getBlockEntity(otherpos);
                         if (beBelow != null && beBelow.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent()) {
                             validPutBlockBelow = false;
                         }
@@ -361,13 +361,13 @@ public class ContractTask {
                         break;
                     }
                 }
-                BlockState blockState = mob.level.getBlockState(pos);
+                BlockState blockState = mob.level().getBlockState(pos);
                 if (!inPositionFilter && !validPutBlockBelow && !blockFilters.contains(blockState.getBlock().asItem())) {
                     return false;
                 }
 
                 if (isPlacingCobweb()) {
-                    return validPutBlockBelow && mob.level.isEmptyBlock(pos);
+                    return validPutBlockBelow && mob.level().isEmptyBlock(pos);
                 }
 
                 if (putTarget != null) {
@@ -389,19 +389,19 @@ public class ContractTask {
                 if (!validPutBlockBelow) return false;
                 var canDrop = boundGoal.takesAll ? !(heldItem.getItem() instanceof BlockItem)
                         : !boundGoal.itemDropDenyList.contains(heldItem.getItem());
-                if (canDrop && !blockState.isCollisionShapeFullBlock(mob.level, pos)) {
+                if (canDrop && !blockState.isCollisionShapeFullBlock(mob.level(), pos)) {
                     return true;
                 }
                 return tryPlaceBlock(pos, heldItem, false, false);
             case OBSERVE:
             case TAKE:
-                BlockEntity takeTarget = mob.level.getBlockEntity(pos);
+                BlockEntity takeTarget = mob.level().getBlockEntity(pos);
                 if (takeTarget == null) {
                     return false;
                 }
                 boolean validTakeBlockBelow = false;
                 for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
-                    if (blockFilters.contains(mob.level.getBlockState(pos.subtract(processOffset(offsetIndex))).getBlock().asItem())) {
+                    if (blockFilters.contains(mob.level().getBlockState(pos.subtract(processOffset(offsetIndex))).getBlock().asItem())) {
                         validTakeBlockBelow = true;
                         break;
                     }
@@ -424,7 +424,7 @@ public class ContractTask {
             case ATTACK:
                 return canAttackPosition(mob.getType());
             case CRAFT:
-                if (mob.level.getBlockState(pos).getBlock() != Blocks.CRAFTING_TABLE) return false;
+                if (mob.level().getBlockState(pos).getBlock() != Blocks.CRAFTING_TABLE) return false;
                 usedIngredientsCache.clear();
                 for (var ingredient : recipe.getIngredients()) {
                     if (!findCraftingIngredient(ingredient, pos, usedIngredientsCache)) return false;
@@ -447,12 +447,12 @@ public class ContractTask {
         if (taskType == TaskType.ATTACK || taskType == TaskType.OBSERVE) return true;
         if (mob.blockPosition().distSqr(pos) > 16 * 16) return true;
         if (mob.getType() == EntityType.ENDERMAN || mob.getType() == EntityType.SHULKER) {
-            if (mob.level.getBlockState(pos.below()).getCollisionShape(mob.level, pos.below()).isEmpty()) return false;
+            if (mob.level().getBlockState(pos.below()).getCollisionShape(mob.level(), pos.below()).isEmpty()) return false;
         } else {
             var path = mob.getNavigation().createPath(pos, 0);
             if (path == null || !path.getEndNode().asBlockPos().equals(pos)) return false;
         }
-        return !mob.level.collidesWithSuffocatingBlock(mob, new AABB(
+        return !mob.level().collidesWithSuffocatingBlock(mob, new AABB(
                 pos.getX() + 0.1f, pos.getY() + 0.5f, pos.getZ() + 0.1f,
                 pos.getX() + 0.9f, pos.getY() + mob.getBbHeight(), pos.getZ() + 0.0f
         ));
@@ -461,7 +461,7 @@ public class ContractTask {
     private boolean findCraftingIngredient(Ingredient ingredient, BlockPos pos, HashMap<ItemStack, Integer> usedIngredients) {
         if (ingredient.isEmpty()) return true;
         for (var dir : Direction.values()) {
-            var checkTarget = mob.level.getBlockEntity(pos.relative(dir));
+            var checkTarget = mob.level().getBlockEntity(pos.relative(dir));
             if (checkTarget instanceof IItemHandler inventory) {
                 for (int i = 0; i < inventory.getSlots(); i++) {
                     ItemStack stack = inventory.getStackInSlot(i);
@@ -493,10 +493,10 @@ public class ContractTask {
 
     public boolean isPossible() {
         for (var offset : offsets) {
-            if (!offset.isPosition && offset.getPos(mob.level) == null) return false;
+            if (!offset.isPosition && offset.getPos(mob.level()) == null) return false;
         }
-        if (corner0 != null && !corner0.isPosition && corner0.getPos(mob.level) == null) return false;
-        if (corner0 != null && !corner1.isPosition && corner1.getPos(mob.level) == null) return false;
+        if (corner0 != null && !corner0.isPosition && corner0.getPos(mob.level()) == null) return false;
+        if (corner0 != null && !corner1.isPosition && corner1.getPos(mob.level()) == null) return false;
 
         var heldItem = BindingManager.getHeldItem(mob);
         if (taskType == TaskType.TAKE) {
@@ -527,7 +527,7 @@ public class ContractTask {
 
     public boolean tick() {
         if (spindle != null) {
-            targetPos = spindle.getPos(mob.level);
+            targetPos = spindle.getPos(mob.level());
             if (targetPos == null) return fail();
         }
         if (!isPossible()) return fail();
@@ -602,7 +602,7 @@ public class ContractTask {
                 maxTransferAmount = Math.min(maxTransferAmount, countMax);
                 var transferredItems = ItemStack.EMPTY;
 
-                BlockEntity be = mob.level.getBlockEntity(targetPos);
+                BlockEntity be = mob.level().getBlockEntity(targetPos);
 
                 if (be != null) {
                     var cap = be.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
@@ -647,7 +647,7 @@ public class ContractTask {
             }
             var insertAttemptCount = Math.min(itemsToInsert.getCount(), countMax);
             itemsToInsert.setCount(insertAttemptCount);
-            BlockEntity be = mob.level.getBlockEntity(targetPos);
+            BlockEntity be = mob.level().getBlockEntity(targetPos);
             LOGGER.debug("insertAttemptCount: " + insertAttemptCount);
             if (be != null) {
                 var cap = be.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
@@ -684,7 +684,7 @@ public class ContractTask {
                 return harvestBlock();
             }
             var tool = BindingManager.getHeldItem(mob);
-            BlockState blockstate = mob.level.getBlockState(targetPos);
+            BlockState blockstate = mob.level().getBlockState(targetPos);
             float destroyTime = blockstate.getBlock().defaultDestroyTime();
             AttributeInstance attackDamageAttr = mob.getAttribute(Attributes.ATTACK_DAMAGE);
             float attackDamage = attackDamageAttr == null ? 0.5f : (float) attackDamageAttr.getValue();
@@ -703,18 +703,18 @@ public class ContractTask {
                     : (int) Math.floor(doActionTicks * attackDamage / destroyTime / 20);
             if (newBlockDamage != blockDamage) {
                 if (newBlockDamage >= 10) {
-                    mob.level.playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
-                    this.mob.level.destroyBlock(targetPos, false, mob);
+                    mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
+                    this.mob.level().destroyBlock(targetPos, false, mob);
                     if (tool.isEmpty() && mob instanceof EnderMan em) {
                         BindingManager.setHeldItem(mob, blockstate.getBlock().asItem().getDefaultInstance());
                     } else {
-                        Block.dropResources(blockstate, mob.level, targetPos, mob.level.getBlockEntity(targetPos), mob, tool);
+                        Block.dropResources(blockstate, mob.level(), targetPos, mob.level().getBlockEntity(targetPos), mob, tool);
                     }
                     return succeed();
                 }
-                mob.level.playSound(null, targetPos, blockstate.getSoundType().getHitSound(), SoundSource.BLOCKS, 1f, 1f);
+                mob.level().playSound(null, targetPos, blockstate.getSoundType().getHitSound(), SoundSource.BLOCKS, 1f, 1f);
                 blockDamage = newBlockDamage;
-                mob.level.destroyBlockProgress(this.mob.getId(), targetPos, blockDamage);
+                mob.level().destroyBlockProgress(this.mob.getId(), targetPos, blockDamage);
             }
             return false;
         } else if (taskType == TaskType.CRAFT) {
@@ -724,7 +724,7 @@ public class ContractTask {
             doActionTicks++;
             if (doActionTicks < 60) return false;
             for (var dir : Direction.values()) {
-                var be = mob.level.getBlockEntity(targetPos.relative(dir));
+                var be = mob.level().getBlockEntity(targetPos.relative(dir));
                 if (be instanceof IItemHandler inventory) {
                     for (int i = 0; i < inventory.getSlots(); i++) {
                         ItemStack stack = inventory.getStackInSlot(i);
@@ -749,17 +749,17 @@ public class ContractTask {
                     }
                 }
             }
-            spawnAtTargetPos(recipe.getResultItem().copy());
+            spawnAtTargetPos(recipe.getResultItem(mob.level().registryAccess()).copy());
         }
         return succeed();
     }
 
     private boolean harvestBlock() {
-        BlockState blockstate = mob.level.getBlockState(targetPos);
-        if (!(mob.level instanceof ServerLevel sl) || !(blockstate.getBlock() instanceof CropBlock cb)) return fail();
+        BlockState blockstate = mob.level().getBlockState(targetPos);
+        if (!(mob.level() instanceof ServerLevel sl) || !(blockstate.getBlock() instanceof CropBlock cb)) return fail();
         MutableBoolean hasTaken = new MutableBoolean(false);
         Item blockItem = blockstate.getBlock().asItem();
-        Block.getDrops(blockstate, sl, targetPos, mob.level.getBlockEntity(targetPos), mob, mob.getMainHandItem().copy())
+        Block.getDrops(blockstate, sl, targetPos, mob.level().getBlockEntity(targetPos), mob, mob.getMainHandItem().copy())
                 .forEach((stack) -> {
                     if (stack.getItem() == blockItem && !hasTaken.getValue()) {
                         stack.shrink(1);
@@ -770,22 +770,20 @@ public class ContractTask {
                         Block.popResource(sl, targetPos, stack);
                 });
         if (hasTaken.isFalse()) {
-            mob.level.playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
-            this.mob.level.destroyBlock(targetPos, false, mob);
+            mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
+            this.mob.level().destroyBlock(targetPos, false, mob);
         } else {
-            var prop = cb.getAgeProperty();
-            blockstate = blockstate.setValue(prop, cb.defaultBlockState().getValue(prop));
-            mob.level.setBlockAndUpdate(targetPos, blockstate);
+            mob.level().setBlockAndUpdate(targetPos, cb.defaultBlockState());
         }
         return succeed();
     }
 
     private void spawnAtTargetPos(ItemStack stackToPlace) {
-        ItemEntity itementity = new ItemEntity(mob.level,
+        ItemEntity itementity = new ItemEntity(mob.level(),
                 targetPos.getX() + 0.5f, targetPos.getY() + 0.5f, targetPos.getZ() + 0.5f,
                 stackToPlace);
         itementity.setDefaultPickUpDelay();
-        mob.level.addFreshEntity(itementity);
+        mob.level().addFreshEntity(itementity);
     }
 
     private boolean canAttackPosition(EntityType<?> type) {
@@ -797,7 +795,7 @@ public class ContractTask {
         var type = mob.getType();
         var source = new Vec3(mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f));
         var diff = target.subtract(source);
-        Level level = mob.getLevel();
+        Level level = mob.level();
         if (type == EntityType.BLAZE) {
             SmallFireball smallfireball = new SmallFireball(level, mob, diff.x, diff.y, diff.z);
             smallfireball.setPos(source.x, source.y, source.z);
@@ -821,10 +819,10 @@ public class ContractTask {
     }
 
     private boolean tryPlaceBlock(BlockPos placePos, ItemStack stack, boolean depleteHand, boolean actuallyPlace) {
-        if (!(stack.getItem() instanceof BlockItem bi) || !mob.level.isEmptyBlock(placePos)) {
+        if (!(stack.getItem() instanceof BlockItem bi) || !mob.level().isEmptyBlock(placePos)) {
             return false;
         }
-        BlockPlaceContext ctx = new BlockPlaceContext(mob.level, null, InteractionHand.MAIN_HAND, stack,
+        BlockPlaceContext ctx = new BlockPlaceContext(mob.level(), null, InteractionHand.MAIN_HAND, stack,
                 new BlockHitResult(
                         new Vec3(placePos.getX() + 0.5f, placePos.getY(), placePos.getZ() + 0.5f),
                         Direction.UP, placePos, false));
@@ -848,7 +846,7 @@ public class ContractTask {
             BindingManager.setHeldItem(mob, stack);
         } else {
             boundGoal.cooldown = 20 * 2;
-            mob.hurt(DamageSource.OUT_OF_WORLD, COBWEB_DAMAGE);
+            mob.hurt(mob.level().damageSources().fellOutOfWorld(), COBWEB_DAMAGE);
         }
         return true;
     }
@@ -862,7 +860,7 @@ public class ContractTask {
             doActionTicks = 0;
             if (taskType == TaskType.BREAK) {
                 blockDamage = -1;
-                mob.level.destroyBlockProgress(mob.getId(), targetPos, -1);
+                mob.level().destroyBlockProgress(mob.getId(), targetPos, -1);
             }
         }
         resetLookIndex();
@@ -883,9 +881,9 @@ public class ContractTask {
 
     private boolean moveTo(int x, int y, int z) {
         if (mob instanceof EnderMan em && boundGoal.cooldown == 0 && mob.position().distanceToSqr(new Vec3(x, y, z)) > 9
-                && mob.level.isEmptyBlock(new BlockPos(x, y + 1, z))
-                && mob.level.isEmptyBlock(new BlockPos(x, y + 2, z))
-                && mob.level.isEmptyBlock(new BlockPos(x, y + 3, z))) {
+                && mob.level().isEmptyBlock(new BlockPos(x, y + 1, z))
+                && mob.level().isEmptyBlock(new BlockPos(x, y + 2, z))
+                && mob.level().isEmptyBlock(new BlockPos(x, y + 3, z))) {
             em.teleportTo(x + 0.5, y + 1, z + 0.5);
             boundGoal.cooldown = 200;
         }
