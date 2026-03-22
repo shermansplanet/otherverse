@@ -10,6 +10,14 @@ public class DynamicSprite extends TextureAtlasSprite {
     private ResourceLocation location;
 
     protected DynamicSprite(ResourceLocation p_250211_, SpriteContents p_248526_, int p_248950_, int p_249741_, int p_248672_, int p_248637_) {
+//      this.atlasLocation = p_250211_;
+//      this.contents = p_248526_;
+//      this.x = p_248672_;
+//      this.y = p_248637_;
+//      this.u0 = (float)p_248672_ / (float)p_248950_;
+//      this.u1 = (float)(p_248672_ + p_248526_.width()) / (float)p_248950_;
+//      this.v0 = (float)p_248637_ / (float)p_249741_;
+//      this.v1 = (float)(p_248637_ + p_248526_.height()) / (float)p_249741_;
         super(p_250211_, p_248526_, p_248950_, p_249741_, p_248672_, p_248637_);
     }
 

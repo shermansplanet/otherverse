@@ -36,9 +36,8 @@ public class HallowTextureManager extends TextureAtlasHolder {
 
     public void quietReload() {
         var pf = Minecraft.getInstance().getProfiler();
-        var prep = SpriteLoader.create(this.textureAtlas).stitch()
-        this.textureAtlas.prepareToStitch(p_118891_, this.getResourcesToLoad().map(this::resolveLocation), p_118892_, 0)
-        this.apply(prep, pf);
+        var prep = SpriteLoader.create(this.textureAtlas).loadAndStitch(Minecraft.getInstance().getResourceManager(), ATLAS_LOCATION, 0,  Minecraft.getInstance());
+        this.apply(prep.join(), pf);
     }
 
     private void apply(SpriteLoader.Preparations p_252333_, ProfilerFiller p_250624_) {

@@ -245,7 +245,6 @@ public class ItemRendererInjector {
         var itemKey = ForgeRegistries.ITEMS.getKey(item);
         var modelLocation = new ModelResourceLocation(itemKey.getNamespace(), itemKey.getPath(), "inventory");
         var model = bakery.getModel(modelLocation);
-        var set = new HashSet<Pair<String, String>>();
 
         model.resolveParents(bakery::getModel);
         List<ResourceLocation> locations = new ArrayList<>();
