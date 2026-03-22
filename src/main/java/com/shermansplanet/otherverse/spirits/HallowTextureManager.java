@@ -10,6 +10,7 @@ import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -21,12 +22,12 @@ import java.util.stream.Stream;
 @OnlyIn(Dist.CLIENT)
 public class HallowTextureManager extends TextureAtlasHolder {
 
-    public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(Otherverse.MODID, "textures/atlas/hallows.png");
+    public static final ResourceLocation ATLAS_LOCATION = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/atlas/hallows.png");
     public static ArrayList<ResourceLocation> hallowResourceLocations = new ArrayList<>();
     public static final HashMap<ResourceLocation, Pair<Integer, Integer>> offsetsByMaterial = new HashMap<>();
 
     public HallowTextureManager(TextureManager p_118802_) {
-        super(p_118802_, ATLAS_LOCATION, "hallow");
+        super(p_118802_, ATLAS_LOCATION, ResourceLocation.parse("hallow"));
     }
 
     protected Stream<ResourceLocation> getResourcesToLoad() {
@@ -35,8 +36,15 @@ public class HallowTextureManager extends TextureAtlasHolder {
 
     public void quietReload() {
         var pf = Minecraft.getInstance().getProfiler();
-        var rm = Minecraft.getInstance().getResourceManager();
-        this.apply(this.prepare(rm, pf), rm, pf);
+        this.apply(this.prepare(rm, pf), pf);
+    }
+
+    private void apply(SpriteLoader.Preparations p_252333_, ProfilerFiller p_250624_) {
+        p_250624_.startTick();
+        p_250624_.push("upload");
+        this.textureAtlas.upload(p_252333_);
+        p_250624_.pop();
+        p_250624_.endTick();
     }
 
     public TextureAtlasSprite getSpritePublic(Pair<ResourceLocation, AbstractTexture> tex, Material material, HashMap<ResourceLocation, DynamicSprite> spriteCache) {

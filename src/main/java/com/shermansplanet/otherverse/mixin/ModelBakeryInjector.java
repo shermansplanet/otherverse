@@ -33,8 +33,6 @@ public abstract class ModelBakeryInjector implements IModelGetter {
     }
 
     @Shadow
-    private Map<ResourceLocation, Pair<TextureAtlas, TextureAtlas.Preparations>> atlasPreparations;
-    @Shadow
     private static final Logger LOGGER = LogUtils.getLogger();
 
     @Shadow

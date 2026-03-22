@@ -41,7 +41,7 @@ public abstract class WitherBossInjector extends Monster implements PowerableMob
                 int k1 = this.getInvulnerableTicks() - 1;
                 this.bossEvent.setProgress(1.0F - (float) k1 / 220.0F);
                 if (k1 <= 0) {
-                    this.level.explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, Explosion.BlockInteraction.NONE);
+                    this.level().explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, Level.ExplosionInteraction.MOB);
                     bossEvent.removeAllPlayers();
                 }
 

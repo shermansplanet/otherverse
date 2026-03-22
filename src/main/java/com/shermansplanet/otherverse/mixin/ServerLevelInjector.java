@@ -5,6 +5,8 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.spirits.Chronomancy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -28,8 +30,9 @@ import java.util.function.Supplier;
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelInjector extends Level implements WorldGenLevel {
 
-    public ServerLevelInjector(WritableLevelData p_220352_, ResourceKey<Level> p_220353_, Holder<DimensionType> p_220354_, Supplier<ProfilerFiller> p_220355_, boolean p_220356_, boolean p_220357_, long p_220358_, int p_220359_) {
-        super(p_220352_, p_220353_, p_220354_, p_220355_, p_220356_, p_220357_, p_220358_, p_220359_);
+
+    protected ServerLevelInjector(WritableLevelData p_270739_, ResourceKey<Level> p_270683_, RegistryAccess p_270200_, Holder<DimensionType> p_270240_, Supplier<ProfilerFiller> p_270692_, boolean p_270904_, boolean p_270470_, long p_270248_, int p_270466_) {
+        super(p_270739_, p_270683_, p_270200_, p_270240_, p_270692_, p_270904_, p_270470_, p_270248_, p_270466_);
     }
 
     @Inject(method = "tickNonPassenger", at = @At("HEAD"), cancellable = true)
@@ -62,16 +65,21 @@ public abstract class ServerLevelInjector extends Level implements WorldGenLevel
             var totalTicks = sections.length * tickCount;
             for (var ignored = 0; ignored < totalTicks; ignored++) {
                 var pos = this.getBlockRandomPos(x, modChunk.getMin(), z, modChunk.getMax() - modChunk.getMin());
-                var levelchunksection = sections[chunk.getSectionIndex(pos.getY())];
-                BlockState blockstate = levelchunksection.getBlockState(pos.getX() - x, pos.getY() - levelchunksection.bottomBlockY(), pos.getZ() - z);
+                int sectionIndex = chunk.getSectionIndex(pos.getY());
+                var levelchunksection = sections[sectionIndex];
+                int j1 = chunk.getSectionYFromSectionIndex(sectionIndex);
+                int k1 = SectionPos.sectionToBlockCoord(j1);
+                BlockState blockstate = levelchunksection.getBlockState(pos.getX() - x, pos.getY() - k1, pos.getZ() - z);
                 tickBlocks(profilerfiller, pos, blockstate);
             }
         } else {
             if (tickCount > 0) {
-                for (LevelChunkSection levelchunksection : chunk.getSections()) {
+                LevelChunkSection[] sections = chunk.getSections();
+                for (int i = 0; i < sections.length; i++) {
+                    LevelChunkSection levelchunksection = sections[i];
                     if (levelchunksection.isRandomlyTicking()) {
-                        int l = levelchunksection.bottomBlockY();
-
+                        int j1 = chunk.getSectionYFromSectionIndex(i);
+                        int l = SectionPos.sectionToBlockCoord(j1);
                         for (int k = 0; k < tickCount; ++k) {
                             BlockPos blockpos1 = this.getBlockRandomPos(x, l, z, 15);
                             BlockState blockstate = levelchunksection.getBlockState(blockpos1.getX() - x, blockpos1.getY() - l, blockpos1.getZ() - z);

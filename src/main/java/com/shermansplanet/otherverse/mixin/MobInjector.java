@@ -45,15 +45,15 @@ public abstract class MobInjector extends LivingEntity {
         var activity = getBrain().getActiveNonCoreActivity();
         if(activity.isPresent() && activity.get() == Activity.FIGHT) return;
         ci.cancel();
-        this.level.getProfiler().push("controls");
-        this.level.getProfiler().push("move");
+        this.level().getProfiler().push("controls");
+        this.level().getProfiler().push("move");
         this.moveControl.tick();
-        this.level.getProfiler().popPush("look");
+        this.level().getProfiler().popPush("look");
         this.lookControl.tick();
-        this.level.getProfiler().popPush("jump");
+        this.level().getProfiler().popPush("jump");
         this.jumpControl.tick();
-        this.level.getProfiler().pop();
-        this.level.getProfiler().pop();
+        this.level().getProfiler().pop();
+        this.level().getProfiler().pop();
         this.sendDebugPackets();
     }
 

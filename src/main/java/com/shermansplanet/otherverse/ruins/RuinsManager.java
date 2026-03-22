@@ -56,16 +56,16 @@ public class RuinsManager {
     @SubscribeEvent
     public static void playerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
-        if (!event.player.level.dimension().location().getPath().equals("ruins")) {
+        if (!event.player.level().dimension().location().getPath().equals("ruins")) {
             skyMultiplier = 1;
             return;
         }
         if (!(event.player instanceof ServerPlayer player)) {
             skyMultiplier = skyMultiplierRaw * 0.2f + skyMultiplier * 0.8f;
-            event.player.level.setRainLevel(1);
+            event.player.level().setRainLevel(1);
             return;
         }
-        var level = player.getLevel();
+        var level = player.serverLevel();
         level.getBiome(player.blockPosition()).unwrapKey().ifPresent(biome -> {
             var path = biome.location().getPath();
             if (!path.equals("ruins_shock") || !lightningPositions.containsKey(player)) {
@@ -95,13 +95,13 @@ public class RuinsManager {
                             var target = player.position().add(player.getLookAngle().scale(lightningDistance));
                             target = target.add(new Vec3(r.nextFloat() - 0.5f, 0, r.nextFloat() - 0.5f)
                                     .normalize().scale(r.nextFloat() * lightningDistance * 0.2f));
-                            var blockTarget = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(target));
+                            var blockTarget = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, BlockPos.containing(target));
                             lightningbolt.moveTo(Vec3.atBottomCenterOf(blockTarget));
                             lightningbolt.setVisualOnly(false);
                             var special = r.nextFloat();
                             if (special < 0.25f || level.isEmptyBlock(blockTarget.below(3))) {
                                 level.explode(lightningbolt, blockTarget.getX(), blockTarget.getY(), blockTarget.getZ(),
-                                        2, Explosion.BlockInteraction.BREAK);
+                                        2, Level.ExplosionInteraction.BLOCK);
                                 for (var dx = -1; dx <= 1; dx++) {
                                     for (var dy = -2; dy <= 0; dy++) {
                                         for (var dz = -1; dz <= 1; dz++) {
@@ -144,14 +144,14 @@ public class RuinsManager {
                     player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 500));
                 }
                 case "ruins_anger" -> {
-                    if (!player.isOnGround() || EnchantmentHelper.hasFrostWalker(player)) return;
+                    if (!player.onGround() || EnchantmentHelper.hasFrostWalker(player)) return;
                     var sandTicks = ticksOnSand.getOrDefault(player, 0);
                     if (!burnBlocks.contains(level.getBlockState(player.blockPosition().below()).getBlock())) {
                         if (sandTicks > 0) sandTicks--;
                     } else if (sandTicks < 40) {
                         sandTicks++;
                     } else {
-                        player.hurt(DamageSource.HOT_FLOOR, 1.0F);
+                        player.hurt(level.damageSources().hotFloor(), 1.0F);
                     }
                     ticksOnSand.put(player, sandTicks);
                 }
@@ -179,7 +179,7 @@ public class RuinsManager {
             return;
 
         ServerLevel level = ((ServerLevel) event.getLevel()).getServer().getLevel(
-                event.getEntity().getLevel().dimension() == Level.OVERWORLD ? ModDimensions.RUINS_KEY : Level.OVERWORLD);
+                event.getEntity().level().dimension() == Level.OVERWORLD ? ModDimensions.RUINS_KEY : Level.OVERWORLD);
         if (level == null) {
             System.out.println("Ruins not found!");
             return;

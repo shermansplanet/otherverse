@@ -45,7 +45,7 @@ public class TyphloticJellyfish extends FlyingMob {
     public void customServerAiStep() {
         age = (age + 1) % 40;
         if (getTarget() == null) {
-            var p = level.getNearestPlayer(TargetingConditions
+            var p = level().getNearestPlayer(TargetingConditions
                             .forCombat()
                             .range(64)
                             .ignoreLineOfSight()

@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -26,17 +25,17 @@ public class OtherverseBlocks {
     public static final RegistryObject<Block> CHALK_LINE = BLOCKS.register("chalk_line",
             ChalkLineBlock::new);
     public static final RegistryObject<Block> WEB_OF_FATE = BLOCKS.register("web_of_fate",
-            () -> new FateWebBlock(BlockBehaviour.Properties.of(Material.WEB).noCollission()));
+            () -> new FateWebBlock(BlockBehaviour.Properties.copy(Blocks.COBWEB).noCollission()));
     public static final RegistryObject<Block> SELECTOR = BLOCKS.register("selector",
-            () -> new SelectorBlock(BlockBehaviour.Properties.of(Material.AIR).noCollission()));
+            () -> new SelectorBlock(BlockBehaviour.Properties.copy(Blocks.AIR).noCollission()));
     public static final RegistryObject<Block> FAMILIAR_CROWN = BLOCKS.register("familiar_crown",
-            () -> new CrownBlock(BlockBehaviour.Properties.of(Material.AIR)));
+            () -> new CrownBlock(BlockBehaviour.Properties.copy(Blocks.AIR)));
     public static final RegistryObject<Block> SLATE_SCAFFOLDING = BLOCKS
             .register("slate_scaffolding", () -> new SlateScaffoldingBlock(
-                    BlockBehaviour.Properties.of(Material.STONE).noCollission().instabreak()));
+                    BlockBehaviour.Properties.copy(Blocks.STONE).noCollission().instabreak()));
     public static final RegistryObject<Block> SALT_CRYSTALS = BLOCKS.register("salt_crystals",
             () -> new AmethystClusterBlock(7, 3,
-                    BlockBehaviour.Properties.of(Material.AMETHYST).sound(SoundType.AMETHYST_CLUSTER).strength(0.3F)));
+                    BlockBehaviour.Properties.copy(Blocks.AMETHYST_CLUSTER).sound(SoundType.AMETHYST_CLUSTER).strength(0.3F)));
     public static final RegistryObject<Block> SULFUR_ORE = BLOCKS.register("sulfur_ore",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.NETHER_QUARTZ_ORE)));
     /*public static final RegistryObject<Block> BEAST_SKULL = BLOCKS.register("beastskull",

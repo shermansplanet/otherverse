@@ -52,8 +52,8 @@ public abstract class LivingEntityInjector extends Entity implements net.minecra
         var player = (Player) self();
         if (!FamiliarManager.hasFamiliarType(player, EntityType.SPIDER)) return;
         var pos = player.blockPosition().relative(player.getDirection());
-        var state = player.getLevel().getBlockState(pos);
-        if (state.getCollisionShape(player.level, pos).isEmpty()) return;
+        var state = player.level().getBlockState(pos);
+        if (state.getCollisionShape(player.level(), pos).isEmpty()) return;
         ci.setReturnValue(true);
         ci.cancel();
     }

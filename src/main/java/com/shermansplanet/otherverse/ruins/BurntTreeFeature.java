@@ -59,7 +59,7 @@ public class BurntTreeFeature extends Feature<NoneFeatureConfiguration> {
         var realdir = dir.scale(0.8f);
         for (var i = 0; i < length; i++) {
             pos = pos.add(realdir);
-            var blockPos = new BlockPos(pos);
+            var blockPos = BlockPos.containing(pos);
             level.setBlock(blockPos, getBlockstate(lerp, r), 2);
             if (blocksRemaining > 25) {
                 level.setBlock(blockPos.north(), getBlockstate(lerp, r), 2);
@@ -78,7 +78,7 @@ public class BurntTreeFeature extends Feature<NoneFeatureConfiguration> {
             lerp += lerpStep;
         }
         if (blocksRemaining == length) {
-            level.setBlock(new BlockPos(pos).above(), getRandomCoralTop(r), 2);
+            level.setBlock(BlockPos.containing(pos).above(), getRandomCoralTop(r), 2);
             return;
         }
         blocksRemaining -= length;

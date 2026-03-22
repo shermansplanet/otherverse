@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.spirits;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.Item;
 
@@ -17,7 +18,7 @@ public class ColorSpiritMessage {
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeInt(colorSpiritMappings.size());
         for (var entry : colorSpiritMappings.entrySet()) {
-            buffer.writeId(Registry.ITEM, entry.getKey());
+            buffer.writeId(BuiltInRegistries.ITEM, entry.getKey());
             buffer.writeByte(entry.getValue().length);
             for (var i = 0; i < entry.getValue().length; i++) {
                 var spirit = entry.getValue()[i];
@@ -31,7 +32,7 @@ public class ColorSpiritMessage {
         var sto = new HashMap<Item, SpiritLabeler.SpiritAmount[]>();
         var itemCount = buffer.readInt();
         for (var i = 0; i < itemCount; i++) {
-            var item = buffer.readById(Registry.ITEM);
+            var item = buffer.readById(BuiltInRegistries.ITEM);
             var spiritCount = buffer.readByte();
             var spirits = new SpiritLabeler.SpiritAmount[spiritCount];
             for (var ii = 0; ii < spiritCount; ii++) {
