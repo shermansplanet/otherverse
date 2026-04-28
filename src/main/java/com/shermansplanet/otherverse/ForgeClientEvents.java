@@ -3,8 +3,10 @@ package com.shermansplanet.otherverse;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -32,5 +34,16 @@ public class ForgeClientEvents {
         var slot = containerScreen.getSlotUnderMouse();
         if (slot == null) return;
         if (ImplementManager.isImplement(slot.getItem())) event.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void renderFog(ViewportEvent.RenderFog event) {
+        var player = Minecraft.getInstance().player;
+        if (!player.level().dimension().location().getPath().equals("ruins")) return;
+        if (player.getEyeInFluidType() != net.minecraftforge.common.ForgeMod.EMPTY_TYPE.get()) return;
+        if (player.isInPowderSnow) return;
+        event.setNearPlaneDistance(-32);
+        event.setFarPlaneDistance(200);
+        event.setCanceled(true);
     }
 }

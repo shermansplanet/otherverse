@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.block.model.ItemModelGenerator;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.block.model.multipart.MultiPart;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
@@ -38,10 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 @Mixin(ItemRenderer.class)
@@ -246,22 +244,27 @@ public class ItemRendererInjector {
         var modelLocation = new ModelResourceLocation(itemKey.getNamespace(), itemKey.getPath(), "inventory");
         var model = bakery.getModel(modelLocation);
 
+        System.out.println("GOT MODEL: " + modelLocation);
+        System.out.println("MODEL TYPE: " + model.getClass().getName());
+
         model.resolveParents(bakery::getModel);
         List<ResourceLocation> locations = new ArrayList<>();
+        Set<BlockModel> blockModels = new HashSet<>();
+        HallowTextureManager.GetBlockModels(model, blockModels);
 
-        if(model instanceof BlockModel blockModel) {
-            for (int i = 0; i < ItemModelGenerator.LAYERS.size(); ++i) {
-                String s = ItemModelGenerator.LAYERS.get(i);
-                if (!blockModel.hasTexture(s)) {
-                    break;
-                }
-
+        for(BlockModel blockModel : blockModels) {
+            for (var s : blockModel.textureMap.keySet()) {
+                System.out.println(s);
                 Material material = blockModel.getMaterial(s);
-                if (material.texture().getPath().equals("missingno")) continue;
-                locations.add(ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
-                        "textures/" + material.texture().getPath() + ".png"));
+                System.out.println(material.texture());
+                if (MissingTextureAtlasSprite.getLocation().equals(material.texture())) continue;
+                var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
+                        "textures/" + material.texture().getPath() + ".png");
+                if(locations.contains(rl)) continue;
+                locations.add(rl);
             }
         }
+        if(locations.isEmpty()) return null;
         var primaryTex = MobRetexturer.makeSpiritVariant(locations, spiritName);
         if (primaryTex == null) {
             return null;

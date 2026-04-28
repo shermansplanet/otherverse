@@ -1,0 +1,7 @@
+{
+	"other" : "alexscaves:brainiac",
+	"spirit": "death",
+	"healing" : {
+		"alexscaves:waste_drum" : 10
+	}
+}

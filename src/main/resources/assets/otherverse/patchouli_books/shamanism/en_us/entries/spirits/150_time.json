@@ -1,19 +1,19 @@
 {
-    "name": "Time",
-    "sortnum": 140,
-    "icon": "otherverse:spirit_time",
-    "category": "otherverse:spirits",
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": {
-                "item": "otherverse:spirit_time"
-            },
-            "text": "If an entity enters a block focus influenced by a time hallow, it will become \"paused\" - arrows will freeze midair, TNT will stop counting down, mobs will stop moving, and so on. Keeping an entity paused consumes one time spirit per second."
-        },
-        {
-            "type": "patchouli:text",
-            "text": "As mentioned in Essentials, random ticks can be turned into time spirits. If a block influence of a time hallow would be randomly ticked, it will yield nine time spirits (so long as the time hallow has room) and will not be ticked."
-        }
-    ]
+  "name": "Time",
+  "sortnum": 140,
+  "icon": "otherverse:spirit_time",
+  "category": "otherverse:spirits",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": {
+        "item": "otherverse:spirit_time"
+      },
+      "text": "As mentioned in Essentials, random ticks can be turned into time spirits. If a block influence of a time hallow would be randomly ticked, it will yield nine time spirits (so long as the time hallow has room) and will not be ticked."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "If an entity enters a block focus influenced by a time hallow, it will become \"paused\" - arrows will freeze midair, TNT will stop counting down, mobs will stop moving, and so on. Keeping an entity paused consumes one time spirit per second. Time- and Fate-aligned mobs are immune to this effect."
+    }
+  ]
 }

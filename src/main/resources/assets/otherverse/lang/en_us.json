@@ -55,6 +55,8 @@
     "block.otherverse.demesne_beacon" : "Demesnes Beacon",
     "item.otherverse.biome_brazier" : "Biome Brazier",
     "block.otherverse.biome_brazier" : "Biome Brazier",
+    "item.otherverse.redstone_nether_bricks" : "Redstone Nether Bricks",
+    "block.otherverse.redstone_nether_bricks" : "Redstone Nether Bricks",
 
     "effect.otherverse.heaviness" : "Heaviness",
     "effect.otherverse.familiar_blessing" : "Familiar's Blessing",
@@ -140,5 +142,8 @@
     "item.otherverse.spirit_magenta": "Magenta Spirits",
     "item.otherverse.spirit_pink": "Pink Spirits",
 
-    "item.otherverse.spirit_tablet": "Spirit Tablet"
+    "item.otherverse.spirit_tablet": "Spirit Tablet",
+
+    "entity.otherverse.typhlotic_shark": "Typhlotic Shark",
+    "entity.otherverse.typhlotic_jellyfish": "Typhlotic Jellyfish"
 }

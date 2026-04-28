@@ -1,7 +1,7 @@
 {
   "temperature": 0,
   "downfall": 0.4,
-  "precipitation": "snow",
+  "has_precipitation": true,
   "effects": {
     "sky_color": 0,
     "fog_color": 1842204,
@@ -20,9 +20,9 @@
     "monster": [
       {
         "type": "otherverse:typhlotic_shark",
-        "weight": 100,
+        "weight": 1,
         "minCount": 1,
-        "maxCount": 2
+        "maxCount": 1
       }
     ]
   },

@@ -53,9 +53,9 @@ public class SpiritLabeler {
                 @Override
                 public boolean synthesize() {
                     LOGGER.debug("SPIRIT LABELER: SYNTHESIZING");
-                    if(SPIRITS_FROM_TAGS.data == null) LOGGER.debug("NO SPIRITS FROM TAGS");
-                    if(SPIRITS_FROM_COLORS.data == null) LOGGER.debug("NO SPIRITS FROM COLORS");
-                    if(SPIRITS_FROM_JSON.data == null) LOGGER.debug("NO SPIRITS FROM JSON");
+                    if (SPIRITS_FROM_TAGS.data == null) LOGGER.debug("NO SPIRITS FROM TAGS");
+                    if (SPIRITS_FROM_COLORS.data == null) LOGGER.debug("NO SPIRITS FROM COLORS");
+                    if (SPIRITS_FROM_JSON.data == null) LOGGER.debug("NO SPIRITS FROM JSON");
                     for (var component : components) {
                         if (component.data == null) return false;
                     }
@@ -65,13 +65,13 @@ public class SpiritLabeler {
                     itemsWithoutSpirits.add(OtherverseItems.SELF.get());
                     itemsWithoutSpirits.add(OtherverseItems.SPIRIT_TABLET.get());
                     itemsWithoutSpirits.add(OtherverseItems.IDOL.get());
-                    for(var item : Spirits.spiritItems.values()){
+                    for (var item : Spirits.spiritItems.values()) {
                         itemsWithoutSpirits.add(item.get());
                     }
                     data = new HashMap<>();
                     for (var component : Arrays.stream(components).map(t -> (HashMap<Item, SpiritLabeler.SpiritAmount[]>) t.data).toList()) {
                         for (var itemAmount : component.entrySet()) {
-                            if(itemsWithoutSpirits.contains(itemAmount.getKey())) continue;
+                            if (itemsWithoutSpirits.contains(itemAmount.getKey())) continue;
                             var table = data.computeIfAbsent(itemAmount.getKey(), x -> new Hashtable<>());
                             for (var spiritAmount : itemAmount.getValue()) {
                                 if (spiritAmount.amount() == 0) continue;
@@ -134,7 +134,7 @@ public class SpiritLabeler {
         var spirits = practice.get("spirits").getAsJsonObject();
         for (var itemstring : spirits.keySet()) {
             var loc = ResourceLocation.parse(itemstring);
-            if(!ForgeRegistries.ITEMS.containsKey(loc)) continue;
+            if (!ForgeRegistries.ITEMS.containsKey(loc)) continue;
             Item item = ForgeRegistries.ITEMS.getValue(loc);
             var spiritcounts = spirits.get(itemstring).getAsJsonArray();
             SpiritAmount[] amounts = new SpiritAmount[spiritcounts.size()];
@@ -182,6 +182,8 @@ public class SpiritLabeler {
             }
             ArrayList<SpiritAmount> spiritAmounts = new ArrayList<>();
 
+            var modId = ForgeRegistries.ITEMS.getKey(item).getNamespace();
+
             for (SpiritType spiritType : yieldingSpiritTypes) {
                 if (item == Spirits.spiritItems.get(spiritType).get()) {
                     spiritAmounts.add(new SpiritAmount(spiritType, 3));
@@ -204,13 +206,15 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Items.SAND, Spirits.TIME, 1);
             AddForTag(item, spiritAmounts, ItemTags.CANDLES, Spirits.TIME, 3);
 
-            AddForTag(item, spiritAmounts, Items.ARMORS, Spirits.PROTECTION,
-                    i -> i instanceof ArmorItem a ? (int) ((a.getDefense() + a.getToughness()) * 9) : 1);
-            AddForTag(item, spiritAmounts, Items.BONES, Spirits.DEATH, 9);
+            if (item instanceof ArmorItem a) {
+                spiritAmounts.add(new SpiritAmount(Spirits.PROTECTION, (int) ((a.getDefense() + a.getToughness()) * 9)));
+            }
 
             if (item instanceof HorseArmorItem horseArmor) {
                 spiritAmounts.add(new SpiritAmount(Spirits.PROTECTION, horseArmor.getProtection()));
             }
+
+            AddForTag(item, spiritAmounts, Items.BONES, Spirits.DEATH, 9);
 
             SpiritAmountDeterminer tierFunc = i -> i instanceof TieredItem t ?
                     (int) (t.getTier().getAttackDamageBonus() + t.getTier().getSpeed()) : 7;
@@ -263,6 +267,7 @@ public class SpiritLabeler {
             }
 
             if (item.isEdible()) {
+                if (modId.equals("macabre")) spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 9));
                 var foodProps = item.getDefaultInstance().getFoodProperties(null);
                 int foodAmount = 1;
                 if (foodProps != null) {
@@ -302,6 +307,7 @@ public class SpiritLabeler {
                     spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
                 }
             }
+
 
             if (spiritAmounts.isEmpty()) {
                 continue;

@@ -34,7 +34,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                             MultiBufferSource multiBufferSource, float dx, float dz, float scale) {
         if (chalkCircle.animationTime < 0) {
             poseStack.translate(0.5f + dx, 0.0625D, 0.5f + dz);
-            poseStack.mulPose(new Quaternionf().rotateX(90));
+            poseStack.mulPose(new Quaternionf().rotateX(Mth.PI/2));
         } else {
             if (Minecraft.getInstance().isPaused()) {
                 return;
@@ -69,7 +69,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                 var s = Math.min(1, (10000 - t) / 200f);
 
                 poseStack.pushPose();
-                poseStack.mulPose(new Quaternionf().rotateY((float) -chalkCircle.angleDegrees));
+                poseStack.mulPose(new Quaternionf().rotateY((float) -chalkCircle.angleDegrees * Mth.TWO_PI / 360));
 
                 var fade1 = (int) Math.max(0, (5000 - t) * 255 / 1000);
                 drawPolygon(poseStack, multiBufferSource, side, up, 4, 0.85f * s, r, 255, fade1, fade1, 255);
@@ -93,7 +93,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
             }
             var spin = isSpecial ? (float) Math.pow(t, 2.1) / 40000f : 0;
             poseStack.mulPose(new Quaternionf().rotateXYZ(
-                    90 * (1 - riseLerp), 360 * riseLerp + spin, 0));
+                    Mth.PI/2 * (1 - riseLerp), Mth.TWO_PI * riseLerp + spin, 0));
         }
         poseStack.scale(scale, scale, scale);
         this.itemRenderer.renderStatic(chalkCircle.item, ItemDisplayContext.FIXED, lightVal,
@@ -113,7 +113,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
         }
         poseStack.pushPose();
         poseStack.translate(0.5f, 0.0f, 0.5f);
-        poseStack.mulPose(new Quaternionf().rotateY((float) chalkCircle.angleDegrees));
+        poseStack.mulPose(new Quaternionf().rotateY((float) chalkCircle.angleDegrees * Mth.TWO_PI / 360));
         poseStack.translate(-0.5f, 0.0f, -0.5f);
 
         if (itemstack.is(OtherverseItems.SELF.get())) {

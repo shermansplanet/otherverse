@@ -67,11 +67,11 @@ public class DemesnesBeaconRenderer implements BlockEntityRenderer<DemesnesBeaco
                 pose.translate(0, 0, 5);
                 var newMatrix = pose.last().pose();
                 hoverName = hoverName.copy().withStyle(Style.EMPTY.withColor(0));
-                font.drawInBatch(hoverName, dx, dy, 0xaa000000, false, newMatrix, buffers, Font.DisplayMode.NORMAL, 0xff000000, 0);
+                font.drawInBatch(hoverName, dx, dy, 0xaa000000, false, newMatrix, buffers, Font.DisplayMode.SEE_THROUGH, 0xff000000, 0);
                 hoverName = hoverName.copy().withStyle(Style.EMPTY.withColor(0xbcff00));
                 pose.popPose();
             }
-            font.drawInBatch(hoverName, dx, dy, tint, false, matrix4f, buffers, Font.DisplayMode.NORMAL, 0, 0xf000f0);
+            font.drawInBatch(hoverName, dx, dy, tint, false, matrix4f, buffers, Font.DisplayMode.SEE_THROUGH, 0, 0xf000f0);
             pose.popPose();
         }
         if (beacon.clientData == null) beacon.recalculatePositions();

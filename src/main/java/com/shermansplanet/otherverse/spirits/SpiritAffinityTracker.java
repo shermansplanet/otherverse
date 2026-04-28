@@ -107,7 +107,7 @@ public class SpiritAffinityTracker {
     }
 
     private static void markUpdated(ServerPlayer player) {
-        DiagramManager.getOrCreateLevelData(player.getLevel().getServer().overworld()).savedData.setDirty();
+        DiagramManager.getOrCreateLevelData(player.serverLevel().getServer().overworld()).savedData.setDirty();
     }
 
     private static SpiritAffinitySet getAffinities(ServerPlayer player) {

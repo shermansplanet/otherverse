@@ -1,0 +1,11 @@
+{
+	"other" : "alexscaves:notor",
+	"spirit": "technology",
+	"transfusion" : [
+		{
+			"input": "minecraft:redstone_torch",
+			"health": 3,
+			"output": "alexscaves:notor_gizmo"
+		}
+	]
+}

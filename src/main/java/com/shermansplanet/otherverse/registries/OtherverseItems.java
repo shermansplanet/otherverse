@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.registries;
 
+import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.artifacts.BrazierItem;
 import com.shermansplanet.otherverse.artifacts.RealmWrackedCoalItem;
@@ -21,13 +22,14 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class OtherverseItems {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, Otherverse.MODID);
@@ -50,6 +52,7 @@ public class OtherverseItems {
             SPINDLES.add(spindle);
         }
     }
+
     public static final RegistryObject<Item> CHALK = ITEMS.register("chalk",
             () -> new ChalkItem(new Item.Properties().durability(64)));
     public static final RegistryObject<Item> CHARCOAL_STICK = ITEMS.register("charcoal_stick",
@@ -85,6 +88,8 @@ public class OtherverseItems {
             () -> new BlockItem(OtherverseBlocks.CINNABAR_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> DEMESNE_BEACON = ITEMS.register("demesne_beacon",
             () -> new BlockItem(OtherverseBlocks.DEMESNE_BEACON.get(), new Item.Properties()));
+    public static final RegistryObject<Item> REDSTONE_NETHER_BRICKS = ITEMS.register("redstone_nether_bricks",
+            () -> new BlockItem(OtherverseBlocks.REDSTONE_NETHER_BRICKS.get(), new Item.Properties()));
     public static final RegistryObject<Item> WRIT = ITEMS.register("writ",
             () -> new WritItem(new Item.Properties()));
     public static final RegistryObject<Item> ESCAPE_ROPE = ITEMS.register("escape_rope",
@@ -141,19 +146,4 @@ public class OtherverseItems {
             () -> new BlockItem(OtherverseBlocks.GILDED_TRUCHET.get(), new Item.Properties()));
     public static final RegistryObject<Item> CANDYCANE = ITEMS.register("candycane",
             () -> new BlockItem(OtherverseBlocks.CANDYCANE.get(), new Item.Properties()));
-
-    @SubscribeEvent
-    public void buildContents(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == Otherverse.TAB_PRACTICE.getKey()) {
-            for(var item : ITEMS.getEntries()){
-                if(item.get() instanceof SpiritItem) continue;
-                event.accept(item);
-            }
-        }
-        if (event.getTabKey() == Otherverse.TAB_SPIRITS.getKey()) {
-            for(var item : ITEMS.getEntries()){
-                if(item.get() instanceof SpiritItem) event.accept(item);
-            }
-        }
-    }
 }

@@ -155,8 +155,10 @@ public class MobTransfusions {
             for (JsonElement transfusionElement : practice.getAsJsonArray("transfusion")) {
                 JsonObject transfusion = transfusionElement.getAsJsonObject();
                 for (var item : getItemOrShortcut(transfusion.get("input").getAsString())) {
+                    var loc = ResourceLocation.parse(transfusion.get("output").getAsString());
+                    if(!ForgeRegistries.ITEMS.containsKey(loc)) continue;
                     register(other, item.item,
-                            ForgeRegistries.ITEMS.getValue(new ResourceLocation(transfusion.get("output").getAsString())).getDefaultInstance(),
+                            ForgeRegistries.ITEMS.getValue(loc).getDefaultInstance(),
                             transfusion.get("health").getAsInt(),
                             false
                     );

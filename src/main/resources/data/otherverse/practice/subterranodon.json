@@ -1,0 +1,9 @@
+{
+	"other" : "alexscaves:subterranodon",
+	"spirit": "time",
+	"healing" : {
+		"minecraft:cod" : 3,
+		"minecraft:cooked_cod" : 6,
+		"alexscaves:trilocaris_tail" : 9
+	}
+}

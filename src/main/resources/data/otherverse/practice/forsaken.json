@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:forsaken",
+	"spirit": "dark",
+	"healing" : {
+		"entity.alexscaves.gloomoth" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:ender_eye",
+			"health" : 66,
+			"output" : "alexscaves:pure_darkness"
+		}
+	]
+}

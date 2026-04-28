@@ -1,0 +1,11 @@
+{
+	"other" : "alexscaves:ferrouslime",
+	"spirit": "technology",
+	"transfusion" : [
+		{
+			"input" : "minecraft:slime",
+			"health" : 9,
+			"output" : "alexscaves:ferrouslime_ball"
+		}
+	]
+}

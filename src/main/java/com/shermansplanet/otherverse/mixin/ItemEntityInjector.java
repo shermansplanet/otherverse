@@ -23,7 +23,7 @@ public abstract class ItemEntityInjector extends Entity {
     }
 
     @Shadow
-    public Entity getThrowingEntity() {
+    public Entity getOwner() {
         return null;
     }
 
@@ -36,7 +36,7 @@ public abstract class ItemEntityInjector extends Entity {
     private void onSetUnderwaterMovement(CallbackInfo ci) {
         //if (level.getGameTime() % 4 != 0) return;
 
-        var throwingEntity = getThrowingEntity();
+        var throwingEntity = getOwner();
         if (!(throwingEntity instanceof ServerPlayer sp)) return;
 
         var item = getItem();

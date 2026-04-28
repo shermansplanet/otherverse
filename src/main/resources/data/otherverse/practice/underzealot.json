@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:underzealot",
+	"spirit": "dark",
+	"healing" : {
+		"otherverse:spirit_earth" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:black_wool",
+			"health" : 3,
+			"output" : "alexscaves:dark_tatters"
+		}
+	]
+}

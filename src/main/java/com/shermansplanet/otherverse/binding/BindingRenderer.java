@@ -4,8 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.ReskinManager;
+import com.shermansplanet.otherverse.SightManager;
 import com.shermansplanet.otherverse.registries.CrownBlock;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -39,6 +41,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.slf4j.Logger;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -139,15 +143,31 @@ public class BindingRenderer {
     public static void onLivingRender(RenderLivingEvent.Pre<?, ?> event) {
         var entityId = event.getEntity().getUUID();
         var contractOnly = false;
+        if (itemRenderer == null) {
+            itemRenderer = Minecraft.getInstance().getItemRenderer();
+        }
         if (!boundEntities.contains(entityId)) {
             if (contractEntities.contains(entityId)) {
                 contractOnly = true;
             } else {
+                LivingEntity mob = event.getEntity();
+                if (SightManager.shouldRenderSight() && System.currentTimeMillis() % 1000 < 500 && mob.getHealth() <= FleshbindingManager.FLESHBINDING_HP) {
+                    PoseStack pose = event.getPoseStack();
+                    pose.pushPose();
+                    var bounds = mob.getBoundingBox();
+                    var s = (float) bounds.getSize() / 2f;
+                    pose.translate(0, bounds.getYsize() + 0.3, 0);
+                    pose.scale(s, s, s);
+                    var partialTick = Minecraft.getInstance().getPartialTick();
+                    var renderPoint = mob.getPosition(partialTick).add(0, bounds.getYsize() + 0.3, 0);
+                    var toCam = Minecraft.getInstance().cameraEntity.getEyePosition(partialTick).subtract(renderPoint);
+                    pose.mulPose(new Quaternionf().lookAlong(toCam.toVector3f(), new Vector3f(0,1,0)).invert());
+                    itemRenderer.renderStatic(OtherverseItems.SELF.get().getDefaultInstance(), ItemDisplayContext.FIXED, event.getPackedLight(),
+                            OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
+                    pose.popPose();
+                }
                 return;
             }
-        }
-        if (itemRenderer == null) {
-            itemRenderer = Minecraft.getInstance().getItemRenderer();
         }
         if (blockRenderer == null) {
             blockRenderer = Minecraft.getInstance().getBlockRenderer();
@@ -174,7 +194,7 @@ public class BindingRenderer {
         float rot = (contractEntities.contains(mob.getUUID()) || isFamiliar) ? (millis % 3600) / 10f : -mob.yHeadRot;
         var s = 10f / 16f;
         pose.scale(s, s, s);
-        pose.mulPose(new Quaternionf().rotateY(rot));
+        pose.mulPose(new Quaternionf().rotateY(rot * Mth.TWO_PI / 360));
         pose.pushPose();
         if (isFamiliar || contractOnly) {
             pose.translate(-0.5f, -0.4f, -0.5f);
@@ -183,12 +203,12 @@ public class BindingRenderer {
                     pose, event.getMultiBufferSource(),
                     event.getPackedLight(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
         } else {
-            pose.mulPose(new Quaternionf().rotateZ(90));
+            pose.mulPose(new Quaternionf().rotateZ(Mth.PI / 2));
             for (int i = 0; i < 4; i++) {
                 pose.pushPose();
-                pose.mulPose(new Quaternionf().rotateXYZ(90, 90, 90 * i));
+                pose.mulPose(new Quaternionf().rotateXYZ(Mth.PI / 2, Mth.PI / 2, Mth.PI / 2 * i));
                 pose.translate(0.4f, 0f, 0f);
-                pose.mulPose(new Quaternionf().rotateXYZ(0, 90, 0));
+                pose.mulPose(new Quaternionf().rotateXYZ(0, Mth.PI / 2, 0));
                 itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemDisplayContext.FIXED, event.getPackedLight(),
                         OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
                 pose.popPose();

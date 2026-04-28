@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:watcher",
+	"spirit": "dark",
+	"healing" : {
+		"otherverse:fate" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:diamond",
+			"health" : 13,
+			"output" : "alexscaves:occult_gem"
+		}
+	]
+}

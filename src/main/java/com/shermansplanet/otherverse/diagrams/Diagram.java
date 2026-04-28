@@ -172,10 +172,10 @@ public class Diagram {
                 || MobTransfusions.tryFeed(level, circle, this)
                 || HallowHelper.tryHallow(level, circle, this)
                 || MobTransfusions.tryFeedFromMob(circle, this)
+                || ConnectionBlockManager.tryMakeBlocker(level, circle, this)
                 || ContractManager.tryMakeContract(level, circle, this)
                 || FleshbindingManager.tryCinnabind(level, circle, this)
-                || DemesnesManager.tryMakePortal(level, circle, this)
-                || ConnectionBlockManager.tryMakeBlocker(level, circle, this);
+                || DemesnesManager.tryMakePortal(level, circle, this);
 
         if (!needsReactivation) {
             HallowHelper.tryFillHallow(level, circle, this);

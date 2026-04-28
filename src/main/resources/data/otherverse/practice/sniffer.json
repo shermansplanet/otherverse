@@ -1,0 +1,19 @@
+{
+	"other" : "minecraft:sniffer",
+	"spirit" : "time",
+	"healing" : {
+		"minecraft:torchflower" : 7
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:wheat_seeds",
+			"health" : 7,
+			"output" : "minecraft:torchflower_seeds"
+		},
+		{
+			"input" : "minecraft:beetroot_seeds",
+			"health" : 7,
+			"output" : "minecraft:pitcher_pod"
+		}
+	]
+}

@@ -16,7 +16,7 @@ public class SpindleItem extends Item {
 
     public static BlockPos getBlockPos(Player player, BlockHitResult hitResult) {
         var selectedBlockPosition = hitResult.getBlockPos();
-        var block = player.level.getBlockState(selectedBlockPosition);
+        var block = player.level().getBlockState(selectedBlockPosition);
         if (!(block.is(OtherverseBlocks.CHALK_LINE.get()) || block.is(OtherverseBlocks.WEB_OF_FATE.get()))) {
             var dir = hitResult.getDirection();
             var vecToCam = player.getEyePosition().subtract(hitResult.getLocation()).normalize();

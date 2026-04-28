@@ -5,7 +5,7 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-version = '1.20.1-1.0.2'
+version = '1.20.1-1.1.4'
 group = 'com.shermansplanet.otherverse' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'otherverse'
 
@@ -165,10 +165,10 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.1'
 
     // compile against the JEI API but do not include it at runtime
-    compileOnly("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
-    compileOnly("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
     // at runtime, use the full JEI jar for Forge
-    runtimeOnly("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 //
 //    compileOnly ("vazkii.patchouli:Patchouli:${mc_version}-85:api")
 //    runtimeOnly ("vazkii.patchouli:Patchouli:${mc_version}-85")
@@ -185,7 +185,7 @@ dependencies {
     compileOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:${caelus_version}:api")
     runtimeOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:${caelus_version}")
 
-    implementation ("com.github.Virtuoel:Pehkui:3.8.2-1.20.1-forge")
+    implementation  fg.deobf("com.github.Virtuoel:Pehkui:3.8.2-1.20.1-forge")
 }
 
 mixin {

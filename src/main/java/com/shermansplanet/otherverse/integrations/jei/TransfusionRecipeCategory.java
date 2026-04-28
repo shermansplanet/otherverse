@@ -44,6 +44,16 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
     }
 
     @Override
+    public int getWidth() {
+        return 100;
+    }
+
+    @Override
+    public int getHeight() {
+        return 32;
+    }
+
+    @Override
     public RecipeType<TransfusionRecipe> getRecipeType() {
         return TYPE;
     }
@@ -81,6 +91,6 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
         overlay.draw(graphics, 18, 8);
         RenderSystem.disableBlend();
         String s = recipe.cost + (recipe.isMob ? (recipe.transfusionSources.size() > 1 ? " total HP" : " HP") : "");
-        graphics.drawString(mc.font, s, 50 - s.length() * 3, 20, 0x333333);
+        graphics.drawString(mc.font, s, 50 - s.length() * 3, 20, 0x333333, false);
     }
 }

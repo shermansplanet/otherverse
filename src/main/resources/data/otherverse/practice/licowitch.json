@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:licowitch",
+	"spirit": "food",
+	"healing" : {
+		"alexscaves:licoroot_vine" : 3
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:honey_bottle",
+			"health" : 16,
+			"output" : "alexscaves:radiant_essence"
+		}
+	]
+}

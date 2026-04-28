@@ -1,0 +1,17 @@
+{
+	"other" : "alexscaves:luxtructosaurus",
+	"spirit": "war",
+	"binding" : {
+		"alexscaves:amber" : 30
+	},
+	"healing" : {
+		"otherverse:spirit_fire" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:fire_charge",
+			"health" : 66,
+			"output" : "alexscaves:tectonic_shard"
+		}
+	]
+}

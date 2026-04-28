@@ -88,7 +88,7 @@ public class IdolRenderer extends BlockEntityWithoutLevelRenderer {
             renderEntity.setYBodyRot(0);
             renderEntity.setYHeadRot(0);
         }*/
-        AABB bounds = renderEntity.getBoundingBoxForCulling();
+        AABB bounds = renderEntity.getBoundingBox();
         poseStack.pushPose();
 
         float scaleFactor = 0.5f / (float) Math.max(Math.max(bounds.getXsize(), bounds.getYsize() * 0.66f), bounds.getZsize());
@@ -97,7 +97,6 @@ public class IdolRenderer extends BlockEntityWithoutLevelRenderer {
             scaleFactor *= 0.4f;
             poseStack.translate(0, 0.3, 0);
         }
-        else if (entityType == EntityType.GHAST) scaleFactor *= 0.6f;
         else if (entityType == EntityType.ENDER_DRAGON) scaleFactor *= 4;
 
         if (transformType == ItemDisplayContext.GUI) {

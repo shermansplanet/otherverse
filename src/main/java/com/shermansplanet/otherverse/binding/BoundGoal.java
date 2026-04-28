@@ -387,7 +387,7 @@ public class BoundGoal extends Goal {
                 return;
             }
             if (!isAttacking) {
-                var limit = isLoyaltyBound ? 6 : 2;
+                var limit = isLoyaltyBound ? 6 : 4;
                 if (dist > limit * limit) {
                     if (mob instanceof Shulker shulker) {
                         if (dist > 12 * 12) {
@@ -428,8 +428,8 @@ public class BoundGoal extends Goal {
                 if (otherMob.getTarget() == mob) {
                     targetMob = otherMob;
                 }
-                if (mob.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
-                    var otherMobTarget = mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
+                if (otherMob.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
+                    var otherMobTarget = otherMob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
                     if (otherMobTarget.isPresent() && otherMobTarget.get() == practitioner) {
                         targetMob = otherMob;
                         break;
@@ -453,8 +453,9 @@ public class BoundGoal extends Goal {
     }
 
     public static boolean isAttackGoal(Goal g) {
-        return g instanceof MeleeAttackGoal || g instanceof RangedAttackGoal || g instanceof SwellGoal
-                || g.getClass().getName().toLowerCase().contains("attack");
+        if (g instanceof MeleeAttackGoal || g instanceof RangedAttackGoal || g instanceof SwellGoal) return true;
+        var name = g.getClass().getName().toLowerCase();
+        return name.contains("attack") || name.contains("melee");
     }
 
     public void startAttacking(LivingEntity targetMob) {
@@ -494,9 +495,9 @@ public class BoundGoal extends Goal {
 
     public void sendDebugMessage(Player entity) {
         var s = new StringBuilder();
-        if(currentTask == null){
+        if (currentTask == null) {
             s.append("no task");
-        }else{
+        } else {
             currentTask.getDebugMessage(s);
         }
         entity.sendSystemMessage(Component.literal(s.toString()));
@@ -715,7 +716,7 @@ public class BoundGoal extends Goal {
     public ContractDecider makeDecider(CompoundTag tag) {
         ContractDecider decider = new ContractDecider();
         for (String key : tag.getAllKeys()) {
-            if(key.equals("range")) continue;
+            if (key.equals("range")) continue;
             if (key.equals("fallback")) {
                 decider.fallback = makeDecider(tag.getCompound(key));
             } else {

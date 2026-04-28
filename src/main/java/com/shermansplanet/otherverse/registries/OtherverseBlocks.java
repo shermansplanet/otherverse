@@ -7,6 +7,7 @@ import com.shermansplanet.otherverse.demesnes.DemesnesBeaconBlock;
 import com.shermansplanet.otherverse.demesnes.DemesnesPortalBlock;
 import com.shermansplanet.otherverse.diagrams.ChalkLineBlock;
 import com.shermansplanet.otherverse.diagrams.SlateScaffoldingBlock;
+import com.shermansplanet.otherverse.ruins.RedstoneNetherBricksBlock;
 import com.shermansplanet.otherverse.sympathy.FateWebBlock;
 import com.shermansplanet.otherverse.sympathy.SelectorBlock;
 import net.minecraft.world.level.block.AmethystClusterBlock;
@@ -52,6 +53,8 @@ public class OtherverseBlocks {
             () -> new DemesnesBeaconBlock(BlockBehaviour.Properties.copy(Blocks.BEACON)));
     public static final RegistryObject<Block> DEMESNE_PORTAL = BLOCKS.register("demesne_portal",
             () -> new DemesnesPortalBlock(BlockBehaviour.Properties.copy(Blocks.AIR)));
+    public static final RegistryObject<Block> REDSTONE_NETHER_BRICKS = BLOCKS.register("redstone_nether_bricks",
+            () -> new RedstoneNetherBricksBlock(BlockBehaviour.Properties.copy(Blocks.RED_NETHER_BRICKS)));
 
     public static final RegistryObject<Block> PLUM_BRICKS = BLOCKS.register("plum_bricks",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.BRICKS)));

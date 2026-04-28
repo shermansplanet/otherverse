@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.spirits;
 
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
+import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
@@ -83,6 +84,8 @@ public class Chronomancy {
             entity.getPersistentData().putInt("chronomancy_ticks", chronoTicks - 1);
             return false;
         }
+        var spiritType = MobBindingInfluenceUtils.mobSpirits.get(entity.getType());
+        if (spiritType == Spirits.FATE || spiritType == Spirits.TIME) return true;
         var blockPositions = new HashSet<BlockPos>();
         blockPositions.add(entity.blockPosition());
         var vel = entity.getDeltaMovement();

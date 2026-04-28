@@ -126,7 +126,7 @@ public class TyphloticShark extends FlyingMob {
                 }
             }
             attackCooldown--;
-            if (attackCooldown <= 0 && shark.distanceTo(target) < 2f) {
+            if (attackCooldown <= 0 && shark.isWithinMeleeAttackRange(target)) {
                 shark.swing(InteractionHand.MAIN_HAND);
                 shark.doHurtTarget(target);
                 attackCooldown = 20;

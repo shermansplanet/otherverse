@@ -85,7 +85,7 @@ public class HallowHelper {
     }
 
     @SubscribeEvent
-    public static void onGrindstoneChange(GrindstoneEvent.OnplaceItem event) {
+    public static void onGrindstoneChange(GrindstoneEvent.OnPlaceItem event) {
         if (!event.getTopItem().hasTag() || !event.getTopItem().getTag().contains("hallow")) return;
         var newstack = event.getTopItem().copy();
         newstack.getTag().remove("hallow");
@@ -106,7 +106,7 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void onPlayerLogin(PlayerLoggedInEvent event) {
-        if (event.getEntity().getLevel() instanceof ServerLevel sl) {
+        if (event.getEntity().level() instanceof ServerLevel sl) {
             DiagramManager.getOrCreateLevelData(sl).retryUpdateClient();
             for (var pos : DiagramManager.getOrCreateLevelData(sl).getAllPlacedItemPositions()) {
                 ShrineHelper.getShrine(sl, pos);
@@ -116,7 +116,7 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void onChangeDimension(PlayerChangedDimensionEvent event) {
-        if (event.getEntity().getLevel() instanceof ServerLevel sl) {
+        if (event.getEntity().level() instanceof ServerLevel sl) {
             DiagramManager.getOrCreateLevelData(sl).retryUpdateClient();
         }
     }
@@ -124,11 +124,10 @@ public class HallowHelper {
     @SubscribeEvent
     static void onGrief(EntityMobGriefingEvent event) {
         if (event.getEntity() == null || event.getEntity().getType() != EntityType.CREEPER) return;
-        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level);
+        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level());
         for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
             if (!shrine.tryDrain(9, levelData)) continue;
             event.setResult(Event.Result.DENY);
-            event.setCanceled(true);
             return;
         }
     }
@@ -136,7 +135,7 @@ public class HallowHelper {
     @SubscribeEvent
     static void onAttack(LivingHurtEvent event) {
         if (event.getEntity() == null) return;
-        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level);
+        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level());
         for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
             if (!shrine.tryDrain(Mth.ceil(event.getAmount() * 3), levelData)) continue;
             event.setAmount(event.getAmount() / 2);
@@ -151,7 +150,7 @@ public class HallowHelper {
     static void onDie(LivingDeathEvent event) {
         var entity = event.getEntity();
         if (entity == null) return;
-        var levelData = DiagramManager.getOrCreateLevelData(entity.level);
+        var levelData = DiagramManager.getOrCreateLevelData(entity.level());
         for (var shrine : ShrineHelper.getShrinesFor(entity, Spirits.DEATH)) {
             if (!shrine.tryDrain(444, levelData)) continue;
             entity.setHealth(1);
@@ -241,7 +240,7 @@ public class HallowHelper {
 
         var entityData = BlockItem.getBlockEntityData(event.getItemStack());
         if (entityData != null && entityData.contains("spawn_altar_type")) {
-            var entityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityData.getString("spawn_altar_type")));
+            var entityType = ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(entityData.getString("spawn_altar_type")));
             event.getToolTip().add(Component.literal("Spawn type: ")
                     .append(entityType.getDescription()));
         }
@@ -277,7 +276,7 @@ public class HallowHelper {
 
                 var implementData = ImplementManager.getImplementData(circle);
                 if (!implementData.isEmpty()
-                        && ForgeRegistries.ITEMS.getValue(new ResourceLocation(implementData.getString("item"))) == Items.BUCKET) {
+                        && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.BUCKET) {
                     capacity *= ImplementManager.BUCKET_BONUS;
                 }
 
@@ -301,7 +300,7 @@ public class HallowHelper {
         var data = DiagramManager.getOrCreateLevelData(event.getLevel());
         var tag = data.getPlacedItemTag(event.getPos());
         if (tag == null || tag.contains("shrine")) return;
-        if (!event.getEntity().getAbilities().instabuild) event.getEntity().hurt(DamageSource.MAGIC, 3);
+        if (!event.getEntity().getAbilities().instabuild) event.getEntity().hurt(event.getEntity().damageSources().magic(), 3);
         for (var pos : ShrineHelper.getAllHallows(event.getPos(), tag.getString("spirit_type"), data)) {
             tag = data.getPlacedItemTag(pos);
             tag.putBoolean("shrine", true);
@@ -406,7 +405,7 @@ public class HallowHelper {
     public static void recolorChalk(PlayerInteractEvent.RightClickBlock event) {
         var player = event.getEntity();
         var itemstack = event.getItemStack();
-        var state = player.level.getBlockState(event.getPos());
+        var state = player.level().getBlockState(event.getPos());
         if (state.is(OtherverseBlocks.CHALK_LINE.get()) && player.isShiftKeyDown()
                 && itemstack.hasTag() && itemstack.getTag().contains("hallow")) {
             var hallowTag = itemstack.getTag().getCompound("hallow");
@@ -415,10 +414,10 @@ public class HallowHelper {
             var spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
             for (var dyeColor : Spirits.colorsByDye.entrySet()) {
                 if (dyeColor.getValue() != spiritType) continue;
-                var newstate = ChalkLineBlock.getConnectionState(player.level, event.getPos(), state.setValue(ChalkLineBlock.color, dyeColor.getKey()));
-                player.level.setBlockAndUpdate(event.getPos(), newstate);
-                ChalkLineBlock.refreshNeighborLines(player.level, event.getPos());
-                if (player.level instanceof ServerLevel sl) {
+                var newstate = ChalkLineBlock.getConnectionState(player.level(), event.getPos(), state.setValue(ChalkLineBlock.color, dyeColor.getKey()));
+                player.level().setBlockAndUpdate(event.getPos(), newstate);
+                ChalkLineBlock.refreshNeighborLines(player.level(), event.getPos());
+                if (player.level() instanceof ServerLevel sl) {
                     DiagramManager.OnDiagramBlockChanged(sl, event.getPos(), DiagramManager.BlockUpdateType.ADDED);
                 }
                 hallowTag.putInt("spirit_count", spiritCount - 1);
@@ -431,14 +430,15 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void mobDie(LivingDeathEvent event) {
-        if (!(event.getEntity().getLevel() instanceof ServerLevel sl)) return;
+        if (!(event.getEntity().level() instanceof ServerLevel sl)) return;
         EntityType<? extends LivingEntity> type = (EntityType<? extends LivingEntity>) event.getEntity().getType();
         var ct = event.getEntity().getPersistentData().getString("construct_type");
-        var spiritType = ct.isEmpty() ? MobBindingInfluenceUtils.mobSpirits.get(type).label() : ct;
+        var baseType = MobBindingInfluenceUtils.mobSpirits.get(type);
+        var spiritType = ct.isEmpty() ? baseType == null ? null : baseType.label() : ct;
         if (spiritType == null) return;
         var data = DiagramManager.getOrCreateLevelData(sl);
         for(var offset : new float[]{0f,-1f}) {
-            var pos = new BlockPos(event.getEntity().position().add(0, offset, 0));
+            var pos = BlockPos.containing(event.getEntity().position().add(0, offset, 0));
             var tag = data.getPlacedItemTag(pos);
             if (tag == null) continue;
             if (!tag.getString("spirit_type").equals(spiritType)) continue;

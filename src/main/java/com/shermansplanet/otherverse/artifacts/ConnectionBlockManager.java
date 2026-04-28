@@ -36,7 +36,7 @@ public class ConnectionBlockManager {
         var powerSpent = diagram.getPowerSpent(level, targetPos, -1, new HashSet<>());
         if (powerSpent == 0) return false;
         circle.item = new ItemStack(OtherverseItems.CONNECTION_BLOCKER.get(), 1);
-        var total = powerSpent * 10;
+        var total = powerSpent * 20;
         circle.item.getOrCreateTag().putInt("connection_blocker_total", total);
         circle.item.getOrCreateTag().putInt("connection_blocker_remaining", total);
         return true;

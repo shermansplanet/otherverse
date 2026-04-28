@@ -39,13 +39,13 @@ public class FleshTechManager {
     @SubscribeEvent
     public static void onTick(LivingEvent.LivingTickEvent event) {
         var le = event.getEntity();
-        if (le.level.isClientSide()) return;
-        if (le.level.getGameTime() % 20 != 0) return;
+        if (le.level().isClientSide()) return;
+        if (le.level().getGameTime() % 20 != 0) return;
         var ct = le.getPersistentData().getString("construct_type");
         if (ct.isEmpty()) return;
         if (!ShrineHelper.getShrinesFor(le, Spirits.spiritsByLabel.get(ct)).isEmpty()) return;
         if (getClosestHeart(le) != null) return;
-        le.hurt(DamageSource.MAGIC, 7);
+        le.hurt(le.damageSources().magic(), 7);
     }
 
     @SubscribeEvent
@@ -65,7 +65,7 @@ public class FleshTechManager {
     }
 
     private static Pair<Player, ItemStack> getClosestHeart(LivingEntity le) {
-        for (var p : le.getLevel().getEntities(EntityType.PLAYER, le.getBoundingBox().inflate(16), (Player p) -> true)) {
+        for (var p : le.level().getEntities(EntityType.PLAYER, le.getBoundingBox().inflate(16), (Player p) -> true)) {
             for (var hand : InteractionHand.values()) {
                 var item = p.getItemInHand(hand);
                 if (!item.is(OtherverseItems.HOMUNCULUS_HEART.get())) continue;
@@ -79,7 +79,7 @@ public class FleshTechManager {
     @SubscribeEvent
     public static void onKill(LivingDropsEvent e) {
         var entity = e.getEntity();
-        if (entity.level.isClientSide) return;
+        if (entity.level().isClientSide) return;
         if (entity.getPersistentData().contains("construct_type")) e.setCanceled(true);
     }
 
@@ -108,7 +108,7 @@ public class FleshTechManager {
         tag.remove("UUID");
 
         var e = (LivingEntity) binding.mob.getType().create(level, tag, null, null,
-                spawnPos, MobSpawnType.SPAWN_EGG, false, false);
+                MobSpawnType.SPAWN_EGG, false, false);
         e.load(tag);
         e.setPos(new Vec3(
                 spawnPos.getX() + 0.4f + level.random.nextFloat() * 0.2f,

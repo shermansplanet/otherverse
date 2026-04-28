@@ -54,7 +54,7 @@ public class SympathyManager {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onHeal(LivingHealEvent event) {
-        event.setAmount(onHpChange(event.getEntity(), event.getAmount(), DamageSource.OUT_OF_WORLD));
+        event.setAmount(onHpChange(event.getEntity(), event.getAmount(), event.getEntity().level().damageSources().fellOutOfWorld()));
     }
 
     @SubscribeEvent
@@ -75,7 +75,7 @@ public class SympathyManager {
             return;
         }
         var bindPos = SpindleItem.getBlockPos(event.getEntity(), event.getHitVec());
-        var state = event.getEntity().getLevel().getBlockState(bindPos);
+        var state = event.getEntity().level().getBlockState(bindPos);
         if (state.getBlock() == OtherverseBlocks.CHALK_LINE.get()) return;
         var col = SpindleItem.getDyeColor(event.getItemStack().getItem());
         event.setUseBlock(Event.Result.DENY);
@@ -83,7 +83,7 @@ public class SympathyManager {
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
         if (state.getBlock() == OtherverseBlocks.WEB_OF_FATE.get()) {
-            event.getEntity().getLevel().setBlockAndUpdate(bindPos, state.setValue(ColorableBlock.color, col));
+            event.getEntity().level().setBlockAndUpdate(bindPos, state.setValue(ColorableBlock.color, col));
         } else {
             event.getEntity().displayClientMessage(Component.translatable("otherverse.sympathy.bound_to_pos"), true);
             var key = getKey(event.getEntity(), col);
@@ -102,7 +102,7 @@ public class SympathyManager {
 
     private static float onHpChange(LivingEntity entity, float amount, DamageSource damageSource) {
         if (!entity.getPersistentData().contains("bindingId")) return amount;
-        if (!(entity.level instanceof ServerLevel sl)) return amount;
+        if (!(entity.level() instanceof ServerLevel sl)) return amount;
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
         if (binding == null || binding.getFocus() == null) return amount;

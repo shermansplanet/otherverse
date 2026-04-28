@@ -17,7 +17,7 @@
 		},
 		{
 			"input" : "minecraft:bucket",
-			"health" : 3,
+			"health" : 1,
 			"output" : "minecraft:milk_bucket"
 		}
 	]

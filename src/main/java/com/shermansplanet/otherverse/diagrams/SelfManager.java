@@ -6,10 +6,13 @@ import com.shermansplanet.otherverse.Otherverse;
 import java.util.UUID;
 
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
+import com.shermansplanet.otherverse.others.TyphloticJellyfish;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
@@ -98,5 +101,14 @@ public class SelfManager {
             }
         }
         wasDay = isNowDay;
+    }
+
+    public static void SelfDrainAttack(Mob attacker, LivingEntity target) {
+        var prevHp = target.getHealth();
+        attacker.doHurtTarget(target);
+        if (target instanceof Player player) {
+            var selfDamage = target.getHealth() - prevHp;
+            SelfManager.ChangeSelf(player, (int) selfDamage);
+        }
     }
 }

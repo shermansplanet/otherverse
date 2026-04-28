@@ -60,7 +60,9 @@ public class PracticeJsonManager extends SimpleJsonResourceReloadListener {
                         break;
                 }
             } else if (practice.has("other")) {
-                EntityType<? extends LivingEntity> other = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(practice.get("other").getAsString()));
+                var other_name = ResourceLocation.parse(practice.get("other").getAsString());
+                if(!ForgeRegistries.ENTITY_TYPES.containsKey(other_name)) continue;
+                EntityType<? extends LivingEntity> other = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(other_name);
                 MobTransfusions.processOther(other, practice);
                 MobBindingInfluenceUtils.processOther(other, practice);
             }
@@ -73,16 +75,21 @@ public class PracticeJsonManager extends SimpleJsonResourceReloadListener {
 
     private void loadMobEnchants(JsonObject enchantments) {
         for (var enchantment : enchantments.entrySet()) {
-            var enchantmentId = ForgeRegistries.ENCHANTMENTS.getValue(ResourceLocation.parse(enchantment.getKey()));
+            var loc = ResourceLocation.parse(enchantment.getKey());
+            if(!ForgeRegistries.ENCHANTMENTS.containsKey(loc)) continue;
+            var enchantmentId = ForgeRegistries.ENCHANTMENTS.getValue(loc);
             var enchantmentData = enchantment.getValue().getAsJsonObject();
             var levels = enchantmentData.get("health").getAsJsonArray();
             var required = new HashSet<EntityType<?>>();
             if (enchantmentData.has("required")) {
                 for (var mobId : enchantmentData.get("required").getAsJsonArray()) {
-                    EntityType<?> mob = ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(mobId.getAsString()));
+                    var mobVal = ResourceLocation.parse(mobId.getAsString());
+                    if(!ForgeRegistries.ENTITY_TYPES.containsKey(mobVal)) continue;
+                    EntityType<?> mob = ForgeRegistries.ENTITY_TYPES.getValue(mobVal);
                     required.add(mob);
                 }
             }
+            if(required.isEmpty()) continue;
             if(enchantmentData.has("can_be_any") && enchantmentData.get("can_be_any").getAsBoolean()){
                 for(var r : required){
                     var mobset = new HashSet<EntityType<?>>();
@@ -107,7 +114,9 @@ public class PracticeJsonManager extends SimpleJsonResourceReloadListener {
 
     private void loadSpiritEnchants(JsonObject enchantments) {
         for (var enchantment : enchantments.entrySet()) {
-            var enchantmentId = ForgeRegistries.ENCHANTMENTS.getValue(ResourceLocation.parse(enchantment.getKey()));
+            var loc = ResourceLocation.parse(enchantment.getKey());
+            if(!ForgeRegistries.ENCHANTMENTS.containsKey(loc)) continue;
+            var enchantmentId = ForgeRegistries.ENCHANTMENTS.getValue(loc);
             var enchantmentData = enchantment.getValue().getAsJsonObject();
             var levels = enchantmentData.get("price").getAsJsonArray();
             var spiritType = Spirits.spiritsByLabel.get(enchantmentData.get("spirit").getAsString());

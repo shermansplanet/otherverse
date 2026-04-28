@@ -54,6 +54,16 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
     }
 
     @Override
+    public int getWidth() {
+        return 120;
+    }
+
+    @Override
+    public int getHeight() {
+        return 20;
+    }
+
+    @Override
     public RecipeType<SpiritExtractionRecipe> getRecipeType() {
         return TYPE;
     }
@@ -118,14 +128,14 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
         }
 
         var totalString = String.valueOf(total);
-        if(recipe.input.is(OtherverseItems.IDOL.get())){
+        if (recipe.input.is(OtherverseItems.IDOL.get())) {
             totalString = "";
         }
-        graphics.drawString(mc.font, totalString, 19, 6, totalColor);
+        graphics.drawString(mc.font, totalString, 19, 6, totalColor, false);
         if (ImplementManager.durabilities.containsKey(recipe.input.getItem())) {
             blockIcon.draw(graphics, 110, 1);
             graphics.drawString(mc.font, String.valueOf(ImplementManager.durabilities.get(recipe.input.getItem())),
-                    109, 12, ImplementManager.IMPLEMENT_UI_COLOR);
+                    109, 12, ImplementManager.IMPLEMENT_UI_COLOR, false);
         }
     }
 }

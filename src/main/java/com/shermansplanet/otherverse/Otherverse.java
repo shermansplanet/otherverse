@@ -26,6 +26,7 @@ import com.shermansplanet.otherverse.spirits.*;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -58,7 +59,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.function.BiConsumer;
@@ -73,19 +73,19 @@ public class Otherverse {
     public static final LootHelper LOOT_HELPER = new LootHelper();
     public static final PracticeTrigger ADVANCEMENTS = new PracticeTrigger();
 
-    private static final DeferredRegister<CreativeModeTab> REGISTRAR = DeferredRegister.create(
+    private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(
             Registries.CREATIVE_MODE_TAB, MODID);
-    public static final RegistryObject<CreativeModeTab> TAB_PRACTICE = REGISTRAR.register("example", () -> CreativeModeTab.builder()
+    public static final RegistryObject<CreativeModeTab> TAB_PRACTICE = CREATIVE_TABS.register("practice", () -> CreativeModeTab.builder()
             .title(Component.literal("Practice Items"))
             .icon(() -> OtherverseItems.CHALK.get().getDefaultInstance())
             .build()
     );
-    public static final RegistryObject<CreativeModeTab> TAB_OTHERS = REGISTRAR.register("example", () -> CreativeModeTab.builder()
+    public static final RegistryObject<CreativeModeTab> TAB_OTHERS = CREATIVE_TABS.register("others", () -> CreativeModeTab.builder()
             .title(Component.literal("Mobs"))
             .icon(() -> OtherverseItems.IDOL.get().getDefaultInstance())
             .build()
     );
-    public static final RegistryObject<CreativeModeTab> TAB_SPIRITS = REGISTRAR.register("example", () -> CreativeModeTab.builder()
+    public static final RegistryObject<CreativeModeTab> TAB_SPIRITS = CREATIVE_TABS.register("spirits", () -> CreativeModeTab.builder()
             .title(Component.literal("Spirit Types"))
             .icon(() -> Spirits.spiritItems.get(Spirits.COLOR_GRAY).get().getDefaultInstance())
             .build()
@@ -108,8 +108,13 @@ public class Otherverse {
 
     public static final RegistryObject<EntityType<TyphloticJellyfish>> TYPHLOTIC_JELLYFISH = ENTITIES.register("typhlotic_jellyfish",
             () -> EntityType.Builder.of(TyphloticJellyfish::new, MobCategory.MONSTER)
-                    .sized(1F, 2.5F)
+                    .sized(1F, 1F)
                     .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "typhlotic_jellyfish"))));
+
+    public static final RegistryObject<EntityType<TyphloticZombie>> TYPHLOTIC_ZOMBIE = ENTITIES.register("typhlotic_zombie",
+            () -> EntityType.Builder.of(TyphloticZombie::new, MobCategory.MONSTER)
+                    .sized(1F, 1F)
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "typhlotic_zombie"))));
 
     public static final RegistryObject<EntityType<ThrownTNT>> ENTITY_THROWN_TNT = ENTITIES.register("thrown_tnt",
             () -> EntityType.Builder.<ThrownTNT>of(ThrownTNT::new, MobCategory.MISC)
@@ -169,6 +174,7 @@ public class Otherverse {
         SOUND_EVENTS.register(modEventBus);
         RECIPE_TYPES.register(modEventBus);
         MENU_TYPES.register(modEventBus);
+        CREATIVE_TABS.register(modEventBus);
         OtherverseFeatureGen.FEATURES.register(modEventBus);
         bind(context, Registries.PARTICLE_TYPE, OtherverseParticles::registerParticles);
 
@@ -211,7 +217,7 @@ public class Otherverse {
             case "overworld" -> OtherverseItems.SALT.get();
             case "the_nether" -> OtherverseItems.SULFUR.get();
             case "the_end" -> OtherverseItems.QUICKSILVER.get();
-            default -> null;
+            default -> OtherverseItems.CINNABAR.get();
         };
     }
 
@@ -256,6 +262,7 @@ public class Otherverse {
             event.registerEntityRenderer(ENTITY_ECHO.get(), EchoRenderer::new);
             event.registerEntityRenderer(TYPHLOTIC_SHARK.get(), TyphloticSharkRenderer::new);
             event.registerEntityRenderer(TYPHLOTIC_JELLYFISH.get(), TyphloticJellyfishRenderer::new);
+            event.registerEntityRenderer(TYPHLOTIC_ZOMBIE.get(), ZombieRenderer::new);
 
             event.registerEntityRenderer(ENTITY_THROWN_TNT.get(), ThrownItemRenderer::new);
             event.registerBlockEntityRenderer(CHALK_CIRCLE.get(), ChalkCircleRenderer::new);

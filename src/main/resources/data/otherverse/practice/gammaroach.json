@@ -1,0 +1,20 @@
+{
+	"other" : "alexscaves:gammaroach",
+	"spirit": "war",
+	"healing" : {
+		"alexscaves:spelunkie" : 7
+	},
+	"binding" : {
+		"alexscaves:hazmat_mask" : 10,
+		"alexscaves:hazmat_chestplate" : 16,
+		"alexscaves:hazmat_leggings" : 14,
+		"alexscaves:hazmat_boots" : 8
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:gunpowder",
+			"health" : 7,
+			"output" : "alexscaves:toxic_paste"
+		}
+	]
+}

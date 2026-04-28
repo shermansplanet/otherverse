@@ -41,7 +41,7 @@ public class SightOverlay implements IGuiOverlay {
         poseStack.translate(screenWidth / 2f, screenHeight / 2f, 0);
         var scale = screenWidth * (1.5f - opacity * 0.3f) / 256f;
         poseStack.scale(scale, scale, scale);
-        poseStack.mulPose(new Quaternionf().rotateZ(rot));
+        poseStack.mulPose(new Quaternionf().rotateZ(rot * Mth.TWO_PI / 360));
         poseStack.translate(-128, -128, 0);
         guiGraphics.blit(SIGHT_LOCATION, 0, 0, 0, 0, 256, 256);
         poseStack.popPose();

@@ -20,16 +20,15 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.block.model.MultiVariant;
-import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -55,6 +54,28 @@ public class PlacedHallowRenderer {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final HashSet<ShrineHelper.Shrine> shrinesToRender = new HashSet<>();
+
+    private static final ModelBaker DUMMY_BAKER = new ModelBaker() {
+        @Override
+        public UnbakedModel getModel(ResourceLocation p_252194_) {
+            return null;
+        }
+
+        @Override
+        public @org.jetbrains.annotations.Nullable BakedModel bake(ResourceLocation p_250776_, ModelState p_251280_) {
+            return null;
+        }
+
+        @Override
+        public @org.jetbrains.annotations.Nullable BakedModel bake(ResourceLocation location, ModelState state, Function<Material, TextureAtlasSprite> sprites) {
+            return null;
+        }
+
+        @Override
+        public Function<Material, TextureAtlasSprite> getModelTextureGetter() {
+            return null;
+        }
+    };
 
     @SubscribeEvent
     public static void renderTick(RenderLevelStageEvent event) {
@@ -82,7 +103,7 @@ public class PlacedHallowRenderer {
     }*/
 
     private static void renderHallows(LocalPlayer player, RenderLevelStageEvent event) {
-        var levelData = DiagramManager.getOrCreateLevelData(player.level);
+        var levelData = DiagramManager.getOrCreateLevelData(player.level());
         var poseStack = event.getPoseStack();
         var camera = event.getCamera();
         poseStack.pushPose();
@@ -98,7 +119,7 @@ public class PlacedHallowRenderer {
         for (BlockPos pos : levelData.getAllPlacedItemPositions()) {
             if (player.position().distanceToSqr(new Vec3(pos.getX(), pos.getY(), pos.getZ())) > renderDist) continue;
             var tag = levelData.getPlacedItemTag(pos);
-            var bs = player.level.getBlockState(pos);
+            var bs = player.level().getBlockState(pos);
             poseStack.pushPose();
             poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
             var st = tag.getString("spirit_type");
@@ -106,9 +127,9 @@ public class PlacedHallowRenderer {
                     255, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout(), st);
             poseStack.popPose();
             if (!tag.contains("shrine") || !renderShrineBounds) continue;
-            var shrine = ShrineHelper.shrinesByPosition.computeIfAbsent(player.level, x -> new HashMap<>()).get(pos);
+            var shrine = ShrineHelper.shrinesByPosition.computeIfAbsent(player.level(), x -> new HashMap<>()).get(pos);
             if (shrine == null) {
-                shrine = ShrineHelper.getShrine(player.level, pos, Spirits.spiritsByLabel.get(st));
+                shrine = ShrineHelper.getShrine(player.level(), pos, Spirits.spiritsByLabel.get(st));
             }
             shrinesToRender.add(shrine.parentShrine == null ? shrine : shrine.parentShrine);
         }
@@ -122,7 +143,7 @@ public class PlacedHallowRenderer {
         var dir2 = new Vec3(0, 0, 1);
         var rot = (event.getRenderTick() + event.getPartialTick()) * 0.003f;
 
-        var t = (player.level.getGameTime() + Minecraft.getInstance().getPartialTick()) / 20f;
+        var t = (player.level().getGameTime() + Minecraft.getInstance().getPartialTick()) / 20f;
 
         for (var shrine : shrinesToRender) {
             var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
@@ -187,7 +208,7 @@ public class PlacedHallowRenderer {
                     break;
                 case ENTITYBLOCK_ANIMATED:
                     ItemStack stack = new ItemStack(p_110913_.getBlock());
-                    IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, p_110914_, p_110915_, p_110916_, p_110917_);
+                    IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.NONE, p_110914_, p_110915_, p_110916_, p_110917_);
             }
 
         }
@@ -201,16 +222,24 @@ public class PlacedHallowRenderer {
         var bakery = Minecraft.getInstance().getModelManager().getModelBakery();
         var blockKey = ForgeRegistries.BLOCKS.getKey(state.getBlock());
         var modelLocation = BlockModelShaper.stateToModelLocation(state);
-
         var model = bakery.getModel(modelLocation);
 
-        var set = new HashSet<Pair<String, String>>();
-        var materials = model.getMaterials(bakery::getModel, set);
-
+        model.resolveParents(bakery::getModel);
         List<ResourceLocation> locations = new ArrayList<>();
-        for (var m : materials) {
-            locations.add(new ResourceLocation(m.texture().getNamespace(),
-                    "textures/" + m.texture().getPath() + ".png"));
+        Set<BlockModel> blockModels = new HashSet<>();
+        HallowTextureManager.GetBlockModels(model, blockModels);
+
+        for(BlockModel blockModel : blockModels) {
+            for (var s : blockModel.textureMap.keySet()) {
+                System.out.println(s);
+                Material material = blockModel.getMaterial(s);
+                System.out.println(material.texture());
+                if (MissingTextureAtlasSprite.getLocation().equals(material.texture())) continue;
+                var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
+                        "textures/" + material.texture().getPath() + ".png");
+                if(locations.contains(rl)) continue;
+                locations.add(rl);
+            }
         }
 
         if (locations.isEmpty()) {
@@ -226,7 +255,7 @@ public class PlacedHallowRenderer {
 
         for (int i = 0; i < locations.size(); i++) {
             var loc = locations.get(i);
-            loc = new ResourceLocation(loc.getNamespace(),
+            loc = ResourceLocation.fromNamespaceAndPath(loc.getNamespace(),
                     loc.getPath().substring(9, loc.getPath().length() - 4));
             HallowTextureManager.offsetsByMaterial.put(loc, Pair.of(locations.size(), i));
         }
@@ -238,7 +267,7 @@ public class PlacedHallowRenderer {
         var newLoc = new ModelResourceLocation(Otherverse.MODID,
                 modelLocation.getNamespace() + "_" + modelLocation.getPath() + "_hallow_" + spiritType, modelLocation.getVariant());
         BakedModel m = model instanceof MultiVariant mv ? bakeMultiVariant(mv, bakery, func) :
-                model.bake(bakery, func, BlockModelRotation.X0_Y0, newLoc);
+                model.bake(DUMMY_BAKER, func, BlockModelRotation.X0_Y0, newLoc);
 
         var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
         RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false,
@@ -272,13 +301,13 @@ public class PlacedHallowRenderer {
         UnbakedModel unbakedmodel = bakery.getModel(p_119350_);
         if (unbakedmodel instanceof BlockModel blockmodel) {
             if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
-                return ((IModelGetter) bakery).getItemModelGenerator().generateBlockModel(sprites, blockmodel).bake(bakery, blockmodel, sprites, p_119351_, p_119350_, false);
+                return ((IModelGetter) bakery).getItemModelGenerator().generateBlockModel(sprites, blockmodel).bake(DUMMY_BAKER, blockmodel, sprites, p_119351_, p_119350_, false);
             }
         } else if (unbakedmodel instanceof MultiVariant mv) {
             return bakeMultiVariant(mv, bakery, sprites);
         }
 
-        return unbakedmodel.bake(bakery, sprites, p_119351_, p_119350_);
+        return unbakedmodel.bake(DUMMY_BAKER, sprites, p_119351_, p_119350_);
     }
 
 

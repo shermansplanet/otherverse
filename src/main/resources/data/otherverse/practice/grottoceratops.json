@@ -1,0 +1,25 @@
+{
+	"other" : "alexscaves:grottoceratops",
+	"spirit": "time",
+	"healing" : {
+		"alexscaves:tree_star" : 5,
+		"alexscaves:pewen_pines" : 5
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:leather",
+			"health" : 7,
+			"output" : "alexscaves:tough_hide"
+		},
+		{
+			"input" : "minecraft:bone_block",
+			"health" : 7,
+			"output" : "alexscaves:dinosaur_chop"
+		},
+		{
+			"input" : "alexscaves:curly_fern",
+			"health" : 1,
+			"output" : "alexscaves:fiddlehead"
+		}
+	]
+}

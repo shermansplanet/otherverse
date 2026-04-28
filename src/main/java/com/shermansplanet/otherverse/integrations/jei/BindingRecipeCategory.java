@@ -61,6 +61,16 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
     }
 
     @Override
+    public int getWidth() {
+        return 120;
+    }
+
+    @Override
+    public int getHeight() {
+        return 80;
+    }
+
+    @Override
     public RecipeType<BindingRecipe> getRecipeType() {
         return TYPE;
     }
@@ -139,17 +149,17 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
             int x = column * 22 + 10 - (s.length() + 1) * 3;
             int y = row++ * 30 + 42;
             icon.draw(graphics, x, val >= 0 ? y : y + 1);
-            graphics.drawString(mc.font, s, x + 6, y, 0x333333);
+            graphics.drawString(mc.font, s, x + 6, y, 0x333333, false);
             if (row >= columns) {
                 row = 0;
                 column++;
             }
         }
-        graphics.drawString(mc.font, recipe.entityType.getDescription().getString(), 22, 3, 0x333333);
+        graphics.drawString(mc.font, recipe.entityType.getDescription().getString(), 22, 3, 0x333333, false);
         int hp = (int) DefaultAttributes.getSupplier(recipe.entityType).getValue(Attributes.MAX_HEALTH);
         String heartstring = Float.toString(hp).replace(".0", "");
         heartIcon.draw(graphics, 22, 13);
-        graphics.drawString(mc.font, heartstring, 28, 12, 0x333333);
+        graphics.drawString(mc.font, heartstring, 28, 12, 0x333333, false);
         int x = 30 + heartstring.length() * 6;
         chainIcon.draw(graphics, x, 12);
         int coeff = 3;
@@ -160,12 +170,12 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
             color = ImplementManager.IMPLEMENT_UI_COLOR;
         }
         var s = Integer.toString(hp * coeff).replace(".0", "");
-        graphics.drawString(mc.font, s, x + 6, 12, color);
+        graphics.drawString(mc.font, s, x + 6, 12, color, false);
         if (BindingManager.drainsBindings(recipe.entityType)) {
             x += (s.length() + 1) * 6 + 2;
             bindingBreakIcon.draw(graphics, x, 12);
             s = BindingManager.getSpiritDrain(hp) + "/" + BindingManager.getBindingWearInterval(hp) + "s";
-            graphics.drawString(mc.font, s, x + 8, 12, color);
+            graphics.drawString(mc.font, s, x + 8, 12, color, false);
         }
         RenderSystem.disableBlend();
     }

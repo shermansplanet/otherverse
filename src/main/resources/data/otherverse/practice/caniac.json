@@ -1,0 +1,22 @@
+{
+	"other" : "alexscaves:caniac",
+	"spirit": "food",
+	"binding" : {
+		"minecraft:sweet_berries" : 15
+	},
+	"healing" : {
+		"alexscaves:peppermint_powder" : 4
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:stick",
+			"health" : 8,
+			"output" : "alexscaves:candy_cane"
+		},
+		{
+			"input" : "minecraft:flint",
+			"health" : 8,
+			"output" : "alexscaves:sharpened_candy_cane"
+		}
+	]
+}

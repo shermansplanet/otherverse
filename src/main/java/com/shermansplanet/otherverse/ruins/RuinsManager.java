@@ -10,7 +10,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -26,6 +28,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -54,6 +58,18 @@ public class RuinsManager {
             Arrays.stream(new Block[]{Blocks.RED_SAND, Blocks.ORANGE_TERRACOTTA, Blocks.MAGMA_BLOCK}).toList());
 
     @SubscribeEvent
+    public static void onPlayerJump(LivingEvent.LivingJumpEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        player.level().getBiome(player.blockPosition()).unwrapKey().ifPresent(biome -> {
+            var path = biome.location().getPath();
+            if (path.equals("ruins_ecstasy")) {
+                var vel = player.getDeltaMovement().scale(10);
+                player.push(vel.x, 1.5f, vel.z);
+            }
+        });
+    }
+
+    @SubscribeEvent
     public static void playerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         if (!event.player.level().dimension().location().getPath().equals("ruins")) {
@@ -61,6 +77,14 @@ public class RuinsManager {
             return;
         }
         if (!(event.player instanceof ServerPlayer player)) {
+            event.player.level().getBiome(event.player.blockPosition()).unwrapKey().ifPresent(biome -> {
+                var path = biome.location().getPath();
+                if (path.equals("ruins_ecstasy")) {
+                    skyMultiplierRaw = 1.25f;
+                } else if (!path.equals("ruins_shock")) {
+                    skyMultiplierRaw = 1f;
+                }
+            });
             skyMultiplier = skyMultiplierRaw * 0.2f + skyMultiplier * 0.8f;
             event.player.level().setRainLevel(1);
             return;
@@ -167,8 +191,41 @@ public class RuinsManager {
                                 SoundSource.HOSTILE, 1, 1);
                     }
                 }
+                case "ruins_vigil" -> {
+                    var playerPos = player.position();
+                    var playerVel = player.getDeltaMovement().scale(20);
+                    var gravity = 9.8f;
+                    for (var h = 0; h < 64; h++) {
+                        var secondsToFall = Mth.sqrt(2 * h / gravity);
+                        var projectedPlayerPos = playerPos.add(playerVel.scale(secondsToFall));
+                        var pos = new BlockPos(Mth.floor(projectedPlayerPos.x), Mth.floor(projectedPlayerPos.y) + h + 1, Mth.floor(projectedPlayerPos.z));
+                        var bs = level.getBlockState(pos);
+                        if (bs.is(Blocks.ANVIL) && level.getBlockState(pos.above()).is(Blocks.CHAIN)) {
+                            level.destroyBlock(pos.above(), true);
+                        } else if (bs.is(Blocks.POINTED_DRIPSTONE)) {
+                            for (var i = 0; i < 8; i++) {
+                                pos = pos.above();
+                                if (!level.getBlockState(pos).is(Blocks.POINTED_DRIPSTONE)) break;
+                            }
+                            if (level.getBlockState(pos).is(Blocks.DRIPSTONE_BLOCK)) {
+                                level.destroyBlock(pos, true);
+                            }
+                        }
+                    }
+                }
             }
         });
+    }
+
+    @SubscribeEvent
+    public static void onDamage(LivingDamageEvent event) {
+        if (!(event.getEntity().level() instanceof ServerLevel sl)) return;
+        if (!event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD) || event.getEntity().level().dimension() != ModDimensions.RUINS_KEY) {
+            return;
+        }
+        var pos = event.getEntity().position();
+        event.getEntity().setPos(pos.x, 100, pos.y);
+        event.getEntity().changeDimension(sl.getServer().overworld(), new NoReturnTeleporter());
     }
 
     @SubscribeEvent

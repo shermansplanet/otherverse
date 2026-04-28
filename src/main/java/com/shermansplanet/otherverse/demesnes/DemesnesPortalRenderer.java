@@ -37,7 +37,7 @@ public class DemesnesPortalRenderer implements BlockEntityRenderer<DemesnesPorta
         long millis = System.currentTimeMillis();
         var rot = (millis % Math.round(speed * 2 * 360)) * 1f / speed;
         pose.translate(0.5f, 0, 0.5f);
-        pose.mulPose(new Quaternionf().rotateY(rot));
+        pose.mulPose(new Quaternionf().rotateY(rot * Mth.TWO_PI / 360));
         pose.translate(-0.5f, 0, -0.5f);
         BeaconRenderer.renderBeaconBeam(pose, buffers, BEAM_LOCATION, mc.getPartialTick(), 1,
                 mc.level.getGameTime(), 0, height, portal.color, 0.2F, 0.3F);
@@ -80,7 +80,7 @@ public class DemesnesPortalRenderer implements BlockEntityRenderer<DemesnesPorta
         poseStack.translate(0.5f, 0, 0.5f);
         long millis = System.currentTimeMillis();
         var rot = (millis % (speed * 360L)) * 1f / speed;
-        poseStack.mulPose(new Quaternionf().rotateY(rot));
+        poseStack.mulPose(new Quaternionf().rotateY(rot* Mth.TWO_PI / 360));
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
         var pose = poseStack.last().pose();

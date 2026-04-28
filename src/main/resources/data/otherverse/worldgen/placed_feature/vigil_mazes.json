@@ -1,0 +1,23 @@
+{
+  "feature": "otherverse:vigil_maze",
+  "placement": [
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:random_offset",
+      "xz_spread": {
+        "type": "minecraft:constant",
+        "value": 8
+      },
+      "y_spread": {
+        "type": "minecraft:constant",
+        "value": 0
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

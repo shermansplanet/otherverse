@@ -14,35 +14,29 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.phys.Vec3;
 
-public class BurntTreeFeature extends Feature<NoneFeatureConfiguration> {
-
-    private static final BlockState[] palette = new BlockState[]{
-            Blocks.STRIPPED_ACACIA_LOG.defaultBlockState(),
-            Blocks.TERRACOTTA.defaultBlockState(),
-            Blocks.BROWN_MUSHROOM_BLOCK.defaultBlockState(),
-            Blocks.DEAD_FIRE_CORAL_BLOCK.defaultBlockState()
-    };
-
-    private static final BlockState[] coralTops = new BlockState[]{
-            Blocks.DEAD_FIRE_CORAL.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, false),
-            Blocks.DEAD_FIRE_CORAL_FAN.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, false),
-    };
+public class ProceduralTreeFeature extends Feature<NoneFeatureConfiguration> {
 
     private static final Direction[] sideDirs = new Direction[]{
             Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST
     };
 
     private static final Vec3 up = new Vec3(0, 1, 0);
+    private final BlockState[] palette;
+    private final BlockState[] topDecor;
+    private boolean isAnger;
 
-    public BurntTreeFeature(Codec<NoneFeatureConfiguration> p_65786_) {
+    public ProceduralTreeFeature(Codec<NoneFeatureConfiguration> p_65786_, BlockState[] palette, BlockState[] topDecor, boolean isAnger) {
         super(p_65786_);
+        this.palette = palette;
+        this.topDecor = topDecor;
+        this.isAnger = isAnger;
     }
 
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         var origin = ctx.origin();
         var blockBelow = ctx.level().getBlockState(origin.below());
-        if (!blockBelow.is(Blocks.ORANGE_TERRACOTTA) && !blockBelow.is(Blocks.RED_SAND)) return false;
+        if (isAnger && !blockBelow.is(Blocks.ORANGE_TERRACOTTA) && !blockBelow.is(Blocks.RED_SAND)) return false;
         var r = ctx.random();
         var totalBlockCount = r.nextInt(6, 48);
         generateSegment(new Vec3(origin.getX() + 0.5f, origin.getY() - 0.5f, origin.getZ() + 0.5f),
@@ -68,12 +62,16 @@ public class BurntTreeFeature extends Feature<NoneFeatureConfiguration> {
                 level.setBlock(blockPos.west(), getBlockstate(lerp, r), 2);
             }
             for (var direction : sideDirs) {
-                if (r.nextFloat() > lerp * 0.66f) continue;
+                if (r.nextFloat() > lerp * (isAnger ? 0.66f : 0.33f)) continue;
                 var rel = blockPos.relative(direction);
                 if (!level.isEmptyBlock(rel)) continue;
-                level.setBlock(rel, Blocks.DEAD_FIRE_CORAL_WALL_FAN.defaultBlockState()
-                        .setValue(BlockStateProperties.WATERLOGGED, false)
-                        .setValue(BaseCoralWallFanBlock.FACING, direction), 2);
+                if(isAnger) {
+                    level.setBlock(rel, Blocks.DEAD_FIRE_CORAL_WALL_FAN.defaultBlockState()
+                            .setValue(BlockStateProperties.WATERLOGGED, false)
+                            .setValue(BaseCoralWallFanBlock.FACING, direction), 2);
+                }else{
+                    level.setBlock(rel, Blocks.CHERRY_LEAVES.defaultBlockState(), 2);
+                }
             }
             lerp += lerpStep;
         }
@@ -107,7 +105,7 @@ public class BurntTreeFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     private BlockState getRandomCoralTop(RandomSource r) {
-        return coralTops[r.nextInt(coralTops.length)];
+        return topDecor[r.nextInt(topDecor.length)];
     }
 
     private BlockState getBlockstate(float lerp, RandomSource r) {

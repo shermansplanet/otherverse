@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:candicorn",
+	"spirit": "food",
+	"healing" : {
+		"alexscaves:caramel_apple" : 11
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:string",
+			"health" : 3,
+			"output" : "alexscaves:sweet_puff"
+		}
+	]
+}

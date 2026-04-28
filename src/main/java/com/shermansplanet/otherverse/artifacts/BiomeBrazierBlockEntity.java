@@ -42,16 +42,19 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementContext;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class BiomeBrazierBlockEntity extends BlockEntity {
 
@@ -97,7 +100,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                 this.getBlockPos().getX() + radius, this.getBlockPos().getY() + radius, this.getBlockPos().getZ() + radius);
 
         var blockReplacements = new HashMap<Block, Block>();
-        if(originalBiomeString == null){
+        if (originalBiomeString == null) {
             originalBiomeString = registry.getKey(level.getBiome(getBlockPos()).get()).toString();
         }
         var originalBiomeKey = ResourceKey.create(Registries.BIOME, ResourceLocation.parse(originalBiomeString));
@@ -126,7 +129,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
 
         var feature_range = 64;
 
-        if(makingFeatures){
+        if (makingFeatures) {
             biomeConversionBox = biomeConversionBox.inflatedBy(feature_range);
         }
 
@@ -142,33 +145,60 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                 if (chunkaccess == null) {
                     hasNullChunks = true;
                     break;
-                }else{
+                } else {
                     list.add(chunkaccess);
                 }
             }
         }
 
-        if(hasNullChunks){
+        if (hasNullChunks) {
             return;
         }
 
         if (makingFeatures) {
-            var region = new WorldGenRegion(serverLevel, list, ChunkStatus.FEATURES, feature_range);
             for (var featureSet : targetBiome.get().getGenerationSettings().features()) {
                 for (var feature : featureSet) {
-                    if(r.nextBoolean()) continue;
+                    if (r.nextBoolean()) continue;
                     var x = getBlockPos().getX() + serverLevel.getRandom().nextInt(-radius, radius);
                     var z = getBlockPos().getZ() + serverLevel.getRandom().nextInt(-radius, radius);
-                    var y = serverLevel.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-                    feature.get().placeWithBiomeCheck(region, serverLevel.getChunkSource().getGenerator(),
-                            serverLevel.getRandom(), new BlockPos(x, y - 1, z));
+                    var pos = new BlockPos.MutableBlockPos(x, worldPosition.getY(), z);
+                    for (var i = 0; i < radius; i++) {
+                        if (serverLevel.getBlockState(pos).getCollisionShape(serverLevel, pos).isEmpty()) break;
+                        pos.setY(pos.getY() + 1);
+                    }
+                    for (var i = 0; i < radius; i++) {
+                        if (!serverLevel.getBlockState(pos).getCollisionShape(serverLevel, pos).isEmpty()) break;
+                        pos.setY(pos.getY() - 1);
+                    }
+                    try {
+                        var thisFeature = feature.get();
+                        var ctx = new PlacementContext(serverLevel, serverLevel.getChunkSource().getGenerator(), Optional.of(thisFeature));
+
+                        Stream<BlockPos> stream = Stream.of(pos);
+                        for (PlacementModifier placementmodifier : thisFeature.placement()) {
+                            stream = stream.flatMap((p_226376_) -> placementmodifier.getPositions(ctx, serverLevel.getRandom(), p_226376_));
+                        }
+
+                        ConfiguredFeature<?, ?> configuredfeature = thisFeature.feature().value();
+                        MutableBoolean mutableboolean = new MutableBoolean();
+                        stream.forEach((placePos) -> {
+                            if (placePos.distSqr(worldPosition) <= radiusSqr) {
+                                if (configuredfeature.place(ctx.getLevel(), ctx.generator(), serverLevel.getRandom(), placePos)) {
+                                    mutableboolean.setTrue();
+                                }
+                            }
+                        });
+
+                    } catch (Exception e) {
+                        LOGGER.warn("Error when generating " + feature.get());
+                    }
                 }
             }
         }
 
         MutableInt mutableint = new MutableInt(0);
         for (ChunkAccess chunkaccess1 : list) {
-            if(!makingFeatures) {
+            if (!makingFeatures) {
                 chunkaccess1.fillBiomesFromNoise(makeResolver(mutableint, chunkaccess1, biomeConversionBox, radius * radius, targetBiome, getBlockPos()), serverLevel.getChunkSource().randomState().sampler());
             }
             chunkaccess1.setUnsaved(true);
@@ -184,11 +214,56 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
     }
 
     private Block getBlockStone(Holder<Biome> biome) {
-        var biomeName = MobBindingInfluenceUtils.getBiomeName(biome, level);
-        if (biomeName.equals("visceral_heap")) return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty","flesh"));
-        if (biomeName.equals("erupting_inferno")) return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty","brimstone"));
-        if (biomeName.equals("withered_abyss")) return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty","blackstone"));
+        var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(biome, level);
+        var biomeMod = biomeKeys.getNamespace();
+        var biomeName = biomeKeys.getPath();
 
+        if (biomeMod.equals("biomesoplenty")) {
+            if (biomeName.equals("visceral_heap"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty", "flesh"));
+            if (biomeName.equals("erupting_inferno"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty", "brimstone"));
+            if (biomeName.equals("withered_abyss"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("biomesoplenty", "blackstone"));
+        } else if (biomeMod.equals("alexscaves")) {
+            if (biomeName.equals("magnetic_caves"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "galena"));
+            if (biomeName.equals("primordial_caves"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "limestone"));
+            if (biomeName.equals("toxic_caves"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "radrock"));
+            if (biomeName.equals("abyssal_chasm"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "abyssmarine"));
+            if (biomeName.equals("forlorn_hollows"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "coprolith"));
+            if (biomeName.equals("candy_cavity"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "cake_layer"));
+        } else if (biomeMod.equals("macabre")) {
+            if (biomeName.equals("mortem_swamp"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "mortem_dirt"));
+            if (biomeName.equals("mortem_marsh"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "mortem_dirt"));
+            if (biomeName.equals("gloom_forest"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
+            if (biomeName.equals("cracked_cliffs"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
+            if (biomeName.equals("rotting_field"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
+            if (biomeName.equals("teething_forest"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "gums"));
+            if (biomeName.equals("crawling_field"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "crawling_dirt"));
+            if (biomeName.equals("valley_of_eyes"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "veins"));
+            if (biomeName.equals("deathless_valley"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "gore_sand"));
+            if (biomeName.equals("decaying_meadow"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "necrosis_flesh"));
+            if (biomeName.equals("lifeless_pits"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "lifeless_sand"));
+            if (biomeName.equals("mountain_maw"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "tumor_dirt"));
+        }
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
         if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH)) return Blocks.SANDSTONE;
 
@@ -200,6 +275,24 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
 
     private Block getBlockDirt(Holder<Biome> biome) {
         if (biome.is(Biomes.SOUL_SAND_VALLEY)) return Blocks.SOUL_SOIL;
+
+        var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(biome, level);
+        var biomeMod = biomeKeys.getNamespace();
+        var biomeName = biomeKeys.getPath();
+
+        if (biomeMod.equals("alexscaves")) {
+            if (biomeName.equals("candy_cavity"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "block_of_chocolate"));
+            if (biomeName.equals("forlorn_hollows"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "guanostone"));
+            if (biomeName.equals("primordial_caves")) return Blocks.DIRT;
+        } else if (biomeMod.equals("macabre")) {
+            if (biomeName.equals("deathless_valley") || biomeName.equals("lifeless_pits"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "gore_undersand"));
+            if (biomeName.equals("mountain_maw"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "dr_dirt"));
+            return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "damp_dirt"));
+        }
 
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
         if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH)) return Blocks.SAND;
@@ -215,6 +308,21 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         if (biome.is(Biomes.DEEP_DARK)) return Blocks.SCULK;
         if (biome.is(Biomes.OLD_GROWTH_PINE_TAIGA) || biome.is(Biomes.BAMBOO_JUNGLE)) return Blocks.PODZOL;
         if (biome.is(Biomes.MUSHROOM_FIELDS)) return Blocks.MYCELIUM;
+
+        var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(biome, level);
+        var biomeMod = biomeKeys.getNamespace();
+        var biomeName = biomeKeys.getPath();
+
+        if (biomeMod.equals("alexscaves")) {
+            if (biomeName.equals("candy_cavity"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "block_of_frosted_chocolate"));
+            if (biomeName.equals("forlorn_hollows")) return Blocks.PACKED_MUD;
+            if (biomeName.equals("primordial_caves")) return Blocks.GRASS_BLOCK;
+        } else if (biomeMod.equals("macabre")) {
+            if (biomeName.equals("mountain_maw"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "petrified_rock"));
+            return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "weak_stone"));
+        }
 
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
         if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH)) return Blocks.SAND;

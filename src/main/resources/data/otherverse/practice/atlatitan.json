@@ -1,0 +1,12 @@
+{
+	"other" : "alexscaves:atlatitan",
+	"spirit": "time",
+	"binding" : {
+		"alexscaves:amber" : 30
+	},
+	"healing" : {
+		"alexscaves:archaic_vine" : 5,
+		"alexscaves:tree_star" : 5,
+		"alexscaves:serene_salad" : 10
+	}
+}

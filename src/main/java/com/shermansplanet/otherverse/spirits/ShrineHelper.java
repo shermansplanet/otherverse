@@ -2,7 +2,6 @@ package com.shermansplanet.otherverse.spirits;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
@@ -38,6 +37,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -412,7 +412,7 @@ public class ShrineHelper {
                     var player = sl.getRandomPlayer();
                     sl.explode(player, null, damageCalc,
                             pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f,
-                            4 * extra, false, Explosion.BlockInteraction.BREAK);
+                            4 * extra, false, Level.ExplosionInteraction.TNT);
                 }
                 return (extra + 1) * 33;
             }
@@ -1066,7 +1066,7 @@ public class ShrineHelper {
     }
 
     public static List<Shrine> getShrinesFor(Entity entity, SpiritType spiritType) {
-        var level = entity.level;
+        var level = entity.level();
         var mobPos = entity.blockPosition();
         var levelShrines = ShrineHelper.shrinesByChunk.get(level);
         if (levelShrines == null || levelShrines.isEmpty()) return List.of();

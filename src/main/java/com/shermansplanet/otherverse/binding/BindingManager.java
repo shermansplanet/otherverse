@@ -34,6 +34,7 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -123,7 +124,6 @@ public class BindingManager {
     public static void onGrief(EntityMobGriefingEvent event) {
         if (event.getEntity() != null && event.getEntity().getType() == EntityType.ENDERMAN && event.getEntity().getPersistentData().hasUUID("bindingId")) {
             event.setResult(Event.Result.DENY);
-            event.setCanceled(true);
         }
     }
 
@@ -360,6 +360,7 @@ public class BindingManager {
         }
         BoundGoal boundGoal = new BoundGoal(mob, binding);
         mob.goalSelector.addGoal(-1, boundGoal);
+        if(mob instanceof WanderingTrader wt) wt.setDespawnDelay(-1);
         if (!binding.contract.isEmpty()) {
             boundGoal.applyContract();
         }

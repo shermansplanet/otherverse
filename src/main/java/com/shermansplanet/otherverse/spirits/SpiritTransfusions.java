@@ -198,6 +198,7 @@ public class SpiritTransfusions {
     }
 
     public static void register(Item input, SpiritType spiritType, int price, ItemStack output, Block blockOutput, boolean fromRecipe) {
+        if (input == Items.AIR || blockOutput == Blocks.AIR || output.is(Items.AIR)) return;
         var spiritTransfusions = fromRecipe ? TRANSFUSIONS_FROM_RECIPES.data : TRANSFUSIONS_FROM_JSON.data;
         if (!spiritTransfusions.containsKey(input)) {
             spiritTransfusions.put(input, new ArrayList<>());

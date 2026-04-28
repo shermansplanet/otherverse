@@ -1,5 +1,6 @@
 {
 	"other" : "minecraft:wither",
+	"spirit" : "death",
 	"binding" : {
 		"entity.minecraft.cow" : 45,
 		"minecraft:milk_bucket" : 15

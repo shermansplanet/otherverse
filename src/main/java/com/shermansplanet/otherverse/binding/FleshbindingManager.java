@@ -32,7 +32,7 @@ import java.util.HashSet;
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FleshbindingManager {
 
-    private static final int FLESHBINDING_HP = 10;
+    public static final int FLESHBINDING_HP = 10;
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final HashMap<String, ResourceLocation> texturesByLabel = new HashMap<>();
@@ -43,21 +43,21 @@ public class FleshbindingManager {
         texturesByLabel.put("otherverse:cinnabar_block", ResourceLocation.fromNamespaceAndPath("otherverse", "textures/block/cinnabar_block.png"));
     }
 
-    @SubscribeEvent
-    public static void onEntityHurt(LivingDamageEvent event) {
-        if (!SightManager.shouldRenderSight()) return;
-        var entity = event.getEntity();
-        if (entity.getType() == EntityType.PLAYER) return;
-        var level = entity.level();
-        if (!(level instanceof ServerLevel sl)) return;
-        var hp = entity.getHealth();
-        if (hp > FLESHBINDING_HP && hp - event.getAmount() <= FLESHBINDING_HP) {
-            for (var i = 0; i < 6; i++) {
-                sl.sendParticles(ParticleTypes.CRIMSON_SPORE, entity.getRandomX(0.5D), entity.getRandomY(), entity.getRandomZ(0.5D), 1, 0, 0, 0, 0.5D);
-            }
-            sl.playSound(null, entity.getX(), entity.getY(0.5D), entity.getZ(), SoundEvents.GLOW_SQUID_SQUIRT, SoundSource.HOSTILE, 0.7f, 0.8f);
-        }
-    }
+//    @SubscribeEvent
+//    public static void onEntityHurt(LivingDamageEvent event) {
+//        if (!SightManager.shouldRenderSight()) return;
+//        var entity = event.getEntity();
+//        if (entity.getType() == EntityType.PLAYER) return;
+//        var level = entity.level();
+//        if (!(level instanceof ServerLevel sl)) return;
+//        var hp = entity.getHealth();
+//        if (hp > FLESHBINDING_HP && hp - event.getAmount() <= FLESHBINDING_HP) {
+//            for (var i = 0; i < 6; i++) {
+//                sl.sendParticles(ParticleTypes.CRIMSON_SPORE, entity.getRandomX(0.5D), entity.getRandomY(), entity.getRandomZ(0.5D), 1, 0, 0, 0, 0.5D);
+//            }
+//            sl.playSound(null, entity.getX(), entity.getY(0.5D), entity.getZ(), SoundEvents.GLOW_SQUID_SQUIRT, SoundSource.HOSTILE, 0.7f, 0.8f);
+//        }
+//    }
 
     private static boolean canItemFleshbindEntity(Item item, EntityType<?> entityType) {
         var entities = LootHelper.entitiesThatDropItem.get(item);

@@ -94,16 +94,4 @@ public class IdolItem extends Item {
             }
         });
     }
-
-    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> list) {
-        if (tab != Otherverse.TAB_OTHERS.get()) {
-            return;
-        }
-        var encounteredTypes = new HashSet<EntityType<?>>();
-        for (var item : MobBindingInfluenceUtils.typesByIdol.entrySet()) {
-            if (encounteredTypes.add(item.getValue())) {
-                list.add(item.getKey());
-            }
-        }
-    }
 }

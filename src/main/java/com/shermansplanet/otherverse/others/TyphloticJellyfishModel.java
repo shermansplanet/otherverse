@@ -11,10 +11,11 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 public class TyphloticJellyfishModel<T extends TyphloticJellyfish> extends HierarchicalModel<T> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(Otherverse.MODID, "typhloticjellyfishmodel"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "typhloticjellyfishmodel"), "main");
     private final ModelPart root;
     private final ModelPart tentacle_1;
     private final ModelPart tentacle_3;
@@ -62,12 +63,26 @@ public class TyphloticJellyfishModel<T extends TyphloticJellyfish> extends Hiera
     }
 
     @Override
-    public void setupAnim(TyphloticJellyfish entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.root().getAllParts().forEach(ModelPart::resetPose);
-//        var delta = entity.getDeltaMovement();
-//        entity.setXRot((float) (delta.x * delta.x + delta.z * delta.z) * 1000);
-        this.animate(entity.idleAnimationState, TyphloticJellyfishModelAnimation.idle,  ageInTicks);
-        entity.setXRot(45);
+    public void setupAnim(TyphloticJellyfish mob, float a, float b, float animTime, float d, float e) {
+        var tentacleAngle = animTime < 15 ? (15 - animTime) / 10f : (animTime - 15f) / 25f;
+        tentacleAngle = Mth.clamp(tentacleAngle, 0f, 1f);
+        tentacleAngle *= -0.3f;
+        tentacle_1.xRot = tentacleAngle;
+        tentacle_2.xRot = tentacleAngle;
+        tentacle_3.xRot = tentacleAngle;
+        tentacle_4.xRot = tentacleAngle;
+
+        var bellSwell = animTime < 10 ? (10 - animTime) / 10f : (animTime - 10f) / 30f;
+        bellSwell = Mth.clamp(bellSwell, 0f, 1f);
+        bellSwell *= 0.4f;
+        inner.xScale = 1 + bellSwell;
+        inner.yScale = 1 - bellSwell;
+        inner.zScale = 1 + bellSwell;
+
+        bellSwell *= 0.5f;
+        bell.xScale = 1 + bellSwell;
+        bell.yScale = 1 - bellSwell;
+        bell.zScale = 1 + bellSwell;
     }
 
     @Override

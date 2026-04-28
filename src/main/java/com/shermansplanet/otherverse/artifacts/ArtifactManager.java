@@ -117,36 +117,77 @@ public class ArtifactManager {
         if (biome.is(Biomes.DRIPSTONE_CAVES))
             return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_GRAY, Spirits.COLOR_LIGHT_GRAY);
 
-        var biomeName = MobBindingInfluenceUtils.getBiomeName(biome, level);
-        if (biomeName.equals("erupting_inferno"))
-            return List.of(Spirits.COLOR_YELLOW, Spirits.COLOR_ORANGE, Spirits.COLOR_RED);
-        if (biomeName.equals("withered_abyss"))
-            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLACK, Spirits.COLOR_PURPLE);
-        if (biomeName.equals("undergrowth"))
-            return List.of(Spirits.COLOR_RED, Spirits.COLOR_ORANGE, Spirits.COLOR_GREEN);
-        if (biomeName.equals("crystalline_chasm"))
-            return List.of(Spirits.COLOR_RED, Spirits.COLOR_PINK, Spirits.COLOR_PINK);
-        if (biomeName.equals("ominous_woods"))
-            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_GRAY, Spirits.COLOR_PURPLE);
-        if (biomeName.equals("pumpkin_patch"))
-            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_ORANGE, Spirits.COLOR_GREEN);
-        if (biomeName.equals("maple_woods"))
-            return List.of(Spirits.COLOR_RED, Spirits.COLOR_BROWN, Spirits.COLOR_GREEN);
-        if (biomeName.equals("lavender_fields") || biomeName.equals("jacaranda_glade"))
-            return List.of(Spirits.COLOR_GRAY, Spirits.COLOR_GREEN, Spirits.COLOR_PURPLE);
-        if (biomeName.equals("hot_springs"))
-            return List.of(Spirits.COLOR_ORANGE, Spirits.COLOR_YELLOW, Spirits.COLOR_WHITE);
-        if (biomeName.equals("tundra"))
-            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
-        if (biomeName.equals("volcanic_plains"))
-            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_GREEN, Spirits.COLOR_BROWN);
-        if (biomeName.equals("volcano"))
-            return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_ORANGE, Spirits.COLOR_GRAY);
+        var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(biome, level);
+        var biomeMod = biomeKeys.getNamespace();
+        var biomeName = biomeKeys.getPath();
 
-        if (biomeName.equals("ruins_shock"))
-            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
-        if (biomeName.equals("ruins_shock"))
-            return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
+        if (biomeMod.equals("biomesoplenty")) {
+            if (biomeName.equals("erupting_inferno"))
+                return List.of(Spirits.COLOR_YELLOW, Spirits.COLOR_ORANGE, Spirits.COLOR_RED);
+            if (biomeName.equals("withered_abyss"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLACK, Spirits.COLOR_PURPLE);
+            if (biomeName.equals("undergrowth"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_ORANGE, Spirits.COLOR_GREEN);
+            if (biomeName.equals("crystalline_chasm"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_PINK, Spirits.COLOR_PINK);
+            if (biomeName.equals("ominous_woods"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_GRAY, Spirits.COLOR_PURPLE);
+            if (biomeName.equals("pumpkin_patch"))
+                return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_ORANGE, Spirits.COLOR_GREEN);
+            if (biomeName.equals("maple_woods"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_BROWN, Spirits.COLOR_GREEN);
+            if (biomeName.equals("lavender_fields") || biomeName.equals("jacaranda_glade"))
+                return List.of(Spirits.COLOR_GRAY, Spirits.COLOR_GREEN, Spirits.COLOR_PURPLE);
+            if (biomeName.equals("hot_springs"))
+                return List.of(Spirits.COLOR_ORANGE, Spirits.COLOR_YELLOW, Spirits.COLOR_WHITE);
+            if (biomeName.equals("tundra"))
+                return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
+            if (biomeName.equals("volcanic_plains"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_GREEN, Spirits.COLOR_BROWN);
+            if (biomeName.equals("volcano"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_ORANGE, Spirits.COLOR_GRAY);
+        } else if (biomeMod.equals("alexscaves")) {
+            if (biomeName.equals("magnetic_caves"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_RED, Spirits.COLOR_BLUE);
+            if (biomeName.equals("primordial_caves"))
+                return List.of(Spirits.COLOR_GREEN, Spirits.COLOR_LIME, Spirits.COLOR_BROWN);
+            if (biomeName.equals("toxic_caves"))
+                return List.of(Spirits.COLOR_LIME, Spirits.COLOR_GRAY, Spirits.COLOR_BLACK);
+            if (biomeName.equals("abyssal_chasm"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLUE, Spirits.COLOR_CYAN);
+            if (biomeName.equals("forlorn_hollows"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_GRAY, Spirits.COLOR_BROWN);
+            if (biomeName.equals("candy_cavity"))
+                return List.of(Spirits.COLOR_PINK, Spirits.COLOR_BROWN, Spirits.COLOR_PURPLE);
+        } else if (biomeMod.equals("otherverse")) {
+            if (biomeName.equals("ruins_shock"))
+                return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
+        } else if (biomeMod.equals("macabre")) {
+            if (biomeName.equals("mortem_swamp"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_WHITE, Spirits.COLOR_CYAN);
+            if (biomeName.equals("mortem_marsh"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_CYAN, Spirits.COLOR_PURPLE);
+            if (biomeName.equals("gloom_forest"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_ORANGE, Spirits.COLOR_YELLOW);
+            if (biomeName.equals("cracked_cliffs"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_GRAY, Spirits.COLOR_ORANGE);
+            if (biomeName.equals("rotting_field"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_ORANGE, Spirits.COLOR_WHITE);
+            if (biomeName.equals("teething_forest"))
+                return List.of(Spirits.COLOR_PINK, Spirits.COLOR_RED, Spirits.COLOR_WHITE);
+            if (biomeName.equals("crawling_field"))
+                return List.of(Spirits.COLOR_PINK, Spirits.COLOR_RED, Spirits.COLOR_WHITE);
+            if (biomeName.equals("valley_of_eyes"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_RED, Spirits.COLOR_WHITE);
+            if (biomeName.equals("deathless_valley"))
+                return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_RED, Spirits.COLOR_WHITE);
+            if (biomeName.equals("decaying_meadow"))
+                return List.of(Spirits.COLOR_PURPLE, Spirits.COLOR_RED, Spirits.COLOR_WHITE);
+            if (biomeName.equals("lifeless_pits"))
+                return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_RED, Spirits.COLOR_WHITE);
+            if (biomeName.equals("mountain_maw"))
+                return List.of(Spirits.COLOR_LIME, Spirits.COLOR_LIGHT_GRAY, Spirits.COLOR_WHITE);
+        }
 
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER))
             return List.of(Spirits.COLOR_BLUE, Spirits.COLOR_LIGHT_BLUE, Spirits.COLOR_CYAN);
@@ -194,7 +235,7 @@ public class ArtifactManager {
         if (!event.getItemStack().is(OtherverseItems.SPAWN_ALTAR.get())) return;
         if (!(be instanceof SpawnerBlockEntity spawner)) return;
 
-        var etstring = ((SpawnDataGetter)spawner.getSpawner()).getNextSpawnData().getEntityToSpawn().getString("id");
+        var etstring = ((SpawnDataGetter) spawner.getSpawner()).getNextSpawnData().getEntityToSpawn().getString("id");
         LOGGER.debug(etstring);
         var et = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(etstring));
 

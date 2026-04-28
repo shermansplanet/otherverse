@@ -57,7 +57,7 @@ public class SympathySelectRenderer {
         var cam = event.getCamera();
 
         if (SightManager.shouldRenderSight()) {
-            var data = DiagramManager.getOrCreateLevelData(player.getLevel());
+            var data = DiagramManager.getOrCreateLevelData(player.level());
             for (var color : DyeColor.values()) {
                 var key = SympathyManager.getKey(player, color);
                 var pos = data.getSympathyPosition(key);

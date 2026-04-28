@@ -1,0 +1,20 @@
+{
+	"other" : "alexscaves:nucleeper",
+	"spirit": "phlogiston",
+	"healing" : {
+		"otherverse:spirit_war" : 1,
+		"otherverse:spirit_death" : 1,
+		"otherverse:spirit_technology" : 1
+	},
+	"binding" : {
+		"otherverse:spirit_protection" : 1,
+		"entity.alexscaves.raycat" : 30
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:fire_charge",
+			"health" : 64,
+			"output" : "alexscaves:fissile_core"
+		}
+	]
+}

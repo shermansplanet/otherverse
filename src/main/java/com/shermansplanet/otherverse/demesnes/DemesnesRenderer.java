@@ -209,7 +209,7 @@ public class DemesnesRenderer {
                     if (ritual.minPos.equals(message.minPos())) return;
                 }
                 var clientData = new ClientDemesnesData(message.minPos(), new AABB( // 1.20.1 demands integer AABBs, keep an eye on this one
-                        message.minPos(), message.maxPos().offset(1,1,1)), message.levelId());
+                        message.minPos(), message.maxPos()), message.levelId());
                 clientData.timeRendered = DemesnesClaimRitual.INTRO_TIME_TICKS * 10;
                 claimedDemesnes.add(clientData);
                 if (Objects.equals(message.playerName(), Minecraft.getInstance().player.getGameProfile().getName())) {

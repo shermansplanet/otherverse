@@ -42,23 +42,30 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
                     }, Component.literal(perk.name));
 
             var tooltip = Component.empty();
-            for(var tt : perk.tooltip) tooltip.append(tt);
+            List<Component> components = perk.tooltip;
+            for (int i = 0; i < components.size(); i++) {
+                var tt = components.get(i);
+                if (i > 0) tooltip.append("\n");
+                tooltip.append(tt);
+            }
             if (perk.isSanction) {
+                tooltip.append("\n");
                 tooltip.append(Component.literal("Currently granted to: ").append(
                         Component.literal(isActive ? "only those with writs and their bound mobs" : "anyone")
                                 .withStyle(Style.EMPTY.withColor(0x90c833))).append(Component.literal(".")));
-                tooltip.append(Component.literal("Click to toggle.").withStyle(Style.EMPTY.withColor(0x888888)));
+                tooltip.append(Component.literal("\nClick to toggle.").withStyle(Style.EMPTY.withColor(0x888888)));
                 if (isActive) {
-                    tooltip.append(Component.literal("Shift-click to produce a writ.").withStyle(Style.EMPTY.withColor(0x888888)));
+                    tooltip.append(Component.literal("\nShift-click to produce a writ.").withStyle(Style.EMPTY.withColor(0x888888)));
                 }
             } else if (isClickable) {
+                tooltip.append("\n");
                 var cost = DemesnesManager.getLevelCost(claimedPerkCount);
                 if (cost > Minecraft.getInstance().player.experienceLevel) {
                     tooltip.append(Component.literal("You need " + cost + " levels to claim this perk!").withStyle(Style.EMPTY.withColor(0x888888)));
                 } else {
                     tooltip.append(Component.literal("Click to claim. This will cost " + cost + " levels.").withStyle(Style.EMPTY.withColor(0x888888)));
                 }
-                tooltip.append(Component.literal("You have claimed " + claimedPerkCount + " out of " + DemesnesManager.MAX_CHOICES + " perks.").withStyle(Style.EMPTY.withColor(0x888888)));
+                tooltip.append(Component.literal("\nYou have claimed " + claimedPerkCount + " out of " + DemesnesManager.MAX_CHOICES + " perks.").withStyle(Style.EMPTY.withColor(0x888888)));
             }
 
 

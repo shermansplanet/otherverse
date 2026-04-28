@@ -197,7 +197,7 @@ public class MobBindingInfluenceUtils {
         var spiritTypes = new ArrayList<SpiritType>();
         var hasDimensionSpirit = false;
 
-        if (tags.contains(Tags.Biomes.IS_MAGICAL)) spiritTypes.add(Spirits.FATE);
+//        if (tags.contains(Tags.Biomes.IS_MAGICAL)) spiritTypes.add(Spirits.FATE);
         if (tags.contains(Tags.Biomes.IS_DEAD)) spiritTypes.add(Spirits.DEATH);
         if (tags.contains(Tags.Biomes.IS_LUSH)) spiritTypes.add(Spirits.NATURE);
         if (tags.contains(BiomeTags.IS_END)) {
@@ -219,12 +219,30 @@ public class MobBindingInfluenceUtils {
             spiritTypes.add(Spirits.OVERWORLD);
         }
 
-        var biomeName = getBiomeName(biome, level);
+        var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(biome, level);
+        var biomeMod = biomeKeys.getNamespace();
+        var biomeName = biomeKeys.getPath();
+
+        if (biomeMod.equals("macabre")) {
+            if (biomeName.equals("mortem_swamp") || biomeName.equals("mortem_marsh")) {
+                spiritTypes.addAll(0, List.of(Spirits.DEATH, Spirits.DEATH));
+            } else {
+                spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
+            }
+        }
+
         if (biomeName.equals("visceral_heap")) spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
         if (biomeName.equals("erupting_inferno")) spiritTypes.add(0, Spirits.FIRE);
         if (biomeName.equals("withered_abyss")) spiritTypes.add(0, Spirits.DEATH);
         if (biomeName.equals("undergrowth")) spiritTypes.add(0, Spirits.NATURE);
         if (biomeName.equals("crystalline_chasm")) spiritTypes.add(0, Spirits.FORTUNE);
+
+        if (biomeName.equals("magnetic_caves")) spiritTypes.addAll(0, List.of(Spirits.TECH, Spirits.TECH));
+        if (biomeName.equals("primordial_caves")) spiritTypes.addAll(0, List.of(Spirits.TIME, Spirits.TIME));
+        if (biomeName.equals("toxic_caves")) spiritTypes.addAll(0, List.of(Spirits.WAR, Spirits.DEATH));
+        if (biomeName.equals("abyssal_chasm")) spiritTypes.addAll(0, List.of(Spirits.DARK, Spirits.WATER));
+        if (biomeName.equals("forlorn_hollows")) spiritTypes.addAll(0, List.of(Spirits.DARK, Spirits.DARK));
+        if (biomeName.equals("candy_cavity")) spiritTypes.addAll(0, List.of(Spirits.FOOD, Spirits.FOOD));
 
         if (!hasDimensionSpirit) {
             var levelName = level.dimensionTypeId().location().getPath();
@@ -267,13 +285,13 @@ public class MobBindingInfluenceUtils {
         return spiritTypes;
     }
 
-    public static String getBiomeName(Holder<Biome> biome, Level level) {
+    public static ResourceLocation getBiomeKeys(Holder<Biome> biome, Level level) {
         var keyMaybe = biome.unwrap();
-        var biomeName = "";
+        ResourceLocation biomeName = null;
         if (keyMaybe.left().isPresent()) {
-            biomeName = keyMaybe.left().get().location().getPath();
+            biomeName = keyMaybe.left().get().location();
         } else if (keyMaybe.right().isPresent()) {
-            biomeName = level.registryAccess().registryOrThrow(Registries.BIOME).getKey(keyMaybe.right().get()).getPath();
+            biomeName = level.registryAccess().registryOrThrow(Registries.BIOME).getKey(keyMaybe.right().get());
         }
         return biomeName;
     }
@@ -333,6 +351,9 @@ public class MobBindingInfluenceUtils {
         var defaultBindings = new HashMap<ItemOrEntityType, Integer>();
         defaultBindings.put(new ItemOrEntityType(Items.CHAIN), 7);
         defaultBindings.put(new ItemOrEntityType(Items.IRON_BARS), 3);
+
+        var totem = ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "totem_of_possession"));
+        if (totem != null) defaultBindings.put(new ItemOrEntityType(totem), 60);
 
         GENERATED_BINDINGS.data = new HashMap<>();
 
@@ -502,7 +523,9 @@ public class MobBindingInfluenceUtils {
                 mob.tick();
                 var le = (EntityType<? extends LivingEntity>) et;
                 if (!mobSpirits.containsKey(et)) {
-                    if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
+                    if (ForgeRegistries.ENTITY_TYPES.getKey(et).getNamespace().equals("macabre")) {
+                        registerMobSpirit(le, Spirits.FLESH);
+                    } else if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
                         registerMobSpirit(le, Spirits.WATER);
                     } else if (mob instanceof FlyingMob || mob instanceof FlyingAnimal || mob.isNoGravity()
                             || mob.getNavigation() instanceof FlyingPathNavigation) {
