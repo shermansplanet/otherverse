@@ -305,7 +305,7 @@ public class MobTransfusions {
             return false;
         }
         BindingOrFleshbinding binding = BindingOrFleshbinding.getFromPosition(level, target);
-        if (binding == null || binding.getHealth() == binding.getMaxHealth()) {
+        if (binding == null || binding.getHealth() >= binding.getMaxHealth()) {
             return false;
         }
         var foods = MobBindingInfluenceUtils.allFoods.get(binding.entityType);
@@ -316,14 +316,17 @@ public class MobTransfusions {
         if (amount == null) {
             return false;
         }
+        int maxHeal = binding.getMaxHealth() - binding.getHealth();
         if (spiritType != null) {
-            int maxHeal = binding.getMaxHealth() - binding.getHealth();
             int spiritCount = (int) Math.ceil(maxHeal / (float) amount);
             amount = sourceFocus.drainHallow(spiritType, spiritCount * 2, false, false) / 2;
             if (amount == 0) {
                 return false;
             }
+        }else if(maxHeal < amount && DiagramManager.shouldPreventWaste(sourceFocus)){
+            return false;
         }
+        amount = Math.min(maxHeal, amount);
         binding.changeHealth(amount, level);
         BlockPos bp = sourceFocus.getPos();
         for (var i = 0; i < 10; i++) {

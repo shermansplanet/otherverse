@@ -10,7 +10,6 @@ import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +29,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -77,16 +77,6 @@ public class ArtifactManager {
         if (!(event.getLevel() instanceof ServerLevel sl) || !event.getItemStack().is(OtherverseItems.REALM_WRACKED_COAL.get()))
             return;
         var biome = sl.getBiome(event.getEntity().blockPosition());
-
-        var keyMaybe = biome.unwrap();
-        var biomeName = "";
-        if (keyMaybe.left().isPresent()) {
-            biomeName = keyMaybe.left().get().location().getPath();
-        } else if (keyMaybe.right().isPresent()) {
-            biomeName = event.getLevel().registryAccess().registryOrThrow(Registries.BIOME).getKey(keyMaybe.right().get()).getPath();
-        }
-        LOGGER.warn(biomeName);
-
         var spiritTypes = MobBindingInfluenceUtils.getSpiritTypes(biome, sl);
         if (spiritTypes.isEmpty()) return;
         spiritTypes.addAll(new ArrayList<>(spiritTypes));
@@ -107,13 +97,16 @@ public class ArtifactManager {
         event.getItemStack().getOrCreateTag().put("wracked_biome", tag);
     }
 
-    private static Collection<SpiritType> getColorsFor(Holder<Biome> biome, Level level) {
+    public static Collection<SpiritType> getColorsFor(Holder<Biome> biome, Level level) {
         if (biome.is(Biomes.WARPED_FOREST)) return List.of(Spirits.COLOR_CYAN, Spirits.COLOR_CYAN, Spirits.COLOR_RED);
         if (biome.is(Biomes.CRIMSON_FOREST)) return List.of(Spirits.COLOR_RED, Spirits.COLOR_RED, Spirits.COLOR_ORANGE);
         if (biome.is(Biomes.SOUL_SAND_VALLEY))
             return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
         if (biome.is(Biomes.DEEP_DARK)) return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLACK, Spirits.COLOR_CYAN);
         if (biome.is(Biomes.LUSH_CAVES)) return List.of(Spirits.COLOR_LIME, Spirits.COLOR_PINK, Spirits.COLOR_GRAY);
+        if (biome.is(Biomes.CHERRY_GROVE)) return List.of(Spirits.COLOR_PINK, Spirits.COLOR_PINK, Spirits.COLOR_WHITE);
+        if (biome.is(Biomes.MUSHROOM_FIELDS))
+            return List.of(Spirits.COLOR_RED, Spirits.COLOR_BROWN, Spirits.COLOR_LIGHT_GRAY);
         if (biome.is(Biomes.DRIPSTONE_CAVES))
             return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_GRAY, Spirits.COLOR_LIGHT_GRAY);
 
@@ -160,8 +153,24 @@ public class ArtifactManager {
             if (biomeName.equals("candy_cavity"))
                 return List.of(Spirits.COLOR_PINK, Spirits.COLOR_BROWN, Spirits.COLOR_PURPLE);
         } else if (biomeMod.equals("otherverse")) {
+            if (biomeName.equals("ruins_anger"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_ORANGE, Spirits.COLOR_YELLOW);
+            if (biomeName.equals("ruins_chaos"))
+                return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_BLACK, Spirits.COLOR_BLACK);
+            if (biomeName.equals("ruins_disgust"))
+                return List.of(Spirits.COLOR_GREEN, Spirits.COLOR_BLACK, Spirits.COLOR_LIME);
+            if (biomeName.equals("ruins_ecstasy"))
+                return List.of(Spirits.COLOR_YELLOW, Spirits.COLOR_WHITE, Spirits.COLOR_ORANGE);
+            if (biomeName.equals("ruins_fear"))
+                return List.of(Spirits.COLOR_WHITE, Spirits.COLOR_CYAN, Spirits.COLOR_BLACK);
+            if (biomeName.equals("ruins_misery"))
+                return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_BLUE, Spirits.COLOR_BLACK);
             if (biomeName.equals("ruins_shock"))
                 return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_CYAN, Spirits.COLOR_WHITE);
+            if (biomeName.equals("ruins_trust"))
+                return List.of(Spirits.COLOR_PURPLE, Spirits.COLOR_MAGENTA, Spirits.COLOR_BLUE);
+            if (biomeName.equals("ruins_vigil"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
         } else if (biomeMod.equals("macabre")) {
             if (biomeName.equals("mortem_swamp"))
                 return List.of(Spirits.COLOR_BLACK, Spirits.COLOR_WHITE, Spirits.COLOR_CYAN);
@@ -218,6 +227,20 @@ public class ArtifactManager {
     public static void onUse(PlayerInteractEvent.RightClickBlock event) {
         var be = event.getLevel().getBlockEntity(event.getPos());
         if (be instanceof BiomeBrazierBlockEntity brazier) {
+            if (event.getItemStack().is(OtherverseItems.SCRYING_POWDER.get())) {
+                if (!event.getEntity().isCreative()) {
+                    event.getItemStack().shrink(1);
+                    if (event.getItemStack().isEmpty())
+                        event.getEntity().getInventory().removeItem(event.getItemStack());
+                }
+                event.setUseItem(Event.Result.DENY);
+                event.setUseBlock(Event.Result.DENY);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                event.setCanceled(true);
+                brazier.fuelForScrying();
+                return;
+            }
+
             if (!event.getItemStack().is(OtherverseItems.REALM_WRACKED_COAL.get())) return;
             if (!event.getItemStack().hasTag() || !event.getItemStack().getTag().contains("wracked_biome")) return;
             if (!event.getEntity().isCreative()) {
@@ -281,7 +304,7 @@ public class ArtifactManager {
         var spawnPos = focus.getPos();
 
         for (var i = 0; i < mobCount; i++) {
-            var e = altar.spawnType.create(level, null, null, null,
+            var e = altar.spawnType.create(level, null, null, spawnPos,
                     MobSpawnType.SPAWN_EGG, false, false);
             e.setPos(new Vec3(
                     spawnPos.getX() + 0.4f + level.random.nextFloat() * 0.2f,
@@ -310,17 +333,23 @@ public class ArtifactManager {
         var anyTransfer = false;
         for (var sourceFocus : foci) {
             for (var spiritType : brazier.spiritCounts.keySet()) {
+                if (brazier.biomeTag == null && !brazier.spiritCode.isEmpty() && brazier.spiritCode.get(brazier.spiritCode.size() - 1) == spiritType) {
+                    continue;
+                }
                 var count = brazier.spiritCounts.get(spiritType);
                 var remaining = count.getSecond() - count.getFirst();
-                if (remaining == 0) continue;
+                if (remaining <= 0) continue;
                 var transferred = sourceFocus.drainHallow(spiritType, remaining, false, false);
                 if (transferred == 0) continue;
+                if (brazier.biomeTag == null) {
+                    brazier.tryScry(spiritType, level);
+                    return false;
+                }
                 brazier.spiritCounts.put(spiritType, new Pair<>(count.getFirst() + transferred, count.getSecond()));
                 anyTransfer = true;
             }
         }
         if (anyTransfer) {
-            LOGGER.debug("ANY TRANSFER");
             var canActivate = true;
             for (var spiritType : brazier.spiritCounts.values()) {
                 if (spiritType.getFirst() >= spiritType.getSecond()) continue;
@@ -333,15 +362,7 @@ public class ArtifactManager {
             } else {
                 level.playSound(null, pos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 1, 1);
             }
-            level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1, 1);
-            var r = level.getRandom();
-            for (var i = 0; i < 8; i++) {
-                level.sendParticles(canActivate ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.LARGE_SMOKE,
-                        pos.getX() + r.nextFloat() * 3f - 1f,
-                        pos.getY() + r.nextFloat() * 3f - 1f,
-                        pos.getZ() + r.nextFloat() * 3f - 1f,
-                        0, 0, 0.2f, 0, 0.15f);
-            }
+            brazier.fuelEffects();
             brazier.setLabels();
             brazier.setChanged();
         }

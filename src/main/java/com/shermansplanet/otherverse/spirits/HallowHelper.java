@@ -88,7 +88,7 @@ public class HallowHelper {
     public static void onGrindstoneChange(GrindstoneEvent.OnPlaceItem event) {
         if (!event.getTopItem().hasTag() || !event.getTopItem().getTag().contains("hallow")) return;
         var newstack = event.getTopItem().copy();
-        newstack.getTag().remove("hallow");
+        newstack.removeTagKey("hallow");
         event.setOutput(newstack);
     }
 
@@ -266,7 +266,7 @@ public class HallowHelper {
             if (spirits == null) {
                 return false;
             }
-            if (diagram.trySpendPower(level, circle.getBlockPos(), (int) (10 * coeff), new HashSet<>())) {
+            if (diagram.trySpendPower(level, circle.getBlockPos(), (int) (9 * coeff), new HashSet<>())) {
                 CompoundTag tag = circle.item.getOrCreateTag();
                 CompoundTag hallowTag = new CompoundTag();
                 float capacity = 0f;
@@ -714,6 +714,9 @@ public class HallowHelper {
                 var transferAmount = Math.min(remainingCapacity, remainingAmount);
                 drainPositions.put(sourcePos, transferAmount);
                 remainingAmount -= transferAmount;
+                if(spiritType == Spirits.TECH && ht.contains("shrine") && level.hasNeighborSignal(blockPos)){
+                    return 0;
+                }
             }
         }
 

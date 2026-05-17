@@ -2,7 +2,7 @@
     "name": "Action: Break",
     "icon": "minecraft:wooden_pickaxe",
     "category": "otherverse:contracts",
-    "sortnum": 7,
+    "sortnum": 70,
     "pages": [
         {
             "type": "patchouli:spotlight",

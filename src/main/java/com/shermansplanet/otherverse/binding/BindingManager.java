@@ -13,12 +13,12 @@ import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -52,7 +52,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -80,11 +79,11 @@ public class BindingManager {
     }
 
     @SubscribeEvent
-    public static void onVexTick(LivingEvent.LivingTickEvent event){
+    public static void onVexTick(LivingEvent.LivingTickEvent event) {
         var e = event.getEntity();
-        if(e.getType() != EntityType.VEX) return;
-        for(var other : e.level().getEntities(e, e.getBoundingBox().inflate(0.5f))){
-            if(other instanceof ItemEntity ie && ie.getItem().is(OtherverseItems.SALT.get())){
+        if (e.getType() != EntityType.VEX) return;
+        for (var other : e.level().getEntities(e, e.getBoundingBox().inflate(0.5f))) {
+            if (other instanceof ItemEntity ie && ie.getItem().is(OtherverseItems.SALT.get())) {
                 e.hurt(e.level().damageSources().indirectMagic(ie.getOwner() == null ? ie : ie.getOwner(), ie), ie.getItem().getCount() * 14);
                 ie.discard();
             }
@@ -92,14 +91,32 @@ public class BindingManager {
     }
 
     @SubscribeEvent
-    public static void onVexHurt(LivingHurtEvent event){
+    public static void onVexHurt(LivingHurtEvent event) {
         var e = event.getEntity();
-        if(e.getType() != EntityType.VEX) return;
-        if(!(event.getSource().getEntity() instanceof LivingEntity le)) return;
+        if (event.getSource().is(DamageTypes.IN_WALL) && e.getEyeHeight() <= 1f && isBoundOrContracted(e)) {
+            var ogPos = e.blockPosition();
+            for (var dir : Direction.values()) {
+                var pos = ogPos.relative(dir);
+                if (e.level().getBlockState(pos).getCollisionShape(e.level(), pos).isEmpty()) {
+                    e.setPos(new Vec3(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f));
+                    event.setAmount(0);
+                    event.setCanceled(true);
+                    return;
+                }
+            }
+        }
+        if (e.getType() != EntityType.VEX) return;
+        if (!(event.getSource().getEntity() instanceof LivingEntity le)) return;
         var stack = le.getMainHandItem();
-        if(!stack.is(OtherverseItems.SALT.get())) return;
+        if (!stack.is(OtherverseItems.SALT.get())) return;
         event.setAmount(14);
         stack.shrink(1);
+    }
+
+    private static boolean isBoundOrContracted(LivingEntity e) {
+        var data = e.getPersistentData();
+        if (data.isEmpty()) return false;
+        return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("unbound_contract") || FamiliarManager.isFamiliar(e);
     }
 
     @SubscribeEvent
@@ -132,6 +149,10 @@ public class BindingManager {
         var data = DiagramManager.getOrCreateLevelData(level);
         var bindingsByPosition = data.bindingsByPosition;
         BindingInfo oldBinding = bindingsByPosition.get(focus.getPos());
+        if (oldBinding != null && oldBinding.isCinnabar) {
+            LogUtils.getLogger().debug("IGNORING CINNABAR BINDING");
+            return false;
+        }
         if (FamiliarManager.isFamiliar(mob)) {
             if (oldBinding != null) {
                 bindingsByPosition.remove(focus.getPos());
@@ -141,12 +162,13 @@ public class BindingManager {
         }
         if (mob == null) {
             if (oldBinding != null) {
+                LOGGER.debug("UNLOADING OLD BINDING");
                 oldBinding.unload();
             }
             focus.mostRecentMob = null;
             return false;
         }
-        if(mob.getPersistentData().contains("construct_type")){
+        if (mob.getPersistentData().contains("construct_type")) {
             return false;
         }
         if (oldBinding != null) {
@@ -192,7 +214,8 @@ public class BindingManager {
                 }
             }
         }
-        if (influenceItems.isEmpty() || !MobBindingInfluenceUtils.CanBeBound(mob, influenceItems, focus)) {
+        var canBeBound = MobBindingInfluenceUtils.CanBeBound(mob, influenceItems, focus);
+        if ((!canBeBound.getSecond() && influenceItems.isEmpty()) || !canBeBound.getFirst()) {
             if (rebinding) {
                 LOGGER.debug("BREAKING BINDING BECAUSE REBINDING");
                 breakBinding(oldBinding);
@@ -204,7 +227,7 @@ public class BindingManager {
             return true;
         }
         if (mob.level() instanceof ServerLevel sl) {
-            BindingInfo binding = new BindingInfo(UUID.randomUUID(), focus.getPos(), mob, sl, new CompoundTag(), DiagramManager.getDimensionHash(sl));
+            BindingInfo binding = new BindingInfo(UUID.randomUUID(), focus.getPos(), mob, sl, new CompoundTag(), DiagramManager.getDimensionHash(sl), false, canBeBound.getSecond());
             mob.setPersistenceRequired();
             mob.getPersistentData().putUUID("bindingId", binding.bindingId);
             binding.register();
@@ -235,7 +258,7 @@ public class BindingManager {
                 if (binding.getFocus() != null) {
                     DiagramManager.markDiagramActive(sl, binding.getFocus().getDiagram());
                 }
-                if(mob.isDeadOrDying()){
+                if (mob.isDeadOrDying()) {
                     binding.unload();
                     return;
                 }
@@ -267,7 +290,7 @@ public class BindingManager {
             var id = event.getEntity().getId();
             var msg = OtherverseClientPacketHandler.waitingMessages.get(id);
             if (msg != null) {
-                for(var m : msg) {
+                for (var m : msg) {
                     BindingRenderer.updateBinding(mob, m);
                 }
                 OtherverseClientPacketHandler.waitingMessages.remove(id);
@@ -284,13 +307,13 @@ public class BindingManager {
                 break;
             }
         }
-        if(!didFindGoal){
+        if (!didFindGoal) {
             BoundGoal boundGoal = new BoundGoal(mob, null);
             boundGoal.loadUnboundContract();
             mob.goalSelector.addGoal(-1, boundGoal);
         }
         OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), !fromClick));
+                new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), BindingUpdateMessage.BindingType.UNBOUND, !fromClick));
     }
 
     @SubscribeEvent
@@ -337,7 +360,7 @@ public class BindingManager {
         }
     }
 
-    public static int getSpiritDrain(float maxHealth){
+    public static int getSpiritDrain(float maxHealth) {
         return (int) Math.ceil(maxHealth / 10);
     }
 
@@ -360,7 +383,7 @@ public class BindingManager {
         }
         BoundGoal boundGoal = new BoundGoal(mob, binding);
         mob.goalSelector.addGoal(-1, boundGoal);
-        if(mob instanceof WanderingTrader wt) wt.setDespawnDelay(-1);
+        if (mob instanceof WanderingTrader wt) wt.setDespawnDelay(-1);
         if (!binding.contract.isEmpty()) {
             boundGoal.applyContract();
         }
@@ -391,12 +414,15 @@ public class BindingManager {
     }
 
     public static void startAttacking(Mob mob, LivingEntity targetMob) {
-        if(mob == targetMob) return;
+        if (mob == targetMob) return;
         mob.setTarget(targetMob);
         mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, targetMob);
         mob.getBrain().setMemory(MemoryModuleType.ANGRY_AT, targetMob.getUUID());
         mob.setAggressive(true);
-        if (mob instanceof Warden w) w.increaseAngerAt(targetMob);
+        if (mob instanceof Warden w) {
+            w.increaseAngerAt(targetMob);
+            w.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 120000L);
+        }
 
         for (var goal : mob.goalSelector.getAvailableGoals()) {
             if (BoundGoal.isAttackGoal(goal.getGoal())) {
@@ -408,6 +434,19 @@ public class BindingManager {
         }
     }
 
+    public static void stopAttacking(Mob mob) {
+        for (var goal : mob.goalSelector.getAvailableGoals()) {
+            if (BoundGoal.isAttackGoal(goal.getGoal())) {
+                if (goal.isRunning()) {
+                    goal.stop();
+                }
+            }
+        }
+        if (mob.getTarget() != null && mob instanceof Warden w) w.clearAnger(mob.getTarget());
+        mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, (LivingEntity) null);
+        mob.setAggressive(false);
+    }
+
     public static void breakBinding(BindingInfo binding) {
         Mob mob = binding.mob;
         if (mob == null) {
@@ -415,7 +454,7 @@ public class BindingManager {
             return;
         }
         Player closest = mob.level().getNearestPlayer(mob, 16);
-        if(closest != null) {
+        if (closest != null) {
             mob.setLastHurtByPlayer(closest);
             mob.setLastHurtByMob(closest);
             startAttacking(mob, closest);
@@ -441,7 +480,7 @@ public class BindingManager {
         if (mob.level() instanceof ServerLevel sl) {
             LOGGER.error("SENDING BROKEN BINDING PACKET");
             OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.BREAK, false));
+                    new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.BREAK, BindingUpdateMessage.BindingType.UNBOUND, false));
         } else {
             LOGGER.error("BREAKING BINDING ON CLIENT LEVEL");
         }
@@ -491,9 +530,9 @@ public class BindingManager {
         if (!(target.getPersistentData().hasUUID("bindingId") || target.getPersistentData().contains("unbound_contract"))
                 || !(target instanceof Mob mob)) return;
 
-        if(event.getItemStack().is(OtherverseItems.CHALK.get())){
-            for(var goal : mob.goalSelector.getAvailableGoals()){
-                if(goal.getGoal() instanceof BoundGoal bg){
+        if (event.getItemStack().is(OtherverseItems.CHALK.get())) {
+            for (var goal : mob.goalSelector.getAvailableGoals()) {
+                if (goal.getGoal() instanceof BoundGoal bg) {
                     bg.sendDebugMessage(event.getEntity());
                     return;
                 }
@@ -520,6 +559,11 @@ public class BindingManager {
     }
 
     public static boolean drainsBindings(EntityType<? extends LivingEntity> type) {
-        return type.getCategory() == MobCategory.MONSTER && DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH) > 20;
+        var maxHp = DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH);
+        if (maxHp <= 20) return false;
+        if (maxHp > 100) return true;
+        if (type.getCategory() == MobCategory.MONSTER) return true;
+        if (DefaultAttributes.getSupplier(type).hasAttribute(Attributes.ATTACK_DAMAGE)) return true;
+        return false;
     }
 }

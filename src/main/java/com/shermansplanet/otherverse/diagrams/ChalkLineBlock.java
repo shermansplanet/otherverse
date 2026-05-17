@@ -45,6 +45,8 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Bus.FORGE)
 public class ChalkLineBlock extends Block implements EntityBlock {
 
@@ -253,6 +255,11 @@ public class ChalkLineBlock extends Block implements EntityBlock {
             int selfCount = 1;
             if (containsSelf) {
                 selfCount += circle.item.getCount();
+            }
+            circle.setPlayer(player);
+            if (level instanceof ServerLevel sl) {
+                var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
+                data.putSelf(player, pos);
             }
             itemstack = new ItemStack(OtherverseItems.SELF.get(), selfCount);
         } else if (makeCircle) {

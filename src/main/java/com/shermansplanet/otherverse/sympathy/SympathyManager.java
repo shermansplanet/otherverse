@@ -8,9 +8,13 @@ import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.Spirits;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -31,7 +35,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -83,6 +89,16 @@ public class SympathyManager {
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
         if (state.getBlock() == OtherverseBlocks.WEB_OF_FATE.get()) {
+            if (event.getEntity().isCrouching()) {
+                var key = getKey(event.getEntity(), col);
+                var data = DiagramManager.getOrCreateLevelData(event.getLevel());
+                var targetPos = data.getSympathyPosition(key);
+                if (targetPos != null) {
+                    data.putSympathyPosition(bindPos.toString(), targetPos);
+                }
+                event.getEntity().displayClientMessage(Component.literal("Web of Fate bound to " + targetPos.getX() + ", " + targetPos.getY() + ", " + targetPos.getZ()), true);
+                col = DyeColor.WHITE;
+            }
             event.getEntity().level().setBlockAndUpdate(bindPos, state.setValue(ColorableBlock.color, col));
         } else {
             event.getEntity().displayClientMessage(Component.translatable("otherverse.sympathy.bound_to_pos"), true);
@@ -101,19 +117,39 @@ public class SympathyManager {
     }
 
     private static float onHpChange(LivingEntity entity, float amount, DamageSource damageSource) {
-        if (!entity.getPersistentData().contains("bindingId")) return amount;
         if (!(entity.level() instanceof ServerLevel sl)) return amount;
-        var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
-        var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
-        if (binding == null || binding.getFocus() == null) return amount;
-        amount = distributeHpChange(binding.getFocus(), (int) amount, damageSource);
         var inFocus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
         if (inFocus != null) amount = distributeHpChange(inFocus, (int) amount, damageSource);
+        if (entity.getPersistentData().contains("bindingId")) {
+            var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
+            var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
+            if (binding == null || binding.getFocus() == null) return amount;
+            amount = distributeHpChange(binding.getFocus(), (int) amount, damageSource);
+        } else if (entity instanceof ServerPlayer player) {
+            for (var level : sl.getServer().getAllLevels()) {
+                var data = DiagramManager.getOrCreateLevelData(level);
+                var key = player.getGameProfile().getName();
+                if (!data.selfPositions.containsKey(key)) return amount;
+                var toRemove = new ArrayList<BlockPos>();
+                var allPositions = data.selfPositions.get(key);
+                for (var pos : allPositions) {
+                    if (!(level.getBlockEntity(pos) instanceof ChalkCircle cc)
+                            || !cc.getItem().is(OtherverseItems.SELF.get())
+                            || !Objects.equals(cc.player, key)) {
+                        toRemove.add(pos);
+                        continue;
+                    }
+                    amount = distributeHpChange(cc, (int) amount, damageSource);
+                }
+                allPositions.removeAll(toRemove);
+                if (!toRemove.isEmpty()) data.setDirty();
+            }
+        }
         return amount;
     }
 
     public static int distributeHpChange(IFocus focus, int delta, DamageSource damageSource) {
-        if (Math.abs(delta) <= 1) return delta;
+        if (Math.abs(delta) == 0) return delta;
         var hallowPos = focus.getDiagram().influences.get(focus.getPos());
         if (hallowPos == null) return delta;
         var spindlePos = focus.getDiagram().influences.get(hallowPos);
@@ -121,7 +157,9 @@ public class SympathyManager {
         var level = focus.getFocusLevel();
         if (!(level instanceof ServerLevel sl)) return delta;
         if (!(level.getBlockEntity(spindlePos) instanceof ChalkCircle spindleCircle)) return delta;
-        if (!spindleCircle.getItem().is(OtherverseItems.SPINDLE_BLOODY.get())) return delta;
+        var isSpindle = spindleCircle.getItem().is(OtherverseItems.SPINDLE_BLOODY.get());
+        var isSelf = spindleCircle.getItem().is(OtherverseItems.SELF.get());
+        if (!isSelf && !isSpindle) return delta;
         IFocus hallowFocus = DiagramManager.getOrCreateLevelData(level).allBlockFoci.get(hallowPos);
         if (hallowFocus == null) {
             if (level.getBlockEntity(hallowPos) instanceof ChalkCircle hallowCircle) {
@@ -132,10 +170,24 @@ public class SympathyManager {
         }
 
         var price = Math.abs(delta) / 2;
+        if (Math.abs(delta) % 2 == 1 && focus.getFocusLevel().getRandom().nextBoolean()) {
+            price += 1;
+        }
+        if (price == 0) return delta;
         var drained = hallowFocus.drainHallow(Spirits.FATE, price, false, false);
         var otherDelta = Mth.sign(delta) * drained;
         if (otherDelta == 0) return delta;
-        var otherEntity = getEntityByUniqueId(spindleCircle.getItem().getTag().getUUID("sympathy_target"), sl);
+        Entity otherEntity = null;
+        if (isSpindle) {
+            otherEntity = getEntityByUniqueId(spindleCircle.getItem().getTag().getUUID("sympathy_target"), sl);
+        } else {
+            for (var player : level.players()) {
+                if (player.getGameProfile().getName().equals(spindleCircle.player)) {
+                    otherEntity = player;
+                    break;
+                }
+            }
+        }
         if (!(otherEntity instanceof LivingEntity le)) return delta;
         if (otherDelta > 0) {
             le.heal(otherDelta);
@@ -149,7 +201,8 @@ public class SympathyManager {
     public static void onTooltip(ItemTooltipEvent event) {
         if (!event.getItemStack().is(OtherverseItems.SPINDLE_BLOODY.get())) return;
         if (!event.getItemStack().hasTag() || !event.getItemStack().getTag().contains("sympathy_label")) return;
-        var label = event.getItemStack().getTag().getString("sympathy_label");
+        var spindleTag = event.getItemStack().getTag();
+        var label = spindleTag.getString("sympathy_label");
         event.getToolTip().add(Component.literal("Sympathy target: ")
                 .append(Component.translatable(label))
                 .withStyle(Style.EMPTY.withColor(0xaaaaaa).withItalic(true)));

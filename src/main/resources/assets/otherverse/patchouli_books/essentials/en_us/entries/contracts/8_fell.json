@@ -1,0 +1,14 @@
+{
+    "name": "Action: Fell",
+    "icon": "minecraft:wooden_axe",
+    "category": "otherverse:contracts",
+    "sortnum": 80,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {"tag" : "forge:tools/axes"},
+            "title" : "Fell",
+            "text": "An axe item denotes the \"fell\" action.$(br2)This works exactly like \"break,\" except when targeting a log, it will break all attached logs one by one. Without a filter, it targets any log."
+        }
+    ]
+}

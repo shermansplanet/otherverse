@@ -40,6 +40,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -267,7 +268,7 @@ public class DemesnesManager {
 
     private static boolean trySetBlock(ClaimedDemesneData demesne, ServerLevel level, BlockPos pos) {
         var blockstate = level.getBlockState(pos.above());
-        if (!blockstate.is(BlockTags.BASE_STONE_OVERWORLD) && !blockstate.is(BlockTags.LOGS)) return false;
+        if (!blockstate.is(Tags.Blocks.STONE) && !blockstate.is(BlockTags.LOGS)) return false;
         demesne.addFavoredMaterial(blockstate);
         return true;
     }
@@ -282,14 +283,45 @@ public class DemesnesManager {
         var z = item.getTag().getFloat("escape_rope_z");
         var destination = new BlockPos(Mth.floor(x), Math.round(y), Mth.floor(z));
         var destLevelId = item.getTag().getInt("level_id");
+//        LOGGER.info("LEVEL ID: {}", destLevelId);
         var owner = diagram.getOwner(level);
         if (owner == null) return false;
-        var demesne = getData(owner);
-        if (demesne == null || demesne.getPerkLevel(DemesnePerk.PORTAL) == 0) return false;
-        if (demesne.levelId != destLevelId || !(new AABB(demesne.minPos, demesne.maxPos).contains(x, y, z)))
+        ClaimedDemesneData demesne = null;
+        for (var demesneLevel : level.getServer().getAllLevels()) {
+//            LOGGER.info("LEVEL {}: {}", DiagramManager.getDimensionHash(demesneLevel), demesneLevel.dimension());
+            if (destLevelId == DiagramManager.getDimensionHash(demesneLevel)) {
+//                LOGGER.info("LEVEL MATCH");
+                demesne = getData(demesneLevel, destination);
+                break;
+            }
+        }
+//        LOGGER.info("TRYING TO OPEN DEMESNE PORTAL...");
+        if (demesne == null) {
+//            LOGGER.info("NULL DEMESNE");
             return false;
-        var cost = destLevelId == DiagramManager.getDimensionHash(level) ? 7 : 21;
-        if (!diagram.trySpendPower(level, target, cost, new HashSet<>())) return false;
+        }
+        if (demesne.getPerkLevel(DemesnePerk.PORTAL) == 0) {
+//            LOGGER.info("NO PORTAL PERK");
+            return false;
+        }
+        if (demesne.levelId != destLevelId) {
+//            LOGGER.info("{} DOES NOT MATCH {}", demesne.levelId, destLevelId);
+            return false;
+        }
+        if (!(new AABB(demesne.minPos, demesne.maxPos).contains(x, y, z))) {
+//            LOGGER.info("DESTINATION NOT IN DEMESNE");
+            return false;
+        }
+        if (!demesne.hasSanction(DemesnePerk.SANCTION_INTERACT, owner)) {
+//            LOGGER.info("UNSANCTIONED");
+            owner.displayClientMessage(Component.literal("You don't have permission to open a portal to this Demesne."), true);
+            return false;
+        }
+        var cost = destLevelId == DiagramManager.getDimensionHash(level) ? 6 : 18;
+        if (!diagram.trySpendPower(level, target, cost, new HashSet<>())) {
+//            LOGGER.info("NOT ENOUGH POWER");
+            return false;
+        }
         circle.removeItem();
         level.setBlockAndUpdate(target, OtherverseBlocks.DEMESNE_PORTAL.get().defaultBlockState());
         if (level.getBlockEntity(target) instanceof DemesnesPortal portal) {
@@ -310,12 +342,12 @@ public class DemesnesManager {
         if (abilities.instabuild) return;
         var demesnes = getData(sp);
         if (demesnes == null) return;
-        if (gameTime % 60 == 0 && demesnes.getPerkLevel(DemesnePerk.RECOVERY) > 0) {
+        var inDemesnes = demesnes == getData(sp.serverLevel(), sp.blockPosition());
+        if (inDemesnes && gameTime % 60 == 0 && demesnes.getPerkLevel(DemesnePerk.RECOVERY) > 0) {
             sp.heal(1);
             sp.getFoodData().eat(1, 1);
         }
         if (demesnes.getPerkLevel(DemesnePerk.FLIGHT) == 0) return;
-        var inDemesnes = demesnes == getData(sp.serverLevel(), sp.blockPosition());
         var fastFlying = abilities.mayfly && abilities.getFlyingSpeed() == 0.05f;
         if (inDemesnes && !fastFlying) {
             abilities.mayfly = true;
@@ -387,6 +419,7 @@ public class DemesnesManager {
     }
 
     public static void onBeaconBroken(ServerLevel sl, BlockPos pos) {
+        LOGGER.debug("GETTING DATA FROM DEMESNE BEACON BROKEN");
         var demesne = getData(sl, pos);
         if (demesne == null || demesne.minChronoPos == null) return;
         OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new DemesnesClientboundMessage(
@@ -491,7 +524,7 @@ public class DemesnesManager {
         var data = event.getEntity().getPersistentData();
         if (!data.getBoolean("demesnes_challenger")) return;
         var ritual = activeRituals.get(data.getString("demesnes_claimant"));
-        if(ritual == null) return;
+        if (ritual == null) return;
         ritual.onChallengerDeath(event);
     }
 
@@ -534,6 +567,7 @@ public class DemesnesManager {
                                 ritual.minBlock, ritual.maxBlock, ritual.levelId, ritual.claimant.getGameProfile().getName()));
             }
             for (var demesne : DiagramManager.getOrCreateLevelData(sp.serverLevel()).claimedDemesnes.values()) {
+                LOGGER.debug("SENDING DEMESNE DATA TO CLIENT");
                 sendDemesneDataToClient(demesne, sp);
             }
         }
@@ -574,6 +608,7 @@ public class DemesnesManager {
             event.setUseBlock(Event.Result.DENY);
             event.setCanceled(true);
             var data = DiagramManager.getOrCreateLevelData(sp.serverLevel().getServer().overworld());
+            LOGGER.debug("ACCESSING DEMESNE DATA FROM USING ITEM");
             data.claimedDemesnes.remove(sp.getGameProfile().getName());
             data.savedData.setDirty();
         }
@@ -725,6 +760,7 @@ public class DemesnesManager {
     }
 
     private static void loadDemesne(ClaimedDemesneData demesne, ServerLevel sl) {
+        LOGGER.debug("LOADING DEMESNE");
         demesne.addToChunks(claimedDemesnes, sl);
         sendDemesneDataToClient(demesne, FamiliarManager.getPlayerFromName(sl, demesne.practitioner));
     }
@@ -776,10 +812,11 @@ public class DemesnesManager {
 
     public static boolean doesIntersectExistingClaim(DemesnesBeacon beacon) {
         var sl = (ServerLevel) beacon.getLevel();
+        LOGGER.debug("CHECKING INTERSECTION");
         if (!claimedDemesnes.containsKey(sl) || beacon.range < 0) return false;
         var chunksForLevel = claimedDemesnes.get(sl);
-        var minChunk = sl.getChunkAt(beacon.minBlock).getPos();
-        var maxChunk = sl.getChunkAt(beacon.maxBlock).getPos();
+        var minChunk = Otherverse.chunkAt(beacon.minBlock);
+        var maxChunk = Otherverse.chunkAt(beacon.maxBlock);
         for (var x = minChunk.x; x <= maxChunk.x; x++) {
             for (var z = minChunk.z; z <= maxChunk.z; z++) {
                 if (chunksForLevel.containsKey(new ChunkPos(x, z))) {
@@ -793,7 +830,14 @@ public class DemesnesManager {
     public static ClaimedDemesneData getData(ServerLevel sl, BlockPos pos) {
         var chunkClaims = claimedDemesnes.get(sl);
         if (chunkClaims == null) return null;
-        return chunkClaims.getOrDefault(sl.getChunkAt(pos).getPos(), null);
+//        LOGGER.info("GETTING DATA FOR {} AT {}", sl.dimension(), Otherverse.chunkAt(pos));
+        var ret = chunkClaims.getOrDefault(Otherverse.chunkAt(pos), null);
+//        if(ret == null){
+//            for(var cc : chunkClaims.keySet()){
+//                LOGGER.info("{}: {}", cc.toString(), chunkClaims.get(cc) == null ? "NULL" : chunkClaims.get(cc));
+//            }
+//        }
+        return ret;
     }
 
     @SubscribeEvent

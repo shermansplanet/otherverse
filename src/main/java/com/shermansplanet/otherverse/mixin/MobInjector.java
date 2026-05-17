@@ -41,7 +41,7 @@ public abstract class MobInjector extends LivingEntity {
             target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
             args = "ldc=mob tick"), cancellable = true)
     protected final void onServerAiStep(CallbackInfo ci) {
-        if (!getPersistentData().contains("bindingId")) return;
+        if (!getPersistentData().contains("bindingId") || this.getType().equals(EntityType.WITHER)) return;
         var activity = getBrain().getActiveNonCoreActivity();
         if(activity.isPresent() && activity.get() == Activity.FIGHT) return;
         ci.cancel();

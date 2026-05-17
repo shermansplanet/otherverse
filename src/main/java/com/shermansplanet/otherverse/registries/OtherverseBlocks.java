@@ -26,7 +26,7 @@ public class OtherverseBlocks {
     public static final RegistryObject<Block> CHALK_LINE = BLOCKS.register("chalk_line",
             ChalkLineBlock::new);
     public static final RegistryObject<Block> WEB_OF_FATE = BLOCKS.register("web_of_fate",
-            () -> new FateWebBlock(BlockBehaviour.Properties.copy(Blocks.COBWEB).noCollission()));
+            () -> new FateWebBlock(BlockBehaviour.Properties.copy(Blocks.TRIPWIRE)));
     public static final RegistryObject<Block> SELECTOR = BLOCKS.register("selector",
             () -> new SelectorBlock(BlockBehaviour.Properties.copy(Blocks.AIR).noCollission()));
     public static final RegistryObject<Block> FAMILIAR_CROWN = BLOCKS.register("familiar_crown",
@@ -46,7 +46,7 @@ public class OtherverseBlocks {
             () -> new SpawnAltarBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BARS)));
     public static final RegistryObject<Block> BIOME_BRAZIER = BLOCKS.register("biome_brazier",
             () -> new BiomeBrazierBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BARS).lightLevel(
-                    (p_50763_) -> p_50763_.getValue(BlockStateProperties.LIT) ? 15 : 0)));
+                    (p_50763_) -> (p_50763_.getValue(BlockStateProperties.LIT) || p_50763_.getValue(BiomeBrazierBlock.SCRY) ) ? 15 : 0)));
     public static final RegistryObject<Block> CINNABAR_BLOCK = BLOCKS.register("cinnabar_block",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.AMETHYST_BLOCK)));
     public static final RegistryObject<Block> DEMESNE_BEACON = BLOCKS.register("demesne_beacon",

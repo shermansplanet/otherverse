@@ -154,6 +154,12 @@ public class SpiritTransfusions {
                 Blocks.PINK_CONCRETE_POWDER
         });
 
+        registerDyableItems(new Item[]{
+                Items.WHITE_DYE, Items.LIGHT_GRAY_DYE, Items.GRAY_DYE, Items.BLACK_DYE, Items.BROWN_DYE, Items.RED_DYE,
+                Items.ORANGE_DYE, Items.YELLOW_DYE, Items.LIME_DYE, Items.GREEN_DYE, Items.CYAN_DYE, Items.LIGHT_BLUE_DYE,
+                Items.BLUE_DYE, Items.PURPLE_DYE, Items.MAGENTA_DYE, Items.PINK_DYE
+        });
+
         for (int i = 0; i < 16; i++) {
             Item input = OtherverseItems.SPINDLES.get(i).get();
             for (int ii = 0; ii < 16; ii++) {
@@ -178,6 +184,16 @@ public class SpiritTransfusions {
             for (int ii = 0; ii < 16; ii++) {
                 if (ii == i) continue;
                 register(input, Spirits.colorSpiritTypes[ii], 3, blocks[ii]);
+            }
+        }
+    }
+
+    private static void registerDyableItems(Item[] items) {
+        for (int i = 0; i < 16; i++) {
+            Item input = items[i];
+            for (int ii = 0; ii < 16; ii++) {
+                if (ii == i) continue;
+                register(input, Spirits.colorSpiritTypes[ii], 3, items[ii], false);
             }
         }
     }

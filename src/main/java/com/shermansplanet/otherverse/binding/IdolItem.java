@@ -1,6 +1,9 @@
 package com.shermansplanet.otherverse.binding;
 
+import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -73,12 +76,32 @@ public class IdolItem extends Item {
         var loc = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType());
         tag.putString("entity_type_namespace", loc.getNamespace());
         tag.putString("entity_type_path", loc.getPath());
+        var heldItem = BindingManager.getHeldItem(mob);
+        if (!heldItem.isEmpty()) {
+            var nbt = new CompoundTag();
+            heldItem.save(nbt);
+            tag.put("held_item", nbt);
+        }
         return tag;
     }
 
     public static ItemStack makeFrom(Mob mob, String material) {
         var tag = mobToTag(mob);
         tag.putString("material", material);
+        if(material.equals("otherverse:cinnabar_block")){
+            LogUtils.getLogger().debug("MAKING MOB FROM CINNABAR");
+            CompoundTag persistentData = mob.getPersistentData();
+            if (persistentData.contains("bindingId")) {
+                LogUtils.getLogger().debug("HAS BINDING");
+                TransientDiagramData data = DiagramManager.getOrCreateLevelData(mob.level().getServer().overworld());
+                BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
+                if (binding != null) {
+                    LogUtils.getLogger().debug("MARKING BINDING AS CINNABAR");
+                    binding.isCinnabar = true;
+                    binding.mob = null;
+                }
+            }
+        }
         var stack = new ItemStack(OtherverseItems.IDOL.get(), 1);
         stack.setTag(tag);
         return stack;

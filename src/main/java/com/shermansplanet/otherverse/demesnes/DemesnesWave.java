@@ -14,10 +14,7 @@ import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import virtuoel.pehkui.api.ScaleTypes;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class DemesnesWave {
 
@@ -66,7 +63,7 @@ public class DemesnesWave {
         register(EntityType.SHULKER, new EntityTag[]{EntityTag.END});
         register(EntityType.ENDERMITE, new EntityTag[]{EntityTag.END});
 
-        effectiveHpOverrides.put(EntityType.EVOKER, 100f);
+        effectiveHpOverrides.put(EntityType.EVOKER, 200f);
     }
 
     private static void register(EntityType<? extends Mob> type, EntityTag[] entityTags) {
@@ -146,8 +143,10 @@ public class DemesnesWave {
             return true;
         }).toList();
         if (spawnPool.isEmpty()) return null;
-        var newSpawnPool = spawnPool.stream().filter(et -> entityTagsByType.get(et).contains(dimensionTag)).toList();
-        if (!newSpawnPool.isEmpty() && r.nextInt(waveIndex * 4) < newSpawnPool.size()) spawnPool = newSpawnPool;
+        if(dimensionTag != null) {
+            var newSpawnPool = spawnPool.stream().filter(et -> entityTagsByType.getOrDefault(et, new HashSet<>()).contains(dimensionTag)).toList();
+            if (!newSpawnPool.isEmpty() && r.nextInt(waveIndex * 4) < newSpawnPool.size()) spawnPool = newSpawnPool;
+        }
         var typeToSpawn = spawnPool.get(r.nextInt(spawnPool.size()));
         var mob = typeToSpawn.create(level);
         if (mob == null) return null;

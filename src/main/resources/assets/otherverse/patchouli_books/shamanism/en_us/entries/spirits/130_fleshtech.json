@@ -1,12 +1,12 @@
 {
-    "name": "Flesh/Technology",
+    "name": "Technology/Flesh",
     "sortnum": 130,
     "icon": "otherverse:contract",
     "category": "otherverse:spirits",
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "With flesh or technology shrines, you can make $(bold)homunculi$() and $(bold)golems$() respectively. If a bound mob is in a diagram influencing the shrine, the shrine will attempt to spend spirits equal to thrice the mob's max HP to create a copy of the bound mob, which will behave as if bound but will not require bindings."
+            "text": "With technology or flesh shrines, you can make $(bold)golems$() and $(bold)homunculi$() respectively. If a bound mob (not an idol) is in a diagram influencing the shrine, the shrine will attempt to spend spirits equal to thrice the mob's max HP to create a copy of the bound mob, which will behave as if bound but will not require bindings."
         },
         {
             "type": "patchouli:image",
@@ -17,6 +17,14 @@
         {
             "type": "patchouli:text",
             "text": "Golems and homunculi do not drop items, and will start taking frequent damage if they are not in the range of a shrine of their spirit type.$(br2)Golems have half the speed of their source mob, but overfilling a tech shrine will make all golems in range faster, and with enough spirits you can more than compensate. The same applies to homunculi and attack strength."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "3 spirits per minute will double a golem's speed (returning it to normal), 9 will triple it, 27 will quadruple it, and so on. 3 spirits per minute will add an extra 3 damage to a homunculus attack, 9 will add 6 damage, 27 will add 9 damage, and so on.$(br2)If a technology shrine is given a redstone signal, it won't create new golems but can still empower existing ones. Note that redstone block hallows still produce a signal!"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Golems and homunculi are tech- and flesh-aligned, instead of the spirit type of their source mob. This can be combined with the 'sacrifice' mechanic (see the 'spirits' section of Essentials) to efficiently expand the range of a technology or flesh shrine."
         }
     ]
 }

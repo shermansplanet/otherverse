@@ -1,5 +1,7 @@
 package com.shermansplanet.otherverse.demesnes;
 
+import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
@@ -193,17 +195,17 @@ public class ClaimedDemesneData {
     public void addToChunks(HashMap<ServerLevel, HashMap<ChunkPos, ClaimedDemesneData>> claimedDemesnes, ServerLevel sl) {
         if (!claimedDemesnes.containsKey(sl)) claimedDemesnes.put(sl, new HashMap<>());
         var chunksForLevel = claimedDemesnes.get(sl);
-        var minChunk = sl.getChunkAt(minPos).getPos();
-        var maxChunk = sl.getChunkAt(maxPos).getPos();
+        var minChunk = Otherverse.chunkAt(minPos);
+        var maxChunk = Otherverse.chunkAt(maxPos);
         for (var x = minChunk.x; x <= maxChunk.x; x++) {
             for (var z = minChunk.z; z <= maxChunk.z; z++) {
                 var chunkPos = new ChunkPos(x, z);
                 chunksForLevel.put(chunkPos, this);
+                LogUtils.getLogger().debug("ADDED CHUNK AT {}", chunkPos);
                 if (minChronoPos == null) continue;
                 if (sl.getChunk(chunkPos.x, chunkPos.z) instanceof ISectionSetter ss) {
                     ss.setSections(minChronoPos.getY(), maxChronoPos.getY());
                 }
-                ;
             }
         }
     }
@@ -254,8 +256,8 @@ public class ClaimedDemesneData {
     }
 
     public void refreshChrono(ServerLevel sl) {
-        var minChunk = sl.getChunkAt(minPos).getPos();
-        var maxChunk = sl.getChunkAt(maxPos).getPos();
+        var minChunk = Otherverse.chunkAt(minPos);
+        var maxChunk = Otherverse.chunkAt(maxPos);
         for (var x = minChunk.x; x <= maxChunk.x; x++) {
             for (var z = minChunk.z; z <= maxChunk.z; z++) {
                 var chunkPos = new ChunkPos(x, z);

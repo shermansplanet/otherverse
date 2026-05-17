@@ -84,6 +84,7 @@
 		"minecraft:warped_nylium" : ["3 nether"],
 		"minecraft:gold_ingot" : ["18 fortune"],
 		"minecraft:deepslate" : ["3 earth"],
+		"minecraft:bedrock" : ["7 earth"],
 		"minecraft:lapis_block" : ["54 fortune"],
 		"minecraft:campfire" : ["24 fire"],
 		"minecraft:sea_pickle" : ["3 water"],
@@ -92,7 +93,7 @@
 		"minecraft:lever" : ["3 technology"],
 		"minecraft:hopper" : ["49 technology"],
 		"minecraft:dropper" : ["18 technology"],
-		"minecraft:dispenser" : ["21 technology"],
+		"minecraft:dispenser" : ["21 technology", "1 war"],
 		"minecraft:lapis_ore" : ["39 fortune"],
 		"minecraft:sculk" : ["3 dark"],
 		"minecraft:iron_ingot" : ["9 fortune"],
@@ -178,6 +179,7 @@
 		"minecraft:leather" : ["1 flesh"],
 		"minecraft:sugar" : ["3 food"],
 		"minecraft:sniffer_egg" : ["11 time"],
+		"minecraft:target" : ["7 war"],
 
 		"otherverse:homunculus_heart" : ["33 flesh"],
 		"otherverse:salt" : ["11 overworld"],
@@ -215,6 +217,11 @@
 		"macabre:gomoria_heart" : ["666 flesh", "111 fate"],
 		"macabre:valamon_heart" : ["666 flesh", "111 fate"],
 		"macabre:gargamaw_heart" : ["666 flesh", "111 fate"],
-		"macabre:morphegor_heart" : ["666 flesh", "111 fate"]
+		"macabre:morphegor_heart" : ["666 flesh", "111 fate"],
+
+		"macabre:soaked_log" : ["1 flesh"],
+		"macabre:teething_log" : ["1 flesh"],
+		"macabre:wasted_log" : ["1 flesh"],
+		"macabre:dead_log" : ["1 death"]
 	}
 }

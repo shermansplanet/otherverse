@@ -4,6 +4,7 @@ import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -23,6 +24,30 @@ import java.util.HashSet;
 public class TreeStripper {
 
     private static boolean stripping = false;
+
+    public static final Vec3i[] directionsAndDiagonals = new Vec3i[]{
+            new Vec3i(1, 0, 0),
+            new Vec3i(-1, 0, 0),
+            new Vec3i(0, 1, 0),
+            new Vec3i(0, -1, 0),
+            new Vec3i(0, 0, 1),
+            new Vec3i(0, 0, -1),
+
+            new Vec3i(1, 1, 0),
+            new Vec3i(1, -1, 0),
+            new Vec3i(-1, 1, 0),
+            new Vec3i(-1, -1, 0),
+
+            new Vec3i(0, 1, 1),
+            new Vec3i(0, -1, 1),
+            new Vec3i(0, 1, -1),
+            new Vec3i(0, -1, -1),
+
+            new Vec3i(1, 0, 1),
+            new Vec3i(-1, 0, 1),
+            new Vec3i(1, 0, -1),
+            new Vec3i(-1, 0, -1),
+    };
 
     @SubscribeEvent
     public static void onBreakBlock(BlockEvent.BreakEvent event) {
@@ -51,8 +76,8 @@ public class TreeStripper {
         toSearch.add(event.getPos());
         while (searched.size() < 64 && !toSearch.isEmpty()) {
             var pos = toSearch.pop();
-            for (var dir : Direction.values()) {
-                var newpos = pos.relative(dir);
+            for (var dir : directionsAndDiagonals) {
+                var newpos = pos.offset(dir);
                 if (searched.contains(newpos) || toNotSearch.contains(newpos) || toSearch.contains(newpos)) continue;
                 var s = sl.getBlockState(newpos);
                 if (s.is(tag)) {

@@ -1,7 +1,12 @@
 package com.shermansplanet.otherverse.binding;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
+import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.familiar.TreeStripper;
+import com.shermansplanet.otherverse.spirits.ShrineHelper;
+import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -79,10 +85,13 @@ public class ContractTask {
     private Recipe<?> recipe;
     private static final Logger LOGGER = LogUtils.getLogger();
     private boolean harvesting = false;
+    private boolean felling = false;
     public int lookIndex;
     public ArrayList<BlockPos> potentialTargets = new ArrayList<>();
     public final String taskId;
     private Path directPath;
+    private int ticksInSameBlock = 0;
+    private BlockPos lastPos = null;
 
     public void getDebugMessage(StringBuilder s) {
         s.append("task: ").append(taskType).append("\n");
@@ -90,8 +99,9 @@ public class ContractTask {
         s.append("task target: ").append(targetPos).append("\n");
         s.append("move target: ").append(targetMovePos).append("\n");
         s.append("phase: ").append(directPath == null ? "initial" : "final").append("\n");
-        s.append("path: ").append(mob.getNavigation().getPath() == null ? "null" : "not null")
-                .append(", ").append(mob.getNavigation().getPath().isDone() ? "done" : "not done");
+        var nullPath = mob.getNavigation().getPath() == null;
+        s.append("path: ").append(nullPath ? "null" : "not null");
+        if (!nullPath) s.append(", ").append(mob.getNavigation().getPath().isDone() ? "done" : "not done");
     }
 
     public enum TaskType {
@@ -113,6 +123,10 @@ public class ContractTask {
             case "harvest" -> {
                 taskType = TaskType.BREAK;
                 harvesting = true;
+            }
+            case "fell" -> {
+                taskType = TaskType.BREAK;
+                felling = true;
             }
             case "attack" -> taskType = TaskType.ATTACK;
             case "craft" -> taskType = TaskType.CRAFT;
@@ -183,9 +197,11 @@ public class ContractTask {
             } else if (key.startsWith("position")) {
                 positionFilters.add(new ContractManager.PositionOrSpindle(tag.getCompound(key)));
             } else if (key.startsWith("offset")) {
-                offsets.add(new ContractManager.PositionOrSpindle(tag.getCompound(key)));
                 var pos = tag.getIntArray(key + "_basis");
-                offsetBases.add(new BlockPos(pos[0], pos[1], pos[2]));
+                if (pos.length == 3) {
+                    offsets.add(new ContractManager.PositionOrSpindle(tag.getCompound(key)));
+                    offsetBases.add(new BlockPos(pos[0], pos[1], pos[2]));
+                }
             }
         }
         if (offsets.isEmpty()) {
@@ -206,10 +222,11 @@ public class ContractTask {
     }
 
     private boolean isValidBlock(BlockState blockState) {
-        if (itemFilters.isEmpty() && !harvesting) return true;
         var block = blockState.getBlock();
         if (harvesting && (!(block instanceof CropBlock cb && cb.isMaxAge(blockState)))) return false;
-        if (itemFilters.isEmpty()) return true;
+        if (itemFilters.isEmpty()) {
+            return !felling || (blockState.is(BlockTags.LOGS));
+        }
         if (!itemFilters.contains(block.asItem())) return false;
         if (blockstateFilters.isEmpty()) return true;
         var blockstateFilter = blockstateFilters.get(block);
@@ -220,10 +237,11 @@ public class ContractTask {
         return true;
     }
 
-    public ItemEntity getClosestDroppedItem() {
+    public Pair<ItemEntity, BlockPos> getClosestReachableDroppedItem() {
         ItemEntity closest = null;
         var lookDiameter = boundGoal.range * 2;
-        float closestDist = lookDiameter;
+        BlockPos closestReachFrom = null;
+        float closestDist = lookDiameter * 2;
         for (Entity e : mob.level().getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
             if (e instanceof ItemEntity ie && isValidItem(ie.getItem())) {
                 if (!positionFilters.isEmpty() && !positionFilters.contains(ie.blockPosition())) {
@@ -231,6 +249,8 @@ public class ContractTask {
                 }
                 if (!BindingManager.getHeldItem(mob).isEmpty() && !BindingManager.getHeldItem(mob).is(ie.getItem().getItem()))
                     continue;
+                var reachFrom = getAccessibleBlock(ie.blockPosition());
+                if (reachFrom == null) continue;
                 for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
                     Block block = mob.level().getBlockState(e.blockPosition().subtract(processOffset(offsetIndex))).getBlock();
                     if (!blockFilters.isEmpty() && !blockFilters.contains(block.asItem()) && !blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
@@ -239,12 +259,13 @@ public class ContractTask {
                     float dist = (float) ie.position().distanceTo(mob.position());
                     if (dist < closestDist) {
                         closestDist = dist;
+                        closestReachFrom = reachFrom;
                         closest = ie;
                     }
                 }
             }
         }
-        return closest;
+        return new Pair<>(closest, closestReachFrom);
     }
 
     private Vec3i processOffset(int offsetIndex) {
@@ -254,7 +275,7 @@ public class ContractTask {
     public LivingEntity getClosestValidLivingTarget() {
         LivingEntity closest = null;
         var lookDiameter = boundGoal.range * 2;
-        float closestDist = lookDiameter;
+        float closestDist = lookDiameter * 2;
         for (Entity e : mob.level().getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
             if (e == mob) {
                 continue;
@@ -291,10 +312,8 @@ public class ContractTask {
         return closest;
     }
 
-    public boolean isAcceptableTarget(BlockPos pos, boolean inPositionFilter) {
-        if (pos == null) return false;
-        if (!isBlockAcceptableTarget(pos, inPositionFilter)) return false;
-
+    private BlockPos getAccessibleBlock(BlockPos pos) {
+        if (pos == null) return null;
         var h = mob.getBbHeight();
         var potentialMovePositions = new ArrayList<BlockPos>();
         var mobPos = mob.blockPosition();
@@ -312,10 +331,15 @@ public class ContractTask {
         potentialMovePositions.sort(Comparator.comparingDouble(mobPos::distSqr));
         for (var potentialPos : potentialMovePositions) {
             if (!canReachBlock(potentialPos)) continue;
-            targetMovePos = potentialPos;
-            return true;
+            return potentialPos;
         }
-        return false;
+        return null;
+    }
+
+    public BlockPos isAcceptableTarget(BlockPos pos, boolean inPositionFilter) {
+        if (pos == null) return null;
+        if (!isBlockAcceptableTarget(pos, inPositionFilter)) return null;
+        return getAccessibleBlock(pos);
         //return internalAcceptableTarget(pos, inPositionFilter) && canReachBlock(pos);
     }
 
@@ -445,16 +469,24 @@ public class ContractTask {
 
     private boolean canReachBlock(BlockPos pos) {
         if (taskType == TaskType.ATTACK || taskType == TaskType.OBSERVE) return true;
+        if (mob.getPersistentData().contains("construct_type")) {
+            if (mob.getPersistentData().getString("construct_type").equals(Spirits.FLESH.label())) {
+                if (ShrineHelper.getShrinesFor(mob, pos, Spirits.FLESH).isEmpty()) return false;
+            } else {
+                if (ShrineHelper.getShrinesFor(mob, pos, Spirits.TECH).isEmpty()) return false;
+            }
+        }
         if (mob.blockPosition().distSqr(pos) > 16 * 16) return true;
         if (mob.getType() == EntityType.ENDERMAN || mob.getType() == EntityType.SHULKER) {
-            if (mob.level().getBlockState(pos.below()).getCollisionShape(mob.level(), pos.below()).isEmpty()) return false;
+            if (mob.level().getBlockState(pos.below()).getCollisionShape(mob.level(), pos.below()).isEmpty())
+                return false;
         } else {
             var path = mob.getNavigation().createPath(pos, 0);
             if (path == null || !path.getEndNode().asBlockPos().equals(pos)) return false;
         }
         return !mob.level().collidesWithSuffocatingBlock(mob, new AABB(
                 pos.getX() + 0.1f, pos.getY() + 0.5f, pos.getZ() + 0.1f,
-                pos.getX() + 0.9f, pos.getY() + mob.getBbHeight(), pos.getZ() + 0.0f
+                pos.getX() + 0.9f, pos.getY() + mob.getBbHeight(), pos.getZ() + 0.9f
         ));
     }
 
@@ -554,6 +586,10 @@ public class ContractTask {
             return false;
         }
 
+        var priorTargetPos = targetPos;
+
+        if (harvesting && !isValidBlock(mob.level().getBlockState(targetPos))) return fail();
+
         if (taskType == TaskType.TAKE) {
             if (BindingManager.getHeldItem(mob).getCount() + countMin >= BindingManager.getHeldItem(mob).getMaxStackSize()) {
                 return fail();
@@ -563,17 +599,27 @@ public class ContractTask {
                     return fail();
                 }
                 targetPos = targetItem.blockPosition();
-                targetMovePos = targetPos;
-            } else if (!isAcceptableTarget(targetPos, true)) {
-                return fail();
             }
-        } else if (!isAcceptableTarget(targetPos, true)) {
+        }
+
+        if (mob.level().getGameTime() % 20 == 0 || targetPos != priorTargetPos) {
+            targetMovePos = getAccessibleBlock(targetPos);
+        }
+        if (targetMovePos == null) {
             return fail();
         }
 
+        if (mob.blockPosition().equals(lastPos)) {
+            ticksInSameBlock++;
+            if (ticksInSameBlock > 100) return fail();
+        } else {
+            ticksInSameBlock = 0;
+        }
+        lastPos = mob.blockPosition();
+
 //        LOGGER.debug(mob.blockPosition() + " -> " + targetMovePos + " (" + targetPos + ")");
 
-        if (directPath == null) {
+        if (directPath == null && (mob.getNavigation().getPath() == null || mob.getNavigation().getTargetPos() != targetMovePos)) {
             if (moveTo(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ())) {
                 return false;
             }
@@ -594,7 +640,11 @@ public class ContractTask {
             return false;
         }
 
-        mob.moveTo(targetMovePos.getX() + 0.5f, mob.position().y, targetMovePos.getZ() + 0.5f);
+        ticksInSameBlock = 0;
+
+        if (taskType == TaskType.MOVE) {
+            mob.moveTo(targetMovePos.getX() + 0.5f, mob.position().y, targetMovePos.getZ() + 0.5f);
+        }
 
         if (taskType == TaskType.TAKE) {
             if (targetItem == null) {
@@ -628,8 +678,8 @@ public class ContractTask {
                 transferAmount = Math.min(transferAmount, countMax);
                 if (transferAmount < countMin) return fail();
                 Item itemType = targetItem.getItem().getItem();
-                BindingManager.setHeldItem(mob,
-                        new ItemStack(itemType, BindingManager.getHeldItem(mob).getCount() + transferAmount));
+                var newItemStack = targetItem.getItem().copyWithCount(BindingManager.getHeldItem(mob).getCount() + transferAmount);
+                BindingManager.setHeldItem(mob, newItemStack);
                 targetItem.setItem(
                         new ItemStack(itemType, targetItem.getItem().getCount() - transferAmount));
                 if (targetItem.getItem().isEmpty()) {
@@ -668,6 +718,7 @@ public class ContractTask {
             }
             var stackToPlace = isPlacingCobweb() ? new ItemStack(Items.COBWEB, 1) : BindingManager.getHeldItem(mob);
             if (tryPlaceBlock(targetPos, stackToPlace, !isPlacingCobweb(), true)) {
+                mob.moveTo(targetMovePos.getX() + 0.5f, mob.position().y, targetMovePos.getZ() + 0.5f);
                 return succeed();
             }
             spawnAtTargetPos(stackToPlace.split(countMax));
@@ -700,13 +751,19 @@ public class ContractTask {
                 }
             }
             int newBlockDamage = destroyTime < 0 ? -1 : destroyTime == 0 ? 10
-                    : (int) Math.floor(doActionTicks * attackDamage / destroyTime / 20);
+                                                        : (int) Math.floor(doActionTicks * attackDamage / destroyTime / 20);
             if (newBlockDamage != blockDamage) {
                 if (newBlockDamage >= 10) {
+                    if (felling && blockstate.is(BlockTags.LOGS)) {
+                        targetPos = tryGetBranch(targetPos);
+                    }
                     mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
                     this.mob.level().destroyBlock(targetPos, false, mob);
-                    if (tool.isEmpty() && mob instanceof EnderMan em) {
-                        BindingManager.setHeldItem(mob, blockstate.getBlock().asItem().getDefaultInstance());
+                    if (tool.isEmpty() && mob instanceof EnderMan) {
+                        var tag = DiagramManager.getOrCreateLevelData(mob.level()).getPlacedItemTag(targetPos);
+                        var item = blockstate.getBlock().asItem().getDefaultInstance();
+                        item.setTag(tag);
+                        BindingManager.setHeldItem(mob, item);
                     } else {
                         Block.dropResources(blockstate, mob.level(), targetPos, mob.level().getBlockEntity(targetPos), mob, tool);
                     }
@@ -752,6 +809,32 @@ public class ContractTask {
             spawnAtTargetPos(recipe.getResultItem(mob.level().registryAccess()).copy());
         }
         return succeed();
+    }
+
+    private BlockPos tryGetBranch(BlockPos startPos) {
+        var level = mob.level();
+        var toMatch = level.getBlockState(startPos);
+        var searched = new HashSet<BlockPos>();
+        var toNotSearch = new HashSet<BlockPos>();
+        searched.add(startPos);
+        var toSearch = new ArrayDeque<BlockPos>();
+        toSearch.add(startPos);
+        var pos = startPos;
+        while (searched.size() < 64 && !toSearch.isEmpty()) {
+            pos = toSearch.pop();
+            for (var dir : TreeStripper.directionsAndDiagonals) {
+                var newpos = pos.offset(dir);
+                if (searched.contains(newpos) || toNotSearch.contains(newpos) || toSearch.contains(newpos)) continue;
+                var s = level.getBlockState(newpos);
+                if (s.is(toMatch.getBlock())) {
+                    toSearch.add(newpos);
+                    searched.add(newpos);
+                } else {
+                    toNotSearch.add(newpos);
+                }
+            }
+        }
+        return pos;
     }
 
     private boolean harvestBlock() {
@@ -869,7 +952,10 @@ public class ContractTask {
         targetPos = null;
         targetMob = null;
         directPath = null;
-        boundGoal.stopAttacking();
+        ticksInSameBlock = 0;
+        lastPos = null;
+        BindingManager.stopAttacking(mob);
+        boundGoal.isAttacking = false;
         decider = decider != null ? decider : onEither != null ? onEither : boundGoal.rootDecider;
         boundGoal.switchToDecider(decider);
     }
@@ -887,6 +973,6 @@ public class ContractTask {
             em.teleportTo(x + 0.5, y + 1, z + 0.5);
             boundGoal.cooldown = 200;
         }
-        return mob.getNavigation().moveTo(x + 0.5, y, z + 0.5, 1);
+        return mob.getNavigation().moveTo(mob.getNavigation().createPath(new BlockPos(x, y, z), 0), 1);
     }
 }

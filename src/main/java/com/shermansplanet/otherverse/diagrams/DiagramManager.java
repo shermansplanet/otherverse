@@ -23,8 +23,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
@@ -264,7 +266,7 @@ public class DiagramManager {
         if (!PracticeWorldManager.worldSetUp) return;
 
         TransientDiagramData levelData = getOrCreateLevelData(sl);
-        for (var diagram : levelData.diagramsByPrimary.values()) {
+        for (var diagram : new ArrayList<>(levelData.diagramsByPrimary.values())) {
             for (var process : new ArrayList<>(diagram.processes)) {
                 process.tick();
             }
@@ -320,6 +322,9 @@ public class DiagramManager {
 
     private static void BlockBreak(Level level, BlockPos pos) {
         TransientDiagramData diagramData = getOrCreateLevelData(level);
+        if(diagramData.getSympathyPosition(pos.toString()) != null){
+            diagramData.putSympathyPosition(pos.toString(), null);
+        }
         if (level instanceof ServerLevel sl) {
             blockChanged(pos, sl);
             if (sl.getBlockState(pos).is(OtherverseBlocks.DEMESNE_BEACON.get())) {
@@ -335,7 +340,7 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void waterproofChalk(BlockEvent.FluidPlaceBlockEvent event) {
-        if (event.getOriginalState().is(OtherverseBlocks.CHALK_LINE.get())){
+        if (event.getOriginalState().is(OtherverseBlocks.CHALK_LINE.get())) {
             event.setCanceled(true);
             return;
         }
@@ -502,6 +507,16 @@ public class DiagramManager {
                     focus.mostRecentMob.getPersistentData().getUUID("bindingId"));
         }
         return null;
+    }
+
+    public static boolean shouldPreventWaste(IFocus focus) {
+        if (focus.getFocusLevel().getBlockState(focus.getPos().below()).is(Blocks.AMETHYST_BLOCK)) return true;
+        for (var sourceFocus : focus.getDiagram().influences.entrySet()) {
+            if (!sourceFocus.getValue().equals(focus)) continue;
+            if (focus.getFocusLevel().getBlockEntity(sourceFocus.getKey()) instanceof ChalkCircle sourceCircle && sourceCircle.getItem().is(Items.AMETHYST_SHARD))
+                return true;
+        }
+        return false;
     }
 
     public enum BlockUpdateType {ADDED, REMOVED, CHANGED}

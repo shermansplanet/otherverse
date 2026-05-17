@@ -2,7 +2,7 @@
     "name": "Action: Take",
     "icon": "minecraft:hopper",
     "category": "otherverse:contracts",
-    "sortnum": 5,
+    "sortnum": 50,
     "pages": [
         {
             "type": "patchouli:spotlight",

@@ -1,7 +1,7 @@
 {
 	"other" : "minecraft:vex",
 	"binding" : {
-		"minecraft:salt" : 9
+		"otherverse:salt" : 9
 	},
 	"transfusion" : [
 		{

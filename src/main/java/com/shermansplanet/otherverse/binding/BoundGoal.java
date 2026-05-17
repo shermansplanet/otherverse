@@ -10,6 +10,8 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.familiar.FaceSetter;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -19,10 +21,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -42,7 +44,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -65,7 +66,7 @@ public class BoundGoal extends Goal {
     public int cooldown = 0;
     private int currentMode = 0;
     public Player practitioner;
-    private boolean isAttacking;
+    protected boolean isAttacking;
     private boolean isPartOfSwarm;
     private boolean isLoyaltyBound;
     public int nextTick = 0;
@@ -125,6 +126,7 @@ public class BoundGoal extends Goal {
     private void getPractitioner() {
         if (practitioner != null) return;
         var playerName = isLoyaltyBound ? mob.getPersistentData().getString("practitioner_loyalty") : FamiliarManager.getPractitionerForFamiliar(mob);
+        if (playerName.isEmpty()) playerName = mob.getPersistentData().getString("last_bound_by");
         for (var player : mob.level().players()) {
             if (!player.getGameProfile().getName().equals(playerName)) continue;
             practitioner = player;
@@ -188,7 +190,10 @@ public class BoundGoal extends Goal {
                 makeDye();
             }
         }
-        if (currentMode == 1) {
+        var held = BindingManager.getHeldItem(mob);
+        if (held.is(OtherverseItems.SPINDLE_BLOODY.get())) {
+            subdueTarget(held);
+        } else if (currentMode == 1) {
             followPlayer();
         } else if (currentMode == 2) {
             mob.getNavigation().stop();
@@ -197,13 +202,13 @@ public class BoundGoal extends Goal {
             if (isTamed && cooldown == 1000) {
                 cooldown = 0;
                 OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                        new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), true));
+                        new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), BindingUpdateMessage.BindingType.UNBOUND, true));
             }
         }
         if (mob.level() instanceof ServerLevel sl) {
             mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
         }
-        if (FamiliarManager.isFamiliar(mob)) return;
+        if (FamiliarManager.isFamiliar(mob) || isTamed || mob instanceof TamableAnimal ta && ta.isTame()) return;
         if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType())) {
             return;
         }
@@ -215,14 +220,14 @@ public class BoundGoal extends Goal {
         if (demesne != null && demesne.getPerkLevel(DemesnesManager.DemesnePerk.CAGE) > 0) return;
         LOGGER.debug("BINDING WEAR");
         if (!binding.getLocalLevel().isLoaded(binding.position)) {
-            LOGGER.debug("BREAKING BINDING BECAUSE NOT LOADED");
+            LOGGER.info("BREAKING BINDING BECAUSE NOT LOADED");
             BindingManager.breakBinding(binding);
             return;
         }
         BlockFocus bindingFocus = DiagramManager.getOrCreateLevelData(binding.getLocalLevel()).allBlockFoci.get(binding.position);
 
         if (bindingFocus == null) {
-            LOGGER.debug("FOCUS NOT FOUND");
+            LOGGER.info("FOCUS NOT FOUND");
             BindingManager.breakBinding(binding);
             return;
         }
@@ -240,7 +245,7 @@ public class BoundGoal extends Goal {
                 continue;
             }
             ItemStack itemStack = focus.getItem();
-            if (MobBindingInfluenceUtils.GetInfluence(mob, itemStack) == 0) {
+            if (MobBindingInfluenceUtils.GetInfluence(mob, itemStack) * (binding.isPositive ? 1 : -1) >= 0) {
                 continue;
             }
             if (itemStack.hasTag() && itemStack.getTag().contains("hallow") &&
@@ -248,6 +253,12 @@ public class BoundGoal extends Goal {
                 continue;
             }
             foci.add(focus);
+        }
+
+        if (foci.isEmpty()) {
+            LOGGER.info("NO BINDING FOCI FOUND");
+            BindingManager.breakBinding(binding);
+            return;
         }
 
         IFocus mostUniqueFocus = getMostUniqueFocus(foci);
@@ -280,6 +291,55 @@ public class BoundGoal extends Goal {
 
             LOGGER.debug("ACTIVATING DIAGRAM: BINDING WEAR");
             DiagramManager.markDiagramActive(sl, bindingFocus.getDiagram());
+        }
+    }
+
+    private void subdueTarget(ItemStack held) {
+        if (!(mob.level() instanceof ServerLevel sl)) return;
+        var target = SympathyManager.getEntityByUniqueId(held.getTag().getUUID("sympathy_target"), sl);
+        if (target == null || (target instanceof Mob m && m.isDeadOrDying())) {
+            ItemEntity itementity = new ItemEntity(sl,
+                    mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f),
+                    held.copy());
+            itementity.setDefaultPickUpDelay();
+            sl.addFreshEntity(itementity);
+            BindingManager.setHeldItem(mob, ItemStack.EMPTY);
+            return;
+        }
+        if (!(target instanceof Mob targetMob)) return;
+        if (targetMob.getHealth() > mob.getHealth() / 2) {
+            if (!isAttacking || mob.getTarget() != targetMob) {
+                BindingManager.startAttacking(mob, targetMob);
+                isAttacking = true;
+            }
+            return;
+        }
+        if (isAttacking) {
+            BindingManager.stopAttacking(mob);
+            isAttacking = false;
+        }
+        if (!mob.getBoundingBox().inflate(1).intersects(targetMob.getBoundingBox().inflate(1))) {
+            mob.getNavigation().moveTo(targetMob, 1);
+            return;
+        }
+        targetMob.getNavigation().stop();
+        BindingManager.stopAttacking(targetMob);
+        if (practitioner == null) {
+            getPractitioner();
+            if (practitioner == null) return;
+        }
+        mob.getNavigation().moveTo(practitioner, 0.5f);
+        var diff = mob.position().subtract(targetMob.position()).normalize().scale(0.03f);
+        var d1 = targetMob.position().subtract(mob.position()).normalize();
+        var d2 = practitioner.position().subtract(mob.position()).normalize();
+        var dot = d1.dot(d2);
+        if (dot < 0) {
+            if(dot < -0.5f) {
+                targetMob.push(diff.x, diff.y, diff.z);
+                targetMob.getNavigation().moveTo(mob, 1);
+            }
+        }else{
+            targetMob.push(diff.z, diff.y, -diff.x);
         }
     }
 
@@ -444,7 +504,8 @@ public class BoundGoal extends Goal {
 
         if (!shouldAttack) {
             if (isAttacking) {
-                stopAttacking();
+                BindingManager.stopAttacking(mob);
+                isAttacking = false;
             }
             return;
         }
@@ -461,20 +522,6 @@ public class BoundGoal extends Goal {
     public void startAttacking(LivingEntity targetMob) {
         BindingManager.startAttacking(mob, targetMob);
         isAttacking = true;
-    }
-
-    public void stopAttacking() {
-        isAttacking = false;
-        for (var goal : mob.goalSelector.getAvailableGoals()) {
-            if (isAttackGoal(goal.getGoal())) {
-                if (goal.isRunning()) {
-                    goal.stop();
-                }
-            }
-        }
-        if (mob.getTarget() != null && mob instanceof Warden w) w.clearAnger(mob.getTarget());
-        mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, (LivingEntity) null);
-        mob.setAggressive(false);
     }
 
     private void poof() {
@@ -562,9 +609,11 @@ public class BoundGoal extends Goal {
             }
             for (ContractManager.PositionOrSpindle positionFilter : task.positionFilters) {
                 var pos = positionFilter.getPos(mob.level());
-                if (task.isAcceptableTarget(pos, true)) {
+                var accessFrom = task.isAcceptableTarget(pos, true);
+                if (accessFrom != null) {
                     if (!positionFilter.isPosition) task.spindle = positionFilter;
                     currentTask = task;
+                    currentTask.targetMovePos = accessFrom;
                     currentTask.targetPos = pos;
                     lookIndex = 0;
                     return true;
@@ -593,8 +642,10 @@ public class BoundGoal extends Goal {
                             break;
                         }
                         var target = task.potentialTargets.get(index);
-                        if (!task.isAcceptableTarget(target, true)) continue;
+                        var accessFrom = task.isAcceptableTarget(target, true);
+                        if (accessFrom == null) continue;
                         currentTask = task;
+                        currentTask.targetMovePos = accessFrom;
                         currentTask.targetPos = target;
                         return true;
                     }
@@ -602,10 +653,11 @@ public class BoundGoal extends Goal {
                 }
             }
             if (task.taskType == ContractTask.TaskType.TAKE) {
-                ItemEntity ie = task.getClosestDroppedItem();
-                if (ie != null) {
+                var pair = task.getClosestReachableDroppedItem();
+                if (pair.getFirst() != null) {
                     currentTask = task;
-                    currentTask.targetItem = ie;
+                    currentTask.targetItem = pair.getFirst();
+                    currentTask.targetMovePos = pair.getSecond();
                     currentTask.isTakingFromGround = true;
                     lookIndex = 0;
                     return true;
@@ -623,14 +675,17 @@ public class BoundGoal extends Goal {
             if (rememberedBlocks.contains(task.taskId)) {
                 var ints = rememberedBlocks.getIntArray(task.taskId);
                 var pos = new BlockPos(ints[0], ints[1], ints[2]);
-                if (task.isAcceptableTarget(pos, false)) {
+                var accessFrom = task.isAcceptableTarget(pos, false);
+                if (accessFrom != null) {
                     currentTask = task;
+                    currentTask.targetMovePos = accessFrom;
                     currentTask.targetPos = pos;
                     lookIndex = 0;
+                    return true;
                 }
             }
         }
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < 256; i++) {
             int shellIndex = Mth.floor((Math.pow(lookIndex, 1f / 3f) + 1) / 2);
             if (shellIndex > range) {
                 shellIndex = 0;
@@ -671,13 +726,16 @@ public class BoundGoal extends Goal {
             }
             BlockPos pos = basePos.offset(lookOffset);
             for (ContractTask task : currentDecider.tasks) {
-                if (task.positionFilters.isEmpty() && task.corner0 == null && task.isPossible() && task.isAcceptableTarget(pos, false)) {
-                    currentTask = task;
-                    currentTask.targetPos = pos;
-                    mob.getPersistentData().getCompound(REMEMBERED_BLOCKS).putIntArray(task.taskId,
-                            new int[]{pos.getX(), pos.getY(), pos.getZ()});
-                    lookIndex = 0;
-                    return true;
+                if (task.positionFilters.isEmpty() && task.corner0 == null && task.isPossible()) {
+                    var accessFrom = task.isAcceptableTarget(pos, false);
+                    if (accessFrom != null) {
+                        currentTask = task;
+                        currentTask.targetPos = pos;
+                        mob.getPersistentData().getCompound(REMEMBERED_BLOCKS).putIntArray(task.taskId,
+                                new int[]{pos.getX(), pos.getY(), pos.getZ()});
+                        lookIndex = 0;
+                        return true;
+                    }
                 }
             }
             lookIndex++;

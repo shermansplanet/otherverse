@@ -43,6 +43,7 @@ public abstract class BeaconBlockEntityInjector extends BlockEntity implements M
     @Inject(method = "tick", at = @At("HEAD"))
     private static void onTick(Level level, BlockPos pos, BlockState p_155110_, BeaconBlockEntity p_155111_, CallbackInfo ci) {
         if(!(level instanceof ServerLevel sl)) return;
+        System.out.println("GETTING DATA FROM BEACON TICK");
         var demesne = DemesnesManager.getData(sl, pos);
         if(demesne == null || demesne.getPerkLevel(DemesnesManager.DemesnePerk.BEACON_HIDE) == 0) return;
 

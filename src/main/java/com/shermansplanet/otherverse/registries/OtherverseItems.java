@@ -100,6 +100,8 @@ public class OtherverseItems {
             () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> REALM_WRACKED_COAL = ITEMS.register("realm_wracked_coal",
             () -> new RealmWrackedCoalItem(new Item.Properties()));
+    public static final RegistryObject<Item> SCRYING_POWDER = ITEMS.register("scrying_powder",
+            () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> CONNECTION_BLOCKER = ITEMS.register("connection_blocker",
             () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> HOMUNCULUS_HEART = ITEMS.register("homunculus_heart",

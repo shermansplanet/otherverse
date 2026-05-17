@@ -13,6 +13,7 @@ import com.shermansplanet.otherverse.echoes.EchoEntity;
 import com.shermansplanet.otherverse.echoes.EchoRenderer;
 import com.shermansplanet.otherverse.familiar.ThrownTNT;
 import com.shermansplanet.otherverse.integrations.jei.BindingRecipe;
+import com.shermansplanet.otherverse.integrations.jei.BiomeCodeRecipe;
 import com.shermansplanet.otherverse.integrations.jei.SpiritExtractionRecipe;
 import com.shermansplanet.otherverse.integrations.jei.TransfusionRecipe;
 import com.shermansplanet.otherverse.others.*;
@@ -27,12 +28,14 @@ import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.entity.ZombieRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.inventory.MenuType;
@@ -40,6 +43,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -150,6 +154,8 @@ public class Otherverse {
             .register("binding", () -> new SimpleRecipeType<>(MODID + ":binding"));
     public static final RegistryObject<SimpleRecipeType<TransfusionRecipe>> TRANSFUSION = RECIPE_TYPES
             .register("transfusion", () -> new SimpleRecipeType<>(MODID + ":transfusion"));
+    public static final RegistryObject<SimpleRecipeType<BiomeCodeRecipe>> BIOME_CODE = RECIPE_TYPES
+            .register("biome_code", () -> new SimpleRecipeType<>(MODID + ":biome_code"));
 
     public static final DeferredRegister<MenuType<?>> MENU_TYPES =
             DeferredRegister.create(ForgeRegistries.MENU_TYPES, MODID);
@@ -188,6 +194,10 @@ public class Otherverse {
         forgeEventBus.addListener(this::addReloadListeners);
 
         OtherversePacketHandler.register();
+    }
+
+    public static ChunkPos chunkAt(BlockPos pos){
+        return new ChunkPos(Mth.floor(pos.getX() / 16f), Mth.floor(pos.getZ() / 16f));
     }
 
     private static <T> void bind(FMLJavaModLoadingContext ctx, ResourceKey<Registry<T>> registry, Consumer<BiConsumer<T, ResourceLocation>> source) {

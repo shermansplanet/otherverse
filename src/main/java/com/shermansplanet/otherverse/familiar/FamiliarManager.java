@@ -62,6 +62,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -367,7 +368,7 @@ public class FamiliarManager {
         CompoundTag tag = new CompoundTag();
         tag.putString("practitioner", practitioner);
         OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.FAMILIAR, tag, false));
+                new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.FAMILIAR, tag, BindingUpdateMessage.BindingType.FAMILIAR, false));
 
         var familiarTag = IdolItem.mobToTag(mob);
         player.getCapability(PRACTICE_HANDLER).ifPresent(practice -> practice.setFamiliar(familiarTag, sp));
@@ -387,6 +388,10 @@ public class FamiliarManager {
     @SubscribeEvent
     public static void changeMode(PlayerEvent.PlayerChangeGameModeEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+        if (event.getNewGameMode() == GameType.CREATIVE) {
+            sp.getAbilities().setFlyingSpeed(0.05f);
+            return;
+        }
         playersToUpdate.add(sp);
     }
 
@@ -619,7 +624,8 @@ public class FamiliarManager {
             } else if (benefit.condition == MobBenefitCondition.UNDERWATER) {
                 if (!sp.isUnderWater()) continue;
             } else if (benefit.condition == MobBenefitCondition.COLD) {
-                if (!sp.serverLevel().getBiome(sp.blockPosition()).value().coldEnoughToSnow(sp.blockPosition())) continue;
+                if (!sp.serverLevel().getBiome(sp.blockPosition()).value().coldEnoughToSnow(sp.blockPosition()))
+                    continue;
             }
             var effect = sp.getEffect(benefit.effect);
             if (effect != null && effect.getDuration() > 21 * 12) continue;
@@ -818,24 +824,33 @@ public class FamiliarManager {
             entity.discard();
         }
 
-        var e = type.create(level, mobData, null, null,
+        var e = type.create(level, mobData, null, BlockPos.containing(spawnPos),
                 MobSpawnType.MOB_SUMMONED, false, false);
-
+        e.load(mobData.getCompound("EntityTag"));
         e.setPos(spawnPos);
 
         addMobToLevel(e, level);
+
+        if (tag.contains("held_item") && e instanceof LivingEntity le) {
+            BindingManager.setHeldItem(le, ItemStack.of(tag.getCompound("held_item")));
+        }
+
         return e;
     }
 
     private static void addMobToLevel(Entity e, ServerLevel level) {
         CompoundTag persistentData = e.getPersistentData();
+        LogUtils.getLogger().debug("ADDING MOB TO LEVEL");
         if (persistentData.contains("bindingId") && e instanceof Mob mob) {
+            LOGGER.debug("HAS BINDING");
             TransientDiagramData data = DiagramManager.getOrCreateLevelData(level.getServer().overworld());
             BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
             if (binding == null) {
+                LOGGER.debug("COULDN'T FIND BINDING");
                 persistentData.remove("bindingId");
             } else {
                 binding.mob = mob;
+                binding.isCinnabar = false;
                 if (isFamiliar(mob)) {
                     binding.dimensionHash = DiagramManager.getDimensionHash(level);
                     if (data.savedData != null) {
@@ -1326,7 +1341,8 @@ public class FamiliarManager {
             if (newAmount <= 0) event.setCanceled(true);
         }
         if (event.getSource().is(DamageTypes.FALL) && hasCatlikeBlessing(sp)) event.setCanceled(true);
-        else if (familiarType.equals(EntityType.CREEPER) && event.getSource().is(DamageTypes.EXPLOSION)) event.setCanceled(true);
+        else if (familiarType.equals(EntityType.CREEPER) && event.getSource().is(DamageTypes.EXPLOSION))
+            event.setCanceled(true);
         else if (familiarType.equals(EntityType.ENDER_DRAGON) && event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
             var end = sp.getServer().getLevel(Level.END);
             sp.changeDimension(end, new ITeleporter() {

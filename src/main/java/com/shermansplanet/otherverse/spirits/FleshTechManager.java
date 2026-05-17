@@ -9,6 +9,7 @@ import com.shermansplanet.otherverse.diagrams.Diagram;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -94,6 +95,15 @@ public class FleshTechManager {
         var mob = binding.mob;
         if (mob == null) return false;
         var levelData = DiagramManager.getOrCreateLevelData(level);
+
+        if (shrine.st == Spirits.TECH) {
+            for (var blockPos : shrine.hallowPositions) {
+                if (level.hasNeighborSignal(blockPos)) {
+                    return false;
+                }
+            }
+        }
+
         if (!shrine.tryDrain(Math.round(mob.getMaxHealth() * 3), levelData)) return false;
         var spawnPos = target;
         while (!level.getBlockState(spawnPos).getCollisionShape(level, spawnPos).isEmpty()) {
@@ -106,8 +116,10 @@ public class FleshTechManager {
         mobData.remove("bindingId");
         mobData.put("unbound_contract", binding.contract);
         tag.remove("UUID");
+        tag.putInt("EggLayTime", 20 * 60 * 60 * 100);
 
-        var e = (LivingEntity) binding.mob.getType().create(level, tag, null, null,
+
+        var e = (LivingEntity) binding.mob.getType().create(level, tag, null, spawnPos,
                 MobSpawnType.SPAWN_EGG, false, false);
         e.load(tag);
         e.setPos(new Vec3(

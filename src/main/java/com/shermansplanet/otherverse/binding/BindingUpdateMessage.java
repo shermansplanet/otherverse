@@ -11,34 +11,42 @@ public class BindingUpdateMessage {
         BIND, CONTRACT, FAMILIAR, BREAK
     }
 
+    public enum BindingType {
+        POSITIVE, NEGATIVE, FLESH, TECH, FAMILIAR, DEMESNE, UNBOUND
+    }
+
     public int mobId;
     public BindingUpdateType updateType;
     public int levelValue;
     public CompoundTag data;
     public boolean silent;
+    public BindingType type;
 
-    public BindingUpdateMessage(Mob mob, BindingUpdateType updateType, boolean silent) {
+    public BindingUpdateMessage(Mob mob, BindingUpdateType updateType, BindingType bindingType, boolean silent) {
         this.mobId = mob.getId();
         this.updateType = updateType;
         this.levelValue = DiagramManager.getDimensionHash(mob.level());
         this.data = new CompoundTag();
         this.silent = silent;
+        this.type = bindingType;
     }
 
-    public BindingUpdateMessage(Mob mob, BindingUpdateType updateType, CompoundTag data, boolean silent) {
+    public BindingUpdateMessage(Mob mob, BindingUpdateType updateType, CompoundTag data, BindingType bindingType, boolean silent) {
         this.mobId = mob.getId();
         this.updateType = updateType;
         this.levelValue = DiagramManager.getDimensionHash(mob.level());
         this.data = data;
         this.silent = silent;
+        this.type = bindingType;
     }
 
-    private BindingUpdateMessage(int mobId, BindingUpdateType updateType, int levelValue, CompoundTag data, boolean silent) {
+    private BindingUpdateMessage(int mobId, BindingUpdateType updateType, int levelValue, CompoundTag data, BindingType bindingType, boolean silent) {
         this.mobId = mobId;
         this.updateType = updateType;
         this.levelValue = levelValue;
         this.data = data;
         this.silent = silent;
+        this.type = bindingType;
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -47,6 +55,7 @@ public class BindingUpdateMessage {
         buffer.writeInt(levelValue);
         buffer.writeNbt(data);
         buffer.writeBoolean(silent);
+        buffer.writeByte(type.ordinal());
     }
 
     public static BindingUpdateMessage decode(FriendlyByteBuf buffer) {
@@ -55,6 +64,7 @@ public class BindingUpdateMessage {
         int lvl = buffer.readInt();
         CompoundTag dta = buffer.readNbt();
         boolean slnt = buffer.readBoolean();
-        return new BindingUpdateMessage(id, b, lvl, dta, slnt);
+        BindingType bt = BindingType.values()[buffer.readByte()];
+        return new BindingUpdateMessage(id, b, lvl, dta, bt, slnt);
     }
 }

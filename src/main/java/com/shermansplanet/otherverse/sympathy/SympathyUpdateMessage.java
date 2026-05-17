@@ -17,7 +17,7 @@ public class SympathyUpdateMessage {
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeBlockPos(position);
+        buffer.writeBlockPos(position == null ? new BlockPos(0, -999, 0) : position);
         buffer.writeInt(levelValue);
         var bytes = key.getBytes(StandardCharsets.UTF_8);
         buffer.writeInt(bytes.length);
@@ -26,6 +26,7 @@ public class SympathyUpdateMessage {
 
     public static SympathyUpdateMessage decode(FriendlyByteBuf buffer) {
         BlockPos pos = buffer.readBlockPos();
+        if (pos.getY() == -999) pos = null;
         int lvl = buffer.readInt();
         var byteCount = buffer.readInt();
         var k = buffer.readBytes(byteCount).toString(StandardCharsets.UTF_8);

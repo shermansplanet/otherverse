@@ -27,14 +27,6 @@ public class SpindleItem extends Item {
         return selectedBlockPosition;
     }
 
-    public static BlockPos getBlockPos(ItemStack stack){
-        if(!stack.hasTag() || !stack.getTag().contains("boundpos_x")){
-            return null;
-        }
-        var tag = stack.getTag();
-        return new BlockPos(tag.getInt("boundpos_x"),tag.getInt("boundpos_y"),tag.getInt("boundpos_z"));
-    }
-
     public static DyeColor getDyeColor(Item item) {
         return OtherverseItems.spindleColors.get(item);
     }

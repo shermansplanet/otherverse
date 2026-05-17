@@ -451,6 +451,8 @@ public class ImplementManager {
         var mostSpirit = Spirits.OVERWORLD;
         if (item.hasTag() && item.getTag().contains("hallow")) {
             mostSpirit = Spirits.spiritsByLabel.get(item.getTag().getCompound("hallow").getString("spirit_type"));
+        } else if (item.is(Items.BUCKET)) {
+            mostSpirit = Spirits.TECH;
         } else {
             var mostAmount = 0;
             for (var spiritType : SpiritLabeler.getSpiritsFor(item.getItem()).entrySet()) {

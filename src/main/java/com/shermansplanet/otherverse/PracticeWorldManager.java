@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.artifacts.BiomeCodeAssigner;
 import com.shermansplanet.otherverse.binding.FleshbindingManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.binding.MobTransfusions;
@@ -78,6 +79,7 @@ public class PracticeWorldManager {
         if (sl.getServer().overworld() != sl) return;
         var smeltingRecipes = sl.getServer().getRecipeManager().getAllRecipesFor(RecipeType.SMELTING);
         SpiritLabeler.analyzeSmeltingRecipes(smeltingRecipes, sl);
+        BiomeCodeAssigner.AssignBiomeCodes(sl);
         MobBindingInfluenceUtils.analyzeMobInstances(sl.getServer().overworld());
     }
 
@@ -94,7 +96,8 @@ public class PracticeWorldManager {
                 SpiritTransfusions.ALL_SPIRIT_TRANSFUSIONS.data,
                 MobTransfusions.ALL_MOB_TRANSFUSIONS.data,
                 MobBindingInfluenceUtils.ALL_BINDING_INFLUENCES.data,
-                MobBindingInfluenceUtils.mobSpirits);
+                MobBindingInfluenceUtils.mobSpirits,
+                BiomeCodeAssigner.biomeCodes);
         LOGGER.debug("GOT UPDATE MESSAGE");
         return message;
     }

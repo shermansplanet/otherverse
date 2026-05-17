@@ -21,16 +21,20 @@ public class BindingInfo {
     public Mob mob;
     public CompoundTag contract;
     public int dimensionHash;
+    public boolean isCinnabar;
+    public boolean isPositive;
 
     private ServerLevel overworldServer;
 
-    public BindingInfo(UUID bindingId, BlockPos position, Mob mob, ServerLevel sl, CompoundTag contract, int dimensionHash) {
+    public BindingInfo(UUID bindingId, BlockPos position, Mob mob, ServerLevel sl, CompoundTag contract, int dimensionHash, boolean isCinnabar, boolean isPositive) {
         this.bindingId = bindingId;
         this.position = position;
         this.mob = mob;
         this.overworldServer = sl.getServer().overworld();
         this.contract = contract;
         this.dimensionHash = dimensionHash;
+        this.isCinnabar = isCinnabar;
+        this.isPositive = isPositive;
     }
 
     public ServerLevel getLocalLevel() {
@@ -46,7 +50,9 @@ public class BindingInfo {
                 tag.getInt("x"),
                 tag.getInt("y"),
                 tag.getInt("z")),
-                null, sl, tag.getCompound("contract"), tag.getInt("dimensionHash")
+                null, sl, tag.getCompound("contract"), tag.getInt("dimensionHash"),
+                tag.getBoolean("isCinnabar"),
+                tag.getBoolean("isPositive")
         );
     }
 
@@ -58,6 +64,8 @@ public class BindingInfo {
         tag.putInt("z", position.getZ());
         tag.put("contract", contract);
         tag.putInt("dimensionHash", dimensionHash);
+        tag.putBoolean("isCinnabar", isCinnabar);
+        tag.putBoolean("isPositive", isPositive);
         return tag;
     }
 

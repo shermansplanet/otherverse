@@ -20,6 +20,15 @@ public abstract class ItemStackInjector extends net.minecraftforge.common.capabi
         super(baseClass);
     }
 
+    @Inject(method = "isDamageableItem", at = @At("HEAD"), cancellable = true)
+    public void onIsDamageableItem(CallbackInfoReturnable<Boolean> ci) {
+        if (tag == null) return;
+        if (tag.contains("hallow")) {
+            ci.setReturnValue(true);
+            ci.cancel();
+        }
+    }
+
     @Inject(method = "isBarVisible", at = @At("HEAD"), cancellable = true)
     public void onBarVisible(CallbackInfoReturnable<Boolean> ci) {
         if (tag == null) return;

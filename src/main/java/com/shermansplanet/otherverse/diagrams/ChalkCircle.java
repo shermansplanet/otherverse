@@ -15,6 +15,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowlFoodItem;
 import net.minecraft.world.item.ItemStack;
@@ -258,9 +259,10 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     public ItemStack getItem() {
         return item;
     }
+
     @Override
     public ItemStack getItemNotMob() {
-        if(item.getItem() instanceof IdolItem) return ItemStack.EMPTY;
+        if (item.getItem() instanceof IdolItem) return ItemStack.EMPTY;
         return item;
     }
 
@@ -369,6 +371,9 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
             if (cc.cooldownTicks == 0) {
                 DiagramManager.markDiagramActive(sl, cc.getDiagram());
             }
+        }
+        if (cc.diagram != null && cc.diagram.isInitialized && sl.getGameTime() % 60 == Mth.abs(blockPos.getX()) % 60) {
+            DiagramManager.markDiagramActive(sl, cc.diagram);
         }
         if (cc.diagram == null || cc.diagram.isInitialized) {
             return;

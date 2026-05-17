@@ -11,6 +11,8 @@ import com.shermansplanet.otherverse.sympathy.FateWebBlock;
 import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import com.shermansplanet.otherverse.sympathy.SympathyRangeUpdateMessage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -49,6 +51,18 @@ public class ContractManager {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private static final Vec3i[] directions = new Vec3i[]{
+            new Vec3i(1, 0, 0),
+            new Vec3i(-1, 0, 0),
+            new Vec3i(0, 0, 1),
+            new Vec3i(0, 0, -1),
+
+            new Vec3i(1, 0, 1),
+            new Vec3i(-1, 0, 1),
+            new Vec3i(1, 0, -1),
+            new Vec3i(-1, 0, -1),
+    };
+
     public static class PositionOrSpindle {
         boolean isPosition;
         int x, y, z;
@@ -65,6 +79,16 @@ public class ContractManager {
         }
 
         public PositionOrSpindle(BlockFocus focus) {
+            var pos = DiagramManager.getOrCreateLevelData(focus.getFocusLevel()).getSympathyPosition(focus.getPos().toString());
+            if (pos != null) {
+                isPosition = true;
+                x = pos.getX();
+                y = pos.getY();
+                z = pos.getZ();
+                key = "";
+                return;
+            }
+
             var state = focus.getFocusLevel().getBlockState(focus.getPos());
             color = state.getValue(FateWebBlock.color);
             playerName = focus.getDiagram().getOwner((ServerLevel) focus.getFocusLevel()).getGameProfile().getName();
@@ -96,6 +120,10 @@ public class ContractManager {
                 tag.putInt("color", color.getId());
             }
             return tag;
+        }
+
+        public CompoundTag toPositionTag(Level level) {
+            return new PositionOrSpindle(getPos(level)).toTag();
         }
 
         public BlockPos getPos(Level level) {
@@ -167,6 +195,7 @@ public class ContractManager {
                 i++;
             }
         }
+        if (tag.isEmpty()) return tag;
         tag.putInt("range", range);
         return tag;
     }
@@ -191,6 +220,8 @@ public class ContractManager {
             tag.putString("type", "go");
         } else if (taskItem.getItem() instanceof HoeItem) {
             tag.putString("type", "harvest");
+        } else if (taskItem.getItem() instanceof AxeItem) {
+            tag.putString("type", "fell");
         } else if (taskItem.is(Items.CRAFTING_TABLE)) {
             tag.putString("type", "craft");
             isCrafting = true;
@@ -248,7 +279,7 @@ public class ContractManager {
                     } else {
                         for (PositionOrSpindle pos : positions) {
                             var compassPos = influencePos.getKey();
-                            tag.put("offset_" + offsetIndex, pos.toTag());
+                            tag.put("offset_" + offsetIndex, pos.toPositionTag(level));
                             tag.putIntArray("offset_" + offsetIndex + "_basis",
                                     new int[]{compassPos.getX(), compassPos.getY(), compassPos.getZ()});
                             offsetIndex++;
@@ -324,12 +355,27 @@ public class ContractManager {
             }
         }
         if (isCrafting) {
-            var sum = new BlockPos(0, 0, 0);
-            for (var pos : craftingItemPositions) {
-                sum = sum.offset(pos.getA());
+            var toSearch = new ArrayList<>(craftingItemPositions.stream().map(x -> x.getA().offset(circle.getPos())).toList());
+            var taken = new HashSet<>(toSearch);
+            taken.add(circle.getPos());
+
+            while (!toSearch.isEmpty()) {
+                var searchFrom = toSearch.remove(0);
+                for (var dir : directions) {
+                    var pos = searchFrom.offset(dir);
+                    if (taken.contains(pos)) continue;
+                    if (!(level.getBlockEntity(pos) instanceof ChalkCircle cc) || cc.getItem().isEmpty() || cc.isEmpty())
+                        continue;
+                    var stack = cc.getItem();
+                    craftingItemPositions.add(new Pair<>(pos.subtract(circle.getPos()), stack));
+                    tag.putInt("filter_" + filterIndex, Item.getId(stack.getItem()));
+                    filterIndex++;
+                    taken.add(pos);
+                    toSearch.add(pos);
+                }
             }
-            while (sum.getZ() < Math.abs(sum.getX())) {
-                sum = new BlockPos(sum.getZ(), 0, -sum.getX());
+
+            for (var n = 0; n < 4; n++) {
                 for (int i = 0; i < craftingItemPositions.size(); i++) {
                     var pos = craftingItemPositions.get(i).getA();
                     craftingItemPositions.set(i, new Pair<>(
@@ -355,6 +401,7 @@ public class ContractManager {
                 if (recipe.isPresent()) {
                     tag.putString("recipe_id", recipe.get().getId().toString());
                     tag.putInt("recipe_result", Item.getId(recipe.get().getResultItem(level.registryAccess()).getItem()));
+                    break;
                 }
             }
         }
@@ -372,7 +419,7 @@ public class ContractManager {
         }
         CompoundTag contractTag = tag.getCompound("contract");
         var range = contractTag.getInt("range");
-        if(range > 8) event.getToolTip().add(Component.literal("Range: " + range + " blocks"));
+        if (range > 8) event.getToolTip().add(Component.literal("Range: " + range + " blocks"));
         makeTooltipRecursive(event.getToolTip(), contractTag, "");
     }
 
@@ -420,9 +467,9 @@ public class ContractManager {
                     if (key.startsWith("block") || key.startsWith("inventory")) {
                         var s = item == Items.HAY_BLOCK ? "passive mobs"
                                 : item == Items.TARGET ? "hostile mobs"
-                                : item == Items.CRAFTING_TABLE ? "players"
-                                : item == Items.CHAIN ? "bound mobs"
-                                : "";
+                                  : item == Items.CRAFTING_TABLE ? "players"
+                                    : item == Items.CHAIN ? "bound mobs"
+                                      : "";
                         if (!s.isEmpty()) {
                             toolTip.add(Component.literal(prefix + s));
                             continue;
@@ -521,7 +568,7 @@ public class ContractManager {
             if (g.getGoal() instanceof BoundGoal bg) {
                 bg.setContract(contractTag, fromPlayerClick);
                 OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                        new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, false));
+                        new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, BindingUpdateMessage.BindingType.UNBOUND, false));
                 return;
             }
         }

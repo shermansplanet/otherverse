@@ -2,7 +2,7 @@
     "name": "Action: Attack",
     "icon": "minecraft:wooden_sword",
     "category": "otherverse:contracts",
-    "sortnum": 9,
+    "sortnum": 90,
     "pages": [
         {
             "type": "patchouli:spotlight",

@@ -59,7 +59,7 @@ public class EscapeRopeItem extends Item {
         }
 
         var playerLevelId = DiagramManager.getDimensionHash(level);
-        if (DemesnesManager.getData(sl, player.blockPosition()) == demesne) {
+        if (DemesnesManager.getData(sl, BlockPos.containing(pos)) == demesne) {
             var tag = itemstack.getOrCreateTag();
             tag.putFloat("escape_rope_x", (float) pos.x);
             tag.putFloat("escape_rope_y", (float) pos.y);

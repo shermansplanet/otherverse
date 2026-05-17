@@ -12,6 +12,7 @@
     "item.otherverse.escape_rope": "Escape Rope",
     "item.otherverse.charcoal_stick": "Charcoal Stick",
     "item.otherverse.realm_wracked_coal" : "Realm-Wracked Coal",
+    "item.otherverse.scrying_powder" : "Scrying Powder",
     "item.otherverse.connection_blocker" : "Connection Blocker",
     "item.otherverse.homunculus_heart" : "Homunculus Heart",
     "item.otherverse.self" : "Self",
@@ -93,6 +94,7 @@
     "otherverse.jei.spirit_extraction": "Spiritual Composition",
     "otherverse.jei.transfusion": "Transfusion",
     "otherverse.jei.binding": "Binding and Healing",
+    "otherverse.jei.biome_code": "Biome Scrying",
 
     "key.categories.practice": "Pact Magic",
 
@@ -145,5 +147,15 @@
     "item.otherverse.spirit_tablet": "Spirit Tablet",
 
     "entity.otherverse.typhlotic_shark": "Typhlotic Shark",
-    "entity.otherverse.typhlotic_jellyfish": "Typhlotic Jellyfish"
+    "entity.otherverse.typhlotic_jellyfish": "Typhlotic Jellyfish",
+
+    "biome.otherverse.ruins_misery": "Misery Ruins",
+    "biome.otherverse.ruins_anger": "Anger Ruins",
+    "biome.otherverse.ruins_chaos": "Ruins Void",
+    "biome.otherverse.ruins_disgust": "Disgust Ruins",
+    "biome.otherverse.ruins_ecstasy": "Ecstasy Ruins",
+    "biome.otherverse.ruins_fear": "Fear Ruins",
+    "biome.otherverse.ruins_shock": "Shock Ruins",
+    "biome.otherverse.ruins_trust": "Trust Ruins",
+    "biome.otherverse.ruins_vigil": "Vigil Ruins"
 }

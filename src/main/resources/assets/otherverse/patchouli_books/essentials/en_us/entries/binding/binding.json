@@ -1,6 +1,6 @@
 {
     "name": "Binding",
-    "sortnum": 1,
+    "sortnum": 10,
     "icon": "minecraft:chain",
     "category": "otherverse:binding",
     "pages": [

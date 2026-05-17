@@ -32,7 +32,7 @@
         {
             "title": "Hallows in Diagrams",
             "type": "patchouli:text",
-            "text": "When placed in either item or block foci, hallows will try to extract spirits from their influences. This will destroy non-hallowed blocks or items, and drain other hallows."
+            "text": "When placed in either item or block foci, hallows with any remaining capacity will try to extract spirits from their influences. This will drain other hallows, and destroy non-hallowed blocks or items. If such a block or item is above an amethyst block, or influenced by an amethyst shard, it will only be destroyed once the hallow has enough empty room to absorb all the spirits."
         },
         {
             "title": "Placed Hallows",

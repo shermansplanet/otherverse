@@ -1,0 +1,7 @@
+{
+"practice" : "spirit_transfusion",
+"input" : "minecraft:dirt",
+"spirit" : "flesh",
+"count" : 3,
+"block" : "macabre:living_dirt"
+}

@@ -2,7 +2,7 @@
     "name": "Detection Range",
     "icon": "minecraft:spyglass",
     "category": "otherverse:contracts",
-    "sortnum": 3,
+    "sortnum": 30,
     "pages": [
         {
             "type": "patchouli:text",        

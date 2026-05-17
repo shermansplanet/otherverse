@@ -93,6 +93,7 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
             else if (levelName.equals("overworld") && getBlockPos().getY() > 190) spiritType = Spirits.AIR;
             else spiritType = MobBindingInfluenceUtils.getSpiritTypes(biome, sl).get(0);
 
+            LOGGER.debug("GETTING DATA FROM DEMESNE BEACON SET LEVEL");
             demesneData = DemesnesManager.getData(sl, getBlockPos());
             if (demesneData != null) {
                 inDemesneOf = demesneData.practitioner;

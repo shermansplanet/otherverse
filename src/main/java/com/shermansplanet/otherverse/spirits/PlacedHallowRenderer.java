@@ -157,9 +157,9 @@ public class PlacedHallowRenderer {
                 case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
             };
             poseStack.translate(range.center().x, cylinderTop, range.center().z);
-            var r = shrine.isCombined ? (int)((Math.sin(t) + 1) * 128) : 255;
-            var g = shrine.isCombined ? (int)((Math.sin(t + Math.PI * 2 / 3) + 1) * 128) : 255;
-            var b = shrine.isCombined ? (int)((Math.sin(t + Math.PI * 4 / 3) + 1) * 128) : 255;
+            var r = shrine.isCombined ? (int) ((Math.sin(t) + 1) * 128) : 255;
+            var g = shrine.isCombined ? (int) ((Math.sin(t + Math.PI * 2 / 3) + 1) * 128) : 255;
+            var b = shrine.isCombined ? (int) ((Math.sin(t + Math.PI * 4 / 3) + 1) * 128) : 255;
             ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
                     rot, r, g, b, 100, range.height());
             poseStack.popPose();
@@ -199,6 +199,7 @@ public class PlacedHallowRenderer {
             switch (rendershape) {
                 case MODEL:
                     var modelAndRender = getBlockModel(p_110913_, spiritName);
+                    if (modelAndRender.getFirst() == null) return;
                     int i = blockRenderGetter.getBlockColors().getColor(p_110913_, null, null, 0);
                     float f = (float) (i >> 16 & 255) / 255.0F;
                     float f1 = (float) (i >> 8 & 255) / 255.0F;
@@ -218,7 +219,13 @@ public class PlacedHallowRenderer {
         var cachedForState = modelByStateCache.computeIfAbsent(state, x -> new HashMap<>());
         var cachedModel = cachedForState.get(spiritType);
         if (cachedModel != null) return cachedModel;
+        var pair = makeBlockModel(state, spiritType);
+        if (pair == null) pair = new Pair<>(null, null);
+        cachedForState.put(spiritType, pair);
+        return pair;
+    }
 
+    private static Pair<BakedModel, RenderType> makeBlockModel(BlockState state, String spiritType) {
         var bakery = Minecraft.getInstance().getModelManager().getModelBakery();
         var blockKey = ForgeRegistries.BLOCKS.getKey(state.getBlock());
         var modelLocation = BlockModelShaper.stateToModelLocation(state);
@@ -229,7 +236,7 @@ public class PlacedHallowRenderer {
         Set<BlockModel> blockModels = new HashSet<>();
         HallowTextureManager.GetBlockModels(model, blockModels);
 
-        for(BlockModel blockModel : blockModels) {
+        for (BlockModel blockModel : blockModels) {
             for (var s : blockModel.textureMap.keySet()) {
                 System.out.println(s);
                 Material material = blockModel.getMaterial(s);
@@ -237,7 +244,7 @@ public class PlacedHallowRenderer {
                 if (MissingTextureAtlasSprite.getLocation().equals(material.texture())) continue;
                 var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
                         "textures/" + material.texture().getPath() + ".png");
-                if(locations.contains(rl)) continue;
+                if (locations.contains(rl)) continue;
                 locations.add(rl);
             }
         }
@@ -266,20 +273,24 @@ public class PlacedHallowRenderer {
 
         var newLoc = new ModelResourceLocation(Otherverse.MODID,
                 modelLocation.getNamespace() + "_" + modelLocation.getPath() + "_hallow_" + spiritType, modelLocation.getVariant());
-        BakedModel m = model instanceof MultiVariant mv ? bakeMultiVariant(mv, bakery, func) :
-                model.bake(DUMMY_BAKER, func, BlockModelRotation.X0_Y0, newLoc);
 
-        var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
-        RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false,
-                RenderType.CompositeState.builder()
-                        .setLightmapState(LIGHTMAP)
-                        .setShaderState(RENDERTYPE_CUTOUT_SHADER)
-                        .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
-                        .createCompositeState(true));
+        try {
+            BakedModel m = model instanceof MultiVariant mv ? bakeMultiVariant(mv, bakery, func) :
+                    model.bake(DUMMY_BAKER, func, BlockModelRotation.X0_Y0, newLoc);
 
-        var pair = Pair.of(m, rt);
-        cachedForState.put(spiritType, pair);
-        return pair;
+            var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
+            RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false,
+                    RenderType.CompositeState.builder()
+                            .setLightmapState(LIGHTMAP)
+                            .setShaderState(RENDERTYPE_CUTOUT_SHADER)
+                            .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
+                            .createCompositeState(true));
+
+            var pair = Pair.of(m, rt);
+            return pair;
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private static BakedModel bakeMultiVariant(MultiVariant mv, ModelBakery bakery, Function<Material, TextureAtlasSprite> p_111851_) {

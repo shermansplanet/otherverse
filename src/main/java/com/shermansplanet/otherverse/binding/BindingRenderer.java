@@ -56,7 +56,8 @@ public class BindingRenderer {
     private static BlockRenderDispatcher blockRenderer;
     private static EntityRenderDispatcher entityRenderDispatcher;
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static HashSet<UUID> boundEntities = new HashSet<>();
+    private static HashSet<UUID> positiveBoundEntities = new HashSet<>();
+    private static HashSet<UUID> negativeBoundEntities = new HashSet<>();
     private static HashSet<UUID> contractEntities = new HashSet<>();
     private static HashMap<UUID, String> familiars = new HashMap<>();
     private static HashMap<String, EntityType<LivingEntity>> familiarsByPract = new HashMap<>();
@@ -146,7 +147,8 @@ public class BindingRenderer {
         if (itemRenderer == null) {
             itemRenderer = Minecraft.getInstance().getItemRenderer();
         }
-        if (!boundEntities.contains(entityId)) {
+        var isPositive = positiveBoundEntities.contains(entityId);
+        if (!isPositive && !negativeBoundEntities.contains(entityId)) {
             if (contractEntities.contains(entityId)) {
                 contractOnly = true;
             } else {
@@ -161,7 +163,7 @@ public class BindingRenderer {
                     var partialTick = Minecraft.getInstance().getPartialTick();
                     var renderPoint = mob.getPosition(partialTick).add(0, bounds.getYsize() + 0.3, 0);
                     var toCam = Minecraft.getInstance().cameraEntity.getEyePosition(partialTick).subtract(renderPoint);
-                    pose.mulPose(new Quaternionf().lookAlong(toCam.toVector3f(), new Vector3f(0,1,0)).invert());
+                    pose.mulPose(new Quaternionf().lookAlong(toCam.toVector3f(), new Vector3f(0, 1, 0)).invert());
                     itemRenderer.renderStatic(OtherverseItems.SELF.get().getDefaultInstance(), ItemDisplayContext.FIXED, event.getPackedLight(),
                             OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
                     pose.popPose();
@@ -196,23 +198,33 @@ public class BindingRenderer {
         pose.scale(s, s, s);
         pose.mulPose(new Quaternionf().rotateY(rot * Mth.TWO_PI / 360));
         pose.pushPose();
-        if (isFamiliar || contractOnly) {
-            pose.translate(-0.5f, -0.4f, -0.5f);
-            blockRenderer.renderSingleBlock(
-                    OtherverseBlocks.FAMILIAR_CROWN.get().defaultBlockState().setValue(CrownBlock.demesne, contractOnly),
-                    pose, event.getMultiBufferSource(),
-                    event.getPackedLight(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
-        } else {
-            pose.mulPose(new Quaternionf().rotateZ(Mth.PI / 2));
-            for (int i = 0; i < 4; i++) {
-                pose.pushPose();
-                pose.mulPose(new Quaternionf().rotateXYZ(Mth.PI / 2, Mth.PI / 2, Mth.PI / 2 * i));
-                pose.translate(0.4f, 0f, 0f);
-                pose.mulPose(new Quaternionf().rotateXYZ(0, Mth.PI / 2, 0));
-                itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemDisplayContext.FIXED, event.getPackedLight(),
-                        OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
-                pose.popPose();
+        if (!mob.getPersistentData().contains("construct_type")) {
+            if (isFamiliar || contractOnly || isPositive) {
+                pose.translate(-0.5f, -0.4f, -0.5f);
+                blockRenderer.renderSingleBlock(
+                        OtherverseBlocks.FAMILIAR_CROWN.get().defaultBlockState().setValue(CrownBlock.demesne, !isFamiliar).setValue(CrownBlock.positive, true),
+                        pose, event.getMultiBufferSource(),
+                        event.getPackedLight(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
+            } else {
+                pose.mulPose(new Quaternionf().rotateZ(Mth.PI / 2));
+                for (int i = 0; i < 4; i++) {
+                    pose.pushPose();
+                    pose.mulPose(new Quaternionf().rotateXYZ(Mth.PI / 2, Mth.PI / 2, Mth.PI / 2 * i));
+                    pose.translate(0.4f, 0f, 0f);
+                    pose.mulPose(new Quaternionf().rotateXYZ(0, Mth.PI / 2, 0));
+                    itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemDisplayContext.FIXED, event.getPackedLight(),
+                            OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
+                    pose.popPose();
+                }
             }
+//            pose.translate(-0.5f, -0.4f, -0.5f);
+//            blockRenderer.renderSingleBlock(
+//                    OtherverseBlocks.FAMILIAR_CROWN.get().defaultBlockState()
+//                            .setValue(CrownBlock.demesne, !isFamiliar && isPositive)
+//                            .setValue(CrownBlock.positive, isPositive),
+//                    pose, event.getMultiBufferSource(),
+//                    event.getPackedLight(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
+
         }
         pose.popPose();
         if (!BindingManager.getHeldItem(mob).isEmpty()) {
@@ -228,7 +240,11 @@ public class BindingRenderer {
         var updateType = update.updateType;
         var silent = update.silent;
         if (updateType == BindingUpdateMessage.BindingUpdateType.BIND) {
-            boundEntities.add(le.getUUID());
+            if (update.type == BindingUpdateMessage.BindingType.POSITIVE) {
+                positiveBoundEntities.add(le.getUUID());
+            } else {
+                negativeBoundEntities.add(le.getUUID());
+            }
             if (silent) {
                 return;
             }
@@ -242,12 +258,12 @@ public class BindingRenderer {
             }
             le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 1, 1);
         } else if (updateType == BindingUpdateMessage.BindingUpdateType.CONTRACT) {
-            LOGGER.debug("CONSTRUCT TYPE: " + update.data.getString("construct_type"));
             if (update.data.contains("construct_type")) {
-                ReskinManager.reskinMob(le, update.data.getString("construct_type"));
-            } else {
-                contractEntities.add(le.getUUID());
+                var ct = update.data.getString("construct_type");
+                ReskinManager.reskinMob(le, ct);
+                le.getPersistentData().putString("construct_type", ct);
             }
+            contractEntities.add(le.getUUID());
             if (silent) {
                 return;
             }
@@ -266,7 +282,7 @@ public class BindingRenderer {
             ReskinManager.reskinAsFamiliar(le, Minecraft.getInstance().player);
             familiars.put(le.getUUID(), name);
             familiarsByPract.put(name, (EntityType<LivingEntity>) le.getType());
-            boundEntities.add(le.getUUID());
+            positiveBoundEntities.add(le.getUUID());
             le.getPersistentData().putString("practitioner", name);
             var lvl = Minecraft.getInstance().level;
             if (lvl != null) {
@@ -284,7 +300,8 @@ public class BindingRenderer {
                 le.level().addParticle(ParticleTypes.HEART, le.getRandomX(1.0D), le.getRandomY() + 0.5D, le.getRandomZ(1.0D), d0, d1, d2);
             }
         } else {
-            boundEntities.remove(le.getUUID());
+            positiveBoundEntities.remove(le.getUUID());
+            negativeBoundEntities.remove(le.getUUID());
             contractEntities.remove(le.getUUID());
         }
     }

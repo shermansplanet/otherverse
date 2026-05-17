@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
+import com.shermansplanet.otherverse.diagrams.Diagram;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritType;
@@ -14,6 +15,7 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -25,10 +27,12 @@ import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
@@ -45,8 +49,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
-import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -54,17 +59,20 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class BiomeBrazierBlockEntity extends BlockEntity {
 
     private static final int MAX_ACTIVATIONS = 16;
     private static final Logger LOGGER = LogUtils.getLogger();
-    private CompoundTag biomeTag = null;
+    public CompoundTag biomeTag = null;
     public HashMap<SpiritType, Pair<Integer, Integer>> spiritCounts = null;
+    public List<SpiritType> spiritCode = null;
     private int activations = 0;
     public MutableComponent[] labels = null;
     private String originalBiomeString = null;
+    private Vec3 direction = Vec3.ZERO;
 
     public BiomeBrazierBlockEntity(BlockPos pos, BlockState state) {
         super(Otherverse.BIOME_BRAZIER_ENTITY.get(), pos, state);
@@ -239,30 +247,9 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             if (biomeName.equals("candy_cavity"))
                 return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "cake_layer"));
         } else if (biomeMod.equals("macabre")) {
-            if (biomeName.equals("mortem_swamp"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "mortem_dirt"));
-            if (biomeName.equals("mortem_marsh"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "mortem_dirt"));
-            if (biomeName.equals("gloom_forest"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
-            if (biomeName.equals("cracked_cliffs"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
-            if (biomeName.equals("rotting_field"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
-            if (biomeName.equals("teething_forest"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "gums"));
-            if (biomeName.equals("crawling_field"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "crawling_dirt"));
-            if (biomeName.equals("valley_of_eyes"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "veins"));
-            if (biomeName.equals("deathless_valley"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "gore_sand"));
-            if (biomeName.equals("decaying_meadow"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "necrosis_flesh"));
-            if (biomeName.equals("lifeless_pits"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "lifeless_sand"));
             if (biomeName.equals("mountain_maw"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "tumor_dirt"));
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "petrified_rock"));
+            return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "weak_stone"));
         }
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
         if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH)) return Blocks.SANDSTONE;
@@ -319,9 +306,30 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             if (biomeName.equals("forlorn_hollows")) return Blocks.PACKED_MUD;
             if (biomeName.equals("primordial_caves")) return Blocks.GRASS_BLOCK;
         } else if (biomeMod.equals("macabre")) {
+            if (biomeName.equals("mortem_swamp"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "mortem_dirt"));
+            if (biomeName.equals("mortem_marsh"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "mortem_dirt"));
+            if (biomeName.equals("gloom_forest"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
+            if (biomeName.equals("cracked_cliffs"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
+            if (biomeName.equals("rotting_field"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "living_dirt"));
+            if (biomeName.equals("teething_forest"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "gums"));
+            if (biomeName.equals("crawling_field"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "crawling_dirt"));
+            if (biomeName.equals("valley_of_eyes"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "veins"));
+            if (biomeName.equals("deathless_valley"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "gore_sand"));
+            if (biomeName.equals("decaying_meadow"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "necrosis_flesh"));
+            if (biomeName.equals("lifeless_pits"))
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "lifeless_sand"));
             if (biomeName.equals("mountain_maw"))
-                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "petrified_rock"));
-            return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "weak_stone"));
+                return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "tumor_dirt"));
         }
 
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
@@ -348,6 +356,13 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
 
     private void resetSpiritCounts() {
         spiritCounts = new HashMap<>();
+        spiritCode = new ArrayList<>();
+        if (biomeTag == null) {
+            for (var st : Spirits.allSpiritTypes) {
+                spiritCounts.put(st, new Pair<>(0, 1));
+            }
+            return;
+        }
         var spiritTag = biomeTag.getCompound("spirits");
         for (var st : spiritTag.getAllKeys()) {
             spiritCounts.put(Spirits.spiritsByLabel.get(st), new Pair<>(0, spiritTag.getInt(st)));
@@ -356,6 +371,13 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
 
     public void setLabels() {
         if (biomeTag == null) {
+            if (spiritCode != null && !spiritCode.isEmpty()) {
+                labels = new MutableComponent[spiritCode.size()];
+                for (var i = 0; i < spiritCode.size(); i++) {
+                    labels[i] = Component.literal(spiritCode.get(i).label());
+                }
+                return;
+            }
             labels = null;
             return;
         }
@@ -375,9 +397,12 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         if (level.getGameTime() % 5 != 0) return;
         if (!(level instanceof ServerLevel sl)) return;
         var r = level.getRandom();
-        if (state.getValue(BlockStateProperties.LIT)) {
+        var isLit = state.getValue(BlockStateProperties.LIT);
+        var isScrying = state.getValue(BiomeBrazierBlock.SCRY);
+        if (isLit || isScrying) {
             sl.sendParticles(new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
-                            OtherverseItems.REALM_WRACKED_COAL.get().getDefaultInstance()),
+                            isLit ? OtherverseItems.REALM_WRACKED_COAL.get().getDefaultInstance()
+                                    : OtherverseItems.SCRYING_POWDER.get().getDefaultInstance()),
                     pos.getX() + r.nextFloat() * 0.8f + 0.1f,
                     pos.getY() + r.nextFloat() * 0.5f + 0.5f,
                     pos.getZ() + r.nextFloat() * 0.8f + 0.1f,
@@ -388,6 +413,14 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                     pos.getY() + r.nextFloat() * 0.5f + 0.5f,
                     pos.getZ() + r.nextFloat() * 0.8f + 0.1f,
                     0, 0, 0.2f, 0, 0.15f);
+        }
+        if (isScrying && t instanceof BiomeBrazierBlockEntity brazier && brazier.direction != Vec3.ZERO) {
+            var dir = brazier.direction.scale(3);
+            sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                    pos.getX() + r.nextFloat() * 0.8f + 0.1f,
+                    pos.getY() + r.nextFloat() * 0.5f + 0.5f,
+                    pos.getZ() + r.nextFloat() * 0.8f + 0.1f,
+                    0, dir.x, dir.y, dir.z, 0.15f);
         }
     }
 
@@ -410,7 +443,14 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             tag.put("spiritCounts", spiritCountTag);
             tag.put("spiritNeeds", spiritNeedsTag);
         }
+        if (spiritCode != null) {
+            var spiritCodeTag = new IntArrayTag(spiritCode.stream().map(SpiritType::id).toList());
+            tag.put("spiritCode", spiritCodeTag);
+        }
         tag.putInt("activations", activations);
+        tag.putFloat("dirX", (float) direction.x);
+        tag.putFloat("dirY", (float) direction.y);
+        tag.putFloat("dirZ", (float) direction.z);
         if (originalBiomeString != null) tag.putString("originalBiomeString", originalBiomeString);
     }
 
@@ -419,6 +459,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         super.load(tag);
         biomeTag = null;
         spiritCounts = null;
+        spiritCode = null;
         if (tag.contains("biomeTag")) biomeTag = tag.getCompound("biomeTag");
         if (tag.contains("spiritCounts")) {
             spiritCounts = new HashMap<>();
@@ -429,6 +470,11 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                         new Pair<>(spiritCountTag.getInt(k), spiritNeedsTag.getInt(k)));
             }
         }
+        if (tag.contains("spiritCode")) {
+            spiritCode = new ArrayList<>(Arrays.stream(tag.getIntArray("spiritCode")).mapToObj(Spirits.spiritsById::get).toList());
+        }
+        direction = new Vec3(
+                tag.getFloat("dirX"), tag.getFloat("dirY"), tag.getFloat("dirZ"));
         activations = tag.getInt("activations");
         if (tag.contains("originalBiomeString")) originalBiomeString = tag.getString("originalBiomeString");
         setLabels();
@@ -456,6 +502,76 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         CompoundTag tag = pkt.getTag();
         if (tag != null) {
             load(tag);
+        }
+    }
+
+    public void fuelForScrying() {
+        level.setBlockAndUpdate(getBlockPos(), OtherverseBlocks.BIOME_BRAZIER.get().defaultBlockState().setValue(BiomeBrazierBlock.SCRY, true));
+        level.playSound(null, getBlockPos(), SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 1, 1);
+        biomeTag = null;
+        resetSpiritCounts();
+        activations = 0;
+        setLabels();
+        setChanged();
+    }
+
+    public void tryScry(SpiritType spiritType, ServerLevel sl) {
+        if (!spiritCode.isEmpty() && spiritType == spiritCode.get(spiritCode.size() - 1)) return;
+        if (spiritCode.size() >= BiomeCodeAssigner.SPIRIT_CODE_COUNT) resetSpiritCounts();
+        spiritCode.add(spiritType);
+
+        if (spiritCode.size() == BiomeCodeAssigner.SPIRIT_CODE_COUNT) {
+            var pos = getBlockPos();
+            var players = sl.getEntitiesOfClass(ServerPlayer.class, AABB.ofSize(pos.getCenter(), 16, 16, 16));
+            var biomeName = BiomeCodeAssigner.getBiomeFor(spiritCode);
+            if (biomeName == null) {
+                for (var player : players)
+                    player.displayClientMessage(Component.literal("Spirit sequence does not correspond to any known biome"), false);
+            } else {
+                var biomeComponent = Component.translatable("biome." + biomeName.toString().replace(':', '.'));
+                var registry = sl.registryAccess().registry(Registries.BIOME).get();
+                var biome = registry.getHolderOrThrow(registry.getResourceKey(registry.get(biomeName)).get());
+                var result = sl.findClosestBiome3d(Predicate.isEqual(biome), getBlockPos(), 6400, 32, 64);
+                if (result == null || result.getFirst() == null) {
+                    for (var player : players)
+                        player.displayClientMessage(Component.literal("Could not find ").append(biomeComponent), false);
+                } else {
+                    for (var player : players)
+                        player.displayClientMessage(Component.literal("Attempting to locate ").append(biomeComponent), false);
+                    new Thread(() -> {
+                        for (var i = 0; i < 8; i++) {
+                            var r = sl.getRandom();
+                            var dir = result.getFirst().getCenter().subtract(pos.getCenter()).normalize();
+                            sl.playSound(null, pos, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 1, 1);
+                            sl.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                                    pos.getX() + r.nextFloat() * 3f - 1f,
+                                    pos.getY() + r.nextFloat() * 3f - 1f,
+                                    pos.getZ() + r.nextFloat() * 3f - 1f,
+                                    0, 0, 0.25, 0, 0.15f);
+                            direction = dir;
+                        }
+                        for (var player : players)
+                            player.displayClientMessage(Component.literal("Now scrying towards ").append(biomeComponent), false);
+                    }).start();
+                }
+            }
+        }
+        fuelEffects();
+        setLabels();
+        setChanged();
+    }
+
+    public void fuelEffects() {
+        if (!(level instanceof ServerLevel sl)) return;
+        var pos = getBlockPos();
+        level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1, 1);
+        var r = level.getRandom();
+        for (var i = 0; i < 8; i++) {
+            sl.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                    pos.getX() + r.nextFloat() * 3f - 1f,
+                    pos.getY() + r.nextFloat() * 3f - 1f,
+                    pos.getZ() + r.nextFloat() * 3f - 1f,
+                    0, 0, 0.2f, 0, 0.15f);
         }
     }
 }

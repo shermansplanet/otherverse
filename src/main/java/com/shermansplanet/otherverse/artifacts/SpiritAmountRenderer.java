@@ -66,7 +66,16 @@ public class SpiritAmountRenderer {
                 shouldRenderLabel = true;
                 return;
             }
-            var tag = DiagramManager.getOrCreateLevelData(lvl).getPlacedItemTag(labelPosition);
+            var data = DiagramManager.getOrCreateLevelData(lvl);
+            var sympathyPosition = data.getSympathyPosition(labelPosition.toString());
+            if(sympathyPosition != null){
+                labelTextLines = new MutableComponent[]{
+                        Component.literal("Bound to (" + sympathyPosition.getX() + ", " + sympathyPosition.getY() + ", " + sympathyPosition.getZ() + ")")
+                };
+                shouldRenderLabel = true;
+                return;
+            }
+            var tag = data.getPlacedItemTag(labelPosition);
             if (tag == null) return;
             var typeString = tag.getString("spirit_type");
             var countAndCapacity = HallowHelper.getShrineSpiritCountAndCapacity(lvl, labelPosition, Spirits.spiritsByLabel.get(typeString));

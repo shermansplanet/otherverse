@@ -2,7 +2,7 @@
     "name": "Amounts",
     "icon": "minecraft:wheat_seeds",
     "category": "otherverse:contracts",
-    "sortnum": 15,
+    "sortnum": 150,
     "pages": [
         {
             "type": "patchouli:text",        

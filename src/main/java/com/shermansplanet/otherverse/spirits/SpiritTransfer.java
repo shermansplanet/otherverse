@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.spirits;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
+import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.DiagramProcess;
 import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
@@ -26,6 +27,7 @@ public class SpiritTransfer extends DiagramProcess {
     }
 
     private static HashMap<String, String> oppositeSpirits = new HashMap<>();
+    private static HashMap<String, String> antiOppositeSpirits = new HashMap<>();
 
     private boolean firstFrame = true;
     private boolean spawnParticlesOverTime = false;
@@ -53,6 +55,10 @@ public class SpiritTransfer extends DiagramProcess {
         oppositeSpirits.put(Spirits.OVERWORLD.label(), Spirits.NETHER.label());
         oppositeSpirits.put(Spirits.NETHER.label(), Spirits.END.label());
         oppositeSpirits.put(Spirits.END.label(), Spirits.OVERWORLD.label());
+
+        for(var opposites : oppositeSpirits.entrySet()){
+            antiOppositeSpirits.put(opposites.getValue(), opposites.getKey());
+        }
     }
 
     private static void declareOpposites(SpiritType a, SpiritType b) {
@@ -63,6 +69,11 @@ public class SpiritTransfer extends DiagramProcess {
     public static SpiritType getOppositeSpiritType(SpiritType spiritType) {
         if (spiritType == null) return null;
         return Spirits.spiritsByLabel.get(oppositeSpirits.getOrDefault(spiritType.label(), ""));
+    }
+
+    public static SpiritType getAntiOppositeSpiritType(SpiritType spiritType) {
+        if (spiritType == null) return null;
+        return Spirits.spiritsByLabel.get(antiOppositeSpirits.getOrDefault(spiritType.label(), ""));
     }
 
     public void tick() {
@@ -106,14 +117,18 @@ public class SpiritTransfer extends DiagramProcess {
 
         var remainingCapacity = sink.getHallowCapacity(spiritType);
 
-        var sinkCanOverflow = sink.isBlock() && ShrineHelper.isOverflowable(spiritType);
+        var sinkCanOverflow = sink.isBlock() && sinkTag.contains("shrine") && ShrineHelper.isOverflowable(spiritType);
         if (remainingCapacity <= 0 && !sinkCanOverflow) {
-            if (firstFrameCheck) abandon();
+            if (firstFrameCheck) {
+                abandon();
+            }
             return;
         }
 
         if (!HallowHelper.canFill(sink, source, spiritType)) {
-            if (firstFrameCheck) abandon();
+            if (firstFrameCheck) {
+                abandon();
+            }
             return;
         }
 
@@ -131,7 +146,9 @@ public class SpiritTransfer extends DiagramProcess {
         }
 
         if (!(source.getFocusLevel() instanceof ServerLevel sl)) {
-            if (firstFrameCheck) abandon();
+            if (firstFrameCheck) {
+                abandon();
+            }
             return;
         }
 
@@ -153,6 +170,10 @@ public class SpiritTransfer extends DiagramProcess {
                     onTransfer = x -> binding.changeHealth(-x, sl);
                 } else {
                     transferAmount = Math.round(SpiritLabeler.getSpiritsFor(sourceItem.getItem()).get(spiritType) * coeff);
+                    if (transferAmount > effectiveCapacity && DiagramManager.shouldPreventWaste(source)) {
+                        abandon();
+                        return;
+                    }
                     transferAmount = Math.min(effectiveCapacity, transferAmount);
                     onTransfer = x -> {
                         source.removeItem();
@@ -175,7 +196,7 @@ public class SpiritTransfer extends DiagramProcess {
 
         spawnRatio = totalDuration * 1f / transferAmount;
 
-        var transferredAmount = sink.fillHallow(spiritType, transferAmount, false, firstFrameCheck);
+        var transferredAmount = sink.fillHallow(spiritType, transferAmount, DiagramManager.shouldPreventWaste(source), firstFrameCheck);
 
         if (transferredAmount < transferAmount) {
             if (sinkCanOverflow) {

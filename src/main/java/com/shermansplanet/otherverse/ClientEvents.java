@@ -25,6 +25,7 @@ import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.HashSet;
@@ -50,7 +51,13 @@ public class ClientEvents {
         }
         else if (event.getTabKey() == Otherverse.TAB_OTHERS.getKey()){
             var encounteredTypes = new HashSet<EntityType<?>>();
+            var denyList = new HashSet<String>();
+            denyList.add("reaching_hand");
+            denyList.add("big_reaching_hand");
+            denyList.add("whirlpool");
+            denyList.add("baal_whirlpool");
             for (var item : MobBindingInfluenceUtils.typesByIdol.entrySet()) {
+                if (denyList.contains(ForgeRegistries.ENTITY_TYPES.getKey(item.getValue()).getPath())) continue;
                 if (encounteredTypes.add(item.getValue())) {
                     event.accept(item.getKey());
                 }
