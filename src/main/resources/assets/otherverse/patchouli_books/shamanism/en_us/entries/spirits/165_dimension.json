@@ -1,0 +1,22 @@
+{
+    "name": "Dimension Shrines",
+    "sortnum": 165,
+    "icon": "otherverse:spirit_overworld",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:biome_brazier"
+            },
+            "text": "If you place a biome brazier in the range of a shrine to your current dimension (overworld/nether/end), you can light it with the prime material of your current dimension (salt/sulfur/quicksilver) and it will keep its chunk loaded."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:biome_brazier"
+            },
+            "text": "This costs 9 spirits from the shrine upon lighting and 9 more each sunrise.$(br2)For modded dimensions, use an overworld shrine and cinnabar."
+        }
+    ]
+}

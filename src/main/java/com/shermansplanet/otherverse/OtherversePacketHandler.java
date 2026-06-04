@@ -3,6 +3,8 @@ package com.shermansplanet.otherverse;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.binding.BindingUpdateMessage;
 import com.shermansplanet.otherverse.demesnes.*;
+import com.shermansplanet.otherverse.diagrams.ChalkCircle;
+import com.shermansplanet.otherverse.diagrams.ChalkCircleScreen;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.familiar.SummonFamiliarMessage;
 import com.shermansplanet.otherverse.implement.FetchImplementMessage;
@@ -161,6 +163,23 @@ public class OtherversePacketHandler {
                 SightToggleMessage::decode,
                 SightManager::onToggleServer
         );
+        OtherversePacketHandler.INSTANCE.registerMessage(
+                id++,
+                ChalkCircleScreen.SetInscriptionMessage.class,
+                ChalkCircleScreen.SetInscriptionMessage::encode,
+                ChalkCircleScreen.SetInscriptionMessage::decode,
+                OtherversePacketHandler::handleInscriptionUpdate
+        );
+    }
+
+    private static void handleInscriptionUpdate(ChalkCircleScreen.SetInscriptionMessage msg, Supplier<Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            var sender = ctx.get().getSender();
+            if (sender == null || !(sender.serverLevel().getBlockEntity(msg.pos()) instanceof ChalkCircle cc)) return;
+            cc.inscription = msg.inscription();
+            cc.markUpdated();
+        });
+        ctx.get().setPacketHandled(true);
     }
 
     private static void handleChronomancyMessage(Chronomancy.ChronomancyMessage msg, Supplier<Context> ctx) {

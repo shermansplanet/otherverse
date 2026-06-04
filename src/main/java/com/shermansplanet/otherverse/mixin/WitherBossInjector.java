@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.binding.BindingManager;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntityType;
@@ -36,7 +37,7 @@ public abstract class WitherBossInjector extends Monster implements PowerableMob
 
     @Inject(method = "customServerAiStep", at = @At("HEAD"), cancellable = true)
     protected void onAiStep(CallbackInfo ci) {
-        if (this.getPersistentData().hasUUID("bindingId")) {
+        if (BindingManager.isBoundOrContracted(this)) {
             if (this.getInvulnerableTicks() > 0) {
                 int k1 = this.getInvulnerableTicks() - 1;
                 this.bossEvent.setProgress(1.0F - (float) k1 / 220.0F);

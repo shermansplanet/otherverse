@@ -244,6 +244,10 @@ public class ContractManager {
             if (level.getBlockEntity(influencePos.getKey()) instanceof ChalkCircle sourceCircle) {
                 ItemStack stack = sourceCircle.getItem();
                 if (stack.isEmpty() || stack.is(Items.AIR) || stack.getItem() instanceof ChalkItem) {
+                    var inscription = sourceCircle.inscription.replace(" ", "");
+                    if (isValidInscription(inscription)) {
+                        tag.putString("inscription", inscription);
+                    }
                     continue;
                 }
                 if (stack.is(Items.GREEN_DYE) || stack.is(Items.YELLOW_DYE) || stack.is(Items.RED_DYE)) {
@@ -315,17 +319,6 @@ public class ContractManager {
                     if (hasSubFilter) {
                         continue;
                     }
-                } else if (sourceCircle.isNumber) {
-                    if (tag.contains("min")) continue;
-                    if (tag.contains("count")) {
-                        var count1 = tag.getInt("count");
-                        var count2 = stack.getCount();
-                        tag.putInt("min", Math.min(count1, count2));
-                        tag.putInt("max", Math.max(count1, count2));
-                    } else {
-                        tag.putInt("count", stack.getCount());
-                    }
-                    continue;
                 }
                 if (isCrafting) {
                     craftingItemPositions.add(new Pair<>(influencePos.getKey().subtract(influencePos.getValue()), stack));
@@ -408,6 +401,14 @@ public class ContractManager {
         return tag;
     }
 
+    private static boolean isValidInscription(String inscription) {
+        LOGGER.debug("CHECKING IF VALID: {}", inscription);
+        return inscription.matches("[0-9]+")
+                || inscription.matches("<[0-9]+")
+                || inscription.matches(">[0-9]+")
+                || inscription.matches("[0-9]+-[0-9]+");
+    }
+
     @SubscribeEvent
     public static void onTooltip(ItemTooltipEvent event) {
         if (!event.getItemStack().hasTag()) {
@@ -421,15 +422,6 @@ public class ContractManager {
         var range = contractTag.getInt("range");
         if (range > 8) event.getToolTip().add(Component.literal("Range: " + range + " blocks"));
         makeTooltipRecursive(event.getToolTip(), contractTag, "");
-    }
-
-    @SubscribeEvent
-    public static void onItem(PlayerInteractEvent.RightClickBlock event) {
-        if (!event.getEntity().isShiftKeyDown()) return;
-        if (!event.getItemStack().is(Tags.Items.SEEDS)) return;
-        if (!event.getLevel().getBlockState(event.getPos()).is(OtherverseBlocks.CHALK_LINE.get())) return;
-        event.setUseBlock(Event.Result.ALLOW);
-        event.setUseItem(Event.Result.DENY);
     }
 
     private static void makeTooltipRecursive(List<Component> toolTip, CompoundTag contractTag, String prefix) {
@@ -510,6 +502,10 @@ public class ContractManager {
             if (key.startsWith("position")) {
                 CompoundTag pos = contractTag.getCompound(key);
                 toolTip.add(Component.literal(prefix + prep).append(getPositionComponent(pos)));
+                continue;
+            }
+            if (key.equals("inscription")) {
+                toolTip.add(Component.literal(prefix + contractTag.getString(key)));
                 continue;
             }
             if (key.startsWith("task")) {

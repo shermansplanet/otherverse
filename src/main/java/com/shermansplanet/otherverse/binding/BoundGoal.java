@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.binding;
 import com.google.common.collect.ImmutableList;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
+import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
@@ -35,7 +36,6 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Shulker;
-import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.schedule.Activity;
@@ -43,6 +43,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -53,6 +54,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.lang.management.ManagementFactory;
 import java.util.*;
 
 public class BoundGoal extends Goal {
@@ -144,12 +146,16 @@ public class BoundGoal extends Goal {
             case 2 -> " is now staying put.";
             default -> throw new IllegalStateException("Unexpected value: " + currentMode);
         };
-        practitioner.displayClientMessage(name.append(Component.literal(s)), true);
+        getPractitioner();
+        if (practitioner != null) {
+            practitioner.displayClientMessage(name.append(Component.literal(s)), true);
+        }
     }
 
     public void tetherToPlayer(ServerPlayer player, boolean isPartOfSwarm) {
         practitioner = player;
         currentMode = 1;
+        mob.getPersistentData().putInt("familiar_mode", currentMode);
         this.isPartOfSwarm = isPartOfSwarm;
         this.isLoyaltyBound = true;
         if (player == null) cooldown = 60;
@@ -171,11 +177,11 @@ public class BoundGoal extends Goal {
     private ContractTask currentTask = null;
     private int lookIndex;
 
-    private IFocus GetFocus(BlockPos pos) {
-        if (mob.level().getBlockEntity(pos) instanceof ChalkCircle cc) {
+    private IFocus GetFocus(BlockPos pos, Level focusLevel) {
+        if (focusLevel.getBlockEntity(pos) instanceof ChalkCircle cc) {
             return cc;
         }
-        BlockFocus bf = DiagramManager.getOrCreateLevelData(mob.level()).allBlockFoci.get(pos);
+        BlockFocus bf = DiagramManager.getOrCreateLevelData(focusLevel).allBlockFoci.get(pos);
         if (bf != null) {
             return bf;
         }
@@ -183,6 +189,8 @@ public class BoundGoal extends Goal {
     }
 
     public void tick() {
+        if (!PracticeWorldManager.worldSetUp) return;
+        if (!(mob.level() instanceof ServerLevel)) return;
         if (FamiliarManager.isFamiliar(mob)) {
             if (FamiliarManager.fishingMobs.contains(mob.getType())) {
                 goFish();
@@ -205,9 +213,7 @@ public class BoundGoal extends Goal {
                         new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), BindingUpdateMessage.BindingType.UNBOUND, true));
             }
         }
-        if (mob.level() instanceof ServerLevel sl) {
-            mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
-        }
+        mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
         if (FamiliarManager.isFamiliar(mob) || isTamed || mob instanceof TamableAnimal ta && ta.isTame()) return;
         if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType())) {
             return;
@@ -216,15 +222,16 @@ public class BoundGoal extends Goal {
         if (mob.level().getGameTime() % (20L * bindingWearInterval) != 0) {
             return;
         }
-        var demesne = DemesnesManager.getData(binding.getLocalLevel(), binding.position);
+        var level = binding.getLocalLevel();
+        var demesne = DemesnesManager.getData(level, binding.position);
         if (demesne != null && demesne.getPerkLevel(DemesnesManager.DemesnePerk.CAGE) > 0) return;
         LOGGER.debug("BINDING WEAR");
-        if (!binding.getLocalLevel().isLoaded(binding.position)) {
-            LOGGER.info("BREAKING BINDING BECAUSE NOT LOADED");
+        if (!level.isLoaded(binding.position)) {
+            LOGGER.info("BREAKING BINDING BECAUSE {} : {} IS NOT LOADED", level.dimension(), binding.position);
             BindingManager.breakBinding(binding);
             return;
         }
-        BlockFocus bindingFocus = DiagramManager.getOrCreateLevelData(binding.getLocalLevel()).allBlockFoci.get(binding.position);
+        BlockFocus bindingFocus = DiagramManager.getOrCreateLevelData(level).allBlockFoci.get(binding.position);
 
         if (bindingFocus == null) {
             LOGGER.info("FOCUS NOT FOUND");
@@ -237,14 +244,16 @@ public class BoundGoal extends Goal {
         int SPIRIT_DRAIN = (int) Math.ceil(mob.getMaxHealth() / 10);
 
         for (var influence : bindingFocus.getDiagram().influences.entrySet()) {
+            LOGGER.debug("{} -> {}", influence.getKey(), influence.getValue());
             if (!influence.getValue().equals(bindingFocus.getPos())) {
                 continue;
             }
-            IFocus focus = GetFocus(influence.getKey());
+            IFocus focus = GetFocus(influence.getKey(), level);
             if (focus == null) {
                 continue;
             }
             ItemStack itemStack = focus.getItem();
+            LOGGER.debug("ITEM: {} ", itemStack);
             if (MobBindingInfluenceUtils.GetInfluence(mob, itemStack) * (binding.isPositive ? 1 : -1) >= 0) {
                 continue;
             }
@@ -256,7 +265,6 @@ public class BoundGoal extends Goal {
         }
 
         if (foci.isEmpty()) {
-            LOGGER.info("NO BINDING FOCI FOUND");
             BindingManager.breakBinding(binding);
             return;
         }
@@ -268,30 +276,30 @@ public class BoundGoal extends Goal {
             CompoundTag hallowTag = mostUniqueItem.getTag().getCompound("hallow");
             hallowTag.putInt("spirit_count", hallowTag.getInt("spirit_count") - SPIRIT_DRAIN);
             if (mostUniqueFocus.isBlock()) {
-                DiagramManager.getOrCreateLevelData(mob.level())
+                DiagramManager.getOrCreateLevelData(level)
                         .putPlacedItemTag(mostUniqueFocus.getPos(), hallowTag);
+            } else if (mostUniqueFocus instanceof ChalkCircle cc) {
+                cc.markUpdated();
             }
         } else if (mostUniqueItem.getItem() instanceof IdolItem) {
-            BindingInfo bindingInfo = DiagramManager.getOrCreateLevelData(mob.level()).bindingsByPosition.get(mostUniqueFocus.getPos());
+            BindingInfo bindingInfo = DiagramManager.getOrCreateLevelData(level).bindingsByPosition.get(mostUniqueFocus.getPos());
             if (bindingInfo == null || bindingInfo.mob == null) {
                 LOGGER.debug("NULL BINDING INFO");
             } else {
-                bindingInfo.mob.hurt(mob.level().damageSources().fellOutOfWorld(), SPIRIT_DRAIN);
+                bindingInfo.mob.hurt(level.damageSources().fellOutOfWorld(), SPIRIT_DRAIN);
             }
         } else {
-            mostUniqueFocus.removeItem();
+            mostUniqueFocus.drainItem();
         }
 
-        if (mob.level() instanceof ServerLevel sl) {
-            BlockPos bp = mostUniqueFocus.getPos();
-            for (int i = 0; i < 10; ++i) {
-                sl.sendParticles(ParticleTypes.POOF, bp.getX() + 0.5, bp.getY() + 0.25, bp.getZ() + 0.5,
-                        1, 0, 0, 0, 0.15);
-            }
-
-            LOGGER.debug("ACTIVATING DIAGRAM: BINDING WEAR");
-            DiagramManager.markDiagramActive(sl, bindingFocus.getDiagram());
+        BlockPos bp = mostUniqueFocus.getPos();
+        for (int i = 0; i < 10; ++i) {
+            level.sendParticles(ParticleTypes.POOF, bp.getX() + 0.5, bp.getY() + 0.25, bp.getZ() + 0.5,
+                    1, 0, 0, 0, 0.15);
         }
+
+        LOGGER.debug("ACTIVATING DIAGRAM: BINDING WEAR");
+        DiagramManager.markDiagramActive(level, bindingFocus.getDiagram());
     }
 
     private void subdueTarget(ItemStack held) {
@@ -334,11 +342,11 @@ public class BoundGoal extends Goal {
         var d2 = practitioner.position().subtract(mob.position()).normalize();
         var dot = d1.dot(d2);
         if (dot < 0) {
-            if(dot < -0.5f) {
+            if (dot < -0.5f) {
                 targetMob.push(diff.x, diff.y, diff.z);
                 targetMob.getNavigation().moveTo(mob, 1);
             }
-        }else{
+        } else {
             targetMob.push(diff.z, diff.y, -diff.x);
         }
     }
@@ -542,6 +550,7 @@ public class BoundGoal extends Goal {
 
     public void sendDebugMessage(Player entity) {
         var s = new StringBuilder();
+        
         if (currentTask == null) {
             s.append("no task");
         } else {
@@ -561,8 +570,8 @@ public class BoundGoal extends Goal {
                 return;
             }
         }
-        if (--nextTick > 0) return;
-        nextTick = mob.getRandom().nextInt(10) + 5;
+//        if (--nextTick > 0) return;
+//        nextTick = mob.getRandom().nextInt(10) + 5;
         currentTask.tick();
     }
 
@@ -731,6 +740,7 @@ public class BoundGoal extends Goal {
                     if (accessFrom != null) {
                         currentTask = task;
                         currentTask.targetPos = pos;
+                        currentTask.targetMovePos = accessFrom;
                         mob.getPersistentData().getCompound(REMEMBERED_BLOCKS).putIntArray(task.taskId,
                                 new int[]{pos.getX(), pos.getY(), pos.getZ()});
                         lookIndex = 0;
@@ -754,6 +764,7 @@ public class BoundGoal extends Goal {
 
         if (fromPlayerClick && currentMode != 0) {
             currentMode = 0;
+            mob.getPersistentData().putInt("familiar_mode", currentMode);
             displayFamiliarMode();
         }
     }

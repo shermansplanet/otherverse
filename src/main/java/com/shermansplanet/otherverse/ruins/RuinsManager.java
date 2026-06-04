@@ -238,7 +238,6 @@ public class RuinsManager {
         ServerLevel level = ((ServerLevel) event.getLevel()).getServer().getLevel(
                 event.getEntity().level().dimension() == Level.OVERWORLD ? ModDimensions.RUINS_KEY : Level.OVERWORLD);
         if (level == null) {
-            System.out.println("Ruins not found!");
             return;
         }
         event.setCanceled(true);

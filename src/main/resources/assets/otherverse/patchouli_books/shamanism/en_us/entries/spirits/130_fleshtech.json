@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "With technology or flesh shrines, you can make $(bold)golems$() and $(bold)homunculi$() respectively. If a bound mob (not an idol) is in a diagram influencing the shrine, the shrine will attempt to spend spirits equal to thrice the mob's max HP to create a copy of the bound mob, which will behave as if bound but will not require bindings."
+            "text": "With technology or flesh shrines, you can make $(bold)golems$() and $(bold)homunculi$() respectively. If a bound mob (not an idol) is in a diagram influencing the shrine, the shrine will attempt to spend spirits equal to thrice the mob's max HP to create a copy of the bound mob, which will behave as if bound but will not require bindings. Technology and flesh shrines will not drain spirits from mobs."
         },
         {
             "type": "patchouli:image",

@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.diagrams;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.binding.BindingInfo;
 import com.shermansplanet.otherverse.binding.BindingUpdateMessage;
@@ -16,7 +17,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.network.PacketDistributor;
@@ -33,9 +37,12 @@ public class TransientDiagramData {
     public HashSet<Diagram> diagramsToActivate = new HashSet<>();
     public HashMap<BlockPos, BindingInfo> bindingsByPosition = new HashMap<>();
     public HashMap<UUID, BindingInfo> bindingsById = new HashMap<>();
-    public HashMap<String, List<BlockPos>> selfPositions = new HashMap<>();
+    public HashMap<String, HashSet<BlockPos>> selfPositions = new HashMap<>();
     public SavedData savedData;
     public Level level = null;
+    private final HashSet<BlockPos> chunkloaders = new HashSet<>();
+    public HashSet<ChunkPos> loadedChunks = new HashSet<>();
+    private Collection<BindingUpdateMessage> cachedMessages = new ArrayList<>();
 
     private final HashMap<BlockPos, CompoundTag> placedItemTags = new HashMap<>();
     private final HashMap<String, BlockPos> sympathyPositions = new HashMap<>();
@@ -74,6 +81,9 @@ public class TransientDiagramData {
         for (var tag : sympathyPositions.entrySet()) {
             OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new SympathyUpdateMessage(tag.getKey(), tag.getValue(), levelId));
+        }
+        for(var cachedMessage : cachedMessages){
+            OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), cachedMessage);
         }
     }
 
@@ -175,7 +185,14 @@ public class TransientDiagramData {
 
     public void putSelf(Player player, BlockPos pos) {
         var key = player.getGameProfile().getName();
-        if (!selfPositions.containsKey(key)) selfPositions.put(key, new ArrayList<>());
+        if (!selfPositions.containsKey(key)) selfPositions.put(key, new HashSet<>());
+        selfPositions.get(key).add(pos);
+        if (savedData != null) savedData.setDirty();
+    }
+
+    public void putSpindle(ItemStack stack, BlockPos pos) {
+        var key = stack.getTag().getUUID("sympathy_target").toString();
+        if (!selfPositions.containsKey(key)) selfPositions.put(key, new HashSet<>());
         selfPositions.get(key).add(pos);
         if (savedData != null) savedData.setDirty();
     }
@@ -208,5 +225,40 @@ public class TransientDiagramData {
 
     public void setDirty() {
         if (savedData != null) savedData.setDirty();
+    }
+
+    public void addChunkloader(BlockPos blockPos) {
+        if (chunkloaders.add(blockPos)) {
+            refreshLoadedChunks();
+        }
+    }
+
+    private void refreshLoadedChunks() {
+        if (!(level instanceof ServerLevel sl)) return;
+        var oldChunks = loadedChunks;
+        loadedChunks = new HashSet<>();
+        for (var pos : chunkloaders) {
+            var chunkPos = Otherverse.chunkAt(pos);
+            if (loadedChunks.add(chunkPos) && !oldChunks.contains(chunkPos)) {
+                sl.setChunkForced(chunkPos.x, chunkPos.z, true);
+            }
+        }
+        for (var chunkPos : oldChunks) {
+            if (!loadedChunks.contains(chunkPos)) {
+                sl.setChunkForced(chunkPos.x, chunkPos.z, false);
+            }
+        }
+
+    }
+
+    public void removeChunkloader(BlockPos blockPos) {
+        if (chunkloaders.remove(blockPos) && level instanceof ServerLevel sl) {
+            refreshLoadedChunks();
+
+        }
+    }
+
+    public void cacheMessage(BindingUpdateMessage message) {
+        cachedMessages.add(message);
     }
 }

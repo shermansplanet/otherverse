@@ -11,12 +11,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.BowlFoodItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,22 +35,24 @@ import net.minecraftforge.common.extensions.IForgeBlockEntity;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IForgeBlockEntity {
+public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IForgeBlockEntity, MenuProvider {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public ItemStack item = ItemStack.EMPTY;
-    public boolean isNumber = false;
 
     public Diagram diagram = null;
     public BlockPos diagramPrimary = null;
     public double angleDegrees = 0;
+    public boolean overrideLock;
     private DiagramProcess activeProcess;
     public long animationTime = -1;
     public int cooldownTicks = 0;
     public String player = "";
+    public String inscription = "";
 
     LazyOptional<IItemHandler> inventoryHandlerLazyOptional = LazyOptional.of(() -> this);
 
@@ -84,6 +91,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     }
 
     public void markUpdated() {
+        if (!item.is(OtherverseItems.CHALK.get())) inscription = "";
         markUpdated(this.getBlockState());
     }
 
@@ -114,7 +122,9 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         if (player != null) {
             tag.putString("player", player);
         }
-        tag.putBoolean("IsNumber", isNumber);
+        if (inscription != null) {
+            tag.putString("inscription", inscription);
+        }
         tag.putLong("AnimTime", animationTime);
     }
 
@@ -142,6 +152,9 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         if (tag.contains("player")) {
             player = tag.getString("player");
         }
+        if (tag.contains("inscription")) {
+            inscription = tag.getString("inscription");
+        }
         if (tag.contains("Diagram")) {
             diagram = new Diagram(level);
             diagram.load(tag.getCompound("Diagram"));
@@ -150,7 +163,6 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
                 DiagramManager.diagramLoaded(diagram, level, true);
             }
         }
-        isNumber = tag.getBoolean("IsNumber");
     }
 
     @Override
@@ -178,14 +190,14 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
             diagramPrimary = null;
             diagram = null;
             player = "";
-            isNumber = false;
+            inscription = "";
         } else {
             load(tag);
         }
     }
 
     public boolean isEmpty() {
-        return item.getItem() instanceof ChalkItem;
+        return item.getItem() instanceof ChalkItem && inscription.isBlank();
     }
 
     @Override
@@ -228,8 +240,10 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     }
 
     private boolean isLocked() {
+        if (overrideLock) return false;
         var diagram = getDiagram();
-        return diagram == null || level == null || !diagram.processes.isEmpty() || !diagram.mobsOnCooldown.isEmpty()
+        return diagram == null || level == null || !diagram.processes.isEmpty()
+                || !diagram.mobsOnCooldown.isEmpty()
                 || DiagramManager.getOrCreateLevelData(level).diagramsToActivate.contains(diagram);
     }
 
@@ -278,9 +292,18 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
 
     @Override
     public void removeItem() {
-        if (item.hasCraftingRemainingItem()) {
+        removeItem(false);
+    }
+
+    @Override
+    public void drainItem() {
+        removeItem(true);
+    }
+
+    private void removeItem(boolean isDraining) {
+        if (isDraining && item.hasCraftingRemainingItem()) {
             item = item.getCraftingRemainingItem();
-        } else if (item.getItem() instanceof BowlFoodItem) {
+        } else if (isDraining && item.getItem() instanceof BowlFoodItem) {
             item = new ItemStack(Items.BOWL, 1);
         } else {
             item = new ItemStack(OtherverseItems.CHALK.get(), 1);
@@ -399,5 +422,15 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         if (player.isEmpty()) {
             player = p.getGameProfile().getName();
         }
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.literal("Chalk Circle");
+    }
+
+    @Override
+    public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+        return new ChalkCircleMenu(i, ContainerLevelAccess.create(level, getBlockPos()));
     }
 }

@@ -35,10 +35,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SympathyManager {
@@ -125,34 +122,52 @@ public class SympathyManager {
             var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
             if (binding == null || binding.getFocus() == null) return amount;
             amount = distributeHpChange(binding.getFocus(), (int) amount, damageSource);
-        } else if (entity instanceof ServerPlayer player) {
-            for (var level : sl.getServer().getAllLevels()) {
-                var data = DiagramManager.getOrCreateLevelData(level);
-                var key = player.getGameProfile().getName();
-                if (!data.selfPositions.containsKey(key)) return amount;
-                var toRemove = new ArrayList<BlockPos>();
-                var allPositions = data.selfPositions.get(key);
-                for (var pos : allPositions) {
-                    if (!(level.getBlockEntity(pos) instanceof ChalkCircle cc)
-                            || !cc.getItem().is(OtherverseItems.SELF.get())
-                            || !Objects.equals(cc.player, key)) {
-                        toRemove.add(pos);
-                        continue;
-                    }
-                    amount = distributeHpChange(cc, (int) amount, damageSource);
-                }
-                allPositions.removeAll(toRemove);
-                if (!toRemove.isEmpty()) data.setDirty();
-            }
         }
+
+        for (var cc : getSympatheticLinks(entity, sl)) {
+            amount = distributeHpChange(cc, (int) amount, damageSource);
+        }
+
         return amount;
+    }
+
+    public static List<ChalkCircle> getSympatheticLinks(LivingEntity entity, ServerLevel sl) {
+        var allCircles = new ArrayList<ChalkCircle>();
+        var key = getKeyFor(entity);
+        for (var level : sl.getServer().getAllLevels()) {
+            var data = DiagramManager.getOrCreateLevelData(level);
+            if (!data.selfPositions.containsKey(key)) continue;
+            var allPositions = data.selfPositions.get(key);
+            var validPositions = new HashSet<BlockPos>();
+            for (var pos : allPositions) {
+                if (!(level.getBlockEntity(pos) instanceof ChalkCircle cc)) continue;
+                if (entity instanceof Player) {
+                    if (!cc.getItem().is(OtherverseItems.SELF.get()) || !Objects.equals(cc.player, key)) continue;
+                } else {
+                    if (!cc.getItem().is(OtherverseItems.SPINDLE_BLOODY.get())
+                            || !Objects.equals(cc.getItem().getTag().getUUID("sympathy_target").toString(), key))
+                        continue;
+                }
+                validPositions.add(pos);
+                allCircles.add(cc);
+            }
+            data.selfPositions.put(key, validPositions);
+            data.setDirty();
+        }
+        return allCircles;
+    }
+
+    private static String getKeyFor(LivingEntity entity) {
+        return (entity instanceof Player player) ? player.getGameProfile().getName() : entity.getUUID().toString();
     }
 
     public static int distributeHpChange(IFocus focus, int delta, DamageSource damageSource) {
         if (Math.abs(delta) == 0) return delta;
-        var hallowPos = focus.getDiagram().influences.get(focus.getPos());
+        var diagram = focus.getDiagram();
+        if (diagram == null) return delta;
+        var hallowPos = diagram.influences.get(focus.getPos());
         if (hallowPos == null) return delta;
-        var spindlePos = focus.getDiagram().influences.get(hallowPos);
+        var spindlePos = diagram.influences.get(hallowPos);
         if (spindlePos == null) return delta;
         var level = focus.getFocusLevel();
         if (!(level instanceof ServerLevel sl)) return delta;

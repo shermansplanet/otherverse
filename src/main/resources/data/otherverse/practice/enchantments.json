@@ -4,11 +4,8 @@
 		"minecraft:aqua_affinity" : {
 			"health" : [13],
 			"required" : [
-				"minecraft:salmon",
-				"minecraft:cod",
 				"minecraft:tropical_fish"
-			],
-			"can_be_any" : true
+			]
 		},
 		"minecraft:blast_protection" : {
 			"health" : [9, 22, 40, 66],
@@ -128,13 +125,6 @@
 			"required" : [
 				"minecraft:skeleton",
 				"minecraft:zombie"
-			]
-		},
-		"minecraft:blast_protection" : {
-			"health" : [9, 22, 40, 66],
-			"required" : [
-				"minecraft:turtle",
-				"minecraft:skeleton"
 			]
 		},
 		"minecraft:punch" : {

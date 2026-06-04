@@ -216,7 +216,7 @@ public class Diagram {
             }
         }
         if (crystalCount < 8) return false;
-        focus.removeItem();
+        focus.drainItem();
         var e = EntityType.ENDER_DRAGON.create(level);
         e.setPos(focus.getCenter());
         level.addFreshEntityWithPassengers(e);

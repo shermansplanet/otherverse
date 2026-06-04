@@ -5,8 +5,10 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.Diagram;
+import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
@@ -31,8 +33,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.StructureTags;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
@@ -73,6 +79,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
     public MutableComponent[] labels = null;
     private String originalBiomeString = null;
     private Vec3 direction = Vec3.ZERO;
+    private static boolean wasDay = true;
 
     public BiomeBrazierBlockEntity(BlockPos pos, BlockState state) {
         super(Otherverse.BIOME_BRAZIER_ENTITY.get(), pos, state);
@@ -103,7 +110,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         var targetBiome = registry.getHolderOrThrow(key);
 
         activations++;
-        var radius = Math.min(activations, MAX_ACTIVATIONS);
+        var radius = Math.min(activations * 3, MAX_ACTIVATIONS);
         BoundingBox biomeConversionBox = new BoundingBox(this.getBlockPos().getX() - radius, this.getBlockPos().getY() - radius, this.getBlockPos().getZ() - radius,
                 this.getBlockPos().getX() + radius, this.getBlockPos().getY() + radius, this.getBlockPos().getZ() + radius);
 
@@ -116,6 +123,10 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         addIfNotNull(blockReplacements, getBlockStone(originalBiome), getBlockStone(targetBiome));
         addIfNotNull(blockReplacements, getBlockDirt(originalBiome), getBlockDirt(targetBiome));
         addIfNotNull(blockReplacements, getBlockSurface(originalBiome), getBlockSurface(targetBiome));
+        var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(targetBiome, level);
+        var biomeMod = biomeKeys.getNamespace();
+        var biomeName = biomeKeys.getPath();
+        var isPlaces = biomeMod.equals("places");
 
         var radiusSqr = radius * radius;
         var r = level.getRandom();
@@ -127,6 +138,9 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                     if (pos.distSqr(getBlockPos()) > radiusSqr || r.nextInt(3) > 0) continue;
                     var bs = level.getBlockState(pos);
                     var replacement = blockReplacements.get(bs.getBlock());
+                    if (isPlaces && (bs.is(BlockTags.PLANKS) || bs.is(BlockTags.LOGS))) {
+                        replacement = ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("places", "yellow_wallpaper_arrow_destructable"));
+                    }
                     if (replacement == null) continue;
                     level.setBlock(pos, replacement.defaultBlockState(), 2);
                 }
@@ -215,6 +229,8 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                         new BitSet(), new BitSet()));
             }
         }
+
+        level.playSound(null, getBlockPos(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 1, 1);
     }
 
     private void addIfNotNull(HashMap<Block, Block> blockReplacements, Block b1, Block b2) {
@@ -250,6 +266,8 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             if (biomeName.equals("mountain_maw"))
                 return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "petrified_rock"));
             return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "weak_stone"));
+        } else if (biomeMod.equals("places")) {
+            return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("places", "rot_fountain"));
         }
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
         if (biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BEACH)) return Blocks.SANDSTONE;
@@ -279,6 +297,8 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             if (biomeName.equals("mountain_maw"))
                 return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "dr_dirt"));
             return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "damp_dirt"));
+        } else if (biomeMod.equals("places")) {
+            return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("places", "woven_brown_carpet"));
         }
 
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
@@ -330,6 +350,8 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                 return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "lifeless_sand"));
             if (biomeName.equals("mountain_maw"))
                 return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("macabre", "tumor_dirt"));
+        } else if (biomeMod.equals("places")) {
+            return ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("places", "woven_brown_carpet"));
         }
 
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) return Blocks.WATER;
@@ -384,7 +406,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         labels = new MutableComponent[spiritCounts.size() + 1];
         var location = biomeTag.getString("location");
         labels[0] = Component.translatable("biome." + location.replace(":", "."))
-                .withStyle(Style.EMPTY.withUnderlined(true));
+                .withStyle(Style.EMPTY.withBold(true));
         var i = 1;
         for (var spiritCount : spiritCounts.entrySet()) {
             labels[i] = Component.literal(
@@ -399,9 +421,20 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         var r = level.getRandom();
         var isLit = state.getValue(BlockStateProperties.LIT);
         var isScrying = state.getValue(BiomeBrazierBlock.SCRY);
+        if (isLit && isScrying) {
+            DiagramManager.getOrCreateLevelData(sl).addChunkloader(pos);
+            boolean isNowDay = sl.getServer().overworld().isDay();
+            if (isNowDay == wasDay) return;
+            if (isNowDay && t instanceof BiomeBrazierBlockEntity brazier) {
+                brazier.refreshChunkloading(sl, null);
+            }
+            wasDay = isNowDay;
+            return;
+        }
         if (isLit || isScrying) {
             sl.sendParticles(new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
-                            isLit ? OtherverseItems.REALM_WRACKED_COAL.get().getDefaultInstance()
+                            isLit ? isScrying ? Items.LIME_DYE.getDefaultInstance()
+                                    : OtherverseItems.REALM_WRACKED_COAL.get().getDefaultInstance()
                                     : OtherverseItems.SCRYING_POWDER.get().getDefaultInstance()),
                     pos.getX() + r.nextFloat() * 0.8f + 0.1f,
                     pos.getY() + r.nextFloat() * 0.5f + 0.5f,
@@ -422,6 +455,43 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                     pos.getZ() + r.nextFloat() * 0.8f + 0.1f,
                     0, dir.x, dir.y, dir.z, 0.15f);
         }
+    }
+
+    private void refreshChunkloading(ServerLevel sl, ServerPlayer player) {
+        var shouldLoad = tryDrain(sl);
+        var chunkPos = Otherverse.chunkAt(getBlockPos());
+        sl.setChunkForced(chunkPos.x, chunkPos.z, shouldLoad);
+        if (shouldLoad) {
+            DiagramManager.getOrCreateLevelData(sl).addChunkloader(getBlockPos());
+        } else {
+            level.setBlockAndUpdate(getBlockPos(), OtherverseBlocks.BIOME_BRAZIER.get().defaultBlockState());
+            level.playSound(null, getBlockPos(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1, 1);
+            setChanged();
+            if (player != null)
+                player.displayClientMessage(Component.literal("No shrine nearby with enough spirits."), true);
+            DiagramManager.getOrCreateLevelData(sl).removeChunkloader(getBlockPos());
+        }
+    }
+
+    private boolean tryDrain(ServerLevel sl) {
+        var levelShrines = ShrineHelper.shrinesByChunk.get(sl);
+        if (levelShrines == null) return false;
+        var shrines = levelShrines.get(Otherverse.chunkAt(getBlockPos()));
+        if (shrines == null || shrines.isEmpty()) return false;
+        var name = sl.dimensionTypeId().location().getPath();
+        var spiritType = switch (name) {
+            case "overworld" -> Spirits.OVERWORLD;
+            case "the_nether" -> Spirits.NETHER;
+            case "the_end" -> Spirits.END;
+            default -> Spirits.OVERWORLD;
+        };
+        var levelData = DiagramManager.getOrCreateLevelData(sl);
+        for (var shrine : shrines) {
+            if (shrine.st != spiritType) continue;
+            if (!shrine.isInRange(null, getBlockPos())) continue;
+            return shrine.tryDrain(9);
+        }
+        return false;
     }
 
     @Override
@@ -573,5 +643,16 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                     pos.getZ() + r.nextFloat() * 3f - 1f,
                     0, 0, 0.2f, 0, 0.15f);
         }
+    }
+
+    public void fuelForChunkloading(Player player) {
+        level.setBlockAndUpdate(getBlockPos(), OtherverseBlocks.BIOME_BRAZIER.get().defaultBlockState().setValue(BiomeBrazierBlock.SCRY, true).setValue(BlockStateProperties.LIT, true));
+        level.playSound(null, getBlockPos(), SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 1, 1);
+        biomeTag = null;
+        resetSpiritCounts();
+        activations = 0;
+        setLabels();
+        if (level instanceof ServerLevel sl && player instanceof ServerPlayer sp) refreshChunkloading(sl, sp);
+        setChanged();
     }
 }

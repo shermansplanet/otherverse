@@ -24,7 +24,6 @@ public abstract class LevelChunkInjector extends ChunkAccess implements ISection
 
     @Override
     public void setSections(int minY, int maxY) {
-        System.out.println("SETTING SECTIONS: " + minY + " TO " + maxY);
         this.minY = minY;
         this.maxY = maxY;
         isSet = true;

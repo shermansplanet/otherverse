@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BoundGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
@@ -81,7 +82,7 @@ public class EnderDragonInjector extends Mob implements Enemy {
 
     @Inject(method = "aiStep", at = @At("HEAD"))
     public void onAiStep(CallbackInfo ci) {
-        if (!getPersistentData().hasUUID("bindingId")) return;
+        if (!BindingManager.isBoundOrContracted(this)) return;
         for (var goal : goalSelector.getAvailableGoals()) {
             if (goal.getGoal() instanceof BoundGoal bg) {
                 bg.tick();
@@ -92,7 +93,7 @@ public class EnderDragonInjector extends Mob implements Enemy {
 
     @Inject(method = "aiStep", at = @At("RETURN"))
     public void onAiStepEnd(CallbackInfo ci) {
-        if (!getPersistentData().hasUUID("bindingId")) return;
+        if (!BindingManager.isBoundOrContracted(this)) return;
         if (phaseManager.getCurrentPhase().getFlyTargetLocation() != null) return;
         setDeltaMovement(Vec3.ZERO);
     }

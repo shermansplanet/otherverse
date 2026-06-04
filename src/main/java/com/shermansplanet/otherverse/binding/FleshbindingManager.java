@@ -97,9 +97,9 @@ public class FleshbindingManager {
         if (circleWithPrime == null || circleWithDrop == null || circleWithMaterial == null ||
                 !diagram.trySpendPower(level, focus.getPos(), 1, new HashSet<>())) return false;
 
-        circleWithPrime.removeItem();
-        circleWithDrop.removeItem();
-        circleWithMaterial.removeItem();
+        circleWithPrime.drainItem();
+        circleWithDrop.drainItem();
+        circleWithMaterial.drainItem();
 
         fleshbindMob(mob, material, level);
         Otherverse.ADVANCEMENTS.trigger(diagram.getOwner(level), "fleshbind");
@@ -132,7 +132,7 @@ public class FleshbindingManager {
         if (targetBinding == null) return false;
         if (targetBinding.mob == null || targetBinding.mob.isRemoved()) return false;
         fleshbindMob(targetBinding.mob, "otherverse:cinnabar_block", level);
-        circle.removeItem();
+        circle.drainItem();
         return true;
     }
 

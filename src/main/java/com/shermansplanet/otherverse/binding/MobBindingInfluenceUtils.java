@@ -50,7 +50,8 @@ public class MobBindingInfluenceUtils {
     public final static PracticeWorldManager.WorldTraitComponent<HashMap<EntityType<? extends LivingEntity>, HashMap<ItemOrEntityType, Integer>>> GENERATED_BINDINGS = new PracticeWorldManager.WorldTraitComponent<>() {
     };
 
-    private static ServerLevel cachedLevel = null;
+    public static ServerLevel cachedLevel = null;
+    public static boolean serverMobInstancesAnalyzed = false;
 
     public final static PracticeWorldManager.WorldTrait<HashMap<EntityType<? extends LivingEntity>, HashMap<ItemOrEntityType, Integer>>> ALL_BINDING_INFLUENCES =
             new PracticeWorldManager.WorldTrait<>(new PracticeWorldManager.WorldTraitComponent[]{
@@ -60,6 +61,7 @@ public class MobBindingInfluenceUtils {
 
                 @Override
                 public boolean synthesize() {
+                    LOGGER.debug("BINDINGS FROM JSON: {}, GENERATED: {}", BINDINGS_FROM_JSON.data == null ? "NO" : "YES", GENERATED_BINDINGS.data == null ? "NO" : "YES");
                     for (var component : components) {
                         if (component.data == null) return false;
                     }
@@ -241,6 +243,9 @@ public class MobBindingInfluenceUtils {
             if (biomeName.equals("ruins_trust")) spiritTypes.add(0, Spirits.FOOD);
             if (biomeName.equals("ruins_vigil")) spiritTypes.add(0, Spirits.TECH);
             hasDimensionSpirit = true;
+        } else if (!biomeMod.equals("minecraft")) {
+            spiritTypes.add(Spirits.END);
+            hasDimensionSpirit = true;
         }
 
         if (biomeName.equals("visceral_heap")) spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
@@ -317,8 +322,10 @@ public class MobBindingInfluenceUtils {
             var foods = new HashMap<ItemOrEntityType, Integer>();
             var bindingInfluences = new HashMap<ItemOrEntityType, Integer>();
             for (var ee : entry.getValue().entrySet()) {
-                var target = ee.getValue() >= 0 ? bindingInfluences : foods;
-                target.put(ee.getKey(), Math.abs(ee.getValue()));
+                if (ee.getValue() < 0) {
+                    foods.put(ee.getKey(), Math.abs(ee.getValue()));
+                }
+                bindingInfluences.put(ee.getKey(), ee.getValue());
             }
             if (!foods.isEmpty()) allFoods.put(entry.getKey(), foods);
             if (!bindingInfluences.isEmpty()) allBindingInfluences.put(entry.getKey(), bindingInfluences);
@@ -452,7 +459,7 @@ public class MobBindingInfluenceUtils {
             }
             var mobSpiritType = mobSpirits.get(mob.getType());
             if (mobSpiritType == st) {
-                return hallowTag.getInt("spirit_count") / -2;
+                return -hallowTag.getInt("spirit_count");
             }
         }
         var ioe = new ItemOrEntityType(item.getItem());
@@ -467,7 +474,6 @@ public class MobBindingInfluenceUtils {
         int negativeInfluence = 0;
         for (ItemStack item : items) {
             var influence = GetInfluence(mob, item);
-            LOGGER.debug("INF:{}", influence);
             positiveInfluence += Math.max(0, -influence);
             negativeInfluence += Math.max(0, influence);
         }
@@ -480,11 +486,8 @@ public class MobBindingInfluenceUtils {
         var negativeInfluence = bothInfluence.getSecond();
         var level = focus.getFocusLevel();
 
-        HashMap<ItemOrEntityType, Integer> influenceMap = allBindingInfluences.get(mob.getType());
         var mobSpiritType = mobSpirits.get(mob.getType());
         if (mobSpiritType != null) {
-            LOGGER.debug(mobSpiritType.label());
-            LOGGER.debug(positiveInfluence.toString());
             for (var dx = -2; dx <= 2; dx++) {
                 for (var dy = -1; dy <= 1; dy++) {
                     for (var dz = -2; dz <= 2; dz++) {
@@ -493,12 +496,11 @@ public class MobBindingInfluenceUtils {
                         if (block == Blocks.WATER) item = Items.WATER_BUCKET;
                         else if (block == Blocks.LAVA) item = Items.LAVA_BUCKET;
                         var spiritsForItem = SpiritLabeler.getSpiritsFor(item);
-                        if (!spiritsForItem.containsKey(mobSpiritType)) continue;
+                        if (spiritsForItem == null || !spiritsForItem.containsKey(mobSpiritType)) continue;
                         positiveInfluence += spiritsForItem.get(mobSpiritType);
                     }
                 }
             }
-            LOGGER.debug(positiveInfluence.toString());
         }
 
         var implementData = ImplementManager.getImplementData(focus);
@@ -520,9 +522,7 @@ public class MobBindingInfluenceUtils {
         if (demesne != null) {
             demesneCoeff = (float) Math.pow(2f / 3f, demesne.getPerkLevel(DemesnesManager.DemesnePerk.BINDING));
         }
-
-        LOGGER.debug(totalInfluence.toString());
-        return new Pair<>(totalInfluence >= mob.getMaxHealth() * demesneCoeff * (hasChain ? 2 : 3) * (isPositive ? 3 : 1), isPositive);
+        return new Pair<>(totalInfluence >= ((int) (mob.getMaxHealth() * demesneCoeff)) * (hasChain ? 2 : 3) * (isPositive ? 3 : 1), isPositive);
     }
 
     public static List<BindingRecipe> GenerateRecipes() {
@@ -559,8 +559,6 @@ public class MobBindingInfluenceUtils {
         }
         return idolCache.get(entityType);
     }
-
-    private static boolean serverMobInstancesAnalyzed = false;
 
     public static void analyzeMobInstances(ServerLevel level) {
         if (serverMobInstancesAnalyzed) return;

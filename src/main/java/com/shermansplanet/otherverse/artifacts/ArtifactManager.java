@@ -196,6 +196,8 @@ public class ArtifactManager {
                 return List.of(Spirits.COLOR_BROWN, Spirits.COLOR_RED, Spirits.COLOR_WHITE);
             if (biomeName.equals("mountain_maw"))
                 return List.of(Spirits.COLOR_LIME, Spirits.COLOR_LIGHT_GRAY, Spirits.COLOR_WHITE);
+        } else if (biomeMod.equals("places")) {
+            return List.of(Spirits.COLOR_YELLOW, Spirits.COLOR_WHITE, Spirits.COLOR_LIGHT_GRAY);
         }
 
         if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER))
@@ -227,6 +229,20 @@ public class ArtifactManager {
     public static void onUse(PlayerInteractEvent.RightClickBlock event) {
         var be = event.getLevel().getBlockEntity(event.getPos());
         if (be instanceof BiomeBrazierBlockEntity brazier) {
+            if (event.getItemStack().is(Otherverse.primeForDimension(event.getLevel()))) {
+                if (!event.getEntity().isCreative()) {
+                    event.getItemStack().shrink(1);
+                    if (event.getItemStack().isEmpty())
+                        event.getEntity().getInventory().removeItem(event.getItemStack());
+                }
+                event.setUseItem(Event.Result.DENY);
+                event.setUseBlock(Event.Result.DENY);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                event.setCanceled(true);
+                brazier.fuelForChunkloading(event.getEntity());
+                return;
+            }
+
             if (event.getItemStack().is(OtherverseItems.SCRYING_POWDER.get())) {
                 if (!event.getEntity().isCreative()) {
                     event.getItemStack().shrink(1);
@@ -242,7 +258,9 @@ public class ArtifactManager {
             }
 
             if (!event.getItemStack().is(OtherverseItems.REALM_WRACKED_COAL.get())) return;
-            if (!event.getItemStack().hasTag() || !event.getItemStack().getTag().contains("wracked_biome")) return;
+            if (!event.getItemStack().hasTag()) return;
+            var tag = event.getItemStack().getTag();
+            if (!tag.contains("wracked_biome")) return;
             if (!event.getEntity().isCreative()) {
                 event.getItemStack().shrink(1);
                 if (event.getItemStack().isEmpty()) event.getEntity().getInventory().removeItem(event.getItemStack());
@@ -251,7 +269,7 @@ public class ArtifactManager {
             event.setUseBlock(Event.Result.DENY);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
-            brazier.fuel(event.getItemStack().getTag().getCompound("wracked_biome"));
+            brazier.fuel(tag.getCompound("wracked_biome"));
             return;
         }
 
@@ -359,8 +377,6 @@ public class ArtifactManager {
             var pos = brazier.getBlockPos();
             if (canActivate) {
                 brazier.activate(level);
-            } else {
-                level.playSound(null, pos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 1, 1);
             }
             brazier.fuelEffects();
             brazier.setLabels();

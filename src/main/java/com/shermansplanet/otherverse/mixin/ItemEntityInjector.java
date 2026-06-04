@@ -1,7 +1,10 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
 import com.shermansplanet.otherverse.spirits.Spirits;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -10,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,14 +36,22 @@ public abstract class ItemEntityInjector extends Entity {
         return null;
     }
 
+    @Shadow
+    public void setItem(ItemStack p_32046_) {
+    }
+
     @Inject(method = "setUnderwaterMovement", at = @At("RETURN"))
     private void onSetUnderwaterMovement(CallbackInfo ci) {
         //if (level.getGameTime() % 4 != 0) return;
+        var item = getItem();
+        if (item.is(OtherverseItems.SPINDLE_BLOODY.get())) {
+            setItem(new ItemStack(ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "spindle_white")), item.getCount()));
+            return;
+        }
 
         var throwingEntity = getOwner();
         if (!(throwingEntity instanceof ServerPlayer sp)) return;
 
-        var item = getItem();
         if (item.isEmpty() || !item.hasTag() || !item.getTag().contains("hallow")) return;
 
         var state = level().getBlockState(blockPosition());

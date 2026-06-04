@@ -70,17 +70,26 @@ public class BindingInfo {
     }
 
     public void register() {
-        DiagramManager.getOrCreateLevelData(dimensionHash, false).bindingsByPosition.put(position, this);
+        var localData = DiagramManager.getOrCreateLevelData(dimensionHash, false);
+        localData.bindingsByPosition.put(position, this);
 
         var data = DiagramManager.getOrCreateLevelData(overworldServer);
+        var priorBinding = data.bindingsById.get(bindingId);
+        if(priorBinding != null){
+            localData.bindingsByPosition.remove(priorBinding.position);
+        }
         data.bindingsById.put(bindingId, this);
         if (data.savedData != null) {
             data.savedData.setDirty();
         }
+        if (localData.savedData != null) {
+            localData.savedData.setDirty();
+        }
     }
 
     public void unload() {
-        DiagramManager.getOrCreateLevelData(dimensionHash, false).bindingsByPosition.remove(position);
+        var localData = DiagramManager.getOrCreateLevelData(dimensionHash, false);
+        localData.bindingsByPosition.remove(position);
 
         var data = DiagramManager.getOrCreateLevelData(overworldServer);
         if (mob != null && FamiliarManager.isFamiliar(mob)) {
@@ -89,6 +98,9 @@ public class BindingInfo {
         data.bindingsById.remove(bindingId);
         if (data.savedData != null) {
             data.savedData.setDirty();
+        }
+        if (localData.savedData != null) {
+            localData.savedData.setDirty();
         }
         if (mob != null) {
             mob.getPersistentData().remove("bindingId");

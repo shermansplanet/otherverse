@@ -176,7 +176,7 @@ public class SpiritTransfer extends DiagramProcess {
                     }
                     transferAmount = Math.min(effectiveCapacity, transferAmount);
                     onTransfer = x -> {
-                        source.removeItem();
+                        source.drainItem();
                         if (!sourceItem.is(Items.AIR)) {
                             BlockPos bp = source.getPos();
                             for (int i = 0; i < 6; i++) {

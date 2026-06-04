@@ -15,21 +15,29 @@ import com.shermansplanet.otherverse.spirits.SavedPracticeData;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent.LevelTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.VanillaGameEvent;
@@ -271,6 +279,13 @@ public class DiagramManager {
                 process.tick();
             }
         }
+        for (var chunkPos : levelData.loadedChunks) {
+            var chunk = sl.getChunk(chunkPos.x, chunkPos.z);
+            if (sl.players().stream().anyMatch(player ->
+                    player.distanceToSqr(new Vec3(chunkPos.getMinBlockX() + 8, player.position().y, chunkPos.getMinBlockZ() + 8)) < 128 * 128
+            )) continue;
+            sl.tickChunk(chunk, sl.getGameRules().getInt(GameRules.RULE_RANDOMTICKING));
+        }
         HashSet<Diagram> diagrams = levelData.diagramsToActivate;
         if (diagrams == null || diagrams.isEmpty()) {
             return;
@@ -289,6 +304,13 @@ public class DiagramManager {
                 diagrams.add(d);
             } else {
 //                LOGGER.debug("deactivating diagram");
+                var toRemove = new ArrayList<Mob>();
+                for (var mob : d.mobsOnCooldown) {
+                    if (mob.invulnerableTime <= 0) {
+                        toRemove.add(mob);
+                    }
+                }
+                toRemove.forEach(d.mobsOnCooldown::remove);
                 if (!d.processes.isEmpty()) {
 //                    LOGGER.debug("...but it still has processes");
                     continue;
@@ -322,13 +344,17 @@ public class DiagramManager {
 
     private static void BlockBreak(Level level, BlockPos pos) {
         TransientDiagramData diagramData = getOrCreateLevelData(level);
-        if(diagramData.getSympathyPosition(pos.toString()) != null){
+        if (diagramData.getSympathyPosition(pos.toString()) != null) {
             diagramData.putSympathyPosition(pos.toString(), null);
         }
         if (level instanceof ServerLevel sl) {
             blockChanged(pos, sl);
-            if (sl.getBlockState(pos).is(OtherverseBlocks.DEMESNE_BEACON.get())) {
+            var state = sl.getBlockState(pos);
+            if (state.is(OtherverseBlocks.DEMESNE_BEACON.get())) {
                 DemesnesManager.onBeaconBroken(sl, pos);
+            }
+            if (state.is(OtherverseBlocks.BIOME_BRAZIER.get())) {
+                diagramData.removeChunkloader(pos);
             }
             return;
         }
@@ -423,7 +449,7 @@ public class DiagramManager {
     @SubscribeEvent
     public static void entityUpdates(LivingEvent.LivingTickEvent event) {
         Level level = event.getEntity().level();
-        if (level.getGameTime() % 10 != 0 || !(level instanceof ServerLevel sl) || !(event.getEntity() instanceof Mob mob)) {
+        if (!(level instanceof ServerLevel sl) || !(event.getEntity() instanceof Mob mob)) {
             return;
         }
         CompoundTag entityData = event.getEntity().getPersistentData();
@@ -441,9 +467,11 @@ public class DiagramManager {
             }
             Diagram diagram = focus.getDiagram();
             if (diagram.mobsOnCooldown.contains(mob) && mob.invulnerableTime <= 0) {
-                diagram.mobsOnCooldown.remove(mob);
-                LOGGER.debug("ACTIVATING DIAGRAM: MOB COOLED DOWN");
-                DiagramManager.markDiagramActive(sl, diagram);
+                for (var otherDiagram : data.diagramsByPrimary.values()) {
+                    if (otherDiagram.mobsOnCooldown.remove(mob)) {
+                        DiagramManager.markDiagramActive(sl, otherDiagram);
+                    }
+                }
                 return;
             }
         }

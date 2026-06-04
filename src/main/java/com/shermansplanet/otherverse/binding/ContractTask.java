@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.binding;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
+import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.familiar.TreeStripper;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
@@ -11,14 +12,18 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -32,6 +37,8 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -42,13 +49,13 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 
@@ -58,11 +65,11 @@ public class ContractTask {
     private static final int COBWEB_DAMAGE = 3;
 
     private final Mob mob;
-    private int countMin = 0;
-    private int countMax = 64;
+    private int countMin = 1;
+    private int countMax = Integer.MAX_VALUE;
     public BlockPos targetPos, targetMovePos;
     public ContractManager.PositionOrSpindle spindle;
-    public ItemEntity targetItem;
+    public Entity targetItem;
     public LivingEntity targetMob;
     public BoundGoal boundGoal;
     public BoundGoal.ContractDecider onSuccess, onFailure, onEither;
@@ -75,7 +82,7 @@ public class ContractTask {
     public ArrayList<BlockPos> offsetBases = new ArrayList<>();
     private HashMap<Block, BlockstateMatch> blockstateFilters = new HashMap<>();
     private HashMap<Item, String> tagFilters = new HashMap<>();
-    private HashMap<ItemStack, Integer> usedIngredientsCache = new HashMap<>();
+    private HashMap<Pair<IItemHandler, Integer>, Integer> usedIngredientsCache = new HashMap<>();
     private boolean onlyHasInventoryBlockFilters = true;
     public boolean isTakingFromGround;
     private int blockDamage = -1;
@@ -142,13 +149,24 @@ public class ContractTask {
         if (tag.contains("either")) {
             onEither = boundGoal.makeDecider(tag.getCompound("either"));
         }
-        if (tag.contains("count")) {
-            if (tag.contains("min")) {
-                countMin = tag.getInt("min");
-                countMax = tag.getInt("max");
+        if (tag.contains("inscription")) {
+            var inscription = tag.getString("inscription");
+            if (inscription.contains("-")) {
+                var parts = inscription.split("-");
+                countMin = Integer.parseInt(parts[0]);
+                countMax = Integer.parseInt(parts[1]);
+            } else if (inscription.startsWith("<")) {
+                countMax = Integer.parseInt(inscription.substring(1)) - 1;
+                countMin = 0;
+            } else if (inscription.startsWith(">")) {
+                countMin = Integer.parseInt(inscription.substring(1)) + 1;
             } else {
-                countMin = tag.getInt("count");
-                countMax = tag.getInt("count");
+                var val = Integer.parseInt(inscription);
+                countMin = val;
+                countMax = val;
+            }
+            if (countMax < countMin) {
+                countMax = countMin;
             }
         }
         if (tag.contains("corner_0")) {
@@ -237,35 +255,50 @@ public class ContractTask {
         return true;
     }
 
-    public Pair<ItemEntity, BlockPos> getClosestReachableDroppedItem() {
-        ItemEntity closest = null;
+    public Pair<Entity, BlockPos> getClosestReachableDroppedItem() {
+        Entity closest = null;
         var lookDiameter = boundGoal.range * 2;
         BlockPos closestReachFrom = null;
         float closestDist = lookDiameter * 2;
         for (Entity e : mob.level().getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
-            if (e instanceof ItemEntity ie && isValidItem(ie.getItem())) {
-                if (!positionFilters.isEmpty() && !positionFilters.contains(ie.blockPosition())) {
+            if ((e instanceof ItemEntity ie && isValidTakeItem(ie.getItem()))
+                    || (mob.getType() == EntityType.PILLAGER && e instanceof AbstractArrow arrow && isValidTakeItem(getArrowItem(arrow)))) {
+                if (!matchesPositionFilter(e.blockPosition())) {
                     continue;
                 }
-                if (!BindingManager.getHeldItem(mob).isEmpty() && !BindingManager.getHeldItem(mob).is(ie.getItem().getItem()))
-                    continue;
-                var reachFrom = getAccessibleBlock(ie.blockPosition());
+                var reachFrom = getAccessibleBlock(e.blockPosition());
                 if (reachFrom == null) continue;
                 for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
                     Block block = mob.level().getBlockState(e.blockPosition().subtract(processOffset(offsetIndex))).getBlock();
                     if (!blockFilters.isEmpty() && !blockFilters.contains(block.asItem()) && !blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
                         continue;
                     }
-                    float dist = (float) ie.position().distanceTo(mob.position());
+                    float dist = (float) e.position().distanceTo(mob.position());
                     if (dist < closestDist) {
                         closestDist = dist;
                         closestReachFrom = reachFrom;
-                        closest = ie;
+                        closest = e;
                     }
                 }
             }
         }
         return new Pair<>(closest, closestReachFrom);
+    }
+
+    private ItemStack getArrowItem(AbstractArrow abstractArrow) {
+        if (abstractArrow instanceof Arrow arrow) {
+            return new ItemStack(Items.ARROW);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private boolean matchesPositionFilter(BlockPos blockPos) {
+        if (positionFilters.isEmpty()) return true;
+        for (var filter : positionFilters) {
+            var pos = filter.getPos(mob.level());
+            if (pos != null && pos.equals(blockPos)) return true;
+        }
+        return false;
     }
 
     private Vec3i processOffset(int offsetIndex) {
@@ -286,7 +319,7 @@ public class ContractTask {
                     continue;
                 }
                 if (!blockFilters.isEmpty() && !blockFilters.contains(Items.CHAIN)
-                        && e.getPersistentData().hasUUID("bindingId")) {
+                        && BindingManager.isBoundOrContracted(le)) {
                     continue;
                 }
                 if (!blockFilters.isEmpty()) {
@@ -418,6 +451,9 @@ public class ContractTask {
                 }
                 return tryPlaceBlock(pos, heldItem, false, false);
             case OBSERVE:
+                if (countMin <= 1 && itemFilters.contains(mob.level().getBlockState(pos).getBlock().asItem())) {
+                    return true;
+                }
             case TAKE:
                 BlockEntity takeTarget = mob.level().getBlockEntity(pos);
                 if (takeTarget == null) {
@@ -436,10 +472,22 @@ public class ContractTask {
                 var cap = takeTarget.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
                 if (cap.isPresent() && (validTakeBlockBelow || onlyHasInventoryBlockFilters)) {
                     var inventory = cap.get();
+                    var runningTotals = new HashMap<Item, Integer>();
+                    if (takeTarget instanceof ChalkCircle cc) {
+                        cc.overrideLock = true;
+                    }
                     for (int i = 0; i < inventory.getSlots(); i++) {
                         ItemStack stack = inventory.getStackInSlot(i);
-                        if (stack.isEmpty()) continue;
-                        if (isValidTakeItem(stack)) {
+                        if (stack.isEmpty() || !isValidTakeItem(stack)) continue;
+                        var key = stack.getItem();
+                        runningTotals.put(key, runningTotals.getOrDefault(key, 0) + stack.getCount());
+                    }
+                    if (takeTarget instanceof ChalkCircle cc) {
+                        cc.overrideLock = false;
+                    }
+                    for (var itemFilter : itemFilters) {
+                        var total = runningTotals.getOrDefault(itemFilter, 0);
+                        if (total >= countMin && (taskType == TaskType.TAKE || total <= countMax)) {
                             return true;
                         }
                     }
@@ -461,7 +509,7 @@ public class ContractTask {
 
     private boolean isValidTakeItem(ItemStack stack) {
         if (!isValidItem(stack)) return false;
-        if (stack.getCount() < countMin) return false;
+        if (taskType == TaskType.OBSERVE) return true;
         var held = BindingManager.getHeldItem(mob);
         if (held.isEmpty()) return true;
         return held.is(stack.getItem()) && Objects.equals(held.getTag(), stack.getTag());
@@ -490,37 +538,31 @@ public class ContractTask {
         ));
     }
 
-    private boolean findCraftingIngredient(Ingredient ingredient, BlockPos pos, HashMap<ItemStack, Integer> usedIngredients) {
+    private boolean findCraftingIngredient(Ingredient ingredient, BlockPos pos, HashMap<Pair<IItemHandler, Integer>, Integer> usedIngredients) {
         if (ingredient.isEmpty()) return true;
         for (var dir : Direction.values()) {
-            var checkTarget = mob.level().getBlockEntity(pos.relative(dir));
-            if (checkTarget instanceof IItemHandler inventory) {
-                for (int i = 0; i < inventory.getSlots(); i++) {
-                    ItemStack stack = inventory.getStackInSlot(i);
-                    if (!matchesIngredient(ingredient, stack, usedIngredients)) continue;
-                    return true;
-                }
-            } else if (checkTarget instanceof Container container) {
-                for (int i = 0; i < container.getContainerSize(); i++) {
-                    ItemStack stack = container.getItem(i);
-                    if (!matchesIngredient(ingredient, stack, usedIngredients)) continue;
-                    return true;
+            var be = mob.level().getBlockEntity(pos.relative(dir));
+            if (be != null) {
+                var cap = be.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
+                if (cap.isPresent()) {
+                    var inventory = cap.get();
+                    for (int i = 0; i < inventory.getSlots(); i++) {
+                        ItemStack stack = inventory.getStackInSlot(i);
+                        if (stack.isEmpty() || !ingredient.test(stack)) continue;
+                        var pair = new Pair<>(inventory, i);
+                        if (!usedIngredients.containsKey(pair)) {
+                            usedIngredients.put(pair, 1);
+                            return true;
+                        }
+                        var usedCount = usedIngredients.get(pair);
+                        if (usedCount >= stack.getCount()) continue;
+                        usedIngredients.put(pair, usedCount + 1);
+                        return true;
+                    }
                 }
             }
         }
         return false;
-    }
-
-    private boolean matchesIngredient(Ingredient ingredient, ItemStack stack, HashMap<ItemStack, Integer> usedIngredients) {
-        if (stack.isEmpty() || !ingredient.test(stack)) return false;
-        if (!usedIngredients.containsKey(stack)) {
-            usedIngredients.put(stack, 1);
-            return true;
-        }
-        var usedCount = usedIngredients.get(stack);
-        if (usedCount >= stack.getCount()) return false;
-        usedIngredients.put(stack, usedCount + 1);
-        return true;
     }
 
     public boolean isPossible() {
@@ -591,11 +633,11 @@ public class ContractTask {
         if (harvesting && !isValidBlock(mob.level().getBlockState(targetPos))) return fail();
 
         if (taskType == TaskType.TAKE) {
-            if (BindingManager.getHeldItem(mob).getCount() + countMin >= BindingManager.getHeldItem(mob).getMaxStackSize()) {
+            if (BindingManager.getHeldItem(mob).getCount() + countMin > BindingManager.getHeldItem(mob).getMaxStackSize()) {
                 return fail();
             }
             if (isTakingFromGround) {
-                if ((targetItem == null || targetItem.isRemoved() || targetItem.getItem().isEmpty())) {
+                if (targetItem == null || targetItem.isRemoved() || getPickupItemStack() == null || getPickupItemStack().isEmpty()) {
                     return fail();
                 }
                 targetPos = targetItem.blockPosition();
@@ -609,8 +651,15 @@ public class ContractTask {
             return fail();
         }
 
+        var isNotor = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType()).getPath().equals("notor");
+
         if (mob.blockPosition().equals(lastPos)) {
             ticksInSameBlock++;
+            if (ticksInSameBlock == 60) {
+                var r = mob.getRandom();
+                var scale = 1;
+                mob.push((r.nextDouble() - 0.5) * scale, r.nextDouble() * scale, (r.nextDouble() - 0.5) * scale);
+            }
             if (ticksInSameBlock > 100) return fail();
         } else {
             ticksInSameBlock = 0;
@@ -619,26 +668,27 @@ public class ContractTask {
 
 //        LOGGER.debug(mob.blockPosition() + " -> " + targetMovePos + " (" + targetPos + ")");
 
-        if (directPath == null && (mob.getNavigation().getPath() == null || mob.getNavigation().getTargetPos() != targetMovePos)) {
-            if (moveTo(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ())) {
+        if (!isAtTarget()) {
+            if (isNotor && !mob.level().getBlockState(mob.blockPosition()).isAir()) {
+                mob.push(0, 0.07, 0);
+            }
+            if (mob.getNavigation().getPath() == null || mob.getNavigation().getTargetPos() != targetMovePos) {
+                if (moveTo(targetMovePos.getX(), targetMovePos.getY() + (isNotor ? 1 : 0), targetMovePos.getZ())) {
+                    return false;
+                }
+            }
+            if (mob.getNavigation().isStuck()) {
+                return fail();
+            }
+            if (mob.getNavigation().getPath() == null || !mob.getNavigation().getPath().isDone()) {
                 return false;
             }
-        }
-        if (mob.getNavigation().isStuck()) {
-            return fail();
-        }
-        if (mob.getNavigation().getPath() == null || !mob.getNavigation().getPath().isDone()) {
+            var diff = targetMovePos.getCenter().subtract(0, 0.5f, 0).subtract(mob.position()).normalize();
+            var adjustedPos = targetMovePos.getCenter().add(diff.scale(ticksInSameBlock / 20f));
+            mob.getNavigation().moveTo(adjustedPos.x, adjustedPos.y + (isNotor ? 1 : 0), adjustedPos.z, 1);
             return false;
         }
-
-        if (directPath == null && !mob.blockPosition().equals(targetMovePos)) {
-            directPath = new Path(List.of(
-//                    new Node(mob.blockPosition().getX(), mob.blockPosition().getY(), mob.blockPosition().getZ()),
-                    new Node(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ())
-            ), targetMovePos, false);
-            mob.getNavigation().moveTo(directPath, 1);
-            return false;
-        }
+        mob.getNavigation().moveTo(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ(), 1);
 
         ticksInSameBlock = 0;
 
@@ -657,12 +707,18 @@ public class ContractTask {
                 if (be != null) {
                     var cap = be.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
                     if (cap.isPresent()) {
+                        if (be instanceof ChalkCircle cc) {
+                            cc.overrideLock = true;
+                        }
                         var inventory = cap.get();
                         for (int i = 0; i < inventory.getSlots(); i++) {
                             ItemStack stack = inventory.getStackInSlot(i);
                             if (stack.isEmpty() || !isValidTakeItem(stack)) continue;
                             transferredItems = inventory.extractItem(i, Math.min(maxTransferAmount, stack.getCount()), false);
                             if (!transferredItems.isEmpty()) break;
+                        }
+                        if (be instanceof ChalkCircle cc) {
+                            cc.overrideLock = false;
                         }
                     }
                 }
@@ -673,16 +729,21 @@ public class ContractTask {
                         BindingManager.getHeldItem(mob).getCount() + transferredItems.getCount()));
 
             } else {
-                int maxStack = targetItem.getItem().getMaxStackSize();
-                int transferAmount = Math.min(maxStack - BindingManager.getHeldItem(mob).getCount(), targetItem.getItem().getCount());
+                var item = getPickupItemStack();
+                int maxStack = item.getMaxStackSize();
+                int transferAmount = Math.min(maxStack - BindingManager.getHeldItem(mob).getCount(), item.getCount());
                 transferAmount = Math.min(transferAmount, countMax);
                 if (transferAmount < countMin) return fail();
-                Item itemType = targetItem.getItem().getItem();
-                var newItemStack = targetItem.getItem().copyWithCount(BindingManager.getHeldItem(mob).getCount() + transferAmount);
+                Item itemType = item.getItem();
+                var newItemStack = item.copyWithCount(BindingManager.getHeldItem(mob).getCount() + transferAmount);
                 BindingManager.setHeldItem(mob, newItemStack);
-                targetItem.setItem(
-                        new ItemStack(itemType, targetItem.getItem().getCount() - transferAmount));
-                if (targetItem.getItem().isEmpty()) {
+                if (targetItem instanceof ItemEntity ie) {
+                    ie.setItem(
+                            new ItemStack(itemType, ie.getItem().getCount() - transferAmount));
+                    if (ie.getItem().isEmpty()) {
+                        targetItem.discard();
+                    }
+                } else {
                     targetItem.discard();
                 }
             }
@@ -775,40 +836,65 @@ public class ContractTask {
             }
             return false;
         } else if (taskType == TaskType.CRAFT) {
+            if (doActionTicks == 0 && !isBlockAcceptableTarget(targetPos, false)) return fail();
             if (!mob.swinging) {
                 mob.swing(InteractionHand.MAIN_HAND);
             }
-            doActionTicks++;
-            if (doActionTicks < 60) return false;
-            for (var dir : Direction.values()) {
-                var be = mob.level().getBlockEntity(targetPos.relative(dir));
-                if (be instanceof IItemHandler inventory) {
-                    for (int i = 0; i < inventory.getSlots(); i++) {
-                        ItemStack stack = inventory.getStackInSlot(i);
-                        if (stack.isEmpty()) continue;
-                        var amount = usedIngredientsCache.get(stack);
-                        if (amount == null) continue;
-                        if (stack.hasCraftingRemainingItem()) {
-                            spawnAtTargetPos(stack.getCraftingRemainingItem());
-                        }
-                        inventory.extractItem(i, amount, false);
-                    }
-                } else if (be instanceof Container container) {
-                    for (int i = 0; i < container.getContainerSize(); i++) {
-                        ItemStack stack = container.getItem(i);
-                        if (stack.isEmpty()) continue;
-                        var amount = usedIngredientsCache.get(stack);
-                        if (amount == null) continue;
-                        if (stack.hasCraftingRemainingItem()) {
-                            spawnAtTargetPos(stack.getCraftingRemainingItem());
-                        }
-                        container.removeItem(i, amount);
-                    }
+            mob.lookAt(EntityAnchorArgument.Anchor.FEET, targetPos.getCenter());
+            var resultItem = recipe.getResultItem(mob.level().registryAccess());
+            if (mob.level() instanceof ServerLevel sl && doActionTicks % 10 == 0) {
+                sl.playSound(null, targetPos,
+                        doActionTicks == 40 ? SoundEvents.LANTERN_BREAK : SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1f, 1f);
+                var r = sl.random;
+                for (var i = 0; i < 8; i++) {
+                    sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, resultItem),
+                            targetPos.getX() + 0.5, targetPos.getY() + 1, targetPos.getZ() + 0.5,
+                            1, (r.nextFloat() - 0.5f) * 0.5f, r.nextFloat() * 0.5f, (r.nextFloat() - 0.5f) * 0.5f, 0.05);
                 }
             }
-            spawnAtTargetPos(recipe.getResultItem(mob.level().registryAccess()).copy());
+            doActionTicks++;
+            if (doActionTicks <= 40) return false;
+            if (!isBlockAcceptableTarget(targetPos, false)) return fail();
+            var craftAmount = resultItem.getMaxStackSize();
+            for (var ingredient : usedIngredientsCache.entrySet()) {
+                var amount = ingredient.getKey().getFirst().getStackInSlot(ingredient.getKey().getSecond()).getCount();
+                craftAmount = Math.min(craftAmount, amount / ingredient.getValue());
+                if (craftAmount == 0) return fail();
+            }
+            for (var ingredient : usedIngredientsCache.entrySet()) {
+                var amount = ingredient.getKey().getFirst().extractItem(ingredient.getKey().getSecond(), craftAmount * ingredient.getValue(), true).getCount();
+                if (amount / ingredient.getValue() != craftAmount) return fail();
+            }
+            for (var ingredient : usedIngredientsCache.entrySet()) {
+                ingredient.getKey().getFirst().extractItem(ingredient.getKey().getSecond(), craftAmount * ingredient.getValue(), false);
+            }
+            var held = BindingManager.getHeldItem(mob);
+            var stack = recipe.getResultItem(mob.level().registryAccess()).copyWithCount(craftAmount);
+            if (held.isEmpty() || (held.is(stack.getItem()) &&
+                    Objects.equals(held.getTag(), stack.getTag()) &&
+                    held.getCount() + stack.getCount() <= stack.getMaxStackSize())) {
+                BindingManager.setHeldItem(mob, stack);
+            } else {
+                spawnAtTargetPos(stack);
+            }
         }
         return succeed();
+    }
+
+    private ItemStack getPickupItemStack() {
+        return (targetItem instanceof AbstractArrow arrow ? getArrowItem(arrow) : ((ItemEntity) targetItem).getItem());
+    }
+
+    private boolean isAtTarget() {
+        var bb = mob.getBoundingBox();
+        for (var y = Mth.floor(bb.minY); y <= Mth.floor(bb.maxY); y++) {
+            for (var x = Mth.floor(bb.minX); x <= Mth.floor(bb.maxX); x++) {
+                for (var z = Mth.floor(bb.minZ); z <= Mth.floor(bb.maxZ); z++) {
+                    if (new BlockPos(x, y, z).equals(targetMovePos)) return true;
+                }
+            }
+        }
+        return false;
     }
 
     private BlockPos tryGetBranch(BlockPos startPos) {

@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.spirits;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.Diagram;
@@ -40,12 +41,13 @@ public class FleshTechManager {
     @SubscribeEvent
     public static void onTick(LivingEvent.LivingTickEvent event) {
         var le = event.getEntity();
-        if (le.level().isClientSide()) return;
+        if (!(le.level() instanceof ServerLevel sl)) return;
+        if (!PracticeWorldManager.worldSetUp || sl.getServer().getTickCount() < 30 * 20) return;
         if (le.level().getGameTime() % 20 != 0) return;
         var ct = le.getPersistentData().getString("construct_type");
         if (ct.isEmpty()) return;
-        if (!ShrineHelper.getShrinesFor(le, Spirits.spiritsByLabel.get(ct)).isEmpty()) return;
-        if (getClosestHeart(le) != null) return;
+        if (!ShrineHelper.getShrinesFor(le, Spirits.spiritsByLabel.get(ct), false).isEmpty()) return;
+        if (ct.equals("flesh") && getClosestHeart(le) != null) return;
         le.hurt(le.damageSources().magic(), 7);
     }
 
@@ -94,7 +96,6 @@ public class FleshTechManager {
         if (binding == null) return false;
         var mob = binding.mob;
         if (mob == null) return false;
-        var levelData = DiagramManager.getOrCreateLevelData(level);
 
         if (shrine.st == Spirits.TECH) {
             for (var blockPos : shrine.hallowPositions) {
@@ -104,7 +105,7 @@ public class FleshTechManager {
             }
         }
 
-        if (!shrine.tryDrain(Math.round(mob.getMaxHealth() * 3), levelData)) return false;
+        if (!shrine.tryDrain(Math.round(mob.getMaxHealth() * 3))) return false;
         var spawnPos = target;
         while (!level.getBlockState(spawnPos).getCollisionShape(level, spawnPos).isEmpty()) {
             spawnPos = spawnPos.above();
@@ -117,6 +118,9 @@ public class FleshTechManager {
         mobData.put("unbound_contract", binding.contract);
         tag.remove("UUID");
         tag.putInt("EggLayTime", 20 * 60 * 60 * 100);
+        if(diagram.getOwnerName() != null) {
+            mobData.putString("last_bound_by", diagram.getOwnerName());
+        }
 
 
         var e = (LivingEntity) binding.mob.getType().create(level, tag, null, spawnPos,
@@ -128,6 +132,7 @@ public class FleshTechManager {
                 spawnPos.getZ() + 0.4f + level.random.nextFloat() * 0.2f));
 
         level.addFreshEntityWithPassengers(e);
+        BindingManager.setHeldItem(e, ItemStack.EMPTY);
         if (shrine.st == Spirits.FLESH) {
             var attr = e.getAttribute(Attributes.ATTACK_DAMAGE);
             if (attr != null) attr.addPermanentModifier(

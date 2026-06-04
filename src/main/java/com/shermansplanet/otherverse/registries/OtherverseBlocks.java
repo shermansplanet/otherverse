@@ -16,6 +16,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -36,7 +38,8 @@ public class OtherverseBlocks {
                     BlockBehaviour.Properties.copy(Blocks.STONE).noCollission().instabreak()));
     public static final RegistryObject<Block> SALT_CRYSTALS = BLOCKS.register("salt_crystals",
             () -> new AmethystClusterBlock(7, 3,
-                    BlockBehaviour.Properties.copy(Blocks.AMETHYST_CLUSTER).sound(SoundType.AMETHYST_CLUSTER).strength(0.3F)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).forceSolidOn().noOcclusion()
+                            .sound(SoundType.AMETHYST_CLUSTER).lightLevel(x -> 0).strength(0.3F).pushReaction(PushReaction.DESTROY)));
     public static final RegistryObject<Block> SULFUR_ORE = BLOCKS.register("sulfur_ore",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.NETHER_QUARTZ_ORE)));
     /*public static final RegistryObject<Block> BEAST_SKULL = BLOCKS.register("beastskull",
@@ -46,7 +49,7 @@ public class OtherverseBlocks {
             () -> new SpawnAltarBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BARS)));
     public static final RegistryObject<Block> BIOME_BRAZIER = BLOCKS.register("biome_brazier",
             () -> new BiomeBrazierBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BARS).lightLevel(
-                    (p_50763_) -> (p_50763_.getValue(BlockStateProperties.LIT) || p_50763_.getValue(BiomeBrazierBlock.SCRY) ) ? 15 : 0)));
+                    (p_50763_) -> (p_50763_.getValue(BlockStateProperties.LIT) || p_50763_.getValue(BiomeBrazierBlock.SCRY)) ? 15 : 0)));
     public static final RegistryObject<Block> CINNABAR_BLOCK = BLOCKS.register("cinnabar_block",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.AMETHYST_BLOCK)));
     public static final RegistryObject<Block> DEMESNE_BEACON = BLOCKS.register("demesne_beacon",

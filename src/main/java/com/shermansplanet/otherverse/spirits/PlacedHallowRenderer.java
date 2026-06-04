@@ -1,6 +1,8 @@
 package com.shermansplanet.otherverse.spirits;
 
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -50,8 +52,16 @@ import java.util.function.Function;
 public class PlacedHallowRenderer {
     private static final Map<BlockState, HashMap<String, Pair<BakedModel, RenderType>>> modelByStateCache = Maps.newIdentityHashMap();
     private static final RenderStateShard.LightmapStateShard LIGHTMAP = new RenderStateShard.LightmapStateShard(true);
-    private static final RenderStateShard.ShaderStateShard RENDERTYPE_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeCutoutShader);
+    private static final RenderStateShard.ShaderStateShard RENDERTYPE_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeTranslucentShader);
     private static final Logger LOGGER = LogUtils.getLogger();
+    protected static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+    }, () -> {
+        RenderSystem.disableBlend();
+        RenderSystem.defaultBlendFunc();
+    });
+    protected static final RenderStateShard.OutputStateShard TRANSLUCENT_TARGET = new RenderStateShard.OutputStateShard("translucent_target", () -> {}, () -> {});
 
     private static final HashSet<ShrineHelper.Shrine> shrinesToRender = new HashSet<>();
 
@@ -79,10 +89,14 @@ public class PlacedHallowRenderer {
 
     @SubscribeEvent
     public static void renderTick(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) return;
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
-        renderHallows(player, event);
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            renderHallows(player, event);
+        }
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS && SightManager.shouldRenderSight()) {
+            renderShrineRanges(player, event);
+        }
     }
 
     @SubscribeEvent
@@ -90,17 +104,41 @@ public class PlacedHallowRenderer {
         shrinesToRender.clear();
     }
 
-    /*@SubscribeEvent
-    public static void tick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        var level = Minecraft.getInstance().level;
-        if (level == null || level.getGameTime() % 5 != 0) return;
-        if (SightManager.shouldRenderSight()) {
-            for (var shrine : shrinesToRender) {
-                ShrineHelper.recalculateShrine(shrine);
-            }
+    private static void renderShrineRanges(LocalPlayer player, RenderLevelStageEvent event) {
+        var dir1 = new Vec3(1, 0, 0);
+        var dir2 = new Vec3(0, 0, 1);
+        var rot = (event.getRenderTick() + event.getPartialTick()) * 0.003f;
+
+        var t = (player.level().getGameTime() + Minecraft.getInstance().getPartialTick()) / 20f;
+        var multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        var poseStack = event.getPoseStack();
+
+        var camera = event.getCamera();
+        poseStack.pushPose();
+        poseStack.translate(-camera.getPosition().x(), -camera.getPosition().y(), -camera.getPosition().z());
+
+        for (var shrine : shrinesToRender) {
+            var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
+            if (behavior == null) continue;
+            poseStack.pushPose();
+            var range = shrine.range;
+            var shape = behavior.getShape();
+            var cylinderTop = switch (shape) {
+                case BELOW -> range.bottom();
+                case ABOVE -> range.bottom() + range.height();
+                case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
+            };
+            poseStack.translate(range.center().x, cylinderTop, range.center().z);
+            var r = shrine.isCombined ? (int) ((Math.sin(t) + 1) * 128) : 255;
+            var g = shrine.isCombined ? (int) ((Math.sin(t + Math.PI * 2 / 3) + 1) * 128) : 255;
+            var b = shrine.isCombined ? (int) ((Math.sin(t + Math.PI * 4 / 3) + 1) * 128) : 255;
+            ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
+                    rot, r, g, b, 100, range.height());
+            poseStack.popPose();
         }
-    }*/
+        poseStack.popPose();
+        multiBufferSource.endBatch(RenderType.lineStrip());
+    }
 
     private static void renderHallows(LocalPlayer player, RenderLevelStageEvent event) {
         var levelData = DiagramManager.getOrCreateLevelData(player.level());
@@ -133,62 +171,6 @@ public class PlacedHallowRenderer {
             }
             shrinesToRender.add(shrine.parentShrine == null ? shrine : shrine.parentShrine);
         }
-
-        if (!renderShrineBounds) {
-            poseStack.popPose();
-            return;
-        }
-
-        var dir1 = new Vec3(1, 0, 0);
-        var dir2 = new Vec3(0, 0, 1);
-        var rot = (event.getRenderTick() + event.getPartialTick()) * 0.003f;
-
-        var t = (player.level().getGameTime() + Minecraft.getInstance().getPartialTick()) / 20f;
-
-        for (var shrine : shrinesToRender) {
-            var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
-            if (behavior == null) continue;
-            poseStack.pushPose();
-            var range = shrine.range;
-            var shape = behavior.getShape();
-            var cylinderTop = switch (shape) {
-                case BELOW -> range.bottom();
-                case ABOVE -> range.bottom() + range.height();
-                case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
-            };
-            poseStack.translate(range.center().x, cylinderTop, range.center().z);
-            var r = shrine.isCombined ? (int) ((Math.sin(t) + 1) * 128) : 255;
-            var g = shrine.isCombined ? (int) ((Math.sin(t + Math.PI * 2 / 3) + 1) * 128) : 255;
-            var b = shrine.isCombined ? (int) ((Math.sin(t + Math.PI * 4 / 3) + 1) * 128) : 255;
-            ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
-                    rot, r, g, b, 100, range.height());
-            poseStack.popPose();
-        }
-
-/*        var levelShrines = ShrineHelper.shrinesByChunk.computeIfAbsent(player.level, x -> new HashMap<>());
-
-        for (var chunkShrines : levelShrines.values()) {
-            for (var shrine : chunkShrines) {
-                if (shrinesToRender.contains(shrine)) continue;
-                var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
-                if (behavior == null) continue;
-                poseStack.pushPose();
-                var range = shrine.range;
-                var shape = behavior.getShape();
-                var cylinderTop = switch (shape) {
-                    case BELOW -> range.bottom();
-                    case ABOVE -> range.bottom() + range.height();
-                    case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
-                };
-                poseStack.translate(range.center().x, cylinderTop, range.center().z);
-                var r = 0;
-                var g = shrine.isCombined ? 50 : 255;
-                var b = shrine.isCombined ? 200 : 255;
-                ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
-                        rot, r, g, b, 100, range.height());
-                poseStack.popPose();
-            }
-        }*/
 
         poseStack.popPose();
     }
@@ -238,9 +220,7 @@ public class PlacedHallowRenderer {
 
         for (BlockModel blockModel : blockModels) {
             for (var s : blockModel.textureMap.keySet()) {
-                System.out.println(s);
                 Material material = blockModel.getMaterial(s);
-                System.out.println(material.texture());
                 if (MissingTextureAtlasSprite.getLocation().equals(material.texture())) continue;
                 var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
                         "textures/" + material.texture().getPath() + ".png");
@@ -250,13 +230,11 @@ public class PlacedHallowRenderer {
         }
 
         if (locations.isEmpty()) {
-            LOGGER.warn("Couldn't find texture for " + blockKey);
             return null;
         }
         var primaryTex = MobRetexturer.makeSpiritVariant(locations, spiritType);
 
         if (primaryTex == null) {
-            LOGGER.warn("Couldn't make texture for " + blockKey);
             return null;
         }
 
@@ -282,9 +260,18 @@ public class PlacedHallowRenderer {
             RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false,
                     RenderType.CompositeState.builder()
                             .setLightmapState(LIGHTMAP)
-                            .setShaderState(RENDERTYPE_CUTOUT_SHADER)
+                            .setShaderState(RENDERTYPE_SHADER)
                             .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
                             .createCompositeState(true));
+
+            var shader = RenderType.CompositeState.builder()
+                    .setLightmapState(LIGHTMAP)
+                    .setShaderState(RENDERTYPE_SHADER)
+                    .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setOutputState(TRANSLUCENT_TARGET)
+                    .createCompositeState(true);
+            rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, shader);
 
             var pair = Pair.of(m, rt);
             return pair;

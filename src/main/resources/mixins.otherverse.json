@@ -30,7 +30,8 @@
     "NearestAttackableTargetGoalInjector",
     "SensorInjector",
     "FlowingFluidInjector",
-    "BaseSpawnerInjector"
+    "BaseSpawnerInjector",
+    "MonsterInjector"
   ],
   "client":[
     "ModelBakeryInjector",

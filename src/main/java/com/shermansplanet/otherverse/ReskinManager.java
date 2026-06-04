@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -50,8 +51,8 @@ public class ReskinManager {
         }
     }
 
-    public static void reskinAsFamiliar(LivingEntity le, LocalPlayer player) {
-        //LOGGER.error("RESKINNING FROM FAMILIAR");
+    public static void reskinAsFamiliar(LivingEntity le, Player player) {
+        LOGGER.debug("RESKINNING FROM FAMILIAR");
         var mobRenderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(le);
         var texLoc = mobRenderer.getTextureLocation(le);
         sightSkins.put(player.getUUID(), List.of(texLoc));

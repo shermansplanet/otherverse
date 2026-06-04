@@ -68,15 +68,7 @@ public class ItemRendererInjector {
     };
 
     private static final RenderStateShard.OutputStateShard ITEM_ENTITY_TARGET = new RenderStateShard.OutputStateShard("item_entity_target", () -> {
-        if (Minecraft.useShaderTransparency()) {
-            Minecraft.getInstance().levelRenderer.getItemEntityTarget().bindWrite(false);
-        }
-
     }, () -> {
-        if (Minecraft.useShaderTransparency()) {
-            Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-        }
-
     });
     private static final RenderStateShard.ShaderStateShard RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeItemEntityTranslucentCullShader);
     private static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
@@ -243,10 +235,6 @@ public class ItemRendererInjector {
         var itemKey = ForgeRegistries.ITEMS.getKey(item);
         var modelLocation = new ModelResourceLocation(itemKey.getNamespace(), itemKey.getPath(), "inventory");
         var model = bakery.getModel(modelLocation);
-
-        System.out.println("GOT MODEL: " + modelLocation);
-        System.out.println("MODEL TYPE: " + model.getClass().getName());
-
         model.resolveParents(bakery::getModel);
         List<ResourceLocation> locations = new ArrayList<>();
         Set<BlockModel> blockModels = new HashSet<>();
@@ -254,9 +242,7 @@ public class ItemRendererInjector {
 
         for(BlockModel blockModel : blockModels) {
             for (var s : blockModel.textureMap.keySet()) {
-                System.out.println(s);
                 Material material = blockModel.getMaterial(s);
-                System.out.println(material.texture());
                 if (MissingTextureAtlasSprite.getLocation().equals(material.texture())) continue;
                 var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
                         "textures/" + material.texture().getPath() + ".png");
@@ -280,7 +266,7 @@ public class ItemRendererInjector {
         ClientEvents.HALLOW_TEXTURE_MANAGER.quietReload();
         BakedModel m = model.bake(DUMMY_BAKER, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex, x, new HashMap<>()), BlockModelRotation.X0_Y0, modelLocation);
 
-        RenderType.CompositeState compState = RenderType.CompositeState.builder()
+        var compState = RenderType.CompositeState.builder()
                 .setShaderState(RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER)
                 .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)

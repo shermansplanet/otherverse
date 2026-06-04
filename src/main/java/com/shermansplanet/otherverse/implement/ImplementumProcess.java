@@ -54,7 +54,7 @@ public class ImplementumProcess extends DiagramProcess {
         var newstack = source.getItem().copy();
         LOGGER.debug("adding " + newstack + " to " + player.getInventory().getFreeSlot());
         player.getInventory().add(newstack);
-        source.removeItem();
+        source.drainItem();
 
         var sourcePos = source.getPos();
         Vec3 center = new Vec3(sourcePos.getX() + 0.5,

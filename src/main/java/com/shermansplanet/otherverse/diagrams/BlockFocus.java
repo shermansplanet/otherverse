@@ -125,6 +125,11 @@ public class BlockFocus implements IFocus {
     }
 
     @Override
+    public void drainItem() {
+        removeItem();
+    }
+
+    @Override
     public boolean isBlock() {
         return true;
     }

@@ -36,9 +36,7 @@ import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -113,7 +111,7 @@ public class BindingManager {
         stack.shrink(1);
     }
 
-    private static boolean isBoundOrContracted(LivingEntity e) {
+    public static boolean isBoundOrContracted(LivingEntity e) {
         var data = e.getPersistentData();
         if (data.isEmpty()) return false;
         return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("unbound_contract") || FamiliarManager.isFamiliar(e);
@@ -139,12 +137,16 @@ public class BindingManager {
 
     @SubscribeEvent
     public static void onGrief(EntityMobGriefingEvent event) {
-        if (event.getEntity() != null && event.getEntity().getType() == EntityType.ENDERMAN && event.getEntity().getPersistentData().hasUUID("bindingId")) {
+        if (event.getEntity() != null && event.getEntity().getType() == EntityType.ENDERMAN && BindingManager.isBoundOrContracted((LivingEntity) event.getEntity())) {
             event.setResult(Event.Result.DENY);
         }
     }
 
     public static boolean tryBindMob(Mob mob, BlockFocus focus, Level level) {
+        return tryBindMob(mob, focus, level, false);
+    }
+
+    public static boolean tryBindMob(Mob mob, BlockFocus focus, Level level, boolean override) {
         boolean rebinding = false;
         var data = DiagramManager.getOrCreateLevelData(level);
         var bindingsByPosition = data.bindingsByPosition;
@@ -181,7 +183,7 @@ public class BindingManager {
         if (oldBinding != null && mob.getId() != oldBinding.mob.getId()) {
             return false;
         }
-        if (mob.getPersistentData().hasUUID("bindingId")) {
+        if (!override && mob.getPersistentData().hasUUID("bindingId")) {
             if (oldBinding != null && mob.equals(oldBinding.mob)) {
                 rebinding = true;
             } else {
@@ -286,6 +288,11 @@ public class BindingManager {
             if (mob.getPersistentData().contains("unbound_contract")) {
                 applyUnboundContract(mob, false);
             }
+            if (mob.getPersistentData().contains("construct_type")) {
+                var message = new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.CONTRACT, mob.getPersistentData(), BindingUpdateMessage.BindingType.UNBOUND, true);
+                OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), message);
+                DiagramManager.getOrCreateLevelData(sl).cacheMessage(message);
+            }
         } else {
             var id = event.getEntity().getId();
             var msg = OtherverseClientPacketHandler.waitingMessages.get(id);
@@ -319,13 +326,15 @@ public class BindingManager {
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent event) {
         if (event.getEntity() instanceof Mob mob && mob.level() instanceof ServerLevel sl) {
-            if (mob.getPersistentData().hasUUID("bindingId")) {
+            if (isBoundOrContracted(mob)) {
                 TransientDiagramData data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
-                data.bindingsById.get(mob.getPersistentData().getUUID("bindingId")).unload();
+                if (mob.getPersistentData().contains("bindingId")) {
+                    data.bindingsById.get(mob.getPersistentData().getUUID("bindingId")).unload();
+                }
 
-                if (!BindingManager.getHeldItem(mob).isEmpty()) {
+                if (!getHeldItem(mob).isEmpty()) {
                     Vec3 pos = mob.position();
-                    ItemEntity itementity = new ItemEntity(sl, pos.x, pos.y, pos.z, BindingManager.getHeldItem(mob));
+                    ItemEntity itementity = new ItemEntity(sl, pos.x, pos.y, pos.z, getHeldItem(mob));
                     itementity.setDefaultPickUpDelay();
                     sl.addFreshEntity(itementity);
                 }
@@ -335,7 +344,7 @@ public class BindingManager {
 
     @SubscribeEvent
     public static void onEnderTeleport(EnderEntity event) {
-        if (event.getEntityLiving().getPersistentData().hasUUID("bindingId")) {
+        if (BindingManager.isBoundOrContracted(event.getEntityLiving())) {
             event.setCanceled(true);
         }
     }
@@ -453,6 +462,11 @@ public class BindingManager {
             binding.unload();
             return;
         }
+        removeBindingFromMob(mob);
+        binding.unload();
+    }
+
+    public static void removeBindingFromMob(Mob mob) {
         Player closest = mob.level().getNearestPlayer(mob, 16);
         if (closest != null) {
             mob.setLastHurtByPlayer(closest);
@@ -469,6 +483,14 @@ public class BindingManager {
                 goal.getGoal().start();
             }
         }
+        var heldItem = getHeldItem(mob);
+        if (!heldItem.isEmpty() && !(heldItem.getItem() instanceof ProjectileWeaponItem)) {
+            Vec3 pos = mob.position();
+            ItemEntity itementity = new ItemEntity(mob.level(), pos.x, pos.y, pos.z, heldItem);
+            itementity.setDefaultPickUpDelay();
+            mob.level().addFreshEntity(itementity);
+            setHeldItem(mob, ItemStack.EMPTY);
+        }
         if (bg != null) {
             bg.stop();
             mob.goalSelector.removeGoal(bg);
@@ -476,7 +498,6 @@ public class BindingManager {
         LOGGER.debug("BINDING BROKEN");
         mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 200));
         mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 200));
-        binding.unload();
         if (mob.level() instanceof ServerLevel sl) {
             LOGGER.error("SENDING BROKEN BINDING PACKET");
             OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
@@ -527,8 +548,7 @@ public class BindingManager {
             return;
         }
 
-        if (!(target.getPersistentData().hasUUID("bindingId") || target.getPersistentData().contains("unbound_contract"))
-                || !(target instanceof Mob mob)) return;
+        if (!(target instanceof Mob mob) || BindingManager.isBoundOrContracted(mob)) return;
 
         if (event.getItemStack().is(OtherverseItems.CHALK.get())) {
             for (var goal : mob.goalSelector.getAvailableGoals()) {

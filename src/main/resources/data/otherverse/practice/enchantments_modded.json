@@ -1,0 +1,336 @@
+{
+  "practice": "enchantment",
+  "mob_transfusion": {
+    "alexscaves:double_stab": {
+      "health": [6],
+      "required": [
+        "alexscaves:gloomoth"
+      ]
+    },
+    "alexscaves:precise_volley": {
+      "health": [13],
+      "required": [
+        "alexscaves:underzealot"
+      ]
+    },
+    "alexscaves:dark_nock": {
+      "health": [7, 14, 28],
+      "required": [
+        "alexscaves:corrodent"
+      ]
+    },
+    "alexscaves:twilight_perfection": {
+      "health": [7, 14, 28],
+      "required": [
+        "alexscaves:vesper"
+      ]
+    },
+    "alexscaves:shaded_respite": {
+      "health": [36],
+      "required": [
+        "alexscaves:gloomoth"
+      ]
+    },
+    "alexscaves:detonating_death": {
+      "health": [12],
+      "required": [
+        "alexscaves:watcher",
+        "minecraft:creeper"
+      ]
+    },
+    "alexscaves:rapid_possession": {
+      "health": [7, 29, 33],
+      "required": [
+        "alexscaves:watcher",
+        "minecraft:rabbit"
+      ]
+    },
+    "alexscaves:sightless": {
+      "health": [13],
+      "required": [
+        "alexscaves:watcher",
+        "minecraft:bat"
+      ]
+    },
+    "alexscaves:astral_transferring": {
+      "health": [13],
+      "required": [
+        "alexscaves:watcher",
+        "minecraft:enderman"
+      ]
+    },
+    "alexscaves:flinging": {
+      "health": [6, 12, 24],
+      "required": [
+        "minecraft:lanternfish",
+        "mineraft:goat"
+      ]
+    },
+    "alexscaves:second_wave": {
+      "health": [14],
+      "required": [
+        "alexscaves:tripodfish"
+      ]
+    },
+    "alexscaves:sea_swing": {
+      "health": [9],
+      "required": [
+        "alexscaves:gossamer_worm"
+      ]
+    },
+    "alexscaves:gamma_ray": {
+      "health": [26],
+      "required": [
+        "alexscaves:gammaroach"
+      ]
+    },
+    "alexscaves:x_ray": {
+      "health": [23],
+      "required": [
+        "alexscaves:raycat"
+      ]
+    },
+    "alexscaves:energy_efficiency": {
+      "health": [7, 14, 28],
+      "required": [
+        "alexscaves:radgill"
+      ]
+    },
+    "alexscaves:seekcandy": {
+      "health": ["15"],
+      "required": [
+        "alexscaves:licowitch",
+        "alexscaves:candicorn"
+      ]
+    },
+    "alexscaves:spell_lasting": {
+      "health": ["9", "15", "21"],
+      "required": [
+        "alexscaves:licowitch",
+        "alexscaves:caramel_cube"
+      ]
+    },
+    "alexscaves:peppermint_punting": {
+      "health": ["9"],
+      "required": [
+        "alexscaves:licowitch",
+        "alexscaves:gumbeeper"
+      ]
+    },
+    "alexscaves:multiple_mint": {
+      "health": ["11", "33"],
+      "required": [
+        "alexscaves:licowitch",
+        "alexscaves:caniac"
+      ]
+    },
+    "alexscaves:humungous_hex": {
+      "health": ["11", "33"],
+      "required": [
+        "alexscaves:licowitch",
+        "alexscaves:gummy_bear"
+      ]
+    },
+    "alexscaves:humungous_hex": {
+      "health": ["11", "33"],
+      "required": [
+        "alexscaves:licowitch",
+        "alexscaves:gummy_bear"
+      ]
+    },
+    "alexscaves:explosive_flavor": {
+      "health": ["33"],
+      "required": [
+        "alexscaves:gumbeeper",
+        "minecraft:creeper"
+      ]
+    },
+    "alexscaves:targeted_riccochet": {
+      "health": ["33"],
+      "required": [
+        "alexscaves:gumbeeper",
+        "alexscaves:candicorn"
+      ]
+    },
+    "alexscaves:bouncy_ball": {
+      "health": ["9","15","21"],
+      "required": [
+        "alexscaves:gumbeeper",
+        "alexscaves:gummy_bear"
+      ]
+    },
+    "alexscaves:triple_split": {
+      "health": ["33"],
+      "required": [
+        "alexscaves:gumbeeper",
+        "alexscaves:caramel_cube"
+      ]
+    },
+    "alexscaves:far_flung": {
+      "health": ["15", "33", "66"],
+      "required": [
+        "alexscaves:caniac",
+        "alexscaves:candicorn"
+      ]
+    },
+    "alexscaves:sharp_cane": {
+      "health": ["15", "33"],
+      "required": [
+        "alexscaves:caniac",
+        "minecraft:skeleton"
+      ]
+    },
+    "alexscaves:straight_hook": {
+      "health": ["33"],
+      "required": [
+        "alexscaves:caniac",
+        "alexscaves:bee"
+      ]
+    },
+    "alexscaves:plummeting_flight": {
+      "health": ["11","19","27"],
+      "required": [
+        "alexscaves:subterranodon"
+      ]
+    },
+    "alexscaves:herd_phalanx": {
+      "health": ["11","19","27"],
+      "required": [
+        "alexscaves:grottoceratops"
+      ]
+    },
+    "alexscaves:chomping_spirit": {
+      "health": ["19","27"],
+      "required": [
+        "alexscaves:tremorsaurus"
+      ]
+    },
+    "alexscaves:swiftwood": {
+      "health": ["11","19","27"],
+      "required": [
+        "alexscaves:vallumraptor"
+      ]
+    },
+    "alexscaves:bonking": {
+      "health": ["33"],
+      "required": [
+        "alexscaves:relicheirus"
+      ]
+    },
+    "alexscaves:dazing_sweep": {
+      "health": ["11","33"],
+      "required": [
+        "alexscaves:golden_frog",
+        "alexscaves:trilocaris"
+      ]
+    },
+    "alexscaves:field_extension": {
+      "health": ["4","8","16","32"],
+      "required": [
+        "alexscaves:notor"
+      ]
+    },
+    "alexscaves:crystallization": {
+      "health": ["22"],
+      "required": [
+        "alexscaves:teletor"
+      ]
+    },
+    "alexscaves:ferrous_haste": {
+      "health": ["22"],
+      "required": [
+        "alexscaves:ferrouslime"
+      ]
+    },
+    "alexscaves:arrow_inducting": {
+      "health": ["22"],
+      "required": [
+        "alexscaves:magnetron"
+      ]
+    },
+    "alexscaves:heavy_slam": {
+      "health": ["11","19","27"],
+      "required": [
+        "alexscaves:boundroid"
+      ]
+    },
+    "alexscaves:charting_call": {
+      "health": ["33","55","62","66"],
+      "required": [
+        "alexscaves:deep_one_knight",
+        "minecraft:cod"
+      ]
+    },
+    "alexscaves:lasting_morale": {
+      "health": ["55","62","66"],
+      "required": [
+        "alexscaves:deep_one_knight",
+        "minecraft:salmon"
+      ]
+    },
+    "alexscaves:taxing_bellow": {
+      "health": ["55"],
+      "required": [
+        "alexscaves:deep_one_knight",
+        "alexscaves:sea_pig"
+      ]
+    },
+    "alexscaves:enveloping_bubble": {
+      "health": ["66"],
+      "required": [
+        "alexscaves:deep_one_mage",
+        "minecraft:turtle"
+      ]
+    },
+    "alexscaves:bouncing_bolt": {
+      "health": ["66"],
+      "required": [
+        "alexscaves:deep_one_mage",
+        "minecraft:salmon"
+      ]
+    },
+    "alexscaves:soak_seeking": {
+      "health": ["66","82","88"],
+      "required": [
+        "alexscaves:deep_one_mage",
+        "minecraft:cod"
+      ]
+    },
+    "alexscaves:triple_splash": {
+      "health": ["66"],
+      "required": [
+        "alexscaves:deep_one_mage",
+        "minecraft:drowned"
+      ]
+    },
+    "alexscaves:seapairng": {
+      "health": ["66"],
+      "required": [
+        "alexscaves:deep_one_mage",
+        "minecraft:axolotl"
+      ]
+    }
+  },
+  "spirit_transfusion": {
+    "alexscaves:impending_stab": {
+      "spirit": "time",
+      "price": [11, 22, 44]
+    },
+    "alexscaves:sated_blade": {
+      "spirit": "food",
+      "price": [18, 36]
+    },
+    "alexscaves:tsunami": {
+      "spirit": "water",
+      "price": [101]
+    },
+    "alexscaves:solar": {
+      "spirit": "light",
+      "price": [33]
+    },
+    "alexscaves:relentless_darkness": {
+      "spirit": "dark",
+      "price": [101]
+    }
+  }
+}

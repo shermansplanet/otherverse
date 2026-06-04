@@ -39,26 +39,21 @@ public abstract class ContainerInjector {
     @Inject(method = "doClick", at = @At("HEAD"), cancellable = true)
     private void doClick(int slotIndex, int p_150432_, ClickType clickType, Player player, CallbackInfo ci) {
         if (Minecraft.getInstance().player == null) {
-            System.out.println("NO PLAYER");
             return;
         }
         if (slotIndex < 0 || slotIndex >= this.slots.size()) {
-            System.out.println("NOT MY SLOT");
             return;
         }
         Slot slot = this.slots.get(slotIndex);
         ItemStack stack = slot.getItem();
         if (!ImplementManager.isImplement(carried) && !ImplementManager.isImplement(stack)) {
-            System.out.println("NOT IMPLEMENT");
             return;
         }
         if (Minecraft.getInstance().player.inventoryMenu.containerId == containerId) {
             if (slotIndex > 4) {
-                System.out.println("IS PLAYER INVENTORY");
                 return;
             }
         }
-        System.out.println("CANCELING INTERACTION");
         ci.cancel();
     }
 }

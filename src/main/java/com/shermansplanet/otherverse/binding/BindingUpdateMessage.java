@@ -26,7 +26,7 @@ public class BindingUpdateMessage {
         this.mobId = mob.getId();
         this.updateType = updateType;
         this.levelValue = DiagramManager.getDimensionHash(mob.level());
-        this.data = new CompoundTag();
+        this.data = mob.getPersistentData();
         this.silent = silent;
         this.type = bindingType;
     }

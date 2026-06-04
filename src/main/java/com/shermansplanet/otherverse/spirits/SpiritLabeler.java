@@ -302,8 +302,13 @@ public class SpiritLabeler {
                     spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 13));
                 }
 
-                if (item.toString().contains("copper")) {
-                    spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18));
+                var itemName = item.toString();
+                var time = itemName.contains("oxidized") ? 9
+                        : itemName.contains("weathered") ? 6
+                          : itemName.contains("exposed") ? 3 : 0;
+                if (time > 0) spiritAmounts.add(new SpiritAmount(Spirits.TIME, time));
+                if (itemName.contains("copper")) {
+                    if (time < 9) spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18 - time * 2));
                     spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
                 }
             }
@@ -334,6 +339,21 @@ public class SpiritLabeler {
                     if (products.contains(input.getItem())) {
                         doubleSmeltItems.add(recipe.getResultItem(sl.registryAccess()).getItem());
                     }
+                }
+            }
+        }
+        for (var item : ForgeRegistries.ITEMS.getKeys()) {
+            var name = item.getPath();
+            var precursor = name
+                    .replace("exposed_", "")
+                    .replace("weathered_", "exposed_")
+                    .replace("oxidized", "weathered_");
+            if (precursor.equals(name)) continue;
+            var newKey = ResourceLocation.fromNamespaceAndPath(item.getNamespace(), precursor);
+            if (ForgeRegistries.ITEMS.containsKey(newKey)) {
+                var preItem = ForgeRegistries.ITEMS.getValue(newKey);
+                if (ForgeRegistries.ITEMS.getValue(item) instanceof BlockItem bi) {
+                    SpiritTransfusions.register(preItem, Spirits.TIME, 3, bi.getBlock());
                 }
             }
         }

@@ -8,6 +8,7 @@ import com.shermansplanet.otherverse.binding.LootHelper;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.demesnes.*;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
+import com.shermansplanet.otherverse.diagrams.ChalkCircleMenu;
 import com.shermansplanet.otherverse.diagrams.ChalkCircleRenderer;
 import com.shermansplanet.otherverse.echoes.EchoEntity;
 import com.shermansplanet.otherverse.echoes.EchoRenderer;
@@ -165,6 +166,9 @@ public class Otherverse {
     public static final RegistryObject<MenuType<DemesnesMenu>> DEMESNES_MENU =
             MENU_TYPES.register("demesnes_menu",
                     () -> IForgeMenuType.create(DemesnesMenu::new));
+    public static final RegistryObject<MenuType<ChalkCircleMenu>> CHALK_CIRCLE_MENU =
+            MENU_TYPES.register("chalk_circle_menu",
+                    () -> IForgeMenuType.create(ChalkCircleMenu::new));
 
     public Otherverse(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();

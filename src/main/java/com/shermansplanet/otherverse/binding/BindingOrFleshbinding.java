@@ -50,7 +50,7 @@ public class BindingOrFleshbinding {
         this.circle = circle;
         if (item.is(OtherverseItems.SPINDLE_BLOODY.get())) {
             var binding = getFromSpindle(circle);
-            if (binding != null) {
+            if (binding != null && binding.mob != null) {
                 initFromBindingInfo(binding);
             }
             return;
@@ -144,6 +144,9 @@ public class BindingOrFleshbinding {
                 bindingInfo.mob.invulnerableTime = MobTransfusions.MOB_DRAIN_COOLDOWN;
                 if (circle != null && circle.getDiagram() != null) {
                     circle.getDiagram().mobsOnCooldown.add(bindingInfo.mob);
+                    if (bindingInfo.getFocus() != null && bindingInfo.getFocus().getDiagram() != null) {
+                        bindingInfo.getFocus().getDiagram().mobsOnCooldown.add(bindingInfo.mob);
+                    }
                 }
             } else {
                 bindingInfo.mob.heal(delta);

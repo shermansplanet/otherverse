@@ -15,6 +15,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class SavedPracticeData extends SavedData {
 
@@ -87,7 +88,7 @@ public class SavedPracticeData extends SavedData {
             CompoundTag positions = tag.getCompound("selfPositions");
             for (String key : positions.getAllKeys()) {
                 var ints = positions.getIntArray(key);
-                var positionsForPlayer = new ArrayList<BlockPos>();
+                var positionsForPlayer = new HashSet<BlockPos>();
                 for (var i = 0; i < ints.length; i += 3) {
                     positionsForPlayer.add(new BlockPos(ints[i], ints[i + 1], ints[i + 2]));
                 }

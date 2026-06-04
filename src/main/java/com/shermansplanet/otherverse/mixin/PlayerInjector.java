@@ -42,7 +42,6 @@ public abstract class PlayerInjector extends LivingEntity implements net.minecra
         BlockState blockstate = p_36131_.getBlockState(p_36132_);
         Block block = blockstate.getBlock();
         if(!(block instanceof BedBlock)) return;
-        System.out.println("GETTING DATA FROM RESPAWN");
         var demesne = DemesnesManager.getData(p_36131_, p_36132_);
         if(demesne == null || demesne.getPerkLevel(DemesnesManager.DemesnePerk.SPAWN_SET) == 0) return;
         ci.setReturnValue(BedBlock.findStandUpPosition(EntityType.PLAYER, p_36131_, p_36132_, blockstate.getValue(BedBlock.FACING), p_36133_));

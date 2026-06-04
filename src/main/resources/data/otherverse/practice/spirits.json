@@ -218,10 +218,10 @@
 		"macabre:valamon_heart" : ["666 flesh", "111 fate"],
 		"macabre:gargamaw_heart" : ["666 flesh", "111 fate"],
 		"macabre:morphegor_heart" : ["666 flesh", "111 fate"],
-
 		"macabre:soaked_log" : ["1 flesh"],
 		"macabre:teething_log" : ["1 flesh"],
 		"macabre:wasted_log" : ["1 flesh"],
-		"macabre:dead_log" : ["1 death"]
+		"macabre:dead_log" : ["1 death"],
+		"macabre:chain" : ["3 fate"]
 	}
 }

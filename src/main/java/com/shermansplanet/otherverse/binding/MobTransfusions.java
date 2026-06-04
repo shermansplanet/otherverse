@@ -335,7 +335,7 @@ public class MobTransfusions {
         }
 
         if (spiritType == null) {
-            sourceFocus.removeItem();
+            sourceFocus.drainItem();
         }
 
         return true;

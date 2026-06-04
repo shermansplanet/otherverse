@@ -202,7 +202,7 @@ public class SpiritTransfusions {
         register(input, spiritType, price, output.getDefaultInstance(), output instanceof BlockItem bi ? bi.getBlock() : null, fromRecipe);
     }
 
-    private static void register(Item input, SpiritType spiritType, int price, Block output) {
+    public static void register(Item input, SpiritType spiritType, int price, Block output) {
         register(input, spiritType, price, output.asItem().getDefaultInstance(), output);
         if (input == Items.DIRT && output != Blocks.GRASS_BLOCK) {
             register(Items.GRASS_BLOCK, spiritType, price, output.asItem().getDefaultInstance(), output);

@@ -112,7 +112,12 @@ public class PracticeWorldManager {
         if (MobTransfusions.ALL_MOB_TRANSFUSIONS.data == null) {
             LOGGER.debug("WORLD MANAGER: NO MOB TRANSFUSIONS");
         }
-        if(SpiritLabeler.SPIRIT_TYPE_OF.data == null || SpiritTransfusions.ALL_SPIRIT_TRANSFUSIONS.data == null || MobTransfusions.ALL_MOB_TRANSFUSIONS.data == null) return;
+        if (MobBindingInfluenceUtils.ALL_BINDING_INFLUENCES.data == null) {
+            LOGGER.debug("WORLD MANAGER: NO BINDING INFLUENCES");
+        }
+        if (SpiritLabeler.SPIRIT_TYPE_OF.data == null || SpiritTransfusions.ALL_SPIRIT_TRANSFUSIONS.data == null ||
+                MobTransfusions.ALL_MOB_TRANSFUSIONS.data == null || MobBindingInfluenceUtils.ALL_BINDING_INFLUENCES.data == null)
+            return;
         worldSetUp = true;
         LOGGER.debug("WORLD MANAGER: SENDING MESSAGE");
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () ->
@@ -148,6 +153,8 @@ public class PracticeWorldManager {
         worldSetUp = false;
         noJeiPending = false;
         jeiInitialized = false;
+        MobBindingInfluenceUtils.serverMobInstancesAnalyzed = false;
+        MobBindingInfluenceUtils.cachedLevel = null;
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

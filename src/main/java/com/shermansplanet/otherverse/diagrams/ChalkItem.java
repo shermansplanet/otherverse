@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.diagrams;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -53,7 +54,7 @@ public class ChalkItem extends Item implements DyeableLeatherItem {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) {
-        if(l.isClientSide()) DiagramSightRenderer.setCenter(null, p);
+        if (l.isClientSide()) DiagramSightRenderer.setCenter(null, p);
         return InteractionResultHolder.pass(p.getItemInHand(h));
     }
 
@@ -61,20 +62,24 @@ public class ChalkItem extends Item implements DyeableLeatherItem {
     public InteractionResult useOn(UseOnContext useCtx) {
         BlockPlaceContext ctx = new BlockPlaceContext(useCtx);
         BlockEntity be = ctx.getLevel().getBlockEntity(useCtx.getClickedPos());
-        boolean isOnBlockEntity = be != null && !(be instanceof ChalkCircle);
-        if (useCtx.getPlayer() != null && useCtx.getPlayer().isShiftKeyDown() && !isOnBlockEntity) {
-            if (!useCtx.getLevel().isClientSide()) {
+        if (useCtx.getPlayer() != null && useCtx.getPlayer().isShiftKeyDown()) {
+            if (be == null) {
+                if (!useCtx.getLevel().isClientSide()) {
+                    return InteractionResult.FAIL;
+                }
+                if (ctx.getClickedPos().equals(DiagramSightRenderer.symmetryCenter)) {
+                    DiagramSightRenderer.setCenter(null, useCtx.getPlayer());
+                } else {
+                    DiagramSightRenderer.setCenter(
+                            useCtx.getLevel().getBlockState(useCtx.getClickedPos()).is(OtherverseBlocks.CHALK_LINE.get())
+                                    ? useCtx.getClickedPos() : ctx.getClickedPos(), useCtx.getPlayer());
+                }
                 return InteractionResult.FAIL;
+            } else if (be instanceof ChalkCircle cc && cc.getItem().is(OtherverseItems.CHALK.get())) {
+                useCtx.getPlayer().openMenu(cc);
             }
-            if (ctx.getClickedPos().equals(DiagramSightRenderer.symmetryCenter)) {
-                DiagramSightRenderer.setCenter(null, useCtx.getPlayer());
-            } else {
-                DiagramSightRenderer.setCenter(
-                        useCtx.getLevel().getBlockState(useCtx.getClickedPos()).is(OtherverseBlocks.CHALK_LINE.get())
-                                ? useCtx.getClickedPos() : ctx.getClickedPos(), useCtx.getPlayer());
-            }
-            return InteractionResult.FAIL;
         }
+
         if (!ctx.canPlace()) {
             return InteractionResult.FAIL;
         }

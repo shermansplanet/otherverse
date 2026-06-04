@@ -322,7 +322,7 @@ public class DemesnesManager {
 //            LOGGER.info("NOT ENOUGH POWER");
             return false;
         }
-        circle.removeItem();
+        circle.drainItem();
         level.setBlockAndUpdate(target, OtherverseBlocks.DEMESNE_PORTAL.get().defaultBlockState());
         if (level.getBlockEntity(target) instanceof DemesnesPortal portal) {
             portal.destinationPosition = destination;

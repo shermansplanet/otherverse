@@ -4,10 +4,14 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
+import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
+import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -610,6 +614,24 @@ public class ShrineHelper {
                 return 33;
             }
         });
+        overflowBehaviors.put(Spirits.OVERWORLD, new OverflowBehavior() {
+            @Override
+            public ShrineShape getShape() {
+                return ShrineShape.CENTERED;
+            }
+        });
+        overflowBehaviors.put(Spirits.NETHER, new OverflowBehavior() {
+            @Override
+            public ShrineShape getShape() {
+                return ShrineShape.CENTERED;
+            }
+        });
+        overflowBehaviors.put(Spirits.END, new OverflowBehavior() {
+            @Override
+            public ShrineShape getShape() {
+                return ShrineShape.CENTERED;
+            }
+        });
     }
 
     public static class Shrine {
@@ -838,7 +860,7 @@ public class ShrineHelper {
         public boolean isInRange(Entity entity, BlockPos pos) {
             var center = range.center;
             var r = range.radius;
-            var dy = pos.getY() - entity.getY();
+            var dy = entity == null ? 0 : pos.getY() - entity.getY();
             var overflowBehavior = overflowBehaviors.get(st);
             if (overflowBehavior == null) return false;
             var topY = switch (overflowBehavior.getShape()) {
@@ -847,7 +869,9 @@ public class ShrineHelper {
                 case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
             };
             var bottomY = topY - range.height;
-            if (entity.getBoundingBox().minY + dy > topY + SHRINE_MOB_MARGIN || entity.getBoundingBox().maxY + dy < bottomY - SHRINE_MOB_MARGIN)
+            var eminY = entity == null ? pos.getY() : entity.getBoundingBox().minY;
+            var emaxY = entity == null ? pos.getY() + 1 : entity.getBoundingBox().maxY;
+            if (eminY + dy > topY + SHRINE_MOB_MARGIN || emaxY + dy < bottomY - SHRINE_MOB_MARGIN)
                 return false;
             var relative = pos.getCenter().subtract(center);
             return (relative.x * relative.x + relative.z * relative.z <= r * r);
@@ -868,12 +892,13 @@ public class ShrineHelper {
             }
         }
 
-        public boolean tryDrain(int price, TransientDiagramData data) {
+        public boolean tryDrain(int price) {
+            var data = DiagramManager.getOrCreateLevelData(level);
 
             if (isCombined) {
                 for (var shrine : network) {
                     if (shrine.isCombined) continue;
-                    if (shrine.tryDrain(price, data)) return true;
+                    if (shrine.tryDrain(price)) return true;
                 }
                 return false;
             }
@@ -1035,7 +1060,41 @@ public class ShrineHelper {
             }
         } else {
             if (overdraw && (spiritType == Spirits.LIGHT || spiritType == Spirits.DARK)) return 0;
-            if (simulate && !overflowBehavior.multipleTargets()) return amount;
+            //if (simulate && !overflowBehavior.multipleTargets()) return amount;
+
+            var data = DiagramManager.getOrCreateLevelData(level);
+            var firstUse = true;
+            if (level instanceof ServerLevel sl) {
+                for (var pos : shrine.hallowPositions) {
+                    var focus = data.allBlockFoci.get(pos);
+                    if (focus == null || focus.getDiagram() == null) continue;
+                    var target = focus.getDiagram().influences.get(pos);
+                    if (target == null || !(level.getBlockEntity(target) instanceof ChalkCircle cc)) continue;
+                    if (cc.getItem().is(OtherverseItems.SELF.get()) && cc.player != null) {
+                        for (var player : sl.players()) {
+                            if (player.getGameProfile().getName().equals(cc.player)) {
+                                var spent = overflowBehavior.affectEntity(player, remainingAmount, overdraw, shrine, simulate);
+                                if (firstUse || overflowBehavior.multipleTargets()) {
+                                    remainingAmount -= spent;
+                                    if (!overflowBehavior.canRun(remainingAmount, overdraw)) break;
+                                    firstUse = false;
+                                }
+                            }
+                        }
+                    } else if (cc.getItem().is(OtherverseItems.SPINDLE_BLOODY.get())) {
+                        var otherEntity = SympathyManager.getEntityByUniqueId(cc.getItem().getTag().getUUID("sympathy_target"), sl);
+                        if (otherEntity != null) {
+                            var spent = overflowBehavior.affectEntity(otherEntity, remainingAmount, overdraw, shrine, simulate);
+                            if (firstUse || overflowBehavior.multipleTargets()) {
+                                remainingAmount -= spent;
+                                if (!overflowBehavior.canRun(remainingAmount, overdraw)) break;
+                                firstUse = false;
+                            }
+                        }
+                    }
+                }
+            }
+
             var center = shrine.range.center;
             var r = shrine.range.radius;
             var h = shrine.range.height;
@@ -1045,9 +1104,10 @@ public class ShrineHelper {
             for (var e : all) {
                 if (!shrine.isInRange(e)) continue;
                 var spent = overflowBehavior.affectEntity(e, remainingAmount, overdraw, shrine, simulate);
-                if (overflowBehavior.multipleTargets()) {
+                if (firstUse || overflowBehavior.multipleTargets()) {
                     remainingAmount -= spent;
                     if (!overflowBehavior.canRun(remainingAmount, overdraw)) break;
+                    firstUse = false;
                 }
             }
             if (!simulate) shrine.markActive(level);
@@ -1086,24 +1146,43 @@ public class ShrineHelper {
     }
 
     public static List<Shrine> getShrinesFor(Entity entity, SpiritType spiritType) {
+        return getShrinesFor(entity, spiritType, true);
+    }
+
+    public static List<Shrine> getShrinesFor(Entity entity, SpiritType spiritType, boolean countRemote) {
         var level = entity.level();
         var mobPos = entity.blockPosition();
-        var levelShrines = ShrineHelper.shrinesByChunk.get(level);
-        if (levelShrines == null || levelShrines.isEmpty()) return List.of();
-
-        var shrines = levelShrines.get(Otherverse.chunkAt(mobPos));
-        if (shrines == null || shrines.isEmpty()) return List.of();
-        var list = new ArrayList<Shrine>();
-        for (var shrine : shrines) {
-            if (shrine.st != spiritType) {
-                continue;
+        var shrineSet = new HashSet<Shrine>();
+        if (countRemote && level instanceof ServerLevel sl && entity instanceof LivingEntity le) {
+            var circles = SympathyManager.getSympatheticLinks(le, sl);
+            for (var cc : circles) {
+                if (cc.getDiagram() == null) continue;
+                for (var influence : cc.getDiagram().influences.entrySet()) {
+                    if (!influence.getValue().equals(cc.getPos())) continue;
+                    var shrine = getShrine(cc.getLevel(), influence.getKey(), spiritType);
+                    if (shrine != null) {
+                        shrineSet.add(shrine);
+                    }
+                }
             }
-            if (!shrine.isInRange(entity)) {
-                continue;
-            }
-            list.add(shrine);
         }
-        return list;
+
+        var levelShrines = ShrineHelper.shrinesByChunk.get(level);
+        if (levelShrines != null) {
+            var localShrines = levelShrines.get(Otherverse.chunkAt(mobPos));
+            if (localShrines != null && !localShrines.isEmpty()) {
+                for (var shrine : localShrines) {
+                    if (shrine.st != spiritType) {
+                        continue;
+                    }
+                    if (!shrine.isInRange(entity)) {
+                        continue;
+                    }
+                    shrineSet.add(shrine);
+                }
+            }
+        }
+        return shrineSet.stream().toList();
     }
 
     public static List<Shrine> getShrinesFor(Entity entity, BlockPos pos, SpiritType spiritType) {

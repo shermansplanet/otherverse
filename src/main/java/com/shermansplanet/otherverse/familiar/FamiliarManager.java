@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.Keybindings;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.binding.*;
+import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.SelfManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
@@ -20,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -82,6 +84,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
@@ -92,6 +95,7 @@ import virtuoel.pehkui.api.ScaleTypes;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.shermansplanet.otherverse.implement.ImplementManager.PRACTICE_HANDLER;
 
@@ -227,7 +231,7 @@ public class FamiliarManager {
     @SubscribeEvent()
     public static void witherWake(PlayerWakeUpEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp) || !hasFamiliarType(sp, EntityType.WITHER)) return;
-        for (Entity e : sp.serverLevel().getEntities(sp, sp.getBoundingBox().inflate(32))) {
+        for (Entity e : sp.serverLevel().getEntities(sp, sp.getBoundingBox().inflate(16))) {
             if (!(e instanceof LivingEntity le)) continue;
             le.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * (8 + sp.getRandom().nextInt(24)), 1));
         }
@@ -847,17 +851,26 @@ public class FamiliarManager {
             BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
             if (binding == null) {
                 LOGGER.debug("COULDN'T FIND BINDING");
-                persistentData.remove("bindingId");
+                BindingManager.removeBindingFromMob(mob);
             } else {
                 binding.mob = mob;
                 binding.isCinnabar = false;
                 if (isFamiliar(mob)) {
                     binding.dimensionHash = DiagramManager.getDimensionHash(level);
-                    if (data.savedData != null) {
-                        data.savedData.setDirty();
+                    data.setDirty();
+                } else {
+                    if (binding.getFocus() == null || !BindingManager.tryBindMob(mob, binding.getFocus(), level)) {
+                        BindingManager.breakBinding(binding);
                     }
                 }
-                data.retryUpdateClient();
+            }
+            BlockFocus focus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(level), mob.getBoundingBox());
+            if (focus != null && (binding == null || !focus.getPos().equals(binding.position))) {
+                if (BindingManager.tryBindMob(mob, focus, level, true) && binding != null) {
+                    var localData = DiagramManager.getOrCreateLevelData(binding.dimensionHash, false);
+                    localData.bindingsByPosition.remove(binding.position);
+                    localData.setDirty();
+                }
             }
         }
         level.addFreshEntityWithPassengers(e);
@@ -874,8 +887,9 @@ public class FamiliarManager {
             var mobData = familiarData.getCompound("mob_data");
             var entityTag = mobData.getCompound("EntityTag");
             var data = DiagramManager.getOrCreateLevelData(player.getServer().overworld());
-            var binding = data.bindingsById.get(entityTag.getCompound("ForgeData").getUUID("bindingId"));
-            if (binding != null) {
+            var forgeData = entityTag.getCompound("ForgeData");
+            if (forgeData.contains("bindingId")) {
+                var binding = data.bindingsById.get(forgeData.getUUID("bindingId"));
                 for (var level : sl.getServer().getAllLevels()) {
                     if (DiagramManager.getDimensionHash(level) != binding.dimensionHash) continue;
                     EntityType<?> type = getEntityTypeFromTag(familiarData);
@@ -898,14 +912,25 @@ public class FamiliarManager {
         }
         var practitioner = getPractitionerForFamiliar(event.getEntity());
         if (practitioner.isEmpty()) return;
+        LOGGER.debug("FAMILIAR JOINING LEVEL WITH ID {}", event.getEntity().getUUID());
+        LOGGER.debug("HIT LIST: {}", String.join(", ", hitList.stream().map(UUID::toString).toList()));
         if (hitList.contains(event.getEntity().getUUID())) {
-            event.getEntity().discard();
+            event.setCanceled(true);
             return;
         }
-        if (getPlayerFromName(sl, practitioner) == null) {
+        var player = getPlayerFromName(sl, practitioner);
+        if (player == null) {
             LOGGER.debug("NULL PLAYER FOR FAMILIAR");
             event.setCanceled(true);
-            event.getEntity().discard();
+            return;
+        }
+        var familiarData = getFamiliarData(player);
+        var mobData = familiarData.getCompound("mob_data");
+        var entityTag = mobData.getCompound("EntityTag");
+        var familiarId = entityTag.getUUID("UUID");
+        if (!familiarId.equals(event.getEntity().getUUID())) {
+            LOGGER.debug("ENTITY ID {} DOES NOT MATCH FAMILIAR ID {}", event.getEntity().getUUID(), familiarId);
+            event.setCanceled(true);
             return;
         }
 
@@ -914,7 +939,7 @@ public class FamiliarManager {
         if (!event.getEntity().getPersistentData().contains("bindingId")) return;
         var binding = data.bindingsById.get(event.getEntity().getPersistentData().getUUID("bindingId"));
         if (binding == null) {
-            LOGGER.debug("NULL BINDING FOR FAMILIAR");
+            LOGGER.info("NULL BINDING FOR FAMILIAR");
             return;
         }
         var localLevel = binding.getLocalLevel();
@@ -922,7 +947,7 @@ public class FamiliarManager {
         LOGGER.debug("BINDING LEVEL: " + (localLevel == null ? "null" : localLevel.dimension()) + " " + binding.dimensionHash);
         if (binding.dimensionHash != DiagramManager.getDimensionHash(sl)) {
             event.setCanceled(true);
-            event.getEntity().discard();
+            return;
         }
     }
 
@@ -955,7 +980,7 @@ public class FamiliarManager {
         if (practitioner.isEmpty()) return;
         var player = getPlayerFromName(sl, practitioner);
         if (player == null) {
-            LOGGER.debug("NULL PLAYER");
+            LOGGER.debug("NULL PLAYER {}", practitioner);
             return;
         }
         var familiarTag = IdolItem.mobToTag(mob);
@@ -1003,6 +1028,7 @@ public class FamiliarManager {
         var entityTag = familiarData.getCompound("mob_data").getCompound("EntityTag");
         var id = entityTag.getUUID("UUID");
         var entity = player.serverLevel().getEntity(id);
+        LOGGER.debug("FOUND ENTITY: {}", entity != null);
         var spawnPos = player.getEyePosition().add(player.getLookAngle());
         if (hitResult != null) {
             var nrm = hitResult.getDirection().getNormal();
@@ -1044,20 +1070,21 @@ public class FamiliarManager {
         var data = DiagramManager.getOrCreateLevelData(player.getServer().overworld());
         var binding = data.bindingsById.get(entityTag.getCompound("ForgeData").getUUID("bindingId"));
         var oldDimensionHash = binding.dimensionHash;
+        LOGGER.debug("OLD DIMENSION: {}", oldDimensionHash);
         var level = player.serverLevel();
         var playerDimensionHash = DiagramManager.getDimensionHash(level);
+        LOGGER.debug("PLAYER DIMENSION: {}", oldDimensionHash);
         if (oldDimensionHash != playerDimensionHash) {
             var oldDimension = binding.getLocalLevel();
             if (oldDimension != null) {
                 var oldEntity = oldDimension.getEntity(id);
                 if (oldEntity != null) {
+                    LOGGER.debug("DISCARDING OTHER DIMENSION ENTITY");
                     oldEntity.discard();
                 }
             }
             binding.dimensionHash = DiagramManager.getDimensionHash(level);
-            if (data.savedData != null) {
-                data.savedData.setDirty();
-            }
+            data.setDirty();
         }
 
         if (entity == null) {
@@ -1066,17 +1093,18 @@ public class FamiliarManager {
             hitList.add(id);
             data.savedData.setDirty();
             entityTag.putUUID("UUID", UUID.randomUUID());
+            player.getCapability(PRACTICE_HANDLER).ifPresent(practice -> {
+                practice.setFamiliar(familiarData, player);
+            });
             entity = makeMobFromTag(type, familiarData, spawnPos, level);
         } else {
-            entity.setPos(spawnPos);
+            entity.moveTo(spawnPos);
         }
 
         setFamiliarSize(entity, 1);
         BlockHitResult hitresultTop = level.clip(new ClipContext(
                 spawnPos, spawnPos.add(0, entity.getBbHeight(), 0),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
-
-        LOGGER.debug(hitresultTop.getType().name());
 
         if (hitresultTop.getType() == HitResult.Type.BLOCK) {
             var scale = (float) (hitresultTop.getLocation().y - spawnPos.y) * 0.95f / entity.getBbHeight();
@@ -1085,7 +1113,6 @@ public class FamiliarManager {
     }
 
     private static void setFamiliarSize(Entity entity, float scale) {
-        LOGGER.debug("SETTING SCALE TO " + scale);
         ScaleTypes.WIDTH.getScaleData(entity).setScale(scale);
         ScaleTypes.HEIGHT.getScaleData(entity).setScale(scale);
         ScaleTypes.REACH.getScaleData(entity).setScale(scale);
@@ -1415,10 +1442,24 @@ public class FamiliarManager {
             var possibleTransfusion = transfusions.get(i);
             if (possibleTransfusion.entityTypes().size() != 1) continue;
             if (!possibleTransfusion.entityTypes().contains(et)) continue;
+            var tagsToDrain = new HashMap<CompoundTag, Integer>();
             if (!player.isCreative()) {
                 var price = possibleTransfusion.price();
                 for (var itemstack : player.getInventory().items) {
                     if (itemstack == null) continue;
+                    if (itemstack.hasTag() && itemstack.getOrCreateTag().contains("hallow")) {
+                        var hallowTag = itemstack.getOrCreateTag().getCompound("hallow");
+                        var spiritType = MobBindingInfluenceUtils.mobSpirits.get(et);
+                        if (hallowTag.getString("spirit_type").equals(spiritType.label())) {
+                            var drain = Math.min(price, hallowTag.getInt("spirit_count"));
+                            price -= drain;
+                            tagsToDrain.put(hallowTag, drain);
+                            if (price <= 0) {
+                                break;
+                            }
+                        }
+                        continue;
+                    }
                     var hp = MobBindingInfluenceUtils.allFoods.get(et).get(new ItemOrEntityType(itemstack.getItem()));
                     if (hp == null) continue;
                     var itemsToRemove = Math.min(itemstack.getCount(), (int) Math.ceil(price / (float) hp));
@@ -1438,6 +1479,10 @@ public class FamiliarManager {
                     if (!player.hurt(player.damageSources().outOfBorder(), price)) {
                         continue;
                     }
+                }
+
+                for (var entry : tagsToDrain.entrySet()) {
+                    entry.getKey().putInt("spirit_count", entry.getKey().getInt("spirit_count") - entry.getValue());
                 }
             }
             var stack = possibleTransfusion.destItem().copy();

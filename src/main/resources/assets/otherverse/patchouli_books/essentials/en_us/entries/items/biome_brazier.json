@@ -7,7 +7,7 @@
         {
             "type": "patchouli:crafting",
             "recipe": "otherverse:biome_brazier",
-            "text": "When fed the right balance of spirits, the Biome Brazier has the ability to locate biomes from afar, and even transform biomes and generate natural resources."
+            "text": "When fed the right balance of spirits, the Biome Brazier has the ability to load chunks, locate biomes from afar, and even transform biomes and generate natural resources."
         },
         {
             "type": "patchouli:spotlight",
@@ -35,6 +35,10 @@
             "type": "patchouli:image",
             "images": ["otherverse:textures/gui/entries/brazier_1.png"],
             "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "text": "To use a biome brazier to load chunks, you'll need a dimension shrine. You can read more about those in the Shamanism book."
         }
     ]
 }

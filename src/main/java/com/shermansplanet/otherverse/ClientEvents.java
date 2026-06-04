@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.demesnes.DemesnesClaimScreen;
 import com.shermansplanet.otherverse.demesnes.DemesnesScreen;
+import com.shermansplanet.otherverse.diagrams.ChalkCircleScreen;
 import com.shermansplanet.otherverse.diagrams.ChalkLineBlock;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
@@ -101,6 +102,7 @@ public class ClientEvents {
         event.enqueueWork(
                 () -> {
                     MenuScreens.register(Otherverse.DEMESNES_CLAIM_MENU.get(), DemesnesClaimScreen::new);
+                    MenuScreens.register(Otherverse.CHALK_CIRCLE_MENU.get(), ChalkCircleScreen::new);
                     MenuScreens.register(Otherverse.DEMESNES_MENU.get(), DemesnesScreen::new);
                 }
         );

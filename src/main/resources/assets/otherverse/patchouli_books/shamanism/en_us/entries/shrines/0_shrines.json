@@ -17,6 +17,10 @@
             "text": "These overflow/overdraw abilities only trigger if they have enough fuel/capacity to have an effect. For instance, nature shrines can use 33 overflow spirits to grow crops, so they won't break down seeds directly since seeds only have 30 nature spirits. To make this work, you'd need an intermediate nature hallow that can hold at least 33 spirits to be drained all at once."
         },
         {
+            "type": "patchouli:text",
+            "text": "Some shrine abilities affect players or bound/tamed mobs in the shrine's radius. These abilities also affect any player with Self influenced by the shrine, or any bound/tamed mob with a bloody spindle influenced by the shrine."
+        },
+        {
             "type": "patchouli:spotlight",
             "item": {
                 "item": "otherverse:spirit_tablet"

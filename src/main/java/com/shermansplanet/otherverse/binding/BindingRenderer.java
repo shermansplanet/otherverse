@@ -152,22 +152,6 @@ public class BindingRenderer {
             if (contractEntities.contains(entityId)) {
                 contractOnly = true;
             } else {
-                LivingEntity mob = event.getEntity();
-                if (SightManager.shouldRenderSight() && System.currentTimeMillis() % 1000 < 500 && mob.getHealth() <= FleshbindingManager.FLESHBINDING_HP) {
-                    PoseStack pose = event.getPoseStack();
-                    pose.pushPose();
-                    var bounds = mob.getBoundingBox();
-                    var s = (float) bounds.getSize() / 2f;
-                    pose.translate(0, bounds.getYsize() + 0.3, 0);
-                    pose.scale(s, s, s);
-                    var partialTick = Minecraft.getInstance().getPartialTick();
-                    var renderPoint = mob.getPosition(partialTick).add(0, bounds.getYsize() + 0.3, 0);
-                    var toCam = Minecraft.getInstance().cameraEntity.getEyePosition(partialTick).subtract(renderPoint);
-                    pose.mulPose(new Quaternionf().lookAlong(toCam.toVector3f(), new Vector3f(0, 1, 0)).invert());
-                    itemRenderer.renderStatic(OtherverseItems.SELF.get().getDefaultInstance(), ItemDisplayContext.FIXED, event.getPackedLight(),
-                            OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
-                    pose.popPose();
-                }
                 return;
             }
         }
@@ -235,74 +219,108 @@ public class BindingRenderer {
         pose.popPose();
     }
 
+    public static String getBindingInfo(LivingEntity le) {
+        var boundBy = le.getPersistentData().getString("last_bound_by");
+        if (familiars.containsKey(le.getUUID())) {
+            return "Familiar of " + familiars.get(le.getUUID());
+        } else if (positiveBoundEntities.contains(le.getUUID())) {
+            return "Positively bound by " + boundBy;
+        } else if (negativeBoundEntities.contains(le.getUUID())) {
+            return "Negatively bound by " + boundBy;
+        } else if (le.getPersistentData().contains("construct_type") && !boundBy.isEmpty()) {
+            return "Created by " + boundBy;
+        }else if(le.getPersistentData().contains("practitioner_loyalty")) {
+            return "Loyal to " + le.getPersistentData().getString("practitioner_loyalty");
+        }
+        return "";
+    }
+
     public static void updateBinding(LivingEntity le, BindingUpdateMessage update) {
         RandomSource r = le.level().random;
         var updateType = update.updateType;
         var silent = update.silent;
-        if (updateType == BindingUpdateMessage.BindingUpdateType.BIND) {
-            if (update.type == BindingUpdateMessage.BindingType.POSITIVE) {
+        switch (updateType) {
+            case BIND -> {
+                if (update.type == BindingUpdateMessage.BindingType.POSITIVE) {
+                    positiveBoundEntities.add(le.getUUID());
+                } else {
+                    negativeBoundEntities.add(le.getUUID());
+                }
+                le.getPersistentData().putString("last_bound_by", update.data.getString("last_bound_by"));
+                if (silent) {
+                    return;
+                }
+                Vec3 v1 = le.getEyePosition();
+                for (int i = 0; i < 8; i++) {
+                    le.level().addParticle(ParticleTypes.INSTANT_EFFECT,
+                            v1.x + (r.nextFloat() - 0.5) * 0.3,
+                            v1.y + 0.5,
+                            v1.z + (r.nextFloat() - 0.5) * 0.3,
+                            0, 0, 0);
+                }
+                le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 1, 1);
+            }
+            case CONTRACT -> {
+                if (update.data.contains("construct_type")) {
+                    var ct = update.data.getString("construct_type");
+                    ReskinManager.reskinMob(le, ct);
+                    le.getPersistentData().putString("construct_type", ct);
+                }
+                if (update.data.contains("practitioner_loyalty")) {
+                    le.getPersistentData().putString("practitioner_loyalty", update.data.getString("practitioner_loyalty"));
+                }
+                if (update.data.contains("last_bound_by")) {
+                    le.getPersistentData().putString("last_bound_by", update.data.getString("last_bound_by"));
+                }
+                contractEntities.add(le.getUUID());
+                if (silent) {
+                    return;
+                }
+                Vec3 v1 = le.position();
+                for (int i = 0; i < 16; i++) {
+                    le.level().addParticle(ParticleTypes.INSTANT_EFFECT,
+                            v1.x + (r.nextFloat() - 0.5) * le.getBoundingBox().getXsize(),
+                            v1.y + r.nextFloat() * le.getBoundingBox().getYsize(),
+                            v1.z + (r.nextFloat() - 0.5) * le.getBoundingBox().getZsize(),
+                            0, 0, 0);
+                }
+                le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.BOOK_PAGE_TURN, SoundSource.NEUTRAL, 1, 1);
+            }
+            case FAMILIAR -> {
+                LOGGER.debug("RECEIVED FAMILIAR UPDATE");
+                var name = update.data.getString("practitioner");
+                for (var player : le.level().players()) {
+                    if (player.getGameProfile().getName().equals(name)) {
+                        ReskinManager.reskinAsFamiliar(le, player);
+                        break;
+                    }
+                }
+                familiars.put(le.getUUID(), name);
+                familiarsByPract.put(name, (EntityType<LivingEntity>) le.getType());
                 positiveBoundEntities.add(le.getUUID());
-            } else {
-                negativeBoundEntities.add(le.getUUID());
-            }
-            if (silent) {
-                return;
-            }
-            Vec3 v1 = le.getEyePosition();
-            for (int i = 0; i < 8; i++) {
-                le.level().addParticle(ParticleTypes.INSTANT_EFFECT,
-                        v1.x + (r.nextFloat() - 0.5) * 0.3,
-                        v1.y + 0.5,
-                        v1.z + (r.nextFloat() - 0.5) * 0.3,
-                        0, 0, 0);
-            }
-            le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 1, 1);
-        } else if (updateType == BindingUpdateMessage.BindingUpdateType.CONTRACT) {
-            if (update.data.contains("construct_type")) {
-                var ct = update.data.getString("construct_type");
-                ReskinManager.reskinMob(le, ct);
-                le.getPersistentData().putString("construct_type", ct);
-            }
-            contractEntities.add(le.getUUID());
-            if (silent) {
-                return;
-            }
-            Vec3 v1 = le.position();
-            for (int i = 0; i < 16; i++) {
-                le.level().addParticle(ParticleTypes.INSTANT_EFFECT,
-                        v1.x + (r.nextFloat() - 0.5) * le.getBoundingBox().getXsize(),
-                        v1.y + r.nextFloat() * le.getBoundingBox().getYsize(),
-                        v1.z + (r.nextFloat() - 0.5) * le.getBoundingBox().getZsize(),
-                        0, 0, 0);
-            }
-            le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.BOOK_PAGE_TURN, SoundSource.NEUTRAL, 1, 1);
-        } else if (updateType == BindingUpdateMessage.BindingUpdateType.FAMILIAR) {
-            LOGGER.info("RECEIVED FAMILIAR UPDATE");
-            var name = update.data.getString("practitioner");
-            ReskinManager.reskinAsFamiliar(le, Minecraft.getInstance().player);
-            familiars.put(le.getUUID(), name);
-            familiarsByPract.put(name, (EntityType<LivingEntity>) le.getType());
-            positiveBoundEntities.add(le.getUUID());
-            le.getPersistentData().putString("practitioner", name);
-            var lvl = Minecraft.getInstance().level;
-            if (lvl != null) {
-                for (var p : lvl.players()) {
-                    p.refreshDimensions();
+                le.getPersistentData().putString("practitioner", name);
+                var lvl = Minecraft.getInstance().level;
+                if (lvl != null) {
+                    for (var p : lvl.players()) {
+                        p.refreshDimensions();
+                    }
+                }
+                if (silent) {
+                    return;
+                }
+                for (int i = 0; i < 7; ++i) {
+                    double d0 = r.nextGaussian() * 0.02D;
+                    double d1 = r.nextGaussian() * 0.02D;
+                    double d2 = r.nextGaussian() * 0.02D;
+                    le.level().addParticle(ParticleTypes.HEART, le.getRandomX(1.0D), le.getRandomY() + 0.5D, le.getRandomZ(1.0D), d0, d1, d2);
                 }
             }
-            if (silent) {
-                return;
+            case BREAK -> {
+                LOGGER.info("RECEIVED BROKEN BINDING UPDATE");
+                positiveBoundEntities.remove(le.getUUID());
+                negativeBoundEntities.remove(le.getUUID());
+                contractEntities.remove(le.getUUID());
             }
-            for (int i = 0; i < 7; ++i) {
-                double d0 = r.nextGaussian() * 0.02D;
-                double d1 = r.nextGaussian() * 0.02D;
-                double d2 = r.nextGaussian() * 0.02D;
-                le.level().addParticle(ParticleTypes.HEART, le.getRandomX(1.0D), le.getRandomY() + 0.5D, le.getRandomZ(1.0D), d0, d1, d2);
-            }
-        } else {
-            positiveBoundEntities.remove(le.getUUID());
-            negativeBoundEntities.remove(le.getUUID());
-            contractEntities.remove(le.getUUID());
         }
     }
 

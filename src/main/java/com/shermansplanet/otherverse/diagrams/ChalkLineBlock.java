@@ -184,9 +184,10 @@ public class ChalkLineBlock extends Block implements EntityBlock {
         }
         BlockEntity blockentity = level.getBlockEntity(pos);
         if (blockentity instanceof ChalkCircle circle) {
-            if (circle.item.getItem() instanceof ChalkItem) {
+            if (circle.item.getItem() instanceof ChalkItem && circle.inscription.isEmpty()) {
                 if (entity instanceof ItemEntity itemEntity) {
                     ItemStack og = itemEntity.getItem();
+                    if (og.is(OtherverseItems.CHALK.get())) return;
                     var newItemStack = og.split(1);
                     if (og.isEmpty()) {
                         itemEntity.discard();
@@ -241,7 +242,6 @@ public class ChalkLineBlock extends Block implements EntityBlock {
         boolean makeCircle = !itemstack.isEmpty() && !circle.item.is(itemstack.getItem());
         boolean fullOfSelf =
                 containsSelf && circle.item.getCount() >= selfPositions.length;
-        circle.isNumber = false;
         if (player.isShiftKeyDown() && itemstack.isEmpty()) {
             if (fullOfSelf) {
                 return InteractionResult.SUCCESS;
@@ -258,7 +258,7 @@ public class ChalkLineBlock extends Block implements EntityBlock {
             }
             circle.setPlayer(player);
             if (level instanceof ServerLevel sl) {
-                var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
+                var data = DiagramManager.getOrCreateLevelData(sl);
                 data.putSelf(player, pos);
             }
             itemstack = new ItemStack(OtherverseItems.SELF.get(), selfCount);
@@ -266,13 +266,7 @@ public class ChalkLineBlock extends Block implements EntityBlock {
             boolean dontSpend =
                     player.getAbilities().instabuild || itemstack.getItem() instanceof ChalkItem;
             itemstack = dontSpend ? itemstack.copy() : itemstack;
-            if (player.isShiftKeyDown() && itemstack.is(Tags.Items.SEEDS)) {
-                player.getInventory().removeItem(itemstack);
-                player.displayClientMessage(Component.literal("Count: " + itemstack.getCount()), true);
-                circle.isNumber = true;
-            } else {
-                itemstack = itemstack.split(1);
-            }
+            itemstack = itemstack.split(1);
         }
         boolean leaveCircleBehind = makeCircle || !(itemstack.getItem() instanceof ChalkItem);
         state = state.setValue(chalkCircle, leaveCircleBehind);
@@ -281,6 +275,10 @@ public class ChalkLineBlock extends Block implements EntityBlock {
             if (!player.addItem(drop)) {
                 player.drop(drop, false);
             }
+        }
+        if (itemstack.is(OtherverseItems.SPINDLE_BLOODY.get()) && level instanceof ServerLevel sl) {
+            var data = DiagramManager.getOrCreateLevelData(sl);
+            data.putSpindle(itemstack, pos);
         }
         circle.item = makeCircle ? itemstack
                 : leaveCircleBehind ? new ItemStack(OtherverseItems.CHALK.get()) : ItemStack.EMPTY;

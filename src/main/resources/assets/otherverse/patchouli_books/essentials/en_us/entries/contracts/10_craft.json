@@ -19,7 +19,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "A mob performing this action will look for a crafting table with adjacent inventories containing all the necessary crafting ingredients. It will go to the crafting table and craft the item."
+            "text": "A mob performing this action will look for a crafting table with adjacent inventories containing all the necessary crafting ingredients. It will go to the crafting table and craft the item, picking up the result if possible."
         }
     ]
 }

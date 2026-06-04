@@ -18,7 +18,6 @@ import java.util.*;
 
 public class MobRetexturer {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static HashMap<ResourceLocation, Palette> paletteCache = new HashMap<>();
     private static HashMap<String, Palette> spiritPaletteCache = new HashMap<>();
     private static HashMap<String, Palette> spiritPaletteCacheSplit = new HashMap<>();
@@ -31,9 +30,9 @@ public class MobRetexturer {
 
         for (int imageIndex = 0; imageIndex < textureSet.size(); imageIndex++) {
             var oldTexture = textureSet.get(imageIndex);
-            var image = getNativeImage( ResourceLocation.fromNamespaceAndPath(oldTexture.getNamespace(), oldTexture.getPath()));
+            var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(oldTexture.getNamespace(), oldTexture.getPath()));
             if (image == null) {
-                LOGGER.error("COULDN'T LOAD TEXTURE " + oldTexture.getPath());
+                System.out.println("COULDN'T LOAD TEXTURE " + oldTexture.getPath());
                 return null;
             }
 
@@ -54,9 +53,11 @@ public class MobRetexturer {
                     var pixelIndex = Mth.floor(lerp * correspondingPalette.size());
                     var spiritPixel = correspondingPalette.get(pixelIndex);
                     var mixel = shouldAdjustBrightness ? getPixelBlend(itemPixel, spiritPixel) : spiritPixel;
-                    var pixelInt = (mixel.r) | ((mixel.g << 8) & 0xff00) | ((mixel.b << 16) & 0xff0000) | 0xff000000;
-                    tex.setPixelRGBA(itemPixel.x % tex.getWidth(),
-                            (itemPixel.y + imageIndex * SIZE) % tex.getHeight(), pixelInt);
+                    var pixelInt = (mixel.r) | ((mixel.g << 8) & 0xff00) | ((mixel.b << 16) & 0xff0000);
+                    var x = itemPixel.x % tex.getWidth();
+                    var y = (itemPixel.y + imageIndex * SIZE) % tex.getHeight();
+                    pixelInt = pixelInt | (image.getPixelRGBA(itemPixel.x, itemPixel.y) & 0xff000000);
+                    tex.setPixelRGBA(x, y, pixelInt);
                 }
             }
         }
@@ -91,6 +92,7 @@ public class MobRetexturer {
         var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
         return new Palette(Collections.singleton(image), true);
     }
+
     private static Palette paletteFromSpiritSplit(String s) {
         var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
         return new Palette(Collections.singleton(image), false);
@@ -116,14 +118,14 @@ public class MobRetexturer {
             textures.add(getNativeImage(texLoc));
         }
         if (textures.isEmpty()) {
-            LOGGER.error("NO MOB TEXTURES FOUND");
+            System.out.println("NO MOB TEXTURES FOUND");
             return false;
         }
         var palette = new Palette(textures);
         ((ITextureSetter) player).setTexture(null);
         var rawTex = MakePlayerTexture(player, palette);
         if (rawTex == null) {
-            LOGGER.error("TEXTURE GENERATION FAILED");
+            System.out.println("TEXTURE GENERATION FAILED");
             return false;
         }
         DynamicTexture newTex = new DynamicTexture(rawTex);
@@ -138,14 +140,14 @@ public class MobRetexturer {
     private static NativeImage getNativeImage(ResourceLocation texLoc) {
         var resource = SpiritColorAnalyzer.getStreamFor(texLoc, SpiritColorAnalyzer.getPacks());
         if (resource == null) {
-            LOGGER.error("COULD NOT LOCATE RESOURCE AT {}", texLoc);
+            System.out.println("COULD NOT LOCATE RESOURCE AT " + texLoc);
             return null;
         }
         NativeImage texture;
         try {
             texture = NativeImage.read(resource);
         } catch (IOException e) {
-            LOGGER.error("COULD NOT READ IMAGE AT {}", texLoc);
+            System.out.println("COULD NOT READ IMAGE AT " + texLoc);
             return null;
         }
         return texture;
@@ -192,17 +194,18 @@ public class MobRetexturer {
 
     private static NativeImage getPlayerTexture(AbstractClientPlayer player) {
         var skinLoc = player.getSkinTextureLocation();
+        System.out.println("GETTING PLAYER SKIN FOR " + player.getGameProfile().getName() + ": " + skinLoc);
         var ni = getNativeImage(skinLoc);
         if (ni != null) return ni;
         TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
         AbstractTexture abstracttexture = texturemanager.getTexture(skinLoc, MissingTextureAtlasSprite.getTexture());
         if (abstracttexture == MissingTextureAtlasSprite.getTexture()) {
-            LOGGER.error("MISSING TEXTURE");
+            System.out.println("MISSING TEXTURE");
         }
         if (abstracttexture instanceof HttpTexture tex) {
             return ((ITextureGetter) tex).getTexture();
         }
-        LOGGER.error("NOT HTTP TEXTURE");
+        System.out.println("NOT HTTP TEXTURE");
         return null;
     }
 
@@ -225,14 +228,6 @@ public class MobRetexturer {
     public static class Palette {
 
         public ArrayList<ArrayList<Pixel>> palettes = new ArrayList<>();
-
-        public void printInfo(String name) {
-            LOGGER.debug(name);
-            LOGGER.debug(palettes.size() + " PALETTES");
-            for(var palette : palettes) {
-                LOGGER.debug(palette.size() + " PIXELS");
-            }
-        }
 
         public record Pixel(int r, int g, int b, int x, int y) {
             public double getPerceptualBrightnessSqr() {

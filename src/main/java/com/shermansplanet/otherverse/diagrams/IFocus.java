@@ -19,6 +19,8 @@ public interface IFocus {
 
   Level getFocusLevel();
 
+  void drainItem();
+
   boolean isBlock();
 
   void setProcess(DiagramProcess process);

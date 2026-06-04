@@ -129,6 +129,7 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
         HashSet<Integer> takenAmounts = new HashSet<>();
         var uniqueInfluences = recipe.influences.values().stream().distinct().count();
         var columns = Math.ceil(uniqueInfluences / 5F);
+        var spiritType = MobBindingInfluenceUtils.mobSpirits.get(recipe.entityType);
         for (var influence : recipe.influences.entrySet()) {
             if (takenAmounts.contains(influence.getValue())) continue;
             takenAmounts.add(influence.getValue());
@@ -138,9 +139,8 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
                 val = -val;
                 icon = heartIcon;
             }
-            var spiritType = MobBindingInfluenceUtils.mobSpirits.get(recipe.entityType);
             if (spiritType != null && Spirits.spiritItems.get(spiritType).get() == influence.getKey().item) {
-                val = 0.5f;
+                val = 1f;
             }
             String s = Float.toString(val).replace(".0", "");
             if (val > 999) {

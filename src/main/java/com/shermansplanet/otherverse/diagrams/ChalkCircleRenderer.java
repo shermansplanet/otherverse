@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.diagrams;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -14,6 +15,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +36,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                             MultiBufferSource multiBufferSource, float dx, float dz, float scale) {
         if (chalkCircle.animationTime < 0) {
             poseStack.translate(0.5f + dx, 0.0625D, 0.5f + dz);
-            poseStack.mulPose(new Quaternionf().rotateX(Mth.PI/2));
+            poseStack.mulPose(new Quaternionf().rotateX(Mth.PI / 2));
         } else {
             if (Minecraft.getInstance().isPaused()) {
                 return;
@@ -93,7 +95,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
             }
             var spin = isSpecial ? (float) Math.pow(t, 2.1) / 40000f : 0;
             poseStack.mulPose(new Quaternionf().rotateXYZ(
-                    Mth.PI/2 * (1 - riseLerp), Mth.TWO_PI * riseLerp + spin, 0));
+                    Mth.PI / 2 * (1 - riseLerp), Mth.TWO_PI * riseLerp + spin, 0));
         }
         poseStack.scale(scale, scale, scale);
         this.itemRenderer.renderStatic(chalkCircle.item, ItemDisplayContext.FIXED, lightVal,
@@ -108,7 +110,8 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
     public void render(ChalkCircle chalkCircle, float p_112308_, PoseStack poseStack,
                        MultiBufferSource buffers, int lightVal, int p_112312_) {
         ItemStack itemstack = chalkCircle.item;
-        if (itemstack.isEmpty() || itemstack.getItem() instanceof ChalkItem) {
+        var isChalk = itemstack.getItem() instanceof ChalkItem;
+        if (itemstack.isEmpty() || (isChalk && chalkCircle.inscription.isEmpty())) {
             return;
         }
         poseStack.pushPose();
@@ -125,6 +128,13 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                         offset[0] + scale / 32f, offset[1], scale);
                 poseStack.popPose();
             }
+        } else if (isChalk && !chalkCircle.inscription.isEmpty()) {
+            Minecraft.getInstance().getBlockRenderer().renderSingleBlock(
+                    OtherverseBlocks.CHALK_LINE.get().defaultBlockState(),
+                    poseStack, Minecraft.getInstance().renderBuffers().bufferSource(),
+                    lightVal,
+                    OverlayTexture.NO_OVERLAY,
+                    net.minecraftforge.client.model.data.ModelData.EMPTY, RenderType.cutout());
         } else {
             poseStack.pushPose();
             renderItem(poseStack, lightVal, chalkCircle, buffers, 0, 0, 0.5f);
