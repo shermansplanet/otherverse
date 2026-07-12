@@ -243,23 +243,23 @@ public class MobBindingInfluenceUtils {
             if (biomeName.equals("ruins_trust")) spiritTypes.add(0, Spirits.FOOD);
             if (biomeName.equals("ruins_vigil")) spiritTypes.add(0, Spirits.TECH);
             hasDimensionSpirit = true;
+        } else if (biomeMod.equals("biomesoplenty")) {
+            if (biomeName.equals("visceral_heap")) spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
+            if (biomeName.equals("erupting_inferno")) spiritTypes.add(0, Spirits.FIRE);
+            if (biomeName.equals("withered_abyss")) spiritTypes.add(0, Spirits.DEATH);
+            if (biomeName.equals("undergrowth")) spiritTypes.add(0, Spirits.NATURE);
+            if (biomeName.equals("crystalline_chasm")) spiritTypes.add(0, Spirits.FORTUNE);
+        } else if (biomeMod.equals("alexscaves")) {
+            if (biomeName.equals("magnetic_caves")) spiritTypes.addAll(0, List.of(Spirits.TECH, Spirits.TECH));
+            if (biomeName.equals("primordial_caves")) spiritTypes.addAll(0, List.of(Spirits.TIME, Spirits.TIME));
+            if (biomeName.equals("toxic_caves")) spiritTypes.addAll(0, List.of(Spirits.WAR, Spirits.DEATH));
+            if (biomeName.equals("abyssal_chasm")) spiritTypes.addAll(0, List.of(Spirits.DARK, Spirits.WATER));
+            if (biomeName.equals("forlorn_hollows")) spiritTypes.addAll(0, List.of(Spirits.DARK, Spirits.DARK));
+            if (biomeName.equals("candy_cavity")) spiritTypes.addAll(0, List.of(Spirits.FOOD, Spirits.FOOD));
         } else if (!biomeMod.equals("minecraft")) {
             spiritTypes.add(Spirits.END);
             hasDimensionSpirit = true;
         }
-
-        if (biomeName.equals("visceral_heap")) spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
-        if (biomeName.equals("erupting_inferno")) spiritTypes.add(0, Spirits.FIRE);
-        if (biomeName.equals("withered_abyss")) spiritTypes.add(0, Spirits.DEATH);
-        if (biomeName.equals("undergrowth")) spiritTypes.add(0, Spirits.NATURE);
-        if (biomeName.equals("crystalline_chasm")) spiritTypes.add(0, Spirits.FORTUNE);
-
-        if (biomeName.equals("magnetic_caves")) spiritTypes.addAll(0, List.of(Spirits.TECH, Spirits.TECH));
-        if (biomeName.equals("primordial_caves")) spiritTypes.addAll(0, List.of(Spirits.TIME, Spirits.TIME));
-        if (biomeName.equals("toxic_caves")) spiritTypes.addAll(0, List.of(Spirits.WAR, Spirits.DEATH));
-        if (biomeName.equals("abyssal_chasm")) spiritTypes.addAll(0, List.of(Spirits.DARK, Spirits.WATER));
-        if (biomeName.equals("forlorn_hollows")) spiritTypes.addAll(0, List.of(Spirits.DARK, Spirits.DARK));
-        if (biomeName.equals("candy_cavity")) spiritTypes.addAll(0, List.of(Spirits.FOOD, Spirits.FOOD));
 
         if (!hasDimensionSpirit) {
             var levelName = level.dimensionTypeId().location().getPath();

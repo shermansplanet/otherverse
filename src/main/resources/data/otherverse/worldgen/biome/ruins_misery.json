@@ -26,7 +26,20 @@
       }
     ]
   },
-  "spawn_costs": {},
+  "spawn_costs": {
+    "otherverse:typhlotic_jellyfish": {
+      "charge": 0.7,
+      "energy_budget": 0.15
+    },
+    "otherverse:typhlotic_zombie": {
+      "charge": 1,
+      "energy_budget": 0
+    },
+    "otherverse:snuffer": {
+      "charge": 1,
+      "energy_budget": 0
+    }
+  },
   "carvers": {},
   "features": [
     ["otherverse:stonebrick_slabs"],

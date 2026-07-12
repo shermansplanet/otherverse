@@ -1,0 +1,12 @@
+{
+    "name": "Fury",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'fury'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A fury Familiar can redirect rage. When you summon it, all enemies that were targeting you now target your Familiar instead. It will also give you slow creative flight in the Ruins."
+        }
+    ]
+}

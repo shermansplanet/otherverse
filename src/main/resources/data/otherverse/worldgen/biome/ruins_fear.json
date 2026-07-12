@@ -26,7 +26,20 @@
       }
     ]
   },
-  "spawn_costs": {},
+  "spawn_costs": {
+    "otherverse:typhlotic_shark": {
+      "charge": 1,
+      "energy_budget": 0.15
+    },
+    "otherverse:snuffer": {
+      "charge": 1,
+      "energy_budget": 0
+    },
+    "otherverse:guest": {
+      "charge": 1,
+      "energy_budget": 0
+    }
+  },
   "carvers": {},
   "features": [
     [

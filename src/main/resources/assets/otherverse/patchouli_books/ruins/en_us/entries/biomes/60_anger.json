@@ -1,0 +1,17 @@
+{
+  "name": "Anger",
+  "sortnum": 60,
+  "icon": "minecraft:magma_block",
+  "category": "otherverse:biomes",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Anger",
+      "text": "Anger is a scorched and prickly wasteland, cut through by rivers of lava. It's so hot that the ground itself will burn you after a bit. If you can't get your hands on fire resistance, you might have to build bridges so your feet stay cool."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Anger is home to typhlotic blazes called $(bold)furies$(), the only typhlotic beasts who can attack from afar. But they will only attack if you have drawn a weapon first. Their definition of 'weapon' is expansive - anything with War spirits counts, even tools like axes."
+    }
+  ]
+}

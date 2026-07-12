@@ -32,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -52,7 +53,7 @@ import java.util.function.Function;
 public class PlacedHallowRenderer {
     private static final Map<BlockState, HashMap<String, Pair<BakedModel, RenderType>>> modelByStateCache = Maps.newIdentityHashMap();
     private static final RenderStateShard.LightmapStateShard LIGHTMAP = new RenderStateShard.LightmapStateShard(true);
-    private static final RenderStateShard.ShaderStateShard RENDERTYPE_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeTranslucentShader);
+    private static final RenderStateShard.ShaderStateShard RENDERTYPE_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeCutoutShader);
     private static final Logger LOGGER = LogUtils.getLogger();
     protected static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
         RenderSystem.enableBlend();
@@ -61,7 +62,9 @@ public class PlacedHallowRenderer {
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();
     });
-    protected static final RenderStateShard.OutputStateShard TRANSLUCENT_TARGET = new RenderStateShard.OutputStateShard("translucent_target", () -> {}, () -> {});
+    protected static final RenderStateShard.OutputStateShard TRANSLUCENT_TARGET = new RenderStateShard.OutputStateShard("translucent_target", () -> {
+    }, () -> {
+    });
 
     private static final HashSet<ShrineHelper.Shrine> shrinesToRender = new HashSet<>();
 
@@ -161,8 +164,7 @@ public class PlacedHallowRenderer {
             poseStack.pushPose();
             poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
             var st = tag.getString("spirit_type");
-            renderSingleBlock((IBlockRenderGetter) Minecraft.getInstance().getBlockRenderer(), bs, poseStack, multiBufferSource,
-                    255, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout(), st);
+            renderSingleBlock(player.level(), bs, pos, poseStack, multiBufferSource, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, st);
             poseStack.popPose();
             if (!tag.contains("shrine") || !renderShrineBounds) continue;
             var shrine = ShrineHelper.shrinesByPosition.computeIfAbsent(player.level(), x -> new HashMap<>()).get(pos);
@@ -175,25 +177,20 @@ public class PlacedHallowRenderer {
         poseStack.popPose();
     }
 
-    private static void renderSingleBlock(IBlockRenderGetter blockRenderGetter, BlockState p_110913_, PoseStack p_110914_, MultiBufferSource p_110915_, int p_110916_, int p_110917_, ModelData modelData, RenderType renderType, String spiritName) {
-        RenderShape rendershape = p_110913_.getRenderShape();
+    private static void renderSingleBlock(Level level, BlockState blockState, BlockPos pos, PoseStack poseStack, MultiBufferSource buffers, int overlay, ModelData modelData, String spiritName) {
+        RenderShape rendershape = blockState.getRenderShape();
         if (rendershape != RenderShape.INVISIBLE) {
             switch (rendershape) {
                 case MODEL:
-                    var modelAndRender = getBlockModel(p_110913_, spiritName);
+                    var modelAndRender = getBlockModel(blockState, spiritName);
                     if (modelAndRender.getFirst() == null) return;
-                    int i = blockRenderGetter.getBlockColors().getColor(p_110913_, null, null, 0);
-                    float f = (float) (i >> 16 & 255) / 255.0F;
-                    float f1 = (float) (i >> 8 & 255) / 255.0F;
-                    float f2 = (float) (i & 255) / 255.0F;
-                    for (RenderType rt : modelAndRender.getFirst().getRenderTypes(p_110913_, RandomSource.create(42), modelData))
-                        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(p_110914_.last(), p_110915_.getBuffer(modelAndRender.getSecond()), p_110913_, modelAndRender.getFirst(), f, f1, f2, p_110916_, p_110917_, modelData, rt);
+                    for (RenderType rt : modelAndRender.getFirst().getRenderTypes(blockState, RandomSource.create(blockState.getSeed(pos)), modelData))
+                        Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateBlock(level, modelAndRender.getFirst(), blockState, pos, poseStack, buffers.getBuffer(modelAndRender.getSecond()), true, RandomSource.create(), blockState.getSeed(pos), overlay, modelData, rt);
                     break;
                 case ENTITYBLOCK_ANIMATED:
-                    ItemStack stack = new ItemStack(p_110913_.getBlock());
-                    IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.NONE, p_110914_, p_110915_, p_110916_, p_110917_);
+                    ItemStack stack = new ItemStack(blockState.getBlock());
+                    IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.NONE, poseStack, buffers, 255, overlay);
             }
-
         }
     }
 
@@ -257,12 +254,6 @@ public class PlacedHallowRenderer {
                     model.bake(DUMMY_BAKER, func, BlockModelRotation.X0_Y0, newLoc);
 
             var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
-            RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false,
-                    RenderType.CompositeState.builder()
-                            .setLightmapState(LIGHTMAP)
-                            .setShaderState(RENDERTYPE_SHADER)
-                            .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
-                            .createCompositeState(true));
 
             var shader = RenderType.CompositeState.builder()
                     .setLightmapState(LIGHTMAP)
@@ -271,7 +262,7 @@ public class PlacedHallowRenderer {
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .setOutputState(TRANSLUCENT_TARGET)
                     .createCompositeState(true);
-            rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, shader);
+            RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, shader);
 
             var pair = Pair.of(m, rt);
             return pair;

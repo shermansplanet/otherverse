@@ -4,18 +4,25 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.artifacts.BrazierItem;
 import com.shermansplanet.otherverse.artifacts.RealmWrackedCoalItem;
+import com.shermansplanet.otherverse.artifacts.WitchHatItem;
 import com.shermansplanet.otherverse.binding.ContractItem;
 import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.demesnes.EscapeRopeItem;
 import com.shermansplanet.otherverse.demesnes.WritItem;
 import com.shermansplanet.otherverse.diagrams.ChalkItem;
 import com.shermansplanet.otherverse.familiar.FamiliarNameTagItem;
+import com.shermansplanet.otherverse.ruins.ClaimArrowItem;
+import com.shermansplanet.otherverse.ruins.EyelessEyeItem;
 import com.shermansplanet.otherverse.spirits.SpiritItem;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import com.shermansplanet.otherverse.sympathy.SpindleItem;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.Item;
+import net.minecraft.Util;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.LazyLoadedValue;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -25,8 +32,10 @@ import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class OtherverseItems {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -50,6 +59,77 @@ public class OtherverseItems {
                         return item;
                     });
             SPINDLES.add(spindle);
+        }
+    }
+
+    public enum OtherverseArmorMaterials implements ArmorMaterial {
+        RUINS("otherverse:ruins", 33, Util.make(new EnumMap<>(ArmorItem.Type.class), (p_266649_) -> {
+            p_266649_.put(ArmorItem.Type.BOOTS, 3);
+            p_266649_.put(ArmorItem.Type.LEGGINGS, 6);
+            p_266649_.put(ArmorItem.Type.CHESTPLATE, 8);
+            p_266649_.put(ArmorItem.Type.HELMET, 3);
+        }), 10, SoundEvents.BONE_BLOCK_BREAK, 2.0F, 0.0F, () -> Ingredient.of(Items.SCULK));
+
+        private OtherverseArmorMaterials(String p_268171_, int p_268303_, EnumMap<ArmorItem.Type, Integer> p_267941_, int p_268086_, SoundEvent p_268145_, float p_268058_, float p_268180_, Supplier<Ingredient> p_268256_) {
+            this.name = p_268171_;
+            this.durabilityMultiplier = p_268303_;
+            this.protectionFunctionForType = p_267941_;
+            this.enchantmentValue = p_268086_;
+            this.sound = p_268145_;
+            this.toughness = p_268058_;
+            this.knockbackResistance = p_268180_;
+            this.repairIngredient = new LazyLoadedValue<>(p_268256_);
+        }
+
+        private static final EnumMap<ArmorItem.Type, Integer> HEALTH_FUNCTION_FOR_TYPE = Util.make(new EnumMap<>(ArmorItem.Type.class), (p_266653_) -> {
+            p_266653_.put(ArmorItem.Type.BOOTS, 13);
+            p_266653_.put(ArmorItem.Type.LEGGINGS, 15);
+            p_266653_.put(ArmorItem.Type.CHESTPLATE, 16);
+            p_266653_.put(ArmorItem.Type.HELMET, 11);
+        });
+        private final String name;
+        private final int durabilityMultiplier;
+        private final EnumMap<ArmorItem.Type, Integer> protectionFunctionForType;
+        private final int enchantmentValue;
+        private final SoundEvent sound;
+        private final float toughness;
+        private final float knockbackResistance;
+        private final LazyLoadedValue<Ingredient> repairIngredient;
+
+        public int getDurabilityForType(ArmorItem.Type p_266745_) {
+            return HEALTH_FUNCTION_FOR_TYPE.get(p_266745_) * this.durabilityMultiplier;
+        }
+
+        public int getDefenseForType(ArmorItem.Type p_266752_) {
+            return this.protectionFunctionForType.get(p_266752_);
+        }
+
+        public int getEnchantmentValue() {
+            return this.enchantmentValue;
+        }
+
+        public SoundEvent getEquipSound() {
+            return this.sound;
+        }
+
+        public Ingredient getRepairIngredient() {
+            return this.repairIngredient.get();
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public float getToughness() {
+            return this.toughness;
+        }
+
+        public float getKnockbackResistance() {
+            return this.knockbackResistance;
+        }
+
+        public String getSerializedName() {
+            return this.name;
         }
     }
 
@@ -90,6 +170,11 @@ public class OtherverseItems {
             () -> new BlockItem(OtherverseBlocks.DEMESNE_BEACON.get(), new Item.Properties()));
     public static final RegistryObject<Item> REDSTONE_NETHER_BRICKS = ITEMS.register("redstone_nether_bricks",
             () -> new BlockItem(OtherverseBlocks.REDSTONE_NETHER_BRICKS.get(), new Item.Properties()));
+    public static final RegistryObject<Item> MEMORY_SNARE = ITEMS.register("memory_snare",
+            () -> new BlockItem(OtherverseBlocks.MEMORY_SNARE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> WITCH_HAT = ITEMS.register("witch_hat",
+            () -> new WitchHatItem(new Item.Properties()));
+
     public static final RegistryObject<Item> WRIT = ITEMS.register("writ",
             () -> new WritItem(new Item.Properties()));
     public static final RegistryObject<Item> ESCAPE_ROPE = ITEMS.register("escape_rope",
@@ -106,6 +191,23 @@ public class OtherverseItems {
             () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> HOMUNCULUS_HEART = ITEMS.register("homunculus_heart",
             () -> new Item(new Item.Properties().durability(20)));
+
+    public static final RegistryObject<Item> SNUFFUR = ITEMS.register("snuffur", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> SHIVER_TOOTH = ITEMS.register("shiver_tooth", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> GLOOM_TENDRIL = ITEMS.register("gloom_tendril", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> ENDED_PEARL = ITEMS.register("ended_pearl", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> BANSHEE_MEMBRANE = ITEMS.register("banshee_membrane", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> FURY_ROD = ITEMS.register("fury_rod", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> BLUE_HONEY = ITEMS.register("blue_honey", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> RANCID_FLESH = ITEMS.register("rancid_flesh", () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> RUINS_HELMET = ITEMS.register("ruins_helmet", () -> new ArmorItem(OtherverseArmorMaterials.RUINS, ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final RegistryObject<Item> RUINS_CHESTPLATE = ITEMS.register("ruins_chestplate", () -> new ArmorItem(OtherverseArmorMaterials.RUINS, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final RegistryObject<Item> RUINS_LEGGINGS = ITEMS.register("ruins_leggings", () -> new ArmorItem(OtherverseArmorMaterials.RUINS, ArmorItem.Type.LEGGINGS, new Item.Properties()));
+    public static final RegistryObject<Item> RUINS_BOOTS = ITEMS.register("ruins_boots", () -> new ArmorItem(OtherverseArmorMaterials.RUINS, ArmorItem.Type.BOOTS, new Item.Properties()));
+
+    public static final RegistryObject<Item> CLAIM_ARROW = ITEMS.register("claim_arrow", () -> new ClaimArrowItem(new Item.Properties()));
+    public static final RegistryObject<Item> EYE_OF_THE_EYELESS = ITEMS.register("eye_of_the_eyeless", () -> new EyelessEyeItem(new Item.Properties()));
 
     public static final RegistryObject<Item> PLUM_BRICKS_ITEM = ITEMS.register("plum_bricks",
             () -> new BlockItem(OtherverseBlocks.PLUM_BRICKS.get(), new Item.Properties()));

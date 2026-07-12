@@ -31,7 +31,8 @@
     "SensorInjector",
     "FlowingFluidInjector",
     "BaseSpawnerInjector",
-    "MonsterInjector"
+    "MonsterInjector",
+    "PhantomInjector"
   ],
   "client":[
     "ModelBakeryInjector",

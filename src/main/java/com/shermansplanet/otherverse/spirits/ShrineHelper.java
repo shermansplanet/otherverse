@@ -1082,7 +1082,7 @@ public class ShrineHelper {
                             }
                         }
                     } else if (cc.getItem().is(OtherverseItems.SPINDLE_BLOODY.get())) {
-                        var otherEntity = SympathyManager.getEntityByUniqueId(cc.getItem().getTag().getUUID("sympathy_target"), sl);
+                        var otherEntity = SympathyManager.getEntityByUniqueId(cc.getItem().getTag().getString("sympathy_target"), sl);
                         if (otherEntity != null) {
                             var spent = overflowBehavior.affectEntity(otherEntity, remainingAmount, overdraw, shrine, simulate);
                             if (firstUse || overflowBehavior.multipleTargets()) {

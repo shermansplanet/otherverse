@@ -11,6 +11,7 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.familiar.FaceSetter;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
+import com.shermansplanet.otherverse.others.TyphloticJellyfish;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.core.BlockPos;
@@ -54,7 +55,6 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.lang.management.ManagementFactory;
 import java.util.*;
 
 public class BoundGoal extends Goal {
@@ -74,6 +74,7 @@ public class BoundGoal extends Goal {
     public int nextTick = 0;
     public boolean isTamed;
     public int range = 8;
+    private boolean needsToScanArea;
 
     public BoundGoal(Mob m, BindingInfo binding) {
         mob = m;
@@ -112,6 +113,13 @@ public class BoundGoal extends Goal {
     public void switchToDecider(ContractDecider decider) {
         currentDecider = decider;
         currentTask = null;
+        needsToScanArea = false;
+        for (ContractTask task : currentDecider.tasks) {
+            if (task.positionFilters.isEmpty() && task.corner0 == null) {
+                needsToScanArea = true;
+                break;
+            }
+        }
     }
 
     public void toggleFamiliarBehavior() {
@@ -177,17 +185,6 @@ public class BoundGoal extends Goal {
     private ContractTask currentTask = null;
     private int lookIndex;
 
-    private IFocus GetFocus(BlockPos pos, Level focusLevel) {
-        if (focusLevel.getBlockEntity(pos) instanceof ChalkCircle cc) {
-            return cc;
-        }
-        BlockFocus bf = DiagramManager.getOrCreateLevelData(focusLevel).allBlockFoci.get(pos);
-        if (bf != null) {
-            return bf;
-        }
-        return null;
-    }
-
     public void tick() {
         if (!PracticeWorldManager.worldSetUp) return;
         if (!(mob.level() instanceof ServerLevel)) return;
@@ -215,7 +212,7 @@ public class BoundGoal extends Goal {
         }
         mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
         if (FamiliarManager.isFamiliar(mob) || isTamed || mob instanceof TamableAnimal ta && ta.isTame()) return;
-        if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType())) {
+        if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType()) || mob.getMaxHealth() <= 20) {
             return;
         }
         //if (currentDecider == null) return;
@@ -248,7 +245,7 @@ public class BoundGoal extends Goal {
             if (!influence.getValue().equals(bindingFocus.getPos())) {
                 continue;
             }
-            IFocus focus = GetFocus(influence.getKey(), level);
+            IFocus focus = DiagramManager.getFocus(influence.getKey(), level);
             if (focus == null) {
                 continue;
             }
@@ -304,7 +301,7 @@ public class BoundGoal extends Goal {
 
     private void subdueTarget(ItemStack held) {
         if (!(mob.level() instanceof ServerLevel sl)) return;
-        var target = SympathyManager.getEntityByUniqueId(held.getTag().getUUID("sympathy_target"), sl);
+        var target = SympathyManager.getEntityByUniqueId(held.getTag().getString("sympathy_target"), sl);
         if (target == null || (target instanceof Mob m && m.isDeadOrDying())) {
             ItemEntity itementity = new ItemEntity(sl,
                     mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f),
@@ -522,7 +519,8 @@ public class BoundGoal extends Goal {
     }
 
     public static boolean isAttackGoal(Goal g) {
-        if (g instanceof MeleeAttackGoal || g instanceof RangedAttackGoal || g instanceof SwellGoal) return true;
+        if (g instanceof MeleeAttackGoal || g instanceof RangedAttackGoal || g instanceof SwellGoal
+                || g instanceof TyphloticJellyfish.JellyfishSeekPotionGoal) return true;
         var name = g.getClass().getName().toLowerCase();
         return name.contains("attack") || name.contains("melee");
     }
@@ -550,7 +548,7 @@ public class BoundGoal extends Goal {
 
     public void sendDebugMessage(Player entity) {
         var s = new StringBuilder();
-        
+
         if (currentTask == null) {
             s.append("no task");
         } else {
@@ -612,144 +610,155 @@ public class BoundGoal extends Goal {
 
     private boolean lookAround() {
         BlockPos basePos = mob.blockPosition();
-        for (ContractTask task : currentDecider.tasks) {
-            if (!task.isPossible()) {
-                continue;
-            }
-            for (ContractManager.PositionOrSpindle positionFilter : task.positionFilters) {
-                var pos = positionFilter.getPos(mob.level());
-                var accessFrom = task.isAcceptableTarget(pos, true);
-                if (accessFrom != null) {
-                    if (!positionFilter.isPosition) task.spindle = positionFilter;
-                    currentTask = task;
-                    currentTask.targetMovePos = accessFrom;
-                    currentTask.targetPos = pos;
-                    lookIndex = 0;
-                    return true;
+        if (mob.level().getGameTime() % 20 == mob.getId() % 20) {
+            for (ContractTask task : currentDecider.tasks) {
+                if (!task.isPossible()) {
+                    continue;
                 }
-            }
-            if (task.corner0 != null) {
-                var eyePos = mob.getEyePosition();
-                if (task.potentialTargets.isEmpty()) {
-                    var corner0 = task.corner0.getPos(mob.level());
-                    var corner1 = task.corner1.getPos(mob.level());
-                    var minCorner = new Vec3i(Math.min(corner0.getX(), corner1.getX()), Math.min(corner0.getY(), corner1.getY()), Math.min(corner0.getZ(), corner1.getZ()));
-                    var maxCorner = new Vec3i(Math.max(corner0.getX(), corner1.getX()), Math.max(corner0.getY(), corner1.getY()), Math.max(corner0.getZ(), corner1.getZ()));
-                    for (int x = minCorner.getX(); x <= maxCorner.getX(); x++) {
-                        for (int y = minCorner.getY(); y <= maxCorner.getY(); y++) {
-                            for (int z = minCorner.getZ(); z <= maxCorner.getZ(); z++) {
-                                task.potentialTargets.add(new BlockPos(x, y, z));
-                            }
-                        }
-                    }
-                    task.potentialTargets.sort(Comparator.comparingDouble(bp -> eyePos.distanceToSqr(new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))));
-                } else {
-                    for (var i = 0; i < 8; i++) {
-                        var index = task.lookIndex + i;
-                        if (index >= task.potentialTargets.size()) {
-                            task.resetLookIndex();
-                            break;
-                        }
-                        var target = task.potentialTargets.get(index);
-                        var accessFrom = task.isAcceptableTarget(target, true);
-                        if (accessFrom == null) continue;
+                for (ContractManager.PositionOrSpindle positionFilter : task.positionFilters) {
+                    var pos = positionFilter.getPos(mob.level());
+                    var accessFrom = task.isAcceptableTarget(pos, true);
+                    if (accessFrom != null) {
+                        if (!positionFilter.isPosition) task.spindle = positionFilter;
                         currentTask = task;
                         currentTask.targetMovePos = accessFrom;
-                        currentTask.targetPos = target;
+                        currentTask.targetPos = pos;
+                        lookIndex = 0;
                         return true;
                     }
-                    task.lookIndex += 8;
                 }
-            }
-            if (task.taskType == ContractTask.TaskType.TAKE) {
-                var pair = task.getClosestReachableDroppedItem();
-                if (pair.getFirst() != null) {
-                    currentTask = task;
-                    currentTask.targetItem = pair.getFirst();
-                    currentTask.targetMovePos = pair.getSecond();
-                    currentTask.isTakingFromGround = true;
-                    lookIndex = 0;
-                    return true;
-                }
-            } else if (task.taskType == ContractTask.TaskType.ATTACK) {
-                LivingEntity le = task.getClosestValidLivingTarget();
-                if (le != null) {
-                    currentTask = task;
-                    currentTask.targetMob = le;
-                    lookIndex = 0;
-                    return true;
-                }
-            }
-            var rememberedBlocks = mob.getPersistentData().getCompound(REMEMBERED_BLOCKS);
-            if (rememberedBlocks.contains(task.taskId)) {
-                var ints = rememberedBlocks.getIntArray(task.taskId);
-                var pos = new BlockPos(ints[0], ints[1], ints[2]);
-                var accessFrom = task.isAcceptableTarget(pos, false);
-                if (accessFrom != null) {
-                    currentTask = task;
-                    currentTask.targetMovePos = accessFrom;
-                    currentTask.targetPos = pos;
-                    lookIndex = 0;
-                    return true;
-                }
-            }
-        }
-        for (int i = 0; i < 256; i++) {
-            int shellIndex = Mth.floor((Math.pow(lookIndex, 1f / 3f) + 1) / 2);
-            if (shellIndex > range) {
-                shellIndex = 0;
-                lookIndex = 0;
-                for (ContractTask task : currentDecider.tasks) {
-                    if (task.taskType == ContractTask.TaskType.OBSERVE) {
-                        task.fail();
-                        return false;
+                if (task.corner0 != null) {
+                    var eyePos = mob.getEyePosition();
+                    if (task.potentialTargets.isEmpty()) {
+                        var corner0 = task.corner0.getPos(mob.level());
+                        var corner1 = task.corner1.getPos(mob.level());
+                        var minCorner = new Vec3i(Math.min(corner0.getX(), corner1.getX()), Math.min(corner0.getY(), corner1.getY()), Math.min(corner0.getZ(), corner1.getZ()));
+                        var maxCorner = new Vec3i(Math.max(corner0.getX(), corner1.getX()), Math.max(corner0.getY(), corner1.getY()), Math.max(corner0.getZ(), corner1.getZ()));
+                        for (int x = minCorner.getX(); x <= maxCorner.getX(); x++) {
+                            for (int y = minCorner.getY(); y <= maxCorner.getY(); y++) {
+                                for (int z = minCorner.getZ(); z <= maxCorner.getZ(); z++) {
+                                    task.potentialTargets.add(new BlockPos(x, y, z));
+                                }
+                            }
+                        }
+                        task.potentialTargets.sort(Comparator.comparingDouble(bp -> eyePos.distanceToSqr(new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))));
+                    } else {
+                        for (var i = 0; i < 8; i++) {
+                            var index = task.lookIndex + i;
+                            if (index >= task.potentialTargets.size()) {
+                                task.resetLookIndex();
+                                break;
+                            }
+                            var target = task.potentialTargets.get(index);
+                            var accessFrom = task.isAcceptableTarget(target, true);
+                            if (accessFrom == null) continue;
+                            currentTask = task;
+                            currentTask.targetMovePos = accessFrom;
+                            currentTask.targetPos = target;
+                            return true;
+                        }
+                        task.lookIndex += 8;
                     }
                 }
-                ContractDecider decider = currentDecider.fallback == null ? rootDecider : currentDecider.fallback;
-                switchToDecider(decider);
-            }
-            BlockPos lookOffset = BlockPos.ZERO;
-            if (shellIndex > 0) {
-                int priorSideLength = shellIndex * 2 - 1;
-                int indexWithinShell = lookIndex - (int) Math.pow(priorSideLength, 3);
-                int priorSquareArea = (int) Math.pow(priorSideLength, 2);
-                if (indexWithinShell < priorSquareArea * 6) {
-                    var squareIndex = (int) (indexWithinShell / priorSquareArea);
-                    var direction = Direction.values()[squareIndex];
-                    var indexWithinSquare = indexWithinShell - squareIndex * priorSquareArea;
-                    lookOffset = lookOffset.relative(direction, shellIndex)
-                            .relative(otherDirections[squareIndex][0], indexWithinSquare / priorSideLength - priorSideLength / 2)
-                            .relative(otherDirections[squareIndex][1], indexWithinSquare % priorSideLength - priorSideLength / 2);
-                } else if (indexWithinShell < priorSquareArea * 6 + priorSideLength * 12) {
-                    indexWithinShell -= priorSquareArea * 6;
-                    var edgeIndex = indexWithinShell / priorSideLength;
-                    var edgeDirection = edgeDirections[edgeIndex];
-                    lookOffset = lookOffset
-                            .relative(edgeDirection[0], priorSideLength / 2 + 1)
-                            .relative(edgeDirection[1], priorSideLength / 2 + 1)
-                            .relative(edgeDirection[2], indexWithinShell - edgeIndex * priorSideLength - priorSideLength / 2);
-                } else {
-                    indexWithinShell -= priorSquareArea * 6 + priorSideLength * 12;
-                    lookOffset = new BlockPos(cornerDirections[indexWithinShell].multiply(priorSideLength / 2 + 1));
+                if (task.taskType == ContractTask.TaskType.TAKE) {
+                    var pair = task.getClosestReachableDroppedItem();
+                    if (pair.getFirst() != null) {
+                        currentTask = task;
+                        currentTask.targetItem = pair.getFirst();
+                        currentTask.targetMovePos = pair.getSecond();
+                        currentTask.isTakingFromGround = true;
+                        lookIndex = 0;
+                        return true;
+                    }
+                } else if (task.taskType == ContractTask.TaskType.ATTACK) {
+                    LivingEntity le = task.getClosestValidLivingTarget();
+                    if (le != null) {
+                        currentTask = task;
+                        currentTask.targetMob = le;
+                        lookIndex = 0;
+                        return true;
+                    }
                 }
-            }
-            BlockPos pos = basePos.offset(lookOffset);
-            for (ContractTask task : currentDecider.tasks) {
-                if (task.positionFilters.isEmpty() && task.corner0 == null && task.isPossible()) {
+                var rememberedBlocks = mob.getPersistentData().getCompound(REMEMBERED_BLOCKS);
+                if (rememberedBlocks.contains(task.taskId)) {
+                    var ints = rememberedBlocks.getIntArray(task.taskId);
+                    var pos = new BlockPos(ints[0], ints[1], ints[2]);
                     var accessFrom = task.isAcceptableTarget(pos, false);
                     if (accessFrom != null) {
                         currentTask = task;
-                        currentTask.targetPos = pos;
                         currentTask.targetMovePos = accessFrom;
-                        mob.getPersistentData().getCompound(REMEMBERED_BLOCKS).putIntArray(task.taskId,
-                                new int[]{pos.getX(), pos.getY(), pos.getZ()});
+                        currentTask.targetPos = pos;
                         lookIndex = 0;
                         return true;
                     }
                 }
             }
-            lookIndex++;
+            if (!needsToScanArea) {
+                return onCannotStartTask();
+            }
         }
+        if (needsToScanArea) {
+            for (int i = 0; i < 256; i++) {
+                int shellIndex = Mth.floor((Math.pow(lookIndex, 1f / 3f) + 1) / 2);
+                if (shellIndex > range) {
+                    lookIndex = 0;
+                    return onCannotStartTask();
+                }
+                BlockPos lookOffset = BlockPos.ZERO;
+                if (shellIndex > 0) {
+                    int priorSideLength = shellIndex * 2 - 1;
+                    int indexWithinShell = lookIndex - (int) Math.pow(priorSideLength, 3);
+                    int priorSquareArea = (int) Math.pow(priorSideLength, 2);
+                    if (indexWithinShell < priorSquareArea * 6) {
+                        var squareIndex = (int) (indexWithinShell / priorSquareArea);
+                        var direction = Direction.values()[squareIndex];
+                        var indexWithinSquare = indexWithinShell - squareIndex * priorSquareArea;
+                        lookOffset = lookOffset.relative(direction, shellIndex)
+                                .relative(otherDirections[squareIndex][0], indexWithinSquare / priorSideLength - priorSideLength / 2)
+                                .relative(otherDirections[squareIndex][1], indexWithinSquare % priorSideLength - priorSideLength / 2);
+                    } else if (indexWithinShell < priorSquareArea * 6 + priorSideLength * 12) {
+                        indexWithinShell -= priorSquareArea * 6;
+                        var edgeIndex = indexWithinShell / priorSideLength;
+                        var edgeDirection = edgeDirections[edgeIndex];
+                        lookOffset = lookOffset
+                                .relative(edgeDirection[0], priorSideLength / 2 + 1)
+                                .relative(edgeDirection[1], priorSideLength / 2 + 1)
+                                .relative(edgeDirection[2], indexWithinShell - edgeIndex * priorSideLength - priorSideLength / 2);
+                    } else {
+                        indexWithinShell -= priorSquareArea * 6 + priorSideLength * 12;
+                        lookOffset = new BlockPos(cornerDirections[indexWithinShell].multiply(priorSideLength / 2 + 1));
+                    }
+                }
+                BlockPos pos = basePos.offset(lookOffset);
+                for (ContractTask task : currentDecider.tasks) {
+                    if (task.positionFilters.isEmpty() && task.corner0 == null && task.isPossible()) {
+                        var accessFrom = task.isAcceptableTarget(pos, false);
+                        if (accessFrom != null) {
+                            currentTask = task;
+                            currentTask.targetPos = pos;
+                            currentTask.targetMovePos = accessFrom;
+                            mob.getPersistentData().getCompound(REMEMBERED_BLOCKS).putIntArray(task.taskId,
+                                    new int[]{pos.getX(), pos.getY(), pos.getZ()});
+                            lookIndex = 0;
+                            return true;
+                        }
+                    }
+                }
+                lookIndex++;
+            }
+        }
+        return false;
+    }
+
+    private boolean onCannotStartTask() {
+        for (ContractTask task : currentDecider.tasks) {
+            if (task.taskType == ContractTask.TaskType.OBSERVE) {
+                task.fail();
+                return false;
+            }
+        }
+        ContractDecider decider = currentDecider.fallback == null ? rootDecider : currentDecider.fallback;
+        switchToDecider(decider);
         return false;
     }
 
@@ -777,9 +786,8 @@ public class BoundGoal extends Goal {
         itemDropDenyList.clear();
         takesAll = false;
         rootDecider = makeDecider(contractTag);
-        currentDecider = rootDecider;
+        switchToDecider(rootDecider);
         range = contractTag.contains("range") ? contractTag.getInt("range") : 8;
-        currentTask = null;
     }
 
     public ContractDecider makeDecider(CompoundTag tag) {

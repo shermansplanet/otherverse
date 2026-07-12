@@ -1,15 +1,19 @@
 package com.shermansplanet.otherverse.mixin;
 
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.others.TyphloticZombie;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
 import com.shermansplanet.otherverse.spirits.Spirits;
+import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
@@ -26,6 +30,8 @@ public abstract class ItemEntityInjector extends Entity {
         super(p_19870_, p_19871_);
     }
 
+    private int secondsInDisgust = 0;
+
     @Shadow
     public Entity getOwner() {
         return null;
@@ -38,6 +44,24 @@ public abstract class ItemEntityInjector extends Entity {
 
     @Shadow
     public void setItem(ItemStack p_32046_) {
+    }
+
+    @Inject(method = "tick", at = @At("RETURN"))
+    private void onTick(CallbackInfo ci) {
+        if (level().getGameTime() % 20 != 0) return;
+        if (level() instanceof ServerLevel sl && getItem().is(OtherverseItems.SPINDLE_BLOODY.get()) && getItem().getOrCreateTag().getBoolean("can_bind_remotely")) {
+            SympathyManager.tryBindFromSpindleItem(getItem(), sl, getBoundingBox());
+        }
+        if (!TyphloticZombie.isFreshFood(getItem())) return;
+        level().getBiome(blockPosition()).unwrapKey().ifPresent(biome -> {
+            var path = biome.location().getPath();
+            if (path.equals("ruins_disgust")) {
+                secondsInDisgust++;
+                if (secondsInDisgust == 7) {
+                    setItem(new ItemStack(Items.ROTTEN_FLESH, getItem().getCount()));
+                }
+            }
+        });
     }
 
     @Inject(method = "setUnderwaterMovement", at = @At("RETURN"))

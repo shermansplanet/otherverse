@@ -72,62 +72,19 @@ public class DiagramSightRenderer {
         }
 
         TransientDiagramData levelData = DiagramManager.getOrCreateLevelData(camera.level());
-        if (camera.level().getGameTime() % 8 == 0) {
+        if (camera.level().getGameTime() % 16 == 0) {
             RandomSource random = camera.level().random;
             for (BlockPos pos : levelData.getAllPlacedItemPositions()) {
                 CompoundTag tag = levelData.getPlacedItemTag(pos);
                 SpiritType spiritType = Spirits.spiritsByLabel.get(tag.getString("spirit_type"));
-                var isShrine = tag.contains("shrine");
-                Vec3 v1 = new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-                if (isShrine) {
-                    var emptyDirections = new ArrayList<Direction>();
-                    var hallowDirections = new HashSet<Direction>();
-                    var shrineToMatch = ShrineHelper.getShrine(camera.level(), pos);
-                    for (var dir : Direction.values()) {
-                        var newpos = pos.relative(dir);
-                        if (camera.level().isEmptyBlock(newpos) || camera.level().getBlockState(newpos).is(OtherverseBlocks.CHALK_LINE.get())) {
-                            emptyDirections.add(dir);
-                        } else if (ShrineHelper.getShrine(camera.level(), newpos) == shrineToMatch) {
-                            hallowDirections.add(dir);
-                        }
-                    }
-                    var validDirectionPairs = new ArrayList<Pair<Direction, Direction>>();
-                    if(hallowDirections.isEmpty()) hallowDirections = new HashSet<>(Arrays.stream(Direction.values()).toList());
-                    for (var dir1 : emptyDirections) {
-                        for (var dir2 : hallowDirections) {
-                            if (dir1.getAxis() == dir2.getAxis()) continue;
-                            validDirectionPairs.add(Pair.of(dir1, dir2));
-                        }
-                    }
-                    var speed = 0.2f;
-                    if (validDirectionPairs.isEmpty()) continue;
-                        /*var dir = emptyDirections.get(random.nextInt(emptyDirections.size()));
-                        v1 = v1.relative(dir, 0.6f);
-                        v1 = v1.add(dir.getStepX() == 0 ? random.nextFloat() - 0.5f : 0,
-                                dir.getStepY() == 0 ? random.nextFloat() - 0.5f : 0,
-                                dir.getStepZ() == 0 ? random.nextFloat() - 0.5f : 0);
-                        camera.level(.addParticle(
-                                new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
-                                        Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
-                                dir.getStepX() * speed, dir.getStepY() * speed, dir.getStepZ() * speed);
-                        continue;*/
-
-                    var dirs = validDirectionPairs.get(random.nextInt(validDirectionPairs.size()));
-                    v1 = v1.relative(dirs.getFirst(), 0.6f);
-                    var normal = dirs.getFirst().getNormal().cross(dirs.getSecond().getNormal());
-                    var offset = random.nextFloat() * 0.5f;
-                    v1 = v1.add(normal.getX() * offset, normal.getY() * offset, normal.getZ() * offset);
-                    camera.level().addParticle(
-                            new ItemParticleOption(OtherverseParticles.HALLOW_PARTICLE_TYPE,
-                                    Spirits.spiritItems.get(spiritType).get().getDefaultInstance()), v1.x, v1.y, v1.z,
-                            dirs.getSecond().getStepX() * speed, dirs.getSecond().getStepY() * speed, dirs.getSecond().getStepZ() * speed);
-
-                } else {
-                    if (camera.level().getGameTime() % 16 != 0) continue;
+                if (tag.contains("shrine")) {
+                    Vec3 v1 = new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
                     Vec3 offset = random.nextBoolean()
                             ? new Vec3(random.nextBoolean() ? -0.6D : 0.6D,
-                            random.nextDouble() - 0.5D, random.nextDouble() - 0.5D)
-                            : new Vec3(random.nextDouble() - 0.5D, random.nextDouble() - 0.5D,
+                            random.nextDouble() - 0.5D,
+                            random.nextDouble() - 0.5D)
+                            : new Vec3(random.nextDouble() - 0.5D,
+                            random.nextDouble() - 0.5D,
                             random.nextBoolean() ? -0.6D : 0.6D);
                     v1 = v1.add(offset);
                     camera.level().addParticle(

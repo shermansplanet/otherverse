@@ -44,13 +44,11 @@ public class ClientEvents {
                 if (item == OtherverseItems.IDOL || item == OtherverseItems.SELF) continue;
                 event.accept(item);
             }
-        }
-        else if (event.getTabKey() == Otherverse.TAB_SPIRITS.getKey()) {
+        } else if (event.getTabKey() == Otherverse.TAB_SPIRITS.getKey()) {
             for (var item : OtherverseItems.ITEMS.getEntries()) {
                 if (item.get() instanceof SpiritItem) event.accept(item);
             }
-        }
-        else if (event.getTabKey() == Otherverse.TAB_OTHERS.getKey()){
+        } else if (event.getTabKey() == Otherverse.TAB_OTHERS.getKey()) {
             var encounteredTypes = new HashSet<EntityType<?>>();
             var denyList = new HashSet<String>();
             denyList.add("reaching_hand");
@@ -89,6 +87,10 @@ public class ClientEvents {
         event.register((stack, color) ->
                         stack.hasTag() ? DyeColor.values()[stack.getTag().getInt("dye_color")].getFireworkColor() : 0xffffff,
                 OtherverseItems.CHALK.get());
+
+        event.register((stack, colorIndex) ->
+                        stack.hasTag() ? DyeColor.values()[stack.getTag().getInt(colorIndex == 0 ? "main_color" : "buckle_color")].getFireworkColor() : 1973019,
+                OtherverseItems.WITCH_HAT.get());
     }
 
     @SubscribeEvent

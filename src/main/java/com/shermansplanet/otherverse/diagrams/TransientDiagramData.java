@@ -191,7 +191,7 @@ public class TransientDiagramData {
     }
 
     public void putSpindle(ItemStack stack, BlockPos pos) {
-        var key = stack.getTag().getUUID("sympathy_target").toString();
+        var key = stack.getTag().getString("sympathy_target");
         if (!selfPositions.containsKey(key)) selfPositions.put(key, new HashSet<>());
         selfPositions.get(key).add(pos);
         if (savedData != null) savedData.setDirty();

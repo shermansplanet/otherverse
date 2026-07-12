@@ -1,0 +1,152 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 32],
+	"textures": {
+		"0": "ruins_armor"
+	},
+	"elements": [
+		{
+			"name": "Helmet",
+			"from": [3, 22, 3],
+			"to": [13, 32, 13],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [2, 4, 4, 8], "texture": "#0"},
+				"east": {"uv": [0, 4, 2, 8], "texture": "#0"},
+				"south": {"uv": [6, 4, 8, 8], "texture": "#0"},
+				"west": {"uv": [4, 4, 6, 8], "texture": "#0"},
+				"up": {"uv": [4, 4, 2, 0], "texture": "#0"},
+				"down": {"uv": [6, 0, 4, 4], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Hat Layer",
+			"from": [2.5, 21, 2.5],
+			"to": [13.5, 32, 13.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [10, 4, 12, 8], "texture": "#0"},
+				"east": {"uv": [8, 4, 10, 8], "texture": "#0"},
+				"south": {"uv": [14, 4, 16, 8], "texture": "#0"},
+				"west": {"uv": [12, 4, 14, 8], "texture": "#0"},
+				"up": {"uv": [12, 4, 10, 0], "texture": "#0"},
+				"down": {"uv": [14, 0, 12, 4], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Chestplate",
+			"from": [2.99, 10.99, 4.99],
+			"to": [13.01, 25.01, 11.01],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [5, 10, 7, 16], "texture": "#0"},
+				"east": {"uv": [4, 10, 5, 16], "texture": "#0"},
+				"south": {"uv": [8, 10, 10, 16], "texture": "#0"},
+				"west": {"uv": [7, 10, 8, 16], "texture": "#0"},
+				"up": {"uv": [7, 10, 5, 8], "texture": "#0"},
+				"down": {"uv": [9, 8, 7, 10], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Right Arm Armor",
+			"from": [11, 11, 5],
+			"to": [17, 25, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [11, 10, 12, 16], "texture": "#0"},
+				"east": {"uv": [10, 10, 11, 16], "texture": "#0"},
+				"south": {"uv": [13, 10, 14, 16], "texture": "#0"},
+				"west": {"uv": [12, 10, 13, 16], "texture": "#0"},
+				"up": {"uv": [12, 10, 11, 8], "texture": "#0"},
+				"down": {"uv": [13, 8, 12, 10], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Left Arm Armor",
+			"from": [-1, 11, 5],
+			"to": [5, 25, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [12, 10, 11, 16], "texture": "#0"},
+				"east": {"uv": [13, 10, 12, 16], "texture": "#0"},
+				"south": {"uv": [14, 10, 13, 16], "texture": "#0"},
+				"west": {"uv": [11, 10, 10, 16], "texture": "#0"},
+				"up": {"uv": [11, 10, 12, 8], "texture": "#0"},
+				"down": {"uv": [12, 8, 13, 10], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Right Boot",
+			"from": [6.9, -1, 5],
+			"to": [12.9, 13, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [1, 10, 2, 16], "texture": "#0"},
+				"east": {"uv": [0, 10, 1, 16], "texture": "#0"},
+				"south": {"uv": [3, 10, 4, 16], "texture": "#0"},
+				"west": {"uv": [2, 10, 3, 16], "texture": "#0"},
+				"up": {"uv": [2, 10, 1, 8], "texture": "#0"},
+				"down": {"uv": [3, 8, 2, 10], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Left Boot",
+			"from": [3.1, -1, 5],
+			"to": [9.1, 13, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [2, 10, 1, 16], "texture": "#0"},
+				"east": {"uv": [3, 10, 2, 16], "texture": "#0"},
+				"south": {"uv": [4, 10, 3, 16], "texture": "#0"},
+				"west": {"uv": [1, 10, 0, 16], "texture": "#0"},
+				"up": {"uv": [1, 10, 2, 8], "texture": "#0"},
+				"down": {"uv": [2, 8, 3, 10], "texture": "#0"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "Head",
+			"origin": [8, 24, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [0, 1]
+		},
+		{
+			"name": "Body",
+			"origin": [8, 24, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [2]
+		},
+		{
+			"name": "Right Arm",
+			"origin": [13, 22, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [3]
+		},
+		{
+			"name": "Left Arm",
+			"origin": [3, 22, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [4]
+		},
+		{
+			"name": "Right Leg",
+			"origin": [9.9, 12, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [5]
+		},
+		{
+			"name": "Left Leg",
+			"origin": [6.1, 12, 8],
+			"scope": 0,
+			"color": 0,
+			"children": [6]
+		}
+	]
+}

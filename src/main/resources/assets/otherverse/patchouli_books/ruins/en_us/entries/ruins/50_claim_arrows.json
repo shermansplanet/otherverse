@@ -1,0 +1,17 @@
+{
+    "name": "Claim Arrows",
+    "sortnum":50,
+    "icon": "otherverse:claim_arrow",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:claim_arrow",
+            "text": "A fury rod and shiver tooth can be crafted into a special arrow. Claim arrows only deal half damage, but they mark your claim over those you best in combat, giving you power over your foes."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If you hit a mob with a claim arrow while holding a spindle in your off-hand, the spindle will become bloodied, entangled with that mob (so long as the mob is in a loaded chunk).$(br2)If you hit the mob thrice without missing or getting hurt by it, you will be able to expend the spindle to summon the mob.$(br2)After nine hits, you can toss the spindle into a block focus and it will act as if the mob were in that focus."
+        }
+    ]
+}

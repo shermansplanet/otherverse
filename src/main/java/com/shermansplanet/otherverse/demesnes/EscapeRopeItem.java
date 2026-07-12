@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.ruins.RuinsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -53,8 +54,22 @@ public class EscapeRopeItem extends Item {
     private InteractionResultHolder<ItemStack> onUse(Level level, Player player, InteractionHand hand, Vec3 pos, boolean fromBlock) {
         var demesne = DemesnesManager.getData(player);
         var itemstack = player.getItemInHand(hand);
-        if (!(level instanceof ServerLevel sl)
-                || demesne == null) {
+        if (!(level instanceof ServerLevel sl)) {
+            return InteractionResultHolder.success(itemstack);
+        }
+
+        if (!itemstack.hasTag() || !itemstack.getTag().contains("escape_rope_x")) {
+            if (player instanceof ServerPlayer sp && sp.level().dimension().location().getPath().equals("ruins")) {
+                if (!player.getAbilities().instabuild) {
+                    itemstack.shrink(1);
+                    if (itemstack.isEmpty()) player.getInventory().removeItem(itemstack);
+                }
+                RuinsManager.returnFromRuins(sp);
+                return InteractionResultHolder.success(itemstack);
+            }
+        }
+
+        if (demesne == null) {
             return InteractionResultHolder.success(itemstack);
         }
 
@@ -136,6 +151,7 @@ public class EscapeRopeItem extends Item {
 
         if (!player.getAbilities().instabuild) {
             itemstack.shrink(1);
+            if (itemstack.isEmpty()) player.getInventory().removeItem(itemstack);
         }
 
         return InteractionResultHolder.consume(itemstack);

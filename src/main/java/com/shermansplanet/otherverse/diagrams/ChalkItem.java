@@ -5,6 +5,7 @@ import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -63,6 +64,9 @@ public class ChalkItem extends Item implements DyeableLeatherItem {
         BlockPlaceContext ctx = new BlockPlaceContext(useCtx);
         BlockEntity be = ctx.getLevel().getBlockEntity(useCtx.getClickedPos());
         if (useCtx.getPlayer() != null && useCtx.getPlayer().isShiftKeyDown()) {
+//            if (be instanceof ChalkCircle cc && useCtx.getPlayer() instanceof ServerPlayer sp) {
+//                sp.displayClientMessage(Component.literal(cc.getLockStatus()), false);
+//            }
             if (be == null) {
                 if (!useCtx.getLevel().isClientSide()) {
                     return InteractionResult.FAIL;

@@ -37,7 +37,7 @@ public class DemesnesClaimRitual {
     public int range = -1;
     public AABB ritualBounds;
     //private final HashSet<Entity> ritualEntities = new HashSet<>();
-    public BlockPos minBlock, maxBlock;
+    public BlockPos minBlock, maxBlock, claimPos;
     public int levelId;
 
     private int tickCount = 0;
@@ -56,6 +56,7 @@ public class DemesnesClaimRitual {
         range = beacon.range;
         minBlock = beacon.minBlock;
         maxBlock = beacon.maxBlock;
+        claimPos = msg.centerPos();
         spiritType = beacon.spiritType;
         ritualBounds = new AABB(minBlock, maxBlock);
         makeEvent();

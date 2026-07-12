@@ -9,6 +9,7 @@ import com.shermansplanet.otherverse.binding.BindingRenderer;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
+import com.shermansplanet.otherverse.ruins.MemorySnareBlockEntity;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.client.Minecraft;
@@ -85,6 +86,13 @@ public class SpiritAmountRenderer {
                         labelTextLines[i] = lines.get(i).copy();
                     }
                 }
+                shouldRenderLabel = true;
+                return;
+            }
+            if (blockEntity instanceof MemorySnareBlockEntity snare) {
+                labelTextLines = new MutableComponent[]{
+                        Component.literal("Stored XP: " + snare.storedExperience)
+                };
                 shouldRenderLabel = true;
                 return;
             }

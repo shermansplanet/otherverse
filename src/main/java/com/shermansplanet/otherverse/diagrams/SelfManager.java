@@ -6,7 +6,7 @@ import com.shermansplanet.otherverse.Otherverse;
 import java.util.UUID;
 
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
-import com.shermansplanet.otherverse.others.TyphloticJellyfish;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -18,6 +18,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.player.AdvancementEvent.AdvancementEarnEvent;
@@ -36,9 +37,9 @@ public class SelfManager {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static boolean ChangeSelf(Player player, int selfDelta) {
+    public static boolean ChangeSelf(LivingEntity le, int selfDelta) {
         LOGGER.debug("Changing Self by " + selfDelta);
-        AttributeInstance healthAttribute = player.getAttribute(Attributes.MAX_HEALTH);
+        AttributeInstance healthAttribute = le.getAttribute(Attributes.MAX_HEALTH);
         AttributeModifier prevMod = healthAttribute.getModifier(selfModifierId);
         double prevCoeff = prevMod == null ? 1 : (prevMod.getAmount() + 1);
         if (prevCoeff == 1 && selfDelta > 0) {
@@ -57,10 +58,10 @@ public class SelfManager {
                 new AttributeModifier(selfModifierId, "Spent Self", newCoeff - 1, Operation.MULTIPLY_TOTAL));
 
         if (selfDelta < 0) {
-            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, selfDelta * -240));
+            le.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, selfDelta * -240, 0, false, false, true));
         }
 
-        player.setHealth(Math.min(player.getHealth(), player.getMaxHealth()));
+        le.setHealth(Math.min(le.getHealth(), le.getMaxHealth()));
         return true;
     }
 
@@ -106,9 +107,17 @@ public class SelfManager {
     public static void SelfDrainAttack(Mob attacker, LivingEntity target) {
         var prevHp = target.getHealth();
         attacker.doHurtTarget(target);
-        if (target instanceof Player player) {
-            var selfDamage = target.getHealth() - prevHp;
-            SelfManager.ChangeSelf(player, (int) selfDamage);
+        var selfDamage = target.getHealth() - prevHp;
+        selfDamage *= getSelfCoeff(target);
+        SelfManager.ChangeSelf(target, Math.round(selfDamage / 2f));
+    }
+
+    public static float getSelfCoeff(LivingEntity target) {
+        var coeff = 1f;
+        for (var armor : target.getArmorSlots()) {
+            if (armor.getItem() instanceof ArmorItem a && a.getMaterial() == OtherverseItems.OtherverseArmorMaterials.RUINS)
+                coeff -= 0.25f;
         }
+        return coeff;
     }
 }

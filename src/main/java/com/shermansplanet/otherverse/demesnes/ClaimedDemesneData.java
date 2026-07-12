@@ -20,6 +20,7 @@ import java.util.*;
 
 public class ClaimedDemesneData {
     public final BlockPos minPos, maxPos;
+    public final String biome;
     public final int range, levelId;
     public final String practitioner;
     private final HashMap<DemesnesManager.DemesnePerk, Integer> perkValues = new HashMap<>();
@@ -35,9 +36,10 @@ public class ClaimedDemesneData {
 
     public final SpiritType spiritType;
 
-    public ClaimedDemesneData(BlockPos minPos, BlockPos maxPos, String practitioner, int range, int levelId, SpiritType spiritType) {
+    public ClaimedDemesneData(BlockPos minPos, BlockPos maxPos, String biome, String practitioner, int range, int levelId, SpiritType spiritType) {
         this.minPos = minPos;
         this.maxPos = maxPos;
+        this.biome = biome;
         this.spiritType = spiritType;
         this.practitioner = practitioner;
         this.range = range;
@@ -54,6 +56,7 @@ public class ClaimedDemesneData {
         maxPos = new BlockPos(tag.getInt("max_x"),
                 tag.getInt("max_y"),
                 tag.getInt("max_z"));
+        biome = tag.getString("biome");
 
         fixedTime = tag.contains("fixedTime") ? tag.getLong("fixedTime") : -1;
 
@@ -102,7 +105,7 @@ public class ClaimedDemesneData {
         for (var key : namespaces.getAllKeys()) {
             var namespace = namespaces.getString(key);
             var path = paths.getString(key);
-            favoredMaterials.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(namespace, path)));
+            favoredMaterials.add(ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath(namespace, path)));
         }
 
         favoredSpirits.addAll(tag.getCompound("favoredSpirits").getAllKeys());
@@ -124,6 +127,7 @@ public class ClaimedDemesneData {
         tag.putInt("max_x", maxPos.getX());
         tag.putInt("max_y", maxPos.getY());
         tag.putInt("max_z", maxPos.getZ());
+        tag.putString("biome", biome);
 
         tag.putLong("fixedTime", fixedTime);
 

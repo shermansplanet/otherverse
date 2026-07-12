@@ -13,10 +13,8 @@ showAsResourcePack = false
 
 [[mods]]
 modId = "otherverse"
-version = "1.1.14"
+version = "1.2.1"
 displayName = "Pact Magic"
-#updateJSONURL="minecraftforge.net/versions.json"
-displayURL = "minecraftforge.net"
 logoFile = "logo.png"
 authors = "Tickbug"
 description = '''
@@ -50,7 +48,7 @@ versionRange = "[1.0,)"
 
 [[dependencies.otherverse]]
 modId = "patchouli"
-mandatory = false
+mandatory = true
 side = "CLIENT"
 versionRange = "[1.0,)"
 

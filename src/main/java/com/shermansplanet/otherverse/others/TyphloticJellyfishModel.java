@@ -38,7 +38,7 @@ public class TyphloticJellyfishModel<T extends TyphloticJellyfish> extends Hiera
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
 
-        PartDefinition root = partdefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, -8.0F, 0.0F));
+        PartDefinition root = partdefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         PartDefinition tentacle_1 = root.addOrReplaceChild("tentacle_1", CubeListBuilder.create().texOffs(0, 32).addBox(-8.0F, 0.0F, 0.0F, 14.0F, 32.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(7.0F, 0.0F, 1.0F, 0.0F, -1.5708F, 0.0F));
 

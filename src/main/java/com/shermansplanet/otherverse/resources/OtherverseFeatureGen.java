@@ -42,4 +42,6 @@ public class OtherverseFeatureGen {
             FEATURES.register("trust_light", () -> new TrustLightFeature(NoneFeatureConfiguration.CODEC));
     public static final RegistryObject<Feature<NoneFeatureConfiguration>> VIGIL_MAZE =
             FEATURES.register("vigil_maze", () -> new VigilMazeFeature(NoneFeatureConfiguration.CODEC));
+    public static final RegistryObject<Feature<NoneFeatureConfiguration>> ECSTASY_STRAND =
+            FEATURES.register("ecstasy_strand", () -> new EcstasyStrandFeature(NoneFeatureConfiguration.CODEC));
 }

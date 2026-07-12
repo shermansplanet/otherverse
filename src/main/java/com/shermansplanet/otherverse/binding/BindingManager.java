@@ -11,6 +11,7 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
+import com.shermansplanet.otherverse.others.Banshee;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -67,7 +68,7 @@ public class BindingManager {
 
     public static void setHeldItem(LivingEntity entity, ItemStack stack) {
         entity.setItemSlot(EquipmentSlot.MAINHAND, stack);
-        if (entity instanceof EnderMan em) {
+        if (entity instanceof EnderMan em && entity.getType() == EntityType.ENDERMAN) {
             if (!stack.isEmpty() && stack.getItem() instanceof BlockItem bi) {
                 em.setCarriedBlock(bi.getBlock().defaultBlockState());
             } else {
@@ -89,7 +90,7 @@ public class BindingManager {
     }
 
     @SubscribeEvent
-    public static void onVexHurt(LivingHurtEvent event) {
+    public static void onHurt(LivingHurtEvent event) {
         var e = event.getEntity();
         if (event.getSource().is(DamageTypes.IN_WALL) && e.getEyeHeight() <= 1f && isBoundOrContracted(e)) {
             var ogPos = e.blockPosition();
@@ -102,6 +103,10 @@ public class BindingManager {
                     return;
                 }
             }
+            e.moveTo(e.position().add(0, 1, 0));
+            event.setAmount(0);
+            event.setCanceled(true);
+            return;
         }
         if (e.getType() != EntityType.VEX) return;
         if (!(event.getSource().getEntity() instanceof LivingEntity le)) return;
@@ -114,7 +119,16 @@ public class BindingManager {
     public static boolean isBoundOrContracted(LivingEntity e) {
         var data = e.getPersistentData();
         if (data.isEmpty()) return false;
-        return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("unbound_contract") || FamiliarManager.isFamiliar(e);
+        return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("unbound_contract") || data.contains("practitioner");
+    }
+
+    public static boolean isAlliedWith(LivingEntity e, String playerName) {
+        if (e instanceof Player p && p.getGameProfile().getName().equals(playerName)) return true;
+        var data = e.getPersistentData();
+        if (data.isEmpty()) return false;
+        return ((data.hasUUID("bindingId") || data.contains("construct_type")) && data.getString("last_bound_by").equals(playerName))
+                || data.getString("practitioner_loyalty").equals(playerName)
+                || data.getString("practitioner").equals(playerName);
     }
 
     @SubscribeEvent
@@ -392,6 +406,7 @@ public class BindingManager {
         }
         BoundGoal boundGoal = new BoundGoal(mob, binding);
         mob.goalSelector.addGoal(-1, boundGoal);
+        mob.getNavigation().stop();
         if (mob instanceof WanderingTrader wt) wt.setDespawnDelay(-1);
         if (!binding.contract.isEmpty()) {
             boundGoal.applyContract();
@@ -431,8 +446,10 @@ public class BindingManager {
         if (mob instanceof Warden w) {
             w.increaseAngerAt(targetMob);
             w.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 120000L);
+        } else if (mob instanceof Banshee banshee && banshee.canDropAnvil()) {
+            banshee.tryAnvilDrop();
+            return;
         }
-
         for (var goal : mob.goalSelector.getAvailableGoals()) {
             if (BoundGoal.isAttackGoal(goal.getGoal())) {
                 if (!goal.isRunning() && goal.canUse()) {
@@ -517,7 +534,9 @@ public class BindingManager {
     public static void tryGiveItem(PlayerInteractEvent.EntityInteractSpecific event) {
         if (event.getLevel().isClientSide()) return;
         var time = event.getLevel().getGameTime();
-        if (time - lastGiveAttempt < 5) return;
+        if (time - lastGiveAttempt < 5) {
+            return;
+        }
         lastGiveAttempt = time;
         var item = event.getItemStack();
 
@@ -540,7 +559,9 @@ public class BindingManager {
             }
         }
 
-        if (event.getEntity().isCrouching()) return;
+        if (event.getEntity().isCrouching()) {
+            return;
+        }
 
         if (event.getEntity().isCreative() && item.is(OtherverseItems.SPAWN_ALTAR.get())) {
             event.setResult(Event.Result.ALLOW);
@@ -548,7 +569,12 @@ public class BindingManager {
             return;
         }
 
-        if (!(target instanceof Mob mob) || BindingManager.isBoundOrContracted(mob)) return;
+        if (!(target instanceof Mob mob)) {
+            return;
+        }
+        if (!BindingManager.isBoundOrContracted(mob)) {
+            return;
+        }
 
         if (event.getItemStack().is(OtherverseItems.CHALK.get())) {
             for (var goal : mob.goalSelector.getAvailableGoals()) {
@@ -565,7 +591,9 @@ public class BindingManager {
             return;
         }
 
-        if (ImplementManager.isImplement(item)) return;
+        if (ImplementManager.isImplement(item)) {
+            return;
+        }
         if (!getHeldItem(mob).isEmpty()) {
             ItemEntity itementity = new ItemEntity(mob.level(),
                     mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f),

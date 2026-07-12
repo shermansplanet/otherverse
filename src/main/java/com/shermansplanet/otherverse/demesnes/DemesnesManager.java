@@ -737,9 +737,10 @@ public class DemesnesManager {
     public static void complete(DemesnesClaimRitual ritual) {
         ritualsToRemove.add(ritual);
         LOGGER.debug("CREATING DEMESNE DATA WITH " + ritual.spiritType.label());
+        var biome = ritual.level.getBiome(ritual.claimPos).unwrapKey().get().location().toString();
         OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new DemesnesClientboundMessage(DemesnesClientboundMessage.EventType.SUCCEED, ritual.minBlock, ritual.maxBlock, ritual.levelId, ritual.claimant.getGameProfile().getName()));
-        var demesne = new ClaimedDemesneData(ritual.minBlock, ritual.maxBlock, ritual.claimant.getGameProfile().getName(), ritual.range, ritual.levelId, ritual.spiritType);
+        var demesne = new ClaimedDemesneData(ritual.minBlock, ritual.maxBlock, biome, ritual.claimant.getGameProfile().getName(), ritual.range, ritual.levelId, ritual.spiritType);
         demesne.addToChunks(claimedDemesnes, ritual.level);
         if (ritual.spiritType != null) SpiritAffinityTracker.setDemesneAffinity(ritual.spiritType, ritual.claimant);
         demesnesByPlayer.put(ritual.claimant.getGameProfile().getName(), demesne);

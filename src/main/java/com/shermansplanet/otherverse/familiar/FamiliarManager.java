@@ -11,11 +11,15 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.SelfManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.implement.ImplementManager;
+import com.shermansplanet.otherverse.others.Buzzed;
+import com.shermansplanet.otherverse.others.TyphloticZombie;
 import com.shermansplanet.otherverse.potions.OtherversePotions;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.ruins.RuinsManager;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
+import com.shermansplanet.otherverse.spirits.SpiritLabeler;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -26,6 +30,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
@@ -44,10 +49,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.animal.Fox;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
@@ -122,6 +124,7 @@ public class FamiliarManager {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static ServerPlayer justJoinedPlayer;
     private static HashSet<EntityType<?>> flyingMobs = new HashSet<>();
+    private static HashSet<EntityType<?>> ruinsMobs = new HashSet<>();
     private static HashMap<EntityType<?>, Item> swarmMobs = new HashMap<>();
     private static HashMap<EntityType<?>, EntityType<? extends LivingEntity>> enemyMobs = new HashMap<>();
     private static HashMap<EntityType<?>, EntityType<? extends Mob>> zombification = new HashMap<>();
@@ -186,6 +189,23 @@ public class FamiliarManager {
         zombification.put(EntityType.PIGLIN_BRUTE, EntityType.ZOMBIFIED_PIGLIN);
 
         fishingMobs.addAll(List.of(EntityType.COD, EntityType.SALMON, EntityType.TROPICAL_FISH, EntityType.PIGLIN, EntityType.SQUID));
+    }
+
+    public static void loadCustomMobs() {
+        flyingMobs.add(Otherverse.TYPHLOTIC_JELLYFISH.get());
+        flyingMobs.add(Otherverse.TYPHLOTIC_SHARK.get());
+        flyingMobs.add(Otherverse.FURY.get());
+        flyingMobs.add(Otherverse.BUZZED.get());
+        flyingMobs.add(Otherverse.BANSHEE.get());
+
+        ruinsMobs.add(Otherverse.TYPHLOTIC_JELLYFISH.get());
+        ruinsMobs.add(Otherverse.TYPHLOTIC_SHARK.get());
+        ruinsMobs.add(Otherverse.FURY.get());
+        ruinsMobs.add(Otherverse.BUZZED.get());
+        ruinsMobs.add(Otherverse.BANSHEE.get());
+        ruinsMobs.add(Otherverse.GUEST.get());
+        ruinsMobs.add(Otherverse.SNUFFER.get());
+        ruinsMobs.add(Otherverse.TYPHLOTIC_ZOMBIE.get());
     }
 
     private static Mob getMobInstance(ServerLevel sl, EntityType<?> et) {
@@ -300,6 +320,38 @@ public class FamiliarManager {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onFeedHoney(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)
+                || !(event.getTarget() instanceof Buzzed buzzed)
+                || !event.getItemStack().is(Items.HONEY_BOTTLE)
+                || !getPractitionerForFamiliar(buzzed).equals(sp.getGameProfile().getName())) return;
+
+        for (var entity : sp.serverLevel().getEntities(null, buzzed.getBoundingBox().inflate(16))) {
+            if (!(entity instanceof Animal animal) || animal.isBaby()) continue;
+            animal.resetLove();
+            animal.setAge(0);
+        }
+
+        var r = buzzed.getRandom();
+        for (var i = 0; i < 16; i++) {
+            sp.serverLevel().sendParticles(ParticleTypes.END_ROD,
+                    buzzed.getX() + r.nextFloat() * 0.8f - 0.4f,
+                    buzzed.getY() + r.nextFloat() * 0.8f - 0.2f,
+                    buzzed.getZ() + r.nextFloat() * 0.8f - 0.4f,
+                    0, 0, 0, 0, 0.15f);
+        }
+        sp.serverLevel().playSound(null, buzzed, SoundEvents.HONEY_DRINK, SoundSource.NEUTRAL, 1, 1);
+
+        event.getItemStack().shrink(1);
+        if (event.getItemStack().isEmpty()) {
+            sp.getInventory().removeItem(event.getItemStack());
+        }
+        event.setResult(Event.Result.ALLOW);
+        event.setCancellationResult(InteractionResult.CONSUME);
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onFeed(PlayerInteractEvent.EntityInteractSpecific event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)
                 || !(event.getTarget() instanceof Cat cat)
@@ -327,9 +379,14 @@ public class FamiliarManager {
     @SubscribeEvent
     public static void onEffect(MobEffectEvent.Applicable event) {
         var effect = event.getEffectInstance();
-        if (effect.getEffect() != MobEffects.HUNGER) return;
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        if (!hasFamiliarType(sp, EntityType.HUSK) && !hasFamiliarType(sp, EntityType.ZOMBIE)) return;
+        if (effect.getEffect() == MobEffects.CONFUSION && hasFamiliarType(sp, Otherverse.TYPHLOTIC_ZOMBIE.get())) {
+            event.setResult(Event.Result.DENY);
+            return;
+        }
+        if (effect.getEffect() != MobEffects.HUNGER) return;
+        if (!hasFamiliarType(sp, EntityType.HUSK) && !hasFamiliarType(sp, EntityType.ZOMBIE) && !hasFamiliarType(sp, Otherverse.TYPHLOTIC_ZOMBIE.get()))
+            return;
         sp.addEffect(new MobEffectInstance(MobEffects.SATURATION, effect.getDuration(), effect.getAmplifier()));
         event.setResult(Event.Result.DENY);
     }
@@ -713,7 +770,7 @@ public class FamiliarManager {
     }
 
     @SubscribeEvent
-    public static void playHorn(LivingEntityUseItemEvent event) {
+    public static void playHorn(LivingEntityUseItemEvent.Start event) {
         if (!event.getItem().is(Items.GOAT_HORN)) return;
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!hasFamiliarType(sp, EntityType.GOAT)) return;
@@ -721,6 +778,16 @@ public class FamiliarManager {
             if (!(e instanceof LivingEntity le) || !le.getType().equals(EntityType.PLAYER) && !isFamiliar(le)) return;
             le.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 60, 1));
         }
+    }
+
+    @SubscribeEvent
+    public static void onEat(LivingEntityUseItemEvent.Finish event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp) || !hasFamiliarType(sp, Otherverse.TYPHLOTIC_ZOMBIE.get()) || !event.getItem().isEdible())
+            return;
+        if (SpiritLabeler.SPIRIT_TYPE_OF.data == null) return;
+        var spirits = SpiritLabeler.getSpiritsFor(event.getItem().getItem());
+        if (spirits == null || !spirits.containsKey(Spirits.FLESH)) return;
+        sp.addEffect(new MobEffectInstance(MobEffects.REGENERATION, spirits.get(Spirits.FLESH) * 20 * 3, 2, false, false, true));
     }
 
     @SubscribeEvent
@@ -773,22 +840,33 @@ public class FamiliarManager {
             return;
         }
         if (flyingMobs.contains(type)) {
-            if (type.equals(EntityType.ENDER_DRAGON) || type.equals(EntityType.PHANTOM) || type.equals(EntityType.PARROT)) {
-                var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
-                if (type.equals(EntityType.PHANTOM)) {
-                    ServerStatsCounter serverstatscounter = player.getStats();
-                    int j = Mth.clamp(serverstatscounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
-                    attr.setBaseValue(j > 20 * 60 * 10 ? 1 : 0);
-                } else {
-                    attr.setBaseValue(1);
+            if (ruinsMobs.contains(type) && !RuinsManager.isInRuins(player)) {
+                if(type.equals(Otherverse.BANSHEE.get())) {
+                    var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
+                    attr.setBaseValue(0);
+                }else{
+                    abilities.mayfly = false;
+                    abilities.flying = false;
+                    player.onUpdateAbilities();
                 }
             } else {
-                abilities.mayfly = true;
-                if (setSpeed) {
-                    abilities.setFlyingSpeed(type.equals(EntityType.WITHER) ? 0.024f : 0.012f);
+                if (type.equals(EntityType.ENDER_DRAGON) || type.equals(EntityType.PHANTOM) || type.equals(EntityType.PARROT) || type.equals(Otherverse.BANSHEE.get())) {
+                    var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
+                    if (type.equals(EntityType.PHANTOM)) {
+                        ServerStatsCounter serverstatscounter = player.getStats();
+                        int j = Mth.clamp(serverstatscounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
+                        attr.setBaseValue(j > 20 * 60 * 10 ? 1 : 0);
+                    } else {
+                        attr.setBaseValue(1);
+                    }
+                } else {
+                    abilities.mayfly = true;
+                    if (setSpeed) {
+                        abilities.setFlyingSpeed(type.equals(EntityType.WITHER) ? 0.024f : 0.012f);
+                    }
+                    if (!player.onGround()) abilities.flying = true;
+                    player.onUpdateAbilities();
                 }
-                if (!player.onGround()) abilities.flying = true;
-                player.onUpdateAbilities();
             }
         }
     }
@@ -882,7 +960,6 @@ public class FamiliarManager {
         if (event.getEntity() instanceof ServerPlayer player) {
             var familiarData = getFamiliarData(player);
             if (familiarData.isEmpty()) return;
-            LOGGER.debug("PLAYER JOINING");
             justJoinedPlayer = player;
             var mobData = familiarData.getCompound("mob_data");
             var entityTag = mobData.getCompound("EntityTag");
@@ -898,29 +975,23 @@ public class FamiliarManager {
                     var mob = (Mob) type.create(level);
                     mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.MOB_SUMMONED, null, entityTag);
                     var listTag = entityTag.getList("Pos", 6);
-                    LOGGER.debug("FAMILIAR POSITION: " + listTag.getDouble(0) + ", " + listTag.getDouble(2));
                     EntityType.updateCustomEntityTag(level, player, mob, mobData);
                     addMobToLevel(mob, level);
-                    LOGGER.debug("MOB ADDED");
                     break;
                 }
             }
-            LOGGER.debug("DONE SEARCHING LEVELS");
             updateAbilities(player);
             justJoinedPlayer = null;
             return;
         }
         var practitioner = getPractitionerForFamiliar(event.getEntity());
         if (practitioner.isEmpty()) return;
-        LOGGER.debug("FAMILIAR JOINING LEVEL WITH ID {}", event.getEntity().getUUID());
-        LOGGER.debug("HIT LIST: {}", String.join(", ", hitList.stream().map(UUID::toString).toList()));
         if (hitList.contains(event.getEntity().getUUID())) {
             event.setCanceled(true);
             return;
         }
         var player = getPlayerFromName(sl, practitioner);
         if (player == null) {
-            LOGGER.debug("NULL PLAYER FOR FAMILIAR");
             event.setCanceled(true);
             return;
         }
@@ -929,22 +1000,16 @@ public class FamiliarManager {
         var entityTag = mobData.getCompound("EntityTag");
         var familiarId = entityTag.getUUID("UUID");
         if (!familiarId.equals(event.getEntity().getUUID())) {
-            LOGGER.debug("ENTITY ID {} DOES NOT MATCH FAMILIAR ID {}", event.getEntity().getUUID(), familiarId);
             event.setCanceled(true);
             return;
         }
 
-        LOGGER.debug("FAMILIAR JOINING LEVEL: " + sl.dimension() + " " + DiagramManager.getDimensionHash(sl));
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         if (!event.getEntity().getPersistentData().contains("bindingId")) return;
         var binding = data.bindingsById.get(event.getEntity().getPersistentData().getUUID("bindingId"));
         if (binding == null) {
-            LOGGER.info("NULL BINDING FOR FAMILIAR");
             return;
         }
-        var localLevel = binding.getLocalLevel();
-
-        LOGGER.debug("BINDING LEVEL: " + (localLevel == null ? "null" : localLevel.dimension()) + " " + binding.dimensionHash);
         if (binding.dimensionHash != DiagramManager.getDimensionHash(sl)) {
             event.setCanceled(true);
             return;
@@ -1101,6 +1166,21 @@ public class FamiliarManager {
             entity.moveTo(spawnPos);
         }
 
+        if (entity.getType() == Otherverse.FURY.get()) {
+            for (var otherEntity : level.getEntities(null, entity.getBoundingBox().inflate(64))) {
+                if (otherEntity instanceof Mob mob && mob.getTarget() == player)
+                    BindingManager.startAttacking(mob, (LivingEntity) entity);
+            }
+        } else if (entity.getType() == Otherverse.TYPHLOTIC_SHARK.get()) {
+            var combinedHealth = player.getHealth() + ((LivingEntity) entity).getHealth();
+            for (var otherEntity : level.getEntities(null, entity.getBoundingBox().inflate(32))) {
+                if (!(otherEntity instanceof Mob mob) || mob.getHealth() >= combinedHealth) continue;
+                var targetPos = mob.position().add(mob.position().subtract(player.position()).normalize().scale(100));
+                mob.getNavigation().moveTo(targetPos.x, targetPos.y, targetPos.z, 2);
+                mob.getPersistentData().putInt("panicTicks", 200);
+            }
+        }
+
         setFamiliarSize(entity, 1);
         BlockHitResult hitresultTop = level.clip(new ClipContext(
                 spawnPos, spawnPos.add(0, entity.getBbHeight(), 0),
@@ -1244,6 +1324,10 @@ public class FamiliarManager {
         witherskull.setOwner(player);
         witherskull.setDangerous(true);
         witherskull.setPosRaw(d0, d1, d2);
+        var power = player.getLookAngle().normalize().scale(0.5f);
+        witherskull.xPower = power.x;
+        witherskull.yPower = power.y;
+        witherskull.zPower = power.z;
         sp.serverLevel().addFreshEntity(witherskull);
 
         if (!player.getAbilities().instabuild) {
@@ -1292,6 +1376,11 @@ public class FamiliarManager {
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 8, 0, false, true, true));
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 120, 2, false, true, true));
             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 120, 2, false, true, true));
+        }
+        if (event.getEntity() instanceof ServerPlayer player && hasFamiliarType(player, Otherverse.SNUFFER.get())) {
+            event.setCanceled(true);
+            player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 20 * 120, 3, false, true, true));
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 120, 3, false, true, true));
         }
     }
 
@@ -1401,6 +1490,10 @@ public class FamiliarManager {
             var positionBelow = sp.position().add(0, -0.5f, 0);
             var inLava = sp.serverLevel().getFluidState(BlockPos.containing(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
             if (inLava) event.setCanceled(true);
+        } else if (familiarType.equals(Otherverse.GUEST.get()) && event.getSource().getEntity() instanceof LivingEntity le && sp.getLastHurtMob() != le && le.getLastHurtByMob() != sp) {
+            for (var e : sp.serverLevel().getEntities(le, le.getBoundingBox().inflate(64))) {
+                if (e instanceof Mob mob && mob.getTarget() == null) BindingManager.startAttacking(mob, le);
+            }
         }
     }
 

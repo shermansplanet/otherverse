@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.others;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.diagrams.SelfManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -38,7 +39,6 @@ public class TyphloticShark extends FlyingMob {
         if (spawnType == MobSpawnType.NATURAL || spawnType == MobSpawnType.CHUNK_GENERATION) {
             return true;
         }
-        if (r.nextFloat() > 0.5f) return false;
         var bs = level.getBlockState(blockPos.below());
         if (!bs.is(Blocks.POWDER_SNOW)) return false;
         return true;
@@ -122,13 +122,13 @@ public class TyphloticShark extends FlyingMob {
                     this.shark.setDeltaMovement(this.shark.getDeltaMovement().add(0, 0.2f, 0));
                 } else {
                     this.shark.getNavigation().moveTo(target, 1);
-                    pathfindCooldown = 5;
+                    pathfindCooldown = shark.random.nextInt(5, 10);
                 }
             }
             attackCooldown--;
             if (attackCooldown <= 0 && shark.isWithinMeleeAttackRange(target)) {
                 shark.swing(InteractionHand.MAIN_HAND);
-                shark.doHurtTarget(target);
+                SelfManager.SelfDrainAttack(shark, target);
                 attackCooldown = 20;
             }
         }

@@ -1,0 +1,12 @@
+{
+    "name": "Rotten",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'typhlotic_zombie'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you have a rotten Familiar, eating food that contains flesh spirits will give you regeneration III for three seconds per flesh spirit. You will also be immune to nausea, and anything that gave you hunger will now give you saturation instead."
+        }
+    ]
+}

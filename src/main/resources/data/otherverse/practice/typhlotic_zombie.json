@@ -1,0 +1,11 @@
+{
+	"other" : "otherverse:typhlotic_zombie",
+	"spirit" : "flesh",
+	"transfusion" : [
+		{
+			"input" : "minecraft:rotten_flesh",
+			"health" : 13,
+			"output" : "otherverse:rancid_flesh"
+		}
+	]
+}

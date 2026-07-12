@@ -256,33 +256,30 @@ public class ContractTask {
     }
 
     public Pair<Entity, BlockPos> getClosestReachableDroppedItem() {
-        Entity closest = null;
         var lookDiameter = boundGoal.range * 2;
-        BlockPos closestReachFrom = null;
-        float closestDist = lookDiameter * 2;
+        var possibleEntities = new ArrayList<Entity>();
         for (Entity e : mob.level().getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
             if ((e instanceof ItemEntity ie && isValidTakeItem(ie.getItem()))
                     || (mob.getType() == EntityType.PILLAGER && e instanceof AbstractArrow arrow && isValidTakeItem(getArrowItem(arrow)))) {
                 if (!matchesPositionFilter(e.blockPosition())) {
                     continue;
                 }
-                var reachFrom = getAccessibleBlock(e.blockPosition());
-                if (reachFrom == null) continue;
                 for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
                     Block block = mob.level().getBlockState(e.blockPosition().subtract(processOffset(offsetIndex))).getBlock();
                     if (!blockFilters.isEmpty() && !blockFilters.contains(block.asItem()) && !blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
                         continue;
                     }
-                    float dist = (float) e.position().distanceTo(mob.position());
-                    if (dist < closestDist) {
-                        closestDist = dist;
-                        closestReachFrom = reachFrom;
-                        closest = e;
-                    }
+                    possibleEntities.add(e);
+                    break;
                 }
             }
         }
-        return new Pair<>(closest, closestReachFrom);
+        possibleEntities.sort(Comparator.comparingDouble(e -> e.position().distanceToSqr(mob.position())));
+        for (var e : possibleEntities) {
+            var reachFrom = getAccessibleBlock(e.blockPosition());
+            if (reachFrom != null) return new Pair<>(e, reachFrom);
+        }
+        return new Pair<>(null, null);
     }
 
     private ItemStack getArrowItem(AbstractArrow abstractArrow) {
@@ -349,18 +346,23 @@ public class ContractTask {
         if (pos == null) return null;
         var h = mob.getBbHeight();
         var potentialMovePositions = new ArrayList<BlockPos>();
-        var mobPos = mob.blockPosition();
-        var canDoCenter = taskType != TaskType.PUT;
-        for (var i = -1; i <= h + 1; i++) {
-            var verticalOffset = pos.offset(0, -i, 0);
-            if (canDoCenter) potentialMovePositions.add(verticalOffset);
-            for (var dir : Direction.values()) {
-                if (dir == Direction.UP) continue;
-                if (dir == Direction.DOWN) continue;
-                var offset = verticalOffset.relative(dir);
-                potentialMovePositions.add(offset);
+        if (taskType == TaskType.MOVE) {
+            potentialMovePositions.add(pos);
+            potentialMovePositions.add(pos.above());
+        } else {
+            var canDoCenter = taskType != TaskType.PUT;
+            for (var i = -1; i <= h + 1; i++) {
+                var verticalOffset = pos.offset(0, -i, 0);
+                if (canDoCenter) potentialMovePositions.add(verticalOffset);
+                for (var dir : Direction.values()) {
+                    if (dir == Direction.UP) continue;
+                    if (dir == Direction.DOWN) continue;
+                    var offset = verticalOffset.relative(dir);
+                    potentialMovePositions.add(offset);
+                }
             }
         }
+        var mobPos = mob.blockPosition();
         potentialMovePositions.sort(Comparator.comparingDouble(mobPos::distSqr));
         for (var potentialPos : potentialMovePositions) {
             if (!canReachBlock(potentialPos)) continue;
@@ -644,7 +646,7 @@ public class ContractTask {
             }
         }
 
-        if (mob.level().getGameTime() % 20 == 0 || targetPos != priorTargetPos) {
+        if (mob.level().getGameTime() % 20 == mob.getId() % 20 || targetPos != priorTargetPos) {
             targetMovePos = getAccessibleBlock(targetPos);
         }
         if (targetMovePos == null) {
@@ -820,7 +822,7 @@ public class ContractTask {
                     }
                     mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
                     this.mob.level().destroyBlock(targetPos, false, mob);
-                    if (tool.isEmpty() && mob instanceof EnderMan) {
+                    if (tool.isEmpty() && mob.getType() == EntityType.ENDERMAN) {
                         var tag = DiagramManager.getOrCreateLevelData(mob.level()).getPlacedItemTag(targetPos);
                         var item = blockstate.getBlock().asItem().getDefaultInstance();
                         item.setTag(tag);

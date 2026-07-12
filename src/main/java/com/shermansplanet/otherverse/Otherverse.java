@@ -12,6 +12,7 @@ import com.shermansplanet.otherverse.diagrams.ChalkCircleMenu;
 import com.shermansplanet.otherverse.diagrams.ChalkCircleRenderer;
 import com.shermansplanet.otherverse.echoes.EchoEntity;
 import com.shermansplanet.otherverse.echoes.EchoRenderer;
+import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.familiar.ThrownTNT;
 import com.shermansplanet.otherverse.integrations.jei.BindingRecipe;
 import com.shermansplanet.otherverse.integrations.jei.BiomeCodeRecipe;
@@ -24,6 +25,7 @@ import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.resources.OtherverseFeatureGen;
 import com.shermansplanet.otherverse.artifacts.SpawnAltarBlockEntity;
 import com.shermansplanet.otherverse.artifacts.SpawnAltarRenderer;
+import com.shermansplanet.otherverse.ruins.MemorySnareBlockEntity;
 import com.shermansplanet.otherverse.spirits.*;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -103,23 +105,50 @@ public class Otherverse {
 
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(
             ForgeRegistries.ENTITY_TYPES, MODID);
+
     public static final RegistryObject<EntityType<EchoEntity>> ENTITY_ECHO = ENTITIES.register("echo",
             () -> EntityType.Builder.<EchoEntity>of(EchoEntity::new, MobCategory.MISC)
                     .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "echo"))));
+
     public static final RegistryObject<EntityType<TyphloticShark>> TYPHLOTIC_SHARK = ENTITIES.register("typhlotic_shark",
             () -> EntityType.Builder.of(TyphloticShark::new, MobCategory.MONSTER)
-                    .immuneTo(Blocks.POWDER_SNOW).sized(0.9F, 0.5F)
+                    .immuneTo(Blocks.POWDER_SNOW).sized(0.9F, 0.5F).clientTrackingRange(8)
                     .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "typhlotic_shark"))));
 
     public static final RegistryObject<EntityType<TyphloticJellyfish>> TYPHLOTIC_JELLYFISH = ENTITIES.register("typhlotic_jellyfish",
             () -> EntityType.Builder.of(TyphloticJellyfish::new, MobCategory.MONSTER)
-                    .sized(1F, 1F)
+                    .sized(1.5F, 1F).clientTrackingRange(8)
                     .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "typhlotic_jellyfish"))));
 
     public static final RegistryObject<EntityType<TyphloticZombie>> TYPHLOTIC_ZOMBIE = ENTITIES.register("typhlotic_zombie",
             () -> EntityType.Builder.of(TyphloticZombie::new, MobCategory.MONSTER)
-                    .sized(1F, 1F)
+                    .sized(0.6F, 1.95F).clientTrackingRange(8)
                     .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "typhlotic_zombie"))));
+
+    public static final RegistryObject<EntityType<Snuffer>> SNUFFER = ENTITIES.register("snuffer",
+            () -> EntityType.Builder.of(Snuffer::new, MobCategory.MONSTER)
+                    .sized(1.9F, 1.75F).fireImmune().clientTrackingRange(8)
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "snuffer"))));
+
+    public static final RegistryObject<EntityType<Guest>> GUEST = ENTITIES.register("guest",
+            () -> EntityType.Builder.of(Guest::new, MobCategory.MONSTER)
+                    .sized(0.6F, 2.9F).clientTrackingRange(8)
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "guest"))));
+
+    public static final RegistryObject<EntityType<Buzzed>> BUZZED = ENTITIES.register("buzzed",
+            () -> EntityType.Builder.of(Buzzed::new, MobCategory.MONSTER)
+                    .sized(0.7F, 0.6F).clientTrackingRange(8)
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "buzzed"))));
+
+    public static final RegistryObject<EntityType<Fury>> FURY = ENTITIES.register("fury",
+            () -> EntityType.Builder.of(Fury::new, MobCategory.MONSTER)
+                    .fireImmune().sized(0.6F, 1.8F).clientTrackingRange(8)
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "fury"))));
+
+    public static final RegistryObject<EntityType<Banshee>> BANSHEE = ENTITIES.register("banshee",
+            () -> EntityType.Builder.of(Banshee::new, MobCategory.MONSTER)
+                    .sized(0.9F, 0.5F).clientTrackingRange(8)
+                    .build(String.valueOf(ResourceLocation.fromNamespaceAndPath(MODID, "banshee"))));
 
     public static final RegistryObject<EntityType<ThrownTNT>> ENTITY_THROWN_TNT = ENTITIES.register("thrown_tnt",
             () -> EntityType.Builder.<ThrownTNT>of(ThrownTNT::new, MobCategory.MISC)
@@ -139,13 +168,15 @@ public class Otherverse {
     public static final RegistryObject<BlockEntityType<BiomeBrazierBlockEntity>> BIOME_BRAZIER_ENTITY =
             BLOCK_ENTITIES.register("biome_brazier",
                     () -> BlockEntityType.Builder.of(BiomeBrazierBlockEntity::new, OtherverseBlocks.BIOME_BRAZIER.get()).build(null));
-
     public static final RegistryObject<BlockEntityType<DemesnesBeacon>> DEMESNES_BEACON_ENTITY =
             BLOCK_ENTITIES.register("demesnes_beacon",
                     () -> BlockEntityType.Builder.of(DemesnesBeacon::new, OtherverseBlocks.DEMESNE_BEACON.get()).build(null));
     public static final RegistryObject<BlockEntityType<DemesnesPortal>> DEMESNES_PORTAL_ENTITY =
             BLOCK_ENTITIES.register("demesnes_portal",
                     () -> BlockEntityType.Builder.of(DemesnesPortal::new, OtherverseBlocks.DEMESNE_PORTAL.get()).build(null));
+    public static final RegistryObject<BlockEntityType<MemorySnareBlockEntity>> MEMORY_SNARE_ENTITY =
+            BLOCK_ENTITIES.register("memory_snare",
+                    () -> BlockEntityType.Builder.of(MemorySnareBlockEntity::new, OtherverseBlocks.MEMORY_SNARE.get()).build(null));
 
     private static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(
             ForgeRegistries.RECIPE_TYPES, MODID);
@@ -200,7 +231,7 @@ public class Otherverse {
         OtherversePacketHandler.register();
     }
 
-    public static ChunkPos chunkAt(BlockPos pos){
+    public static ChunkPos chunkAt(BlockPos pos) {
         return new ChunkPos(Mth.floor(pos.getX() / 16f), Mth.floor(pos.getZ() / 16f));
     }
 
@@ -276,7 +307,12 @@ public class Otherverse {
             event.registerEntityRenderer(ENTITY_ECHO.get(), EchoRenderer::new);
             event.registerEntityRenderer(TYPHLOTIC_SHARK.get(), TyphloticSharkRenderer::new);
             event.registerEntityRenderer(TYPHLOTIC_JELLYFISH.get(), TyphloticJellyfishRenderer::new);
-            event.registerEntityRenderer(TYPHLOTIC_ZOMBIE.get(), ZombieRenderer::new);
+            event.registerEntityRenderer(SNUFFER.get(), SnufferRenderer::new);
+            event.registerEntityRenderer(GUEST.get(), GuestRenderer::new);
+            event.registerEntityRenderer(BUZZED.get(), BuzzedRenderer::new);
+            event.registerEntityRenderer(FURY.get(), FuryRenderer::new);
+            event.registerEntityRenderer(BANSHEE.get(), BansheeRenderer::new);
+            event.registerEntityRenderer(TYPHLOTIC_ZOMBIE.get(), TyphloticZombieRenderer::new);
 
             event.registerEntityRenderer(ENTITY_THROWN_TNT.get(), ThrownItemRenderer::new);
             event.registerBlockEntityRenderer(CHALK_CIRCLE.get(), ChalkCircleRenderer::new);

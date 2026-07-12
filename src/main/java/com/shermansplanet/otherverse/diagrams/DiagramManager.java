@@ -306,7 +306,7 @@ public class DiagramManager {
 //                LOGGER.debug("deactivating diagram");
                 var toRemove = new ArrayList<Mob>();
                 for (var mob : d.mobsOnCooldown) {
-                    if (mob.invulnerableTime <= 0) {
+                    if (mob == null || !mob.isAddedToWorld() || mob.isRemoved() || mob.isDeadOrDying() || mob.invulnerableTime <= 0) {
                         toRemove.add(mob);
                     }
                 }
@@ -325,6 +325,17 @@ public class DiagramManager {
                 }
             }
         }
+    }
+
+    public static IFocus getFocus(BlockPos pos, Level focusLevel) {
+        if (focusLevel.getBlockEntity(pos) instanceof ChalkCircle cc) {
+            return cc;
+        }
+        BlockFocus bf = DiagramManager.getOrCreateLevelData(focusLevel).allBlockFoci.get(pos);
+        if (bf != null) {
+            return bf;
+        }
+        return null;
     }
 
     public static void blockChanged(BlockPos pos, ServerLevel sl) {
@@ -480,6 +491,10 @@ public class DiagramManager {
         if (focus == null) {
             return;
         }
+        onMobInFocus(mob, focus, sl);
+    }
+
+    public static void onMobInFocus(Mob mob, BlockFocus focus, ServerLevel sl) {
         var hp = Math.round(mob.getHealth());
         if (focus.mostRecentMob != null && mob.getId() == focus.mostRecentMob.getId() && hp == focus.mostRecentMobHealth) {
             return;

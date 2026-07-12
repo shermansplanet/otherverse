@@ -1,0 +1,12 @@
+{
+    "name": "Snuffer",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'snuffer'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you have a snuffer Familiar, soul sand will not slow you down and lightning will speed you up instead of harming you. The Shock region will only strike you with lightning if you are holding a lightning rod."
+        }
+    ]
+}

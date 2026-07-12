@@ -1,0 +1,21 @@
+{
+	"other" : "otherverse:typhlotic_jellyfish",
+	"spirit" : "dark",
+	"transfusion" : [
+		{
+			"input" : "minecraft:twisting_vines",
+			"health" : 13,
+			"output" : "otherverse:gloom_tendril"
+		},
+		{
+			"input" : "minecraft:glow_lichen",
+			"health" : 13,
+			"output" : "otherverse:gloom_tendril"
+		},
+		{
+			"input" : "minecraft:vine",
+			"health" : 13,
+			"output" : "otherverse:gloom_tendril"
+		}
+	]
+}

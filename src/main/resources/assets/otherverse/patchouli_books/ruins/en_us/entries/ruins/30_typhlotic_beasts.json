@@ -1,0 +1,17 @@
+{
+    "name": "Typhlotic Beasts",
+    "sortnum": 30,
+    "icon": "otherverse:spirit_dark",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title" : "Typhlotic Beasts",
+            "text": "Typhlotic beasts are the apex predators of the Ruins ecosystem. Each one finds its niche in a unique emotional biome, feeding on echoes and other immateria. Typhlotic beasts take many forms, but there are some traits they all share."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "'Typhlotic' means 'blind,' and this is apt: typhlotic beasts are universally eyeless, relying on other senses to detect their prey. You may be able to avoid their notice entirely. Which is good, because if they catch up to you, they will damage not only your physical form, but your very Self."
+        }
+    ]
+}

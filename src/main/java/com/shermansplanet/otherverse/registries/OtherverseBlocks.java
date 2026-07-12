@@ -7,6 +7,7 @@ import com.shermansplanet.otherverse.demesnes.DemesnesBeaconBlock;
 import com.shermansplanet.otherverse.demesnes.DemesnesPortalBlock;
 import com.shermansplanet.otherverse.diagrams.ChalkLineBlock;
 import com.shermansplanet.otherverse.diagrams.SlateScaffoldingBlock;
+import com.shermansplanet.otherverse.ruins.MemorySnareBlock;
 import com.shermansplanet.otherverse.ruins.RedstoneNetherBricksBlock;
 import com.shermansplanet.otherverse.sympathy.FateWebBlock;
 import com.shermansplanet.otherverse.sympathy.SelectorBlock;
@@ -58,6 +59,10 @@ public class OtherverseBlocks {
             () -> new DemesnesPortalBlock(BlockBehaviour.Properties.copy(Blocks.AIR)));
     public static final RegistryObject<Block> REDSTONE_NETHER_BRICKS = BLOCKS.register("redstone_nether_bricks",
             () -> new RedstoneNetherBricksBlock(BlockBehaviour.Properties.copy(Blocks.RED_NETHER_BRICKS)));
+    public static final RegistryObject<Block> MEMORY_SNARE = BLOCKS.register("memory_snare",
+            () -> new MemorySnareBlock(BlockBehaviour.Properties.copy(Blocks.DIRT).sound(SoundType.SCULK_SENSOR).lightLevel(bs -> 8)));
+    public static final RegistryObject<Block> WITCH_HAT = BLOCKS.register("witch_hat",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.BLACK_WOOL)));
 
     public static final RegistryObject<Block> PLUM_BRICKS = BLOCKS.register("plum_bricks",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.BRICKS)));

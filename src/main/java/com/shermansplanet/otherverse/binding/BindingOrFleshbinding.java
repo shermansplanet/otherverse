@@ -37,8 +37,8 @@ public class BindingOrFleshbinding {
     public static BindingInfo getFromSpindle(ChalkCircle circle) {
         if (!(circle.getLevel() instanceof ServerLevel sl)) return null;
         if (!circle.getItem().hasTag()) return null;
-        if (!circle.getItem().getTag().contains("sympathy_target", 11)) return null;
-        var otherEntity = SympathyManager.getEntityByUniqueId(circle.getItem().getTag().getUUID("sympathy_target"), sl);
+        if (!circle.getItem().getTag().contains("sympathy_target")) return null;
+        var otherEntity = SympathyManager.getEntityByUniqueId(circle.getItem().getTag().getString("sympathy_target"), sl);
         if (!(otherEntity instanceof LivingEntity le)) return null;
         if (!le.getPersistentData().contains("bindingId")) return null;
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());

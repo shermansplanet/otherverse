@@ -1,0 +1,11 @@
+{
+	"other" : "minecraft:phantom",
+	"spirit" : "dark",
+	"transfusion" : [
+		{
+			"input" : "minecraft:leather",
+			"health" : 13,
+			"output" : "minecraft:phantom_membrane"
+		}
+	]
+}

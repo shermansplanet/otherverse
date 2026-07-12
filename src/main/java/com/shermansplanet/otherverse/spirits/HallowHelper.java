@@ -126,7 +126,6 @@ public class HallowHelper {
     @SubscribeEvent
     static void onGrief(EntityMobGriefingEvent event) {
         if (event.getEntity() == null || event.getEntity().getType() != EntityType.CREEPER) return;
-        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level());
         for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
             if (!shrine.tryDrain(9)) continue;
             event.setResult(Event.Result.DENY);
@@ -137,7 +136,6 @@ public class HallowHelper {
     @SubscribeEvent
     static void onAttack(LivingHurtEvent event) {
         if (event.getEntity() == null) return;
-        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level());
         if (isPlayerOrTamedOrBound(event.getEntity())) {
             for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
                 if (!shrine.tryDrain(Mth.ceil(event.getAmount() * 3))) continue;

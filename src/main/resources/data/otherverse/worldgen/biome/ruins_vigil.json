@@ -21,8 +21,30 @@
       "probability": 0.002
     }
   },
-  "spawners": {},
-  "spawn_costs": {},
+  "spawners": {
+    "monster": [
+      {
+        "type": "otherverse:banshee",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ]
+  },
+  "spawn_costs": {
+    "otherverse:fury": {
+      "charge": 1,
+      "energy_budget": 0
+    },
+    "otherverse:banshee": {
+      "charge": 0.5,
+      "energy_budget": 0.15
+    },
+    "otherverse:typhlotic_zombie": {
+      "charge": 1,
+      "energy_budget": 0
+    }
+  },
   "carvers": {},
   "features": [
     [],

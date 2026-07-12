@@ -433,4 +433,14 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
         return new ChalkCircleMenu(i, ContainerLevelAccess.create(level, getBlockPos()));
     }
+
+    public String getLockStatus() {
+        var diagram = getDiagram();
+        if(diagram == null) return "No diagram";
+        if(level == null) return "No level";
+        if(!diagram.processes.isEmpty()) return "Has " + diagram.processes.size() + " ongoing processes.";
+        if(!diagram.mobsOnCooldown.isEmpty()) return "Has mobs on cooldown: " + String.join(", ", diagram.mobsOnCooldown.stream().map(m -> m.getType().toString()).toList());
+        if(DiagramManager.getOrCreateLevelData(level).diagramsToActivate.contains(diagram)) return "Marked for activation this tick";
+        return "Unlocked";
+    }
 }

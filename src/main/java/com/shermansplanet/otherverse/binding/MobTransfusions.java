@@ -27,6 +27,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
@@ -121,7 +122,7 @@ public class MobTransfusions {
         }
         BlockPos target = diagram.influences.get(focus.getPos());
         BindingInfo binding = DiagramManager.getBindingOrBoundMobAt(level, target);
-        if (binding == null || binding.mob == null || !level.canSeeSky(binding.mob.blockPosition())) {
+        if (binding == null || binding.mob == null || !level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, focus.getPos()).equals(focus.getPos())) {
             return false;
         }
         if (!diagram.trySpendPower(level, focus.getPos(), 33, new HashSet<>())) {
@@ -156,7 +157,7 @@ public class MobTransfusions {
                 JsonObject transfusion = transfusionElement.getAsJsonObject();
                 for (var item : getItemOrShortcut(transfusion.get("input").getAsString())) {
                     var loc = ResourceLocation.parse(transfusion.get("output").getAsString());
-                    if(!ForgeRegistries.ITEMS.containsKey(loc)) continue;
+                    if (!ForgeRegistries.ITEMS.containsKey(loc)) continue;
                     register(other, item.item,
                             ForgeRegistries.ITEMS.getValue(loc).getDefaultInstance(),
                             transfusion.get("health").getAsInt(),
@@ -323,7 +324,7 @@ public class MobTransfusions {
             if (amount == 0) {
                 return false;
             }
-        }else if(maxHeal < amount && DiagramManager.shouldPreventWaste(sourceFocus)){
+        } else if (maxHeal < amount && DiagramManager.shouldPreventWaste(sourceFocus)) {
             return false;
         }
         amount = Math.min(maxHeal, amount);

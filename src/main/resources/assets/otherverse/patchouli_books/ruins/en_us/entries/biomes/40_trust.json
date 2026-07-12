@@ -1,0 +1,17 @@
+{
+  "name": "Trust",
+  "sortnum": 40,
+  "icon": "minecraft:stripped_cherry_wood",
+  "category": "otherverse:biomes",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Trust",
+      "text": "Trust is serene and inviting, until you break its laws of Hospitality. It is populated by typhlotic endermen called $(bold)guests$(). Hospitality holds them back from attacking, but they can still sense eye contact and will make their way towards you peacefully if looked at."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The rules of Trust are as follows:$(br2)Do not harm a guest.$(br2)Do not pick the flowers or fell the trees that grow here.$(br2)Share your meals; do not eat unless you've given a guest some food in the past minute.$(br2)If you break any of these laws, the guests have permission to attack you, and they will."
+    }
+  ]
+}

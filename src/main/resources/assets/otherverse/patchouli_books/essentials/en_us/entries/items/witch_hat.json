@@ -1,0 +1,15 @@
+{
+    "name": "Witch Hat",
+    "sortnum": 50,
+    "icon": "otherverse:witch_hat",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+              "item": "otherverse:witch_hat"
+            },
+            "text": "Witch hats are fashionable Practitioner accessories that can be dyed in diagrams. If influenced by a hallow containing color spirits, it will drain all the spirits and adopt the color. If there are at least thirteen spirits in the hallow, the main hat color will change. If there are fewer than thirteen, the buckle color will change."
+        }
+    ]
+}

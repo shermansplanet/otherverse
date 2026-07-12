@@ -15,8 +15,36 @@
       "probability": 0.002
     }
   },
-  "spawners": {},
-  "spawn_costs": {},
+  "spawners": {
+    "monster": [
+      {
+        "type": "otherverse:buzzed",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ]
+  },
+  "spawn_costs": {
+    "otherverse:buzzed": {
+      "charge": 0.5,
+      "energy_budget": 0.15
+    },
+    "otherverse:guest": {
+      "charge": 1,
+      "energy_budget": 0
+    },
+    "otherverse:fury": {
+      "charge": 1,
+      "energy_budget": 0
+    }
+  },
   "carvers": {},
-  "features": []
+  "features": [
+    [
+      "otherverse:ecstasy_strands"
+    ],
+    [],
+    []
+  ]
 }

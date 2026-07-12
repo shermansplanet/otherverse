@@ -1,0 +1,17 @@
+{
+  "name": "Vigil",
+  "sortnum": 70,
+  "icon": "minecraft:red_nether_bricks",
+  "category": "otherverse:biomes",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Vigil",
+      "text": "Vigil is a treacherous maze of traps that demands constant awareness of your surroundings. Floating islands will drop anvils and stalactites on those beneath. Special $(bold)redstone nether bricks$(), barely distinct from normal red nether bricks, may trigger hidden TNT if stepped upon."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "And even if you escape the explosions, they will draw the attention of typhlotic phantoms called $(bold)banshees$(). Banshees are normally content to coast above Vigil and ignore players, but something as loud and dramatic as an explosion will attract their ire - and this is $(italic)not$() a place where you want to be knocked off a ledge."
+    }
+  ]
+}

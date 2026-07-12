@@ -30,7 +30,7 @@ public class TrustTreeFeature extends Feature<NoneFeatureConfiguration> {
 
     private final TreeConfiguration cherryConfig = (new TreeConfiguration.TreeConfigurationBuilder(BlockStateProvider.simple(Blocks.STRIPPED_CHERRY_WOOD), new CherryTrunkPlacer(7, 1, 0, new WeightedListInt(SimpleWeightedRandomList.<IntProvider>builder().add(ConstantInt.of(1), 1).add(ConstantInt.of(2), 1).add(ConstantInt.of(3), 1).build()), UniformInt.of(2, 4), UniformInt.of(-4, -3), UniformInt.of(-1, 0)), BlockStateProvider.simple(Blocks.CHERRY_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true)), new CherryFoliagePlacer(ConstantInt.of(4), ConstantInt.of(0), ConstantInt.of(5), 0.25F, 0.5F, 0.16666667F, 0.33333334F), new TwoLayersFeatureSize(1, 0, 2))).ignoreVines().build();
 
-    private static final BlockState[] flowers = new BlockState[]{
+    public static final BlockState[] flowers = new BlockState[]{
             Blocks.PEONY.defaultBlockState(),
             Blocks.ALLIUM.defaultBlockState(),
             Blocks.LILAC.defaultBlockState(),
@@ -46,12 +46,21 @@ public class TrustTreeFeature extends Feature<NoneFeatureConfiguration> {
         for (var dx = -radius; dx <= radius; dx++) {
             for (var dz = -radius; dz <= radius; dz++) {
                 var density = 1f - Mth.sqrt(dx * dx + dz * dz) / radius;
-                if(density - ctx.random().nextFloat() < 0) continue;
+                if (density - ctx.random().nextFloat() < 0) continue;
                 var x = ctx.origin().getX() + dx;
                 var z = ctx.origin().getZ() + dz;
                 if (dx == 0 && dz == 0) continue;
                 var y = ctx.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                if (y == ctx.level().getMinBuildHeight()) continue;
                 var pos = new BlockPos(x, y, z);
+                if (ctx.level().getBlockState(pos.below()).is(Blocks.STRIPPED_CHERRY_WOOD)) {
+                    for(var i=0; i<8; i++){
+                        if(ctx.level().getBlockState(pos.below()).isCollisionShapeFullBlock(ctx.level(), pos.below())){
+                            break;
+                        }
+                    }
+                    continue;
+                }
                 ctx.level().setBlock(pos.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
                 if (ctx.random().nextFloat() < 0.6f) {
                     ctx.level().setBlock(pos, flowers[ctx.random().nextInt(flowers.length)], 2);

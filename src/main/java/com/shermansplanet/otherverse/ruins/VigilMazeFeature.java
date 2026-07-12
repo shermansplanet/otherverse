@@ -215,9 +215,9 @@ public class VigilMazeFeature extends Feature<NoneFeatureConfiguration> {
                         }
                         ctx.level().setBlock(mutPos, Blocks.CHAIN.defaultBlockState(), 2);
                     }
-                    if(!hitBlock && oldMazeBlocks.containsKey(p2d)){
+                    if (!hitBlock && oldMazeBlocks.containsKey(p2d)) {
                         var yLevel = oldMazeBlocks.get(p2d) + 4;
-                        while(mutPos.getY() > yLevel){
+                        while (mutPos.getY() > yLevel) {
                             mutPos.setY(mutPos.getY() - 1);
                             ctx.level().setBlock(mutPos, Blocks.CHAIN.defaultBlockState(), 2);
                         }
@@ -290,7 +290,8 @@ public class VigilMazeFeature extends Feature<NoneFeatureConfiguration> {
                     var dist = pos.distToCenterSqr(center.add(0, nudge3, 0));
                     var modRad = radius + nudge1 + nudge2;
                     if (dist > modRad * modRad) {
-                        if (wasFilled && r.nextFloat() < 0.2f) {
+                        if (!wasFilled) continue;
+                        if (r.nextFloat() < 0.5f) {
                             var isChain = r.nextFloat() < 0.3f;
                             var descentLength = r.nextInt(maxDescentLength) + (isChain ? 4 : 1);
                             for (var i = 0; i <= descentLength; i++) {
@@ -298,15 +299,15 @@ public class VigilMazeFeature extends Feature<NoneFeatureConfiguration> {
                                                     ? Blocks.ANVIL.defaultBlockState()
                                                     : Blocks.CHAIN.defaultBlockState()) :
                                         Blocks.POINTED_DRIPSTONE.defaultBlockState()
-                                        .setValue(PointedDripstoneBlock.TIP_DIRECTION, Direction.DOWN)
-                                        .setValue(PointedDripstoneBlock.THICKNESS,
-                                                i == descentLength ? DripstoneThickness.TIP :
-                                                i == descentLength - 1 ? DripstoneThickness.FRUSTUM :
-                                                i == 1 ? DripstoneThickness.BASE : DripstoneThickness.MIDDLE);
+                                                .setValue(PointedDripstoneBlock.TIP_DIRECTION, Direction.DOWN)
+                                                .setValue(PointedDripstoneBlock.THICKNESS,
+                                                        i == descentLength ? DripstoneThickness.TIP :
+                                                        i == descentLength - 1 ? DripstoneThickness.FRUSTUM :
+                                                        i == 1 ? DripstoneThickness.BASE : DripstoneThickness.MIDDLE);
                                 ctx.level().setBlock(pos.below(i), bs, 2);
                             }
                         }
-                        continue;
+                        break;
                     }
                     wasFilled = true;
                     ctx.level().setBlock(pos, Blocks.DRIPSTONE_BLOCK.defaultBlockState(), 2);

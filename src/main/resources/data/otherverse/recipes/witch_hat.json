@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " ! ",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:black_carpet"
+    },
+    "!": {
+      "item": "minecraft:black_wool"
+    }
+  },
+  "result": {
+    "item": "otherverse:witch_hat",
+    "count": 1
+  }
+}

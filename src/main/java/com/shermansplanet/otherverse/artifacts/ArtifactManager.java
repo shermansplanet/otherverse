@@ -6,10 +6,12 @@ import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.ruins.MemorySnareBlockEntity;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -33,6 +35,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.Tags;
@@ -45,9 +48,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ArtifactManager {
@@ -197,6 +198,18 @@ public class ArtifactManager {
             if (biomeName.equals("mountain_maw"))
                 return List.of(Spirits.COLOR_LIME, Spirits.COLOR_LIGHT_GRAY, Spirits.COLOR_WHITE);
         } else if (biomeMod.equals("places")) {
+            if (biomeName.equals("manilla_room"))
+                return List.of(Spirits.COLOR_PINK, Spirits.COLOR_WHITE, Spirits.COLOR_LIGHT_BLUE);
+            if (biomeName.equals("alpha_plains"))
+                return List.of(Spirits.COLOR_GREEN, Spirits.COLOR_BROWN, Spirits.COLOR_GRAY);
+            if (biomeName.equals("alpha_beach"))
+                return List.of(Spirits.COLOR_YELLOW, Spirits.COLOR_BLUE, Spirits.COLOR_GRAY);
+            if (biomeName.equals("aquarium_tunnels"))
+                return List.of(Spirits.COLOR_LIGHT_BLUE, Spirits.COLOR_BLUE, Spirits.COLOR_CYAN);
+            if (biomeName.equals("red_road"))
+                return List.of(Spirits.COLOR_RED, Spirits.COLOR_RED, Spirits.COLOR_RED);
+            if (biomeName.equals("structure_bridge"))
+                return List.of(Spirits.COLOR_PURPLE, Spirits.COLOR_BLACK, Spirits.COLOR_GREEN);
             return List.of(Spirits.COLOR_YELLOW, Spirits.COLOR_WHITE, Spirits.COLOR_LIGHT_GRAY);
         }
 
@@ -374,14 +387,42 @@ public class ArtifactManager {
                 canActivate = false;
                 break;
             }
-            var pos = brazier.getBlockPos();
             if (canActivate) {
                 brazier.activate(level);
             }
             brazier.fuelEffects();
             brazier.setLabels();
-            brazier.setChanged();
+            brazier.markUpdated();
         }
         return anyTransfer;
+    }
+
+    public static boolean tryColorHat(ServerLevel level, ChalkCircle circle, Diagram diagram) {
+        var hat = circle.getItem();
+        if (!hat.is(OtherverseItems.WITCH_HAT.get())) return false;
+        for (var influence : diagram.influences.entrySet()) {
+            if (!circle.getPos().equals(influence.getValue())) continue;
+            var source = DiagramManager.getFocus(influence.getKey(), level);
+            if (source == null) continue;
+            var item = source.getItem();
+            if (!item.hasTag() || !item.getTag().contains("hallow")) continue;
+            CompoundTag hallowTag = item.getTag().getCompound("hallow");
+            var count = hallowTag.getInt("spirit_count");
+            if (count <= 0) continue;
+            var spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
+            for (var dyeCol : Spirits.colorsByDye.entrySet()) {
+                if (dyeCol.getValue() != spiritType) continue;
+                hat.getOrCreateTag().putInt(count >= 13 ? "main_color" : "buckle_color", dyeCol.getKey().getId());
+                circle.markUpdated();
+                source.drainHallow(spiritType, count, false, false);
+                var bp = circle.getPos();
+                for (var i = 0; i < 8; i++) {
+                    level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, Spirits.spiritItems.get(spiritType).get().getDefaultInstance()),
+                            bp.getX() + 0.5, bp.getY() + 0.1, bp.getZ() + 0.5, 1, 0, 0, 0, 0.1D);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

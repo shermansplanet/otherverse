@@ -2,9 +2,11 @@ package com.shermansplanet.otherverse.sympathy;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
+import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.Spirits;
@@ -21,9 +23,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -33,6 +38,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -49,8 +55,8 @@ public class SympathyManager {
         var spindle = le.getMainHandItem();
         var bloodySpindle = OtherverseItems.SPINDLE_BLOODY.get();
         if (!(spindle.getItem() instanceof SpindleItem) && !spindle.is(bloodySpindle)) return;
-        var newstack = new ItemStack(bloodySpindle, spindle.getCount(), spindle.getTag());
-        newstack.getOrCreateTag().putUUID("sympathy_target", event.getEntity().getUUID());
+        var newstack = new ItemStack(bloodySpindle, spindle.getCount());
+        newstack.getOrCreateTag().putString("sympathy_target", getKeyFor(event.getEntity()));
         newstack.getOrCreateTag().putString("sympathy_label", event.getEntity().getType().getDescriptionId());
         le.setItemSlot(EquipmentSlot.MAINHAND, newstack);
     }
@@ -61,7 +67,19 @@ public class SympathyManager {
     }
 
     @SubscribeEvent
+    public static void spindleTooltip(ItemTooltipEvent event) {
+        if (!event.getItemStack().is(OtherverseItems.SPINDLE_BLOODY.get())) return;
+        var tag = event.getItemStack().getOrCreateTag();
+        if (tag.getBoolean("can_summon"))
+            event.getToolTip().add(Component.literal("Using this spindle will summon its target."));
+        if (tag.getBoolean("can_bind_remotely"))
+            event.getToolTip().add(Component.literal("If this spindle is tossed into a block focus, it will act as if its target were in that focus."));
+    }
+
+    @SubscribeEvent
     public static void onUse(PlayerInteractEvent.RightClickItem event) {
+        if (event.getItemStack().is(OtherverseItems.SPINDLE_BLOODY.get()))
+            trySpindleSummon(event.getEntity(), event.getItemStack(), event.getEntity().getEyePosition().add(event.getEntity().getLookAngle().scale(2)));
         if (!(event.getItemStack().getItem() instanceof SpindleItem)) {
             return;
         }
@@ -72,8 +90,20 @@ public class SympathyManager {
         data.putSympathyPosition(key, null);
     }
 
+    private static void trySpindleSummon(Player player, ItemStack itemStack, Vec3 position) {
+        var tag = itemStack.getOrCreateTag();
+        if (!(player instanceof ServerPlayer sp) || !tag.getBoolean("can_summon")) return;
+        var entity = getEntityByUniqueId(tag.getString("sympathy_target"), sp.serverLevel());
+        if (entity == null) return;
+        entity.moveTo(position);
+        itemStack.shrink(1);
+        if (itemStack.isEmpty()) player.getInventory().removeItem(itemStack);
+    }
+
     @SubscribeEvent
     public static void onUse(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getItemStack().is(OtherverseItems.SPINDLE_BLOODY.get()))
+            trySpindleSummon(event.getEntity(), event.getItemStack(), event.getHitVec().getLocation());
         if (!(event.getItemStack().getItem() instanceof SpindleItem)) {
             return;
         }
@@ -145,7 +175,7 @@ public class SympathyManager {
                     if (!cc.getItem().is(OtherverseItems.SELF.get()) || !Objects.equals(cc.player, key)) continue;
                 } else {
                     if (!cc.getItem().is(OtherverseItems.SPINDLE_BLOODY.get())
-                            || !Objects.equals(cc.getItem().getTag().getUUID("sympathy_target").toString(), key))
+                            || !Objects.equals(cc.getItem().getTag().getString("sympathy_target"), key))
                         continue;
                 }
                 validPositions.add(pos);
@@ -157,7 +187,11 @@ public class SympathyManager {
         return allCircles;
     }
 
-    private static String getKeyFor(LivingEntity entity) {
+    public static String getKeyFor(LivingEntity entity) {
+        var pract = FamiliarManager.getPractitionerForFamiliar(entity);
+        if (!pract.isEmpty()) {
+            return "familiar:" + pract;
+        }
         return (entity instanceof Player player) ? player.getGameProfile().getName() : entity.getUUID().toString();
     }
 
@@ -194,7 +228,7 @@ public class SympathyManager {
         if (otherDelta == 0) return delta;
         Entity otherEntity = null;
         if (isSpindle) {
-            otherEntity = getEntityByUniqueId(spindleCircle.getItem().getTag().getUUID("sympathy_target"), sl);
+            otherEntity = getEntityByUniqueId(spindleCircle.getItem().getTag().getString("sympathy_target"), sl);
         } else {
             for (var player : level.players()) {
                 if (player.getGameProfile().getName().equals(spindleCircle.player)) {
@@ -223,18 +257,31 @@ public class SympathyManager {
                 .withStyle(Style.EMPTY.withColor(0xaaaaaa).withItalic(true)));
     }
 
-    private static HashMap<UUID, Entity> entitiesByUUID = new HashMap<>();
+    private static HashMap<String, Entity> entitiesByUUID = new HashMap<>();
 
     @SubscribeEvent
     public static void onStart(ServerStartedEvent event) {
         entitiesByUUID.clear();
     }
 
-    public static Entity getEntityByUniqueId(UUID uniqueId, ServerLevel sl) {
+    public static Entity getEntityByUniqueId(String uniqueId, ServerLevel sl) {
         if (entitiesByUUID.containsKey(uniqueId)) return entitiesByUUID.get(uniqueId);
+        if (uniqueId.startsWith("familiar:")) {
+            var playerName = uniqueId.replace("familiar:", "");
+            for (var player : sl.getServer().getPlayerList().getPlayers()) {
+                if (!player.getGameProfile().getName().equals(playerName)) continue;
+                var familiarData = FamiliarManager.getFamiliarData(player);
+                if (familiarData == null) return null;
+                var mobData = familiarData.getCompound("mob_data");
+                var entityTag = mobData.getCompound("EntityTag");
+                var familiarId = entityTag.getUUID("UUID");
+                uniqueId = familiarId.toString();
+                break;
+            }
+        }
         for (ServerLevel level : sl.getServer().getAllLevels()) {
             for (Entity entity : level.getAllEntities()) {
-                if (entity.isAddedToWorld() && entity.getUUID().equals(uniqueId)) {
+                if (entity.isAddedToWorld() && entity.getUUID().toString().equals(uniqueId)) {
                     entitiesByUUID.put(uniqueId, entity);
                     return entity;
                 }
@@ -242,5 +289,13 @@ public class SympathyManager {
         }
 
         return null;
+    }
+
+    public static void tryBindFromSpindleItem(ItemStack item, ServerLevel sl, AABB bb) {
+        var entity = getEntityByUniqueId(item.getOrCreateTag().getString("sympathy_target"), sl);
+        if (!(entity instanceof Mob mob)) return;
+        BlockFocus focus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), bb);
+        if(focus == null) return;
+        DiagramManager.onMobInFocus(mob, focus, sl);
     }
 }

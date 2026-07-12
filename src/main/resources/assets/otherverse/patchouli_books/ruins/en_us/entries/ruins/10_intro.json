@@ -1,0 +1,27 @@
+{
+    "name": "What are the Ruins?",
+    "sortnum": 10,
+    "icon": "minecraft:experience_bottle",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title" : "What are the Ruins?",
+            "text": "The Ruins is a dimension that blurs the line between physical and immaterial, between phenomenon and metaphor.$(br2)It gathers forgotten memories, echoes of emotion, departed spirits, and other immateria produced by the other worlds."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/ruins_1.png"],
+            "border": true,
+            "text": "Each area of the Ruins is shaped by an emotion."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Practitioners sometimes use the Ruins to cross great distances quickly; its scale is warped similarly to the Nether and it is linked to every other dimension.$(br2)Sometimes we visit with the goal of collecting the souls of slain mobs, which inevitably make their way to this realm.$(br2)Sometimes we even make our homes in this strange place."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Claiming your Demesne in a Ruins biome or taking a biome's corresponding typhlotic beast as Familiar will make that biome more friendly towards you, and defang its natural hazards.$(br2)$(italic)DEV NOTE: The Ruins are still in development. What is in this book has been implemented, but echoes and Hosting are not yet present."
+        }
+    ]
+}

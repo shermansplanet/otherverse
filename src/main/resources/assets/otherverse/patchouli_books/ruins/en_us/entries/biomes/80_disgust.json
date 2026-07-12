@@ -1,0 +1,17 @@
+{
+  "name": "Disgust",
+  "sortnum": 80,
+  "icon": "minecraft:slime_block",
+  "category": "otherverse:biomes",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Disgust",
+      "text": "Disgust is a nauseating place of rot and decay. Wither roses dot the landscape, and just stepping in the water will cause your head to swim with the stench. Any fresh food dropped on the ground will turn into rotten flesh after seven seconds (fresh food is any item with food but not flesh spirits)."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Typhlotic zombies called $(bold)rotten$() roam this place. They will pursue you if you have any fresh food in your inventory; its aroma stands out against the stench of Disgust. Rotten can be distracted by fresh food tossed on the ground, but remember - it will spoil quickly. Rotten are healed by the wither effect."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+	"other" : "otherverse:snuffer",
+	"spirit" : "air",
+	"transfusion" : [
+		{
+			"input" : "minecraft:feather",
+			"health" : 13,
+			"output" : "otherverse:snuffur"
+		}
+	]
+}
