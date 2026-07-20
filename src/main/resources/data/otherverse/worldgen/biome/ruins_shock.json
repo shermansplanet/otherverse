@@ -1,7 +1,7 @@
 {
   "temperature": 0.25,
   "downfall": 0.4,
-  "precipitation": "rain",
+  "has_precipitation": false,
   "effects": {
     "sky_color": 0,
     "fog_color": 2804437,
@@ -12,11 +12,29 @@
       "options": {
         "type": "minecraft:flash"
       },
-      "probability": 0.001
+      "probability": 0.0005
     }
   },
-  "spawners": {},
-  "spawn_costs": {},
+  "spawners": {
+    "monster": [
+      {
+        "type": "otherverse:snuffer",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ]
+  },
+  "spawn_costs": {
+    "otherverse:typhlotic_jellyfish": {
+      "charge": 1,
+      "energy_budget": 0
+    },
+    "otherverse:snuffer": {
+      "charge": 1,
+      "energy_budget": 0.15
+    }
+  },
   "carvers": {},
   "features": [
     ["otherverse:shock_spires"],

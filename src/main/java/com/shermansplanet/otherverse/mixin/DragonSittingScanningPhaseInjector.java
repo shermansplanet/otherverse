@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.binding.BindingManager;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.AbstractDragonSittingPhase;
 import net.minecraft.world.entity.boss.enderdragon.phases.DragonSittingScanningPhase;
@@ -18,7 +19,7 @@ public abstract class DragonSittingScanningPhaseInjector extends AbstractDragonS
 
     @Override
     public Vec3 getFlyTargetLocation() {
-        if (!dragon.getPersistentData().hasUUID("bindingId")) return null;
+        if (!BindingManager.isBoundOrContracted(dragon)) return null;
         scanningTime = 0;
         var pos = dragon.getNavigation().getTargetPos();
         if(pos == null) return null;

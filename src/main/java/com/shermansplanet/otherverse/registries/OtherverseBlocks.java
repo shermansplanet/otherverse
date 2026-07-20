@@ -7,6 +7,8 @@ import com.shermansplanet.otherverse.demesnes.DemesnesBeaconBlock;
 import com.shermansplanet.otherverse.demesnes.DemesnesPortalBlock;
 import com.shermansplanet.otherverse.diagrams.ChalkLineBlock;
 import com.shermansplanet.otherverse.diagrams.SlateScaffoldingBlock;
+import com.shermansplanet.otherverse.ruins.MemorySnareBlock;
+import com.shermansplanet.otherverse.ruins.RedstoneNetherBricksBlock;
 import com.shermansplanet.otherverse.sympathy.FateWebBlock;
 import com.shermansplanet.otherverse.sympathy.SelectorBlock;
 import net.minecraft.world.level.block.AmethystClusterBlock;
@@ -15,7 +17,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -26,17 +29,18 @@ public class OtherverseBlocks {
     public static final RegistryObject<Block> CHALK_LINE = BLOCKS.register("chalk_line",
             ChalkLineBlock::new);
     public static final RegistryObject<Block> WEB_OF_FATE = BLOCKS.register("web_of_fate",
-            () -> new FateWebBlock(BlockBehaviour.Properties.of(Material.WEB).noCollission()));
+            () -> new FateWebBlock(BlockBehaviour.Properties.copy(Blocks.TRIPWIRE)));
     public static final RegistryObject<Block> SELECTOR = BLOCKS.register("selector",
-            () -> new SelectorBlock(BlockBehaviour.Properties.of(Material.AIR).noCollission()));
+            () -> new SelectorBlock(BlockBehaviour.Properties.copy(Blocks.AIR).noCollission()));
     public static final RegistryObject<Block> FAMILIAR_CROWN = BLOCKS.register("familiar_crown",
-            () -> new CrownBlock(BlockBehaviour.Properties.of(Material.AIR)));
+            () -> new CrownBlock(BlockBehaviour.Properties.copy(Blocks.AIR)));
     public static final RegistryObject<Block> SLATE_SCAFFOLDING = BLOCKS
             .register("slate_scaffolding", () -> new SlateScaffoldingBlock(
-                    BlockBehaviour.Properties.of(Material.STONE).noCollission().instabreak()));
+                    BlockBehaviour.Properties.copy(Blocks.STONE).noCollission().instabreak()));
     public static final RegistryObject<Block> SALT_CRYSTALS = BLOCKS.register("salt_crystals",
             () -> new AmethystClusterBlock(7, 3,
-                    BlockBehaviour.Properties.of(Material.AMETHYST).sound(SoundType.AMETHYST_CLUSTER).strength(0.3F)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).forceSolidOn().noOcclusion()
+                            .sound(SoundType.AMETHYST_CLUSTER).lightLevel(x -> 0).strength(0.3F).pushReaction(PushReaction.DESTROY)));
     public static final RegistryObject<Block> SULFUR_ORE = BLOCKS.register("sulfur_ore",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.NETHER_QUARTZ_ORE)));
     /*public static final RegistryObject<Block> BEAST_SKULL = BLOCKS.register("beastskull",
@@ -46,13 +50,17 @@ public class OtherverseBlocks {
             () -> new SpawnAltarBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BARS)));
     public static final RegistryObject<Block> BIOME_BRAZIER = BLOCKS.register("biome_brazier",
             () -> new BiomeBrazierBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BARS).lightLevel(
-                    (p_50763_) -> p_50763_.getValue(BlockStateProperties.LIT) ? 15 : 0)));
+                    (p_50763_) -> (p_50763_.getValue(BlockStateProperties.LIT) || p_50763_.getValue(BiomeBrazierBlock.SCRY)) ? 15 : 0)));
     public static final RegistryObject<Block> CINNABAR_BLOCK = BLOCKS.register("cinnabar_block",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.AMETHYST_BLOCK)));
     public static final RegistryObject<Block> DEMESNE_BEACON = BLOCKS.register("demesne_beacon",
             () -> new DemesnesBeaconBlock(BlockBehaviour.Properties.copy(Blocks.BEACON)));
     public static final RegistryObject<Block> DEMESNE_PORTAL = BLOCKS.register("demesne_portal",
             () -> new DemesnesPortalBlock(BlockBehaviour.Properties.copy(Blocks.AIR)));
+    public static final RegistryObject<Block> REDSTONE_NETHER_BRICKS = BLOCKS.register("redstone_nether_bricks",
+            () -> new RedstoneNetherBricksBlock(BlockBehaviour.Properties.copy(Blocks.RED_NETHER_BRICKS)));
+    public static final RegistryObject<Block> MEMORY_SNARE = BLOCKS.register("memory_snare",
+            () -> new MemorySnareBlock(BlockBehaviour.Properties.copy(Blocks.DIRT).sound(SoundType.SCULK_SENSOR).lightLevel(bs -> 8)));
 
     public static final RegistryObject<Block> PLUM_BRICKS = BLOCKS.register("plum_bricks",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.BRICKS)));

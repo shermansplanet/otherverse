@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.integrations.jei;
 
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.spirits.SpiritLabeler.SpiritAmount;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -22,11 +23,6 @@ public class SpiritExtractionRecipe implements Recipe<Container> {
         this.id = id;
         this.spirits = spiritTypes;
         this.input = input;
-    }
-
-    @Override
-    public ItemStack getResultItem() {
-        return ItemStack.EMPTY;
     }
 
     @Override
@@ -52,12 +48,17 @@ public class SpiritExtractionRecipe implements Recipe<Container> {
     }
 
     @Override
-    public ItemStack assemble(Container p_44001_) {
-        return null;
+    public ItemStack assemble(Container p_44001_, RegistryAccess p_267165_) {
+        return ItemStack.EMPTY;
     }
 
     @Override
     public boolean canCraftInDimensions(int p_43999_, int p_44000_) {
         return false;
+    }
+
+    @Override
+    public ItemStack getResultItem(RegistryAccess p_267052_) {
+        return null;
     }
 }

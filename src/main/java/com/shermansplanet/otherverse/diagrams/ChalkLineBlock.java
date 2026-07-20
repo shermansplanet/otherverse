@@ -7,7 +7,6 @@ import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -33,11 +32,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -140,7 +137,7 @@ public class ChalkLineBlock extends Block implements EntityBlock {
     }
 
     public ChalkLineBlock() {
-        super(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().instabreak());
+        super(BlockBehaviour.Properties.copy(Blocks.REDSTONE_WIRE));
         registerDefaultState(stateDefinition.any()
                 .setValue(chalkCircle, false)
                 .setValue(chalkN, false)
@@ -183,9 +180,10 @@ public class ChalkLineBlock extends Block implements EntityBlock {
         }
         BlockEntity blockentity = level.getBlockEntity(pos);
         if (blockentity instanceof ChalkCircle circle) {
-            if (circle.item.getItem() instanceof ChalkItem) {
+            if (circle.item.getItem() instanceof ChalkItem && circle.inscription.isEmpty()) {
                 if (entity instanceof ItemEntity itemEntity) {
                     ItemStack og = itemEntity.getItem();
+                    if (og.is(OtherverseItems.CHALK.get())) return;
                     var newItemStack = og.split(1);
                     if (og.isEmpty()) {
                         itemEntity.discard();
@@ -240,13 +238,12 @@ public class ChalkLineBlock extends Block implements EntityBlock {
         boolean makeCircle = !itemstack.isEmpty() && !circle.item.is(itemstack.getItem());
         boolean fullOfSelf =
                 containsSelf && circle.item.getCount() >= selfPositions.length;
-        circle.isNumber = false;
         if (player.isShiftKeyDown() && itemstack.isEmpty()) {
             if (fullOfSelf) {
                 return InteractionResult.SUCCESS;
             }
             if (!player.isCreative()) {
-                if (!SelfManager.ChangeSelf(player, -1)) {
+                if (!SelfManager.changeSelf(player, -1)) {
                     return InteractionResult.SUCCESS;
                 }
             }
@@ -255,18 +252,17 @@ public class ChalkLineBlock extends Block implements EntityBlock {
             if (containsSelf) {
                 selfCount += circle.item.getCount();
             }
+            circle.setPlayer(player);
+            if (level instanceof ServerLevel sl) {
+                var data = DiagramManager.getOrCreateLevelData(sl);
+                data.putSelf(player, pos);
+            }
             itemstack = new ItemStack(OtherverseItems.SELF.get(), selfCount);
         } else if (makeCircle) {
             boolean dontSpend =
                     player.getAbilities().instabuild || itemstack.getItem() instanceof ChalkItem;
             itemstack = dontSpend ? itemstack.copy() : itemstack;
-            if (player.isShiftKeyDown() && itemstack.is(Tags.Items.SEEDS)) {
-                player.getInventory().removeItem(itemstack);
-                player.displayClientMessage(Component.literal("Count: " + itemstack.getCount()), true);
-                circle.isNumber = true;
-            } else {
-                itemstack = itemstack.split(1);
-            }
+            itemstack = itemstack.split(1);
         }
         boolean leaveCircleBehind = makeCircle || !(itemstack.getItem() instanceof ChalkItem);
         state = state.setValue(chalkCircle, leaveCircleBehind);
@@ -275,6 +271,10 @@ public class ChalkLineBlock extends Block implements EntityBlock {
             if (!player.addItem(drop)) {
                 player.drop(drop, false);
             }
+        }
+        if (itemstack.is(OtherverseItems.SPINDLE_BLOODY.get()) && level instanceof ServerLevel sl) {
+            var data = DiagramManager.getOrCreateLevelData(sl);
+            data.putSpindle(itemstack, pos);
         }
         circle.item = makeCircle ? itemstack
                 : leaveCircleBehind ? new ItemStack(OtherverseItems.CHALK.get()) : ItemStack.EMPTY;
@@ -312,8 +312,8 @@ public class ChalkLineBlock extends Block implements EntityBlock {
             return;
         }
         if (event.getPlacedBlock().getBlock() instanceof ChalkLineBlock cb) {
-            cb.blockWasPlacedBy(event.getEntity().getLevel(), event.getPos());
-            if (event.getEntity() instanceof Player p && p.getLevel().getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
+            cb.blockWasPlacedBy(event.getEntity().level(), event.getPos());
+            if (event.getEntity() instanceof Player p && p.level().getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
                 cc.setPlayer(p);
             }
             return;

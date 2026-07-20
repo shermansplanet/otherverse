@@ -26,8 +26,11 @@ import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
@@ -42,9 +45,13 @@ public class MobTransfusions {
     public static void setupReplacements() {
         transfusionShortcuts.clear();
         transfusionShortcuts.put("!flowers", new ArrayList<>());
+        transfusionShortcuts.put("!doors", new ArrayList<>());
         for (Item item : ForgeRegistries.ITEMS) {
             if (item.getDefaultInstance().is(ItemTags.FLOWERS)) {
                 transfusionShortcuts.get("!flowers").add(new ItemOrEntityType(item));
+            }
+            if (item instanceof BlockItem bi && bi.getBlock() instanceof DoorBlock) {
+                transfusionShortcuts.get("!doors").add(new ItemOrEntityType(item));
             }
             if (item instanceof BlockItem bi) {
                 if (bi.getBlock() instanceof FlowerBlock && !item.equals(Items.WITHER_ROSE)) {
@@ -101,7 +108,7 @@ public class MobTransfusions {
         for (var transfusionSet : ALL_MOB_TRANSFUSIONS.data.entrySet()) {
             for (var transfusionData : transfusionSet.getValue()) {
                 recipes.add(
-                        new TransfusionRecipe(new ResourceLocation(Otherverse.MODID, "mob_transfusion_" + i++),
+                        new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "mob_transfusion_" + i++),
                                 MobBindingInfluenceUtils.getIdols(transfusionData.entityTypes),
                                 transfusionSet.getKey().getItemStack(), transfusionData.destItem,
                                 transfusionData.price));
@@ -110,9 +117,9 @@ public class MobTransfusions {
         return recipes;
     }
 
-    public static void analyzeSmeltingRecipe(SmeltingRecipe recipe) {
+    public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
         register(EntityType.BLAZE, recipe.getIngredients().get(0).getItems()[0].getItem(),
-                recipe.getResultItem(), 1, true);
+                recipe.getResultItem(sl.registryAccess()), 1, true);
     }
 
     public static boolean tryLightningTransform(ServerLevel level, BlockFocus focus, Diagram diagram) {
@@ -121,7 +128,7 @@ public class MobTransfusions {
         }
         BlockPos target = diagram.influences.get(focus.getPos());
         BindingInfo binding = DiagramManager.getBindingOrBoundMobAt(level, target);
-        if (binding == null || binding.mob == null || !level.canSeeSky(binding.mob.blockPosition())) {
+        if (binding == null || binding.mob == null || !level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, focus.getPos()).equals(focus.getPos())) {
             return false;
         }
         if (!diagram.trySpendPower(level, focus.getPos(), 33, new HashSet<>())) {
@@ -140,14 +147,16 @@ public class MobTransfusions {
     public static Collection<ItemOrEntityType> getItemOrShortcut(String s) {
         if (s.startsWith("entity.")) {
             var parts = s.split("\\.");
-            return List.of(new ItemOrEntityType(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(
+            return List.of(new ItemOrEntityType(ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.fromNamespaceAndPath(
                     parts[1], parts[2]
             ))));
         }
         if (transfusionShortcuts.containsKey(s)) {
             return transfusionShortcuts.get(s);
         }
-        return List.of(new ItemOrEntityType(ForgeRegistries.ITEMS.getValue(new ResourceLocation(s))));
+        var key = ResourceLocation.parse(s);
+        if(!ForgeRegistries.ITEMS.containsKey(key)) return List.of();
+        return List.of(new ItemOrEntityType(ForgeRegistries.ITEMS.getValue(key)));
     }
 
     public static void processOther(EntityType<? extends LivingEntity> other, JsonObject practice) {
@@ -155,8 +164,10 @@ public class MobTransfusions {
             for (JsonElement transfusionElement : practice.getAsJsonArray("transfusion")) {
                 JsonObject transfusion = transfusionElement.getAsJsonObject();
                 for (var item : getItemOrShortcut(transfusion.get("input").getAsString())) {
+                    var loc = ResourceLocation.parse(transfusion.get("output").getAsString());
+                    if (!ForgeRegistries.ITEMS.containsKey(loc)) continue;
                     register(other, item.item,
-                            ForgeRegistries.ITEMS.getValue(new ResourceLocation(transfusion.get("output").getAsString())).getDefaultInstance(),
+                            ForgeRegistries.ITEMS.getValue(loc).getDefaultInstance(),
                             transfusion.get("health").getAsInt(),
                             false
                     );
@@ -303,7 +314,7 @@ public class MobTransfusions {
             return false;
         }
         BindingOrFleshbinding binding = BindingOrFleshbinding.getFromPosition(level, target);
-        if (binding == null || binding.getHealth() == binding.getMaxHealth()) {
+        if (binding == null || binding.getHealth() >= binding.getMaxHealth()) {
             return false;
         }
         var foods = MobBindingInfluenceUtils.allFoods.get(binding.entityType);
@@ -314,14 +325,17 @@ public class MobTransfusions {
         if (amount == null) {
             return false;
         }
+        int maxHeal = binding.getMaxHealth() - binding.getHealth();
         if (spiritType != null) {
-            int maxHeal = binding.getMaxHealth() - binding.getHealth();
             int spiritCount = (int) Math.ceil(maxHeal / (float) amount);
             amount = sourceFocus.drainHallow(spiritType, spiritCount * 2, false, false) / 2;
             if (amount == 0) {
                 return false;
             }
+        } else if (maxHeal < amount && DiagramManager.shouldPreventWaste(sourceFocus)) {
+            return false;
         }
+        amount = Math.min(maxHeal, amount);
         binding.changeHealth(amount, level);
         BlockPos bp = sourceFocus.getPos();
         for (var i = 0; i < 10; i++) {
@@ -330,7 +344,7 @@ public class MobTransfusions {
         }
 
         if (spiritType == null) {
-            sourceFocus.removeItem();
+            sourceFocus.drainItem();
         }
 
         return true;

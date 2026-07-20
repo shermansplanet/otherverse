@@ -3,13 +3,21 @@
 	"spirit" : "fate",
 	"healing" : {
 		"entity.minecraft.bee" : 1,
-		"entity.minecraft.silverfish" : 1
+		"entity.minecraft.silverfish" : 1,
+		"entity.enemyexpansion.botfly" : 1,
+		"entity.enemyexpansion.wasp" : 1,
+		"entity.enemyexpansion.ladybug" : 1
 	},
 	"transfusion" : [
 		{
 			"input" : "minecraft:vine",
 			"health" : 3,
 			"output" : "minecraft:string"
+		},
+		{
+			"input" : "minecraft:rotten_flesh",
+			"health" : 3,
+			"output" : "minecraft:spider_eye"
 		}
 	]
 }

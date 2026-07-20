@@ -1,0 +1,31 @@
+{
+	"other" : "alexscaves:sweetish_fish",
+	"spirit": "food",
+	"transfusion" : [
+		{
+			"input" : "minecraft:red_dye",
+			"health" : 1,
+			"output" : "alexscaves:gelatin_red"
+		},
+		{
+			"input" : "minecraft:lime_dye",
+			"health" : 1,
+			"output" : "alexscaves:gelatin_green"
+		},
+		{
+			"input" : "minecraft:yellow_dye",
+			"health" : 1,
+			"output" : "alexscaves:gelatin_yellow"
+		},
+		{
+			"input" : "minecraft:blue_dye",
+			"health" : 1,
+			"output" : "alexscaves:gelatin_blue"
+		},
+		{
+			"input" : "minecraft:pink_dye",
+			"health" : 1,
+			"output" : "alexscaves:gelatin_pink"
+		}
+	]
+}

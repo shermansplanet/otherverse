@@ -1,0 +1,17 @@
+{
+  "name": "The Ruins",
+  "icon": "minecraft:sculk",
+  "category": "otherverse:ruins",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The Ruins bleed into the Overworld in places that we call the Deep Dark, guarded by great typhlotic beasts we call Wardens, spreading on a substrate of calcified memories and experiences we call sculk. See how easily the sculk releases those experiences when broken? But with a gentle touch, a specimen of sculk can be captured live."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "otherverse:ruins",
+      "text": "Perhaps, if one were to tease written words from this sculk, one could learn something about the Realm from which it spread."
+    }
+  ]
+}

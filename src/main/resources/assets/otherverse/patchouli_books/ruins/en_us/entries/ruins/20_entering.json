@@ -1,0 +1,32 @@
+{
+    "name": "Entering the Ruins",
+    "sortnum": 20,
+    "icon": "minecraft:sculk",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title" : "Entering the Ruins",
+            "text": "There are a few ways of traveling to and from the Ruins. The easiest is to die on top of a sculk block while in a block focus. Instead of properly dying, you will lose some experience and be sent to the Ruins for some amount of time. When the time elapses, you will return to the dimension (but not location) from which you came."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/ruins_2.png"],
+            "border": true,
+            "text": "A valid Ruins-access diagram."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The amount of time you spend in the Ruins before getting pulled back out and the amount of experience you lose upon entry are decided by the blocks influencing you when you die on top of sculk.$(br2)Each soul fire will extract 10xp and give you 1 minute.$(br)Each soul torch will extract 100xp and give you 10 minutes.$(br)Each soul lantern will extract 600xp and give you 1 hour.$(br)"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If you manage to find your way to an ancient city, you can instead die on a reinforced deepslate block (an ancient portal frame) influenced by any of the aforementioned blocks. This will not cost any experience and will permanently transport you to the Ruins.$(br2)If you have a Demesne with the Portal perk, you can make a permanent portal to the Ruins as well."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:escape_rope",
+            "text": "To expedite your return to the dimension from which you came, you can fall into the void beneath the Ruins or use an escape rope. You don't need a Demesne to use an escape rope this way."
+        }
+    ]
+}

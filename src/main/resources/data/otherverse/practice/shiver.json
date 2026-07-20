@@ -1,0 +1,11 @@
+{
+	"other" : "otherverse:typhlotic_shark",
+	"spirit" : "cold",
+	"transfusion" : [
+		{
+			"input" : "minecraft:flint",
+			"health" : 13,
+			"output" : "otherverse:shiver_tooth"
+		}
+	]
+}

@@ -1,0 +1,11 @@
+{
+	"other" : "cataclysm:ignited_revenant",
+	"spirit" : "fire",
+	"transfusion" : [
+		{
+			"input" : "minecraft:gunpowder",
+			"health" : 36,
+			"output" : "cataclysm:burning_ashes"
+		}
+	]
+}

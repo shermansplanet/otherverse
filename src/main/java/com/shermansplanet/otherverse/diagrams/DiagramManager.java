@@ -15,19 +15,29 @@ import com.shermansplanet.otherverse.spirits.SavedPracticeData;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent.LevelTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.VanillaGameEvent;
@@ -264,10 +274,17 @@ public class DiagramManager {
         if (!PracticeWorldManager.worldSetUp) return;
 
         TransientDiagramData levelData = getOrCreateLevelData(sl);
-        for (var diagram : levelData.diagramsByPrimary.values()) {
+        for (var diagram : new ArrayList<>(levelData.diagramsByPrimary.values())) {
             for (var process : new ArrayList<>(diagram.processes)) {
                 process.tick();
             }
+        }
+        for (var chunkPos : levelData.loadedChunks) {
+            var chunk = sl.getChunk(chunkPos.x, chunkPos.z);
+            if (sl.players().stream().anyMatch(player ->
+                    player.distanceToSqr(new Vec3(chunkPos.getMinBlockX() + 8, player.position().y, chunkPos.getMinBlockZ() + 8)) < 128 * 128
+            )) continue;
+            sl.tickChunk(chunk, sl.getGameRules().getInt(GameRules.RULE_RANDOMTICKING));
         }
         HashSet<Diagram> diagrams = levelData.diagramsToActivate;
         if (diagrams == null || diagrams.isEmpty()) {
@@ -287,6 +304,13 @@ public class DiagramManager {
                 diagrams.add(d);
             } else {
 //                LOGGER.debug("deactivating diagram");
+                var toRemove = new ArrayList<Mob>();
+                for (var mob : d.mobsOnCooldown) {
+                    if (mob == null || !mob.isAddedToWorld() || mob.isRemoved() || mob.isDeadOrDying() || mob.invulnerableTime <= 0) {
+                        toRemove.add(mob);
+                    }
+                }
+                toRemove.forEach(d.mobsOnCooldown::remove);
                 if (!d.processes.isEmpty()) {
 //                    LOGGER.debug("...but it still has processes");
                     continue;
@@ -301,6 +325,17 @@ public class DiagramManager {
                 }
             }
         }
+    }
+
+    public static IFocus getFocus(BlockPos pos, Level focusLevel) {
+        if (focusLevel.getBlockEntity(pos) instanceof ChalkCircle cc) {
+            return cc;
+        }
+        BlockFocus bf = DiagramManager.getOrCreateLevelData(focusLevel).allBlockFoci.get(pos);
+        if (bf != null) {
+            return bf;
+        }
+        return null;
     }
 
     public static void blockChanged(BlockPos pos, ServerLevel sl) {
@@ -320,10 +355,17 @@ public class DiagramManager {
 
     private static void BlockBreak(Level level, BlockPos pos) {
         TransientDiagramData diagramData = getOrCreateLevelData(level);
+        if (diagramData.getSympathyPosition(pos.toString()) != null) {
+            diagramData.putSympathyPosition(pos.toString(), null);
+        }
         if (level instanceof ServerLevel sl) {
             blockChanged(pos, sl);
-            if (sl.getBlockState(pos).is(OtherverseBlocks.DEMESNE_BEACON.get())) {
+            var state = sl.getBlockState(pos);
+            if (state.is(OtherverseBlocks.DEMESNE_BEACON.get())) {
                 DemesnesManager.onBeaconBroken(sl, pos);
+            }
+            if (state.is(OtherverseBlocks.BIOME_BRAZIER.get())) {
+                diagramData.removeChunkloader(pos);
             }
             return;
         }
@@ -335,7 +377,7 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void waterproofChalk(BlockEvent.FluidPlaceBlockEvent event) {
-        if (event.getOriginalState().is(OtherverseBlocks.CHALK_LINE.get())){
+        if (event.getOriginalState().is(OtherverseBlocks.CHALK_LINE.get())) {
             event.setCanceled(true);
             return;
         }
@@ -359,10 +401,11 @@ public class DiagramManager {
                 if (!event.getPlayer().addItem(drop)) {
                     event.getPlayer().drop(drop, false);
                 }
+                if (sl.getBlockEntity(event.getPos()) instanceof ChalkCircle cc) cc.markUpdated();
                 return;
             }
         }
-        Level level = event.getPlayer().getLevel();
+        Level level = event.getPlayer().level();
         BlockBreak(level, event.getPos());
         if (event.getPlayer().isCreative()) {
             getOrCreateLevelData(level).removePlacedItemTag(event.getPos());
@@ -371,7 +414,7 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void onBlockDestroyed(LivingDestroyBlockEvent event) {
-        BlockBreak(event.getEntity().getLevel(), event.getPos());
+        BlockBreak(event.getEntity().level(), event.getPos());
     }
 
     @SubscribeEvent
@@ -384,7 +427,7 @@ public class DiagramManager {
         if (event.getLevel() instanceof ServerLevel sl) {
             Block block = event.getContext().affectedState().getBlock();
             ItemStack item = null;
-            BlockPos pos = new BlockPos(event.getEventPosition());
+            BlockPos pos = BlockPos.containing(event.getEventPosition());
             if (event.getContext().sourceEntity() instanceof Player player) {
                 ItemStack mainHandItem = player.getItemInHand(InteractionHand.MAIN_HAND);
                 ItemStack offHandItem = player.getItemInHand(InteractionHand.OFF_HAND);
@@ -417,8 +460,8 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void entityUpdates(LivingEvent.LivingTickEvent event) {
-        Level level = event.getEntity().getLevel();
-        if (level.getGameTime() % 10 != 0 || !(level instanceof ServerLevel sl) || !(event.getEntity() instanceof Mob mob)) {
+        Level level = event.getEntity().level();
+        if (!(level instanceof ServerLevel sl) || !(event.getEntity() instanceof Mob mob)) {
             return;
         }
         CompoundTag entityData = event.getEntity().getPersistentData();
@@ -436,9 +479,11 @@ public class DiagramManager {
             }
             Diagram diagram = focus.getDiagram();
             if (diagram.mobsOnCooldown.contains(mob) && mob.invulnerableTime <= 0) {
-                diagram.mobsOnCooldown.remove(mob);
-                LOGGER.debug("ACTIVATING DIAGRAM: MOB COOLED DOWN");
-                DiagramManager.markDiagramActive(sl, diagram);
+                for (var otherDiagram : data.diagramsByPrimary.values()) {
+                    if (otherDiagram.mobsOnCooldown.remove(mob)) {
+                        DiagramManager.markDiagramActive(sl, otherDiagram);
+                    }
+                }
                 return;
             }
         }
@@ -447,6 +492,10 @@ public class DiagramManager {
         if (focus == null) {
             return;
         }
+        onMobInFocus(mob, focus, sl);
+    }
+
+    public static void onMobInFocus(Mob mob, BlockFocus focus, ServerLevel sl) {
         var hp = Math.round(mob.getHealth());
         if (focus.mostRecentMob != null && mob.getId() == focus.mostRecentMob.getId() && hp == focus.mostRecentMobHealth) {
             return;
@@ -502,6 +551,16 @@ public class DiagramManager {
                     focus.mostRecentMob.getPersistentData().getUUID("bindingId"));
         }
         return null;
+    }
+
+    public static boolean shouldPreventWaste(IFocus focus) {
+        if (focus.getFocusLevel().getBlockState(focus.getPos().below()).is(Blocks.AMETHYST_BLOCK)) return true;
+        for (var sourceFocus : focus.getDiagram().influences.entrySet()) {
+            if (!sourceFocus.getValue().equals(focus)) continue;
+            if (focus.getFocusLevel().getBlockEntity(sourceFocus.getKey()) instanceof ChalkCircle sourceCircle && sourceCircle.getItem().is(Items.AMETHYST_SHARD))
+                return true;
+        }
+        return false;
     }
 
     public enum BlockUpdateType {ADDED, REMOVED, CHANGED}

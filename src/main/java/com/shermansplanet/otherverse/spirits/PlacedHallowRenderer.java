@@ -1,6 +1,8 @@
 package com.shermansplanet.otherverse.spirits;
 
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -20,17 +22,17 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.block.model.MultiVariant;
-import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -51,17 +53,53 @@ import java.util.function.Function;
 public class PlacedHallowRenderer {
     private static final Map<BlockState, HashMap<String, Pair<BakedModel, RenderType>>> modelByStateCache = Maps.newIdentityHashMap();
     private static final RenderStateShard.LightmapStateShard LIGHTMAP = new RenderStateShard.LightmapStateShard(true);
-    private static final RenderStateShard.ShaderStateShard RENDERTYPE_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeCutoutShader);
+    private static final RenderStateShard.ShaderStateShard RENDERTYPE_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeCutoutShader);
     private static final Logger LOGGER = LogUtils.getLogger();
+    protected static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+    }, () -> {
+        RenderSystem.disableBlend();
+        RenderSystem.defaultBlendFunc();
+    });
+    protected static final RenderStateShard.OutputStateShard TRANSLUCENT_TARGET = new RenderStateShard.OutputStateShard("translucent_target", () -> {
+    }, () -> {
+    });
 
     private static final HashSet<ShrineHelper.Shrine> shrinesToRender = new HashSet<>();
 
+    private static final ModelBaker DUMMY_BAKER = new ModelBaker() {
+        @Override
+        public UnbakedModel getModel(ResourceLocation p_252194_) {
+            return null;
+        }
+
+        @Override
+        public @org.jetbrains.annotations.Nullable BakedModel bake(ResourceLocation p_250776_, ModelState p_251280_) {
+            return null;
+        }
+
+        @Override
+        public @org.jetbrains.annotations.Nullable BakedModel bake(ResourceLocation location, ModelState state, Function<Material, TextureAtlasSprite> sprites) {
+            return null;
+        }
+
+        @Override
+        public Function<Material, TextureAtlasSprite> getModelTextureGetter() {
+            return null;
+        }
+    };
+
     @SubscribeEvent
     public static void renderTick(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) return;
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
-        renderHallows(player, event);
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+            renderHallows(player, event);
+        }
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS && SightManager.shouldRenderSight()) {
+            renderShrineRanges(player, event);
+        }
     }
 
     @SubscribeEvent
@@ -69,20 +107,44 @@ public class PlacedHallowRenderer {
         shrinesToRender.clear();
     }
 
-    /*@SubscribeEvent
-    public static void tick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        var level = Minecraft.getInstance().level;
-        if (level == null || level.getGameTime() % 5 != 0) return;
-        if (SightManager.shouldRenderSight()) {
-            for (var shrine : shrinesToRender) {
-                ShrineHelper.recalculateShrine(shrine);
-            }
+    private static void renderShrineRanges(LocalPlayer player, RenderLevelStageEvent event) {
+        var dir1 = new Vec3(1, 0, 0);
+        var dir2 = new Vec3(0, 0, 1);
+        var rot = (event.getRenderTick() + event.getPartialTick()) * 0.003f;
+
+        var t = (player.level().getGameTime() + Minecraft.getInstance().getPartialTick()) / 20f;
+        var multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        var poseStack = event.getPoseStack();
+
+        var camera = event.getCamera();
+        poseStack.pushPose();
+        poseStack.translate(-camera.getPosition().x(), -camera.getPosition().y(), -camera.getPosition().z());
+
+        for (var shrine : shrinesToRender) {
+            var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
+            if (behavior == null) continue;
+            poseStack.pushPose();
+            var range = shrine.range;
+            var shape = behavior.getShape();
+            var cylinderTop = switch (shape) {
+                case BELOW -> range.bottom();
+                case ABOVE -> range.bottom() + range.height();
+                case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
+            };
+            poseStack.translate(range.center().x, cylinderTop, range.center().z);
+            var r = shrine.isCombined ? (int) ((Math.sin(t) + 1) * 128) : 255;
+            var g = shrine.isCombined ? (int) ((Math.sin(t + Math.PI * 2 / 3) + 1) * 128) : 255;
+            var b = shrine.isCombined ? (int) ((Math.sin(t + Math.PI * 4 / 3) + 1) * 128) : 255;
+            ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
+                    rot, r, g, b, 100, range.height());
+            poseStack.popPose();
         }
-    }*/
+        poseStack.popPose();
+        multiBufferSource.endBatch(RenderType.lineStrip());
+    }
 
     private static void renderHallows(LocalPlayer player, RenderLevelStageEvent event) {
-        var levelData = DiagramManager.getOrCreateLevelData(player.level);
+        var levelData = DiagramManager.getOrCreateLevelData(player.level());
         var poseStack = event.getPoseStack();
         var camera = event.getCamera();
         poseStack.pushPose();
@@ -98,98 +160,37 @@ public class PlacedHallowRenderer {
         for (BlockPos pos : levelData.getAllPlacedItemPositions()) {
             if (player.position().distanceToSqr(new Vec3(pos.getX(), pos.getY(), pos.getZ())) > renderDist) continue;
             var tag = levelData.getPlacedItemTag(pos);
-            var bs = player.level.getBlockState(pos);
+            var bs = player.level().getBlockState(pos);
             poseStack.pushPose();
             poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
             var st = tag.getString("spirit_type");
-            renderSingleBlock((IBlockRenderGetter) Minecraft.getInstance().getBlockRenderer(), bs, poseStack, multiBufferSource,
-                    255, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout(), st);
+            renderSingleBlock(player.level(), bs, pos, poseStack, multiBufferSource, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, st);
             poseStack.popPose();
             if (!tag.contains("shrine") || !renderShrineBounds) continue;
-            var shrine = ShrineHelper.shrinesByPosition.computeIfAbsent(player.level, x -> new HashMap<>()).get(pos);
+            var shrine = ShrineHelper.shrinesByPosition.computeIfAbsent(player.level(), x -> new HashMap<>()).get(pos);
             if (shrine == null) {
-                shrine = ShrineHelper.getShrine(player.level, pos, Spirits.spiritsByLabel.get(st));
+                shrine = ShrineHelper.getShrine(player.level(), pos, Spirits.spiritsByLabel.get(st));
             }
             shrinesToRender.add(shrine.parentShrine == null ? shrine : shrine.parentShrine);
         }
 
-        if (!renderShrineBounds) {
-            poseStack.popPose();
-            return;
-        }
-
-        var dir1 = new Vec3(1, 0, 0);
-        var dir2 = new Vec3(0, 0, 1);
-        var rot = (event.getRenderTick() + event.getPartialTick()) * 0.003f;
-
-        var t = (player.level.getGameTime() + Minecraft.getInstance().getPartialTick()) / 20f;
-
-        for (var shrine : shrinesToRender) {
-            var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
-            if (behavior == null) continue;
-            poseStack.pushPose();
-            var range = shrine.range;
-            var shape = behavior.getShape();
-            var cylinderTop = switch (shape) {
-                case BELOW -> range.bottom();
-                case ABOVE -> range.bottom() + range.height();
-                case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
-            };
-            poseStack.translate(range.center().x, cylinderTop, range.center().z);
-            var r = shrine.isCombined ? (int)((Math.sin(t) + 1) * 128) : 255;
-            var g = shrine.isCombined ? (int)((Math.sin(t + Math.PI * 2 / 3) + 1) * 128) : 255;
-            var b = shrine.isCombined ? (int)((Math.sin(t + Math.PI * 4 / 3) + 1) * 128) : 255;
-            ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
-                    rot, r, g, b, 100, range.height());
-            poseStack.popPose();
-        }
-
-/*        var levelShrines = ShrineHelper.shrinesByChunk.computeIfAbsent(player.level, x -> new HashMap<>());
-
-        for (var chunkShrines : levelShrines.values()) {
-            for (var shrine : chunkShrines) {
-                if (shrinesToRender.contains(shrine)) continue;
-                var behavior = ShrineHelper.overflowBehaviors.get(shrine.st);
-                if (behavior == null) continue;
-                poseStack.pushPose();
-                var range = shrine.range;
-                var shape = behavior.getShape();
-                var cylinderTop = switch (shape) {
-                    case BELOW -> range.bottom();
-                    case ABOVE -> range.bottom() + range.height();
-                    case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
-                };
-                poseStack.translate(range.center().x, cylinderTop, range.center().z);
-                var r = 0;
-                var g = shrine.isCombined ? 50 : 255;
-                var b = shrine.isCombined ? 200 : 255;
-                ChalkCircleRenderer.drawCylinder(poseStack, multiBufferSource, dir1, dir2, 32, range.radius(),
-                        rot, r, g, b, 100, range.height());
-                poseStack.popPose();
-            }
-        }*/
-
         poseStack.popPose();
     }
 
-    private static void renderSingleBlock(IBlockRenderGetter blockRenderGetter, BlockState p_110913_, PoseStack p_110914_, MultiBufferSource p_110915_, int p_110916_, int p_110917_, ModelData modelData, RenderType renderType, String spiritName) {
-        RenderShape rendershape = p_110913_.getRenderShape();
+    private static void renderSingleBlock(Level level, BlockState blockState, BlockPos pos, PoseStack poseStack, MultiBufferSource buffers, int overlay, ModelData modelData, String spiritName) {
+        RenderShape rendershape = blockState.getRenderShape();
         if (rendershape != RenderShape.INVISIBLE) {
             switch (rendershape) {
                 case MODEL:
-                    var modelAndRender = getBlockModel(p_110913_, spiritName);
-                    int i = blockRenderGetter.getBlockColors().getColor(p_110913_, null, null, 0);
-                    float f = (float) (i >> 16 & 255) / 255.0F;
-                    float f1 = (float) (i >> 8 & 255) / 255.0F;
-                    float f2 = (float) (i & 255) / 255.0F;
-                    for (RenderType rt : modelAndRender.getFirst().getRenderTypes(p_110913_, RandomSource.create(42), modelData))
-                        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(p_110914_.last(), p_110915_.getBuffer(modelAndRender.getSecond()), p_110913_, modelAndRender.getFirst(), f, f1, f2, p_110916_, p_110917_, modelData, rt);
+                    var modelAndRender = getBlockModel(blockState, spiritName);
+                    if (modelAndRender.getFirst() == null) return;
+                    for (RenderType rt : modelAndRender.getFirst().getRenderTypes(blockState, RandomSource.create(blockState.getSeed(pos)), modelData))
+                        Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateBlock(level, modelAndRender.getFirst(), blockState, pos, poseStack, buffers.getBuffer(modelAndRender.getSecond()), true, RandomSource.create(), blockState.getSeed(pos), overlay, modelData, rt);
                     break;
                 case ENTITYBLOCK_ANIMATED:
-                    ItemStack stack = new ItemStack(p_110913_.getBlock());
-                    IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, p_110914_, p_110915_, p_110916_, p_110917_);
+                    ItemStack stack = new ItemStack(blockState.getBlock());
+                    IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.NONE, poseStack, buffers, 255, overlay);
             }
-
         }
     }
 
@@ -197,36 +198,46 @@ public class PlacedHallowRenderer {
         var cachedForState = modelByStateCache.computeIfAbsent(state, x -> new HashMap<>());
         var cachedModel = cachedForState.get(spiritType);
         if (cachedModel != null) return cachedModel;
+        var pair = makeBlockModel(state, spiritType);
+        if (pair == null) pair = new Pair<>(null, null);
+        cachedForState.put(spiritType, pair);
+        return pair;
+    }
 
+    private static Pair<BakedModel, RenderType> makeBlockModel(BlockState state, String spiritType) {
         var bakery = Minecraft.getInstance().getModelManager().getModelBakery();
         var blockKey = ForgeRegistries.BLOCKS.getKey(state.getBlock());
         var modelLocation = BlockModelShaper.stateToModelLocation(state);
-
         var model = bakery.getModel(modelLocation);
 
-        var set = new HashSet<Pair<String, String>>();
-        var materials = model.getMaterials(bakery::getModel, set);
-
+        model.resolveParents(bakery::getModel);
         List<ResourceLocation> locations = new ArrayList<>();
-        for (var m : materials) {
-            locations.add(new ResourceLocation(m.texture().getNamespace(),
-                    "textures/" + m.texture().getPath() + ".png"));
+        Set<BlockModel> blockModels = new HashSet<>();
+        HallowTextureManager.GetBlockModels(model, blockModels);
+
+        for (BlockModel blockModel : blockModels) {
+            for (var s : blockModel.textureMap.keySet()) {
+                Material material = blockModel.getMaterial(s);
+                if (MissingTextureAtlasSprite.getLocation().equals(material.texture())) continue;
+                var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
+                        "textures/" + material.texture().getPath() + ".png");
+                if (locations.contains(rl)) continue;
+                locations.add(rl);
+            }
         }
 
         if (locations.isEmpty()) {
-            LOGGER.warn("Couldn't find texture for " + blockKey);
             return null;
         }
         var primaryTex = MobRetexturer.makeSpiritVariant(locations, spiritType);
 
         if (primaryTex == null) {
-            LOGGER.warn("Couldn't make texture for " + blockKey);
             return null;
         }
 
         for (int i = 0; i < locations.size(); i++) {
             var loc = locations.get(i);
-            loc = new ResourceLocation(loc.getNamespace(),
+            loc = ResourceLocation.fromNamespaceAndPath(loc.getNamespace(),
                     loc.getPath().substring(9, loc.getPath().length() - 4));
             HallowTextureManager.offsetsByMaterial.put(loc, Pair.of(locations.size(), i));
         }
@@ -237,20 +248,27 @@ public class PlacedHallowRenderer {
 
         var newLoc = new ModelResourceLocation(Otherverse.MODID,
                 modelLocation.getNamespace() + "_" + modelLocation.getPath() + "_hallow_" + spiritType, modelLocation.getVariant());
-        BakedModel m = model instanceof MultiVariant mv ? bakeMultiVariant(mv, bakery, func) :
-                model.bake(bakery, func, BlockModelRotation.X0_Y0, newLoc);
 
-        var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
-        RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false,
-                RenderType.CompositeState.builder()
-                        .setLightmapState(LIGHTMAP)
-                        .setShaderState(RENDERTYPE_CUTOUT_SHADER)
-                        .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
-                        .createCompositeState(true));
+        try {
+            BakedModel m = model instanceof MultiVariant mv ? bakeMultiVariant(mv, bakery, func) :
+                    model.bake(DUMMY_BAKER, func, BlockModelRotation.X0_Y0, newLoc);
 
-        var pair = Pair.of(m, rt);
-        cachedForState.put(spiritType, pair);
-        return pair;
+            var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
+
+            var shader = RenderType.CompositeState.builder()
+                    .setLightmapState(LIGHTMAP)
+                    .setShaderState(RENDERTYPE_SHADER)
+                    .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setOutputState(TRANSLUCENT_TARGET)
+                    .createCompositeState(true);
+            RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, shader);
+
+            var pair = Pair.of(m, rt);
+            return pair;
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private static BakedModel bakeMultiVariant(MultiVariant mv, ModelBakery bakery, Function<Material, TextureAtlasSprite> p_111851_) {
@@ -272,13 +290,13 @@ public class PlacedHallowRenderer {
         UnbakedModel unbakedmodel = bakery.getModel(p_119350_);
         if (unbakedmodel instanceof BlockModel blockmodel) {
             if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
-                return ((IModelGetter) bakery).getItemModelGenerator().generateBlockModel(sprites, blockmodel).bake(bakery, blockmodel, sprites, p_119351_, p_119350_, false);
+                return ((IModelGetter) bakery).getItemModelGenerator().generateBlockModel(sprites, blockmodel).bake(DUMMY_BAKER, blockmodel, sprites, p_119351_, p_119350_, false);
             }
         } else if (unbakedmodel instanceof MultiVariant mv) {
             return bakeMultiVariant(mv, bakery, sprites);
         }
 
-        return unbakedmodel.bake(bakery, sprites, p_119351_, p_119350_);
+        return unbakedmodel.bake(DUMMY_BAKER, sprites, p_119351_, p_119350_);
     }
 
 

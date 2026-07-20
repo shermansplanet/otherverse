@@ -1,0 +1,17 @@
+{
+    "name": "Misery",
+    "sortnum": 10,
+    "icon": "minecraft:mud",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title" : "Misery",
+            "text": "Misery is dark and oppressive, with an eternal deluge of rain that collects in natural circular cisterns. Be very careful of water in this place; once you step in, it will pull you down and you will be unable to surface for air."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The typhlotic beasts of Misery are called $(bold)glooms$(). These jellyfish are sensitive to alchemical currents, and will descend upon you with their stinging tendrils if you have any visible potion effects (effects that are emitting particles)."
+        }
+    ]
+}

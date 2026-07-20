@@ -7,6 +7,9 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.JumpControl;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.sensing.Sensing;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,8 +21,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Mob.class)
 public abstract class MobInjector extends LivingEntity {
-    protected MobInjector(EntityType<? extends LivingEntity> p_20966_, Level p_20967_) {
+    protected MobInjector(EntityType<? extends LivingEntity> p_20966_, Level p_20967_, Sensing sensing, GoalSelector goalSelector, GoalSelector targetSelector) {
         super(p_20966_, p_20967_);
+        this.sensing = sensing;
+        this.goalSelector = goalSelector;
+        this.targetSelector = targetSelector;
     }
 
     @Shadow
@@ -28,6 +34,18 @@ public abstract class MobInjector extends LivingEntity {
     protected MoveControl moveControl;
     @Shadow
     protected JumpControl jumpControl;
+    @Shadow
+    protected PathNavigation navigation;
+    @Shadow
+    private final Sensing sensing;
+    @Shadow
+    public final GoalSelector goalSelector;
+    @Shadow
+    public final GoalSelector targetSelector;
+
+    @Shadow
+    protected void customServerAiStep() {
+    }
 
     @Inject(method = "isSunBurnTick", at = @At("HEAD"), cancellable = true)
     protected void isSunBurn(CallbackInfoReturnable<Boolean> ci) {
@@ -40,20 +58,55 @@ public abstract class MobInjector extends LivingEntity {
     @Inject(method = "serverAiStep", at = @At(value = "INVOKE_STRING",
             target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
             args = "ldc=mob tick"), cancellable = true)
-    protected final void onServerAiStep(CallbackInfo ci) {
-        if (!getPersistentData().contains("bindingId")) return;
+    protected final void onServerAiStepWither(CallbackInfo ci) {
+        if (!getPersistentData().contains("bindingId") || !this.getType().equals(EntityType.WITHER)) return;
         var activity = getBrain().getActiveNonCoreActivity();
-        if(activity.isPresent() && activity.get() == Activity.FIGHT) return;
+        if (activity.isPresent() && activity.get() == Activity.FIGHT) return;
         ci.cancel();
-        this.level.getProfiler().push("controls");
-        this.level.getProfiler().push("move");
+        this.level().getProfiler().push("controls");
+        this.level().getProfiler().push("move");
         this.moveControl.tick();
-        this.level.getProfiler().popPush("look");
+        this.level().getProfiler().popPush("look");
         this.lookControl.tick();
-        this.level.getProfiler().popPush("jump");
+        this.level().getProfiler().popPush("jump");
         this.jumpControl.tick();
-        this.level.getProfiler().pop();
-        this.level.getProfiler().pop();
+        this.level().getProfiler().pop();
+        this.level().getProfiler().pop();
+        this.sendDebugPackets();
+    }
+
+    @Inject(method = "serverAiStep", at = @At(value = "HEAD"), cancellable = true)
+    protected final void onServerAiStep(CallbackInfo ci) {
+        if (!getPersistentData().contains("panicTicks")) {
+            return;
+        } else {
+            var panicTicks = getPersistentData().getInt("panicTicks");
+            if (panicTicks == 0) {
+                getPersistentData().remove("panicTicks");
+                return;
+            }
+            getPersistentData().putInt("panicTicks", panicTicks - 1);
+        }
+        ci.cancel();
+        ++this.noActionTime;
+        this.level().getProfiler().push("sensing");
+        this.sensing.tick();
+        this.level().getProfiler().pop();
+        this.level().getProfiler().push("navigation");
+        this.navigation.tick();
+        this.level().getProfiler().pop();
+        this.level().getProfiler().push("mob tick");
+        this.customServerAiStep();
+        this.level().getProfiler().pop();
+        this.level().getProfiler().push("controls");
+        this.level().getProfiler().push("move");
+        this.moveControl.tick();
+        this.level().getProfiler().popPush("look");
+        this.lookControl.tick();
+        this.level().getProfiler().popPush("jump");
+        this.jumpControl.tick();
+        this.level().getProfiler().pop();
+        this.level().getProfiler().pop();
         this.sendDebugPackets();
     }
 

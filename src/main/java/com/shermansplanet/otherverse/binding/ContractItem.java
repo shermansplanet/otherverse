@@ -30,7 +30,7 @@ public class ContractItem extends Item {
             if (tryTameContract(mob, stack, player)) return InteractionResult.SUCCESS;
             return InteractionResult.PASS;
         }
-        TransientDiagramData data = DiagramManager.getOrCreateLevelData(player.getLevel().getServer().overworld());
+        TransientDiagramData data = DiagramManager.getOrCreateLevelData(player.level().getServer().overworld());
         BindingInfo binding = data.bindingsById.get(mobData.getUUID("bindingId"));
         if (binding == null) {
             return InteractionResult.PASS;
@@ -43,7 +43,7 @@ public class ContractItem extends Item {
     }
 
     private boolean tryTameContract(Mob mob, ItemStack stack, Player player) {
-        if (!(mob.getLevel() instanceof ServerLevel sl)) return false;
+        if (!(mob.level() instanceof ServerLevel sl)) return false;
         if(!mob.getPersistentData().contains("construct_type")) {
             if ((!(mob instanceof TamableAnimal ta) || !ta.isOwnedBy(player))
                     && (!(mob instanceof AbstractHorse horse) || horse.getOwnerUUID() != player.getUUID()))

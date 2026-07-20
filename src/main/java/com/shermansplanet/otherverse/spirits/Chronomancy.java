@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.spirits;
 
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
+import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
@@ -44,7 +45,7 @@ public class Chronomancy {
         var stack = event.getItemStack();
         if (!stack.is(Items.CLOCK) || !ImplementManager.isImplement(stack)) return;
         var player = event.getEntity();
-        for (var other : player.getLevel().getEntities(player, player.getBoundingBox().inflate(16))) {
+        for (var other : player.level().getEntities(player, player.getBoundingBox().inflate(16))) {
             other.getPersistentData().putInt("chronomancy_ticks", 20 * 10);
         }
         player.getInventory().removeItem(stack);
@@ -83,6 +84,8 @@ public class Chronomancy {
             entity.getPersistentData().putInt("chronomancy_ticks", chronoTicks - 1);
             return false;
         }
+        var spiritType = MobBindingInfluenceUtils.mobSpirits.get(entity.getType());
+        if (spiritType == Spirits.FATE || spiritType == Spirits.TIME) return true;
         var blockPositions = new HashSet<BlockPos>();
         blockPositions.add(entity.blockPosition());
         var vel = entity.getDeltaMovement();
@@ -92,11 +95,11 @@ public class Chronomancy {
             var steps = Math.ceil(speed);
             for (var i = 1; i <= steps; i++) {
                 var pos = entity.position().subtract(vel.scale(i / steps));
-                blockPositions.add(new BlockPos(pos));
+                blockPositions.add(BlockPos.containing(pos));
             }
         }
         for (var blockPos : blockPositions) {
-            var level = entity.getLevel();
+            var level = entity.level();
             var data = DiagramManager.getOrCreateLevelData(level);
             var blockFocus = data.allBlockFoci.get(blockPos);
             if (blockFocus == null) continue;

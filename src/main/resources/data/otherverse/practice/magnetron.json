@@ -1,0 +1,11 @@
+{
+	"other" : "alexscaves:magnetron",
+	"spirit": "technology",
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_block",
+			"health" : 11,
+			"output" : "alexscaves:heart_of_iron"
+		}
+	]
+}

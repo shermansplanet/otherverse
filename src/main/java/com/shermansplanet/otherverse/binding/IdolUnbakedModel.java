@@ -18,13 +18,12 @@ public class IdolUnbakedModel implements UnbakedModel {
     }
 
     @Override
-    public Collection<Material> getMaterials(Function<ResourceLocation, UnbakedModel> p_119538_, Set<Pair<String, String>> p_119539_) {
-        return Sets.newHashSet();
+    public void resolveParents(Function<ResourceLocation, UnbakedModel> p_119538_) {
+
     }
 
-    @Nullable
     @Override
-    public BakedModel bake(ModelBakery p_119534_, Function<Material, TextureAtlasSprite> p_119535_, ModelState p_119536_, ResourceLocation p_119537_) {
+    public @Nullable BakedModel bake(ModelBaker p_250133_, Function<Material, TextureAtlasSprite> p_119535_, ModelState p_119536_, ResourceLocation p_119537_) {
         return new IdolBakedModel();
     }
 }

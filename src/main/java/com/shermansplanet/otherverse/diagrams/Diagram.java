@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.artifacts.ConnectionBlockManager;
 import com.shermansplanet.otherverse.binding.*;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.ruins.RuinsManager;
 import com.shermansplanet.otherverse.spirits.FleshTechManager;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritTransfusions;
@@ -14,7 +15,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -172,10 +172,12 @@ public class Diagram {
                 || MobTransfusions.tryFeed(level, circle, this)
                 || HallowHelper.tryHallow(level, circle, this)
                 || MobTransfusions.tryFeedFromMob(circle, this)
+                || ConnectionBlockManager.tryMakeBlocker(level, circle, this)
                 || ContractManager.tryMakeContract(level, circle, this)
                 || FleshbindingManager.tryCinnabind(level, circle, this)
                 || DemesnesManager.tryMakePortal(level, circle, this)
-                || ConnectionBlockManager.tryMakeBlocker(level, circle, this);
+                || RuinsManager.tryEnchantArmor(level, circle, this)
+                || ArtifactManager.tryColorHat(level, circle, this);
 
         if (!needsReactivation) {
             HallowHelper.tryFillHallow(level, circle, this);
@@ -190,7 +192,8 @@ public class Diagram {
                 || trySummonDragon(level, focus, this)
                 || MobTransfusions.tryFeed(level, focus, this)
                 || FleshTechManager.tryMakeConstruct(level, focus, this)
-                || ArtifactManager.tryFillBrazier(level, focus, this);
+                || ArtifactManager.tryFillBrazier(level, focus, this)
+                || RuinsManager.tryTeleportToRuins(level, focus, this);
 
         if (!needsReactivation) {
             HallowHelper.tryFillHallow(level, focus, this);
@@ -216,7 +219,7 @@ public class Diagram {
             }
         }
         if (crystalCount < 8) return false;
-        focus.removeItem();
+        focus.drainItem();
         var e = EntityType.ENDER_DRAGON.create(level);
         e.setPos(focus.getCenter());
         level.addFreshEntityWithPassengers(e);
@@ -321,7 +324,7 @@ public class Diagram {
                 powerSources.add(new PowerSource((int) mob.getHealth() - 1, 1,
                         i -> {
                             if (i > 0) {
-                                mob.hurt(DamageSource.OUT_OF_WORLD, i);
+                                mob.hurt(level.damageSources().fellOutOfWorld(), i);
                                 mob.invulnerableTime = MobTransfusions.MOB_DRAIN_COOLDOWN;
                                 mobsOnCooldown.add(mob);
                             }

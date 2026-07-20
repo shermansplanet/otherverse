@@ -1,0 +1,12 @@
+{
+    "name": "Gloom",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'typhlotic_jellyfish'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A gloom Familiar will apply a slowness effect within eight blocks. If it holds a potion, it will drink it; for the potion's duration, it will apply that effect instead. Only positive effects will be applied to you and your bound mobs. It will also give you slow creative flight in the Ruins."
+        }
+    ]
+}

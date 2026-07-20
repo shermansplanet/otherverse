@@ -18,6 +18,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -45,18 +46,28 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
         background = guiHelper.createBlankDrawable(120, 80);
         localizedName = Component.translatable("otherverse.jei.binding");
         heartIcon = guiHelper.createDrawable(
-                new ResourceLocation(Otherverse.MODID, "textures/gui/jei.png"),
+                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 0, 11, 5, 5);
         chainIcon = guiHelper.createDrawable(
-                new ResourceLocation(Otherverse.MODID, "textures/gui/jei.png"),
+                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 15, 11, 5, 7);
         bindingBreakIcon = guiHelper.createDrawable(
-                new ResourceLocation(Otherverse.MODID, "textures/gui/jei.png"),
+                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 22, 11, 7, 7);
         icon = guiHelper.createDrawable(
-                new ResourceLocation(Otherverse.MODID, "textures/gui/jei.png"),
+                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 63, 0, 16, 16);
         this.guiHelper = guiHelper;
+    }
+
+    @Override
+    public int getWidth() {
+        return 120;
+    }
+
+    @Override
+    public int getHeight() {
+        return 80;
     }
 
     @Override
@@ -67,11 +78,6 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
     @Override
     public Component getTitle() {
         return localizedName;
-    }
-
-    @Override
-    public IDrawable getBackground() {
-        return background;
     }
 
     @Override
@@ -114,7 +120,7 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
     }
 
     @Override
-    public void draw(BindingRecipe recipe, IRecipeSlotsView recipeSlotsView, PoseStack stack,
+    public void draw(BindingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics,
                      double mouseX, double mouseY) {
         Minecraft mc = Minecraft.getInstance();
         RenderSystem.enableBlend();
@@ -123,6 +129,7 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
         HashSet<Integer> takenAmounts = new HashSet<>();
         var uniqueInfluences = recipe.influences.values().stream().distinct().count();
         var columns = Math.ceil(uniqueInfluences / 5F);
+        var spiritType = MobBindingInfluenceUtils.mobSpirits.get(recipe.entityType);
         for (var influence : recipe.influences.entrySet()) {
             if (takenAmounts.contains(influence.getValue())) continue;
             takenAmounts.add(influence.getValue());
@@ -132,9 +139,8 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
                 val = -val;
                 icon = heartIcon;
             }
-            var spiritType = MobBindingInfluenceUtils.mobSpirits.get(recipe.entityType);
             if (spiritType != null && Spirits.spiritItems.get(spiritType).get() == influence.getKey().item) {
-                val = 0.5f;
+                val = 1f;
             }
             String s = Float.toString(val).replace(".0", "");
             if (val > 999) {
@@ -142,34 +148,34 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
             }
             int x = column * 22 + 10 - (s.length() + 1) * 3;
             int y = row++ * 30 + 42;
-            icon.draw(stack, x, val >= 0 ? y : y + 1);
-            mc.font.draw(stack, s, x + 6, y, 0x333333);
+            icon.draw(graphics, x, val >= 0 ? y : y + 1);
+            graphics.drawString(mc.font, s, x + 6, y, 0x333333, false);
             if (row >= columns) {
                 row = 0;
                 column++;
             }
         }
-        mc.font.draw(stack, recipe.entityType.getDescription().getString(), 22, 3, 0x333333);
+        graphics.drawString(mc.font, recipe.entityType.getDescription().getString(), 22, 3, 0x333333, false);
         int hp = (int) DefaultAttributes.getSupplier(recipe.entityType).getValue(Attributes.MAX_HEALTH);
         String heartstring = Float.toString(hp).replace(".0", "");
-        heartIcon.draw(stack, 22, 13);
-        mc.font.draw(stack, heartstring, 28, 12, 0x333333);
+        heartIcon.draw(graphics, 22, 13);
+        graphics.drawString(mc.font, heartstring, 28, 12, 0x333333, false);
         int x = 30 + heartstring.length() * 6;
-        chainIcon.draw(stack, x, 12);
+        chainIcon.draw(graphics, x, 12);
         int coeff = 3;
         int color = 0x333333;
         var implementData = ImplementManager.getImplementData(Minecraft.getInstance().player);
-        if (!implementData.isEmpty() && ForgeRegistries.ITEMS.getValue(new ResourceLocation(implementData.getString("item"))) == Items.CHAIN) {
+        if (!implementData.isEmpty() && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.CHAIN) {
             coeff = 2;
             color = ImplementManager.IMPLEMENT_UI_COLOR;
         }
         var s = Integer.toString(hp * coeff).replace(".0", "");
-        mc.font.draw(stack, s, x + 6, 12, color);
+        graphics.drawString(mc.font, s, x + 6, 12, color, false);
         if (BindingManager.drainsBindings(recipe.entityType)) {
             x += (s.length() + 1) * 6 + 2;
-            bindingBreakIcon.draw(stack, x, 12);
+            bindingBreakIcon.draw(graphics, x, 12);
             s = BindingManager.getSpiritDrain(hp) + "/" + BindingManager.getBindingWearInterval(hp) + "s";
-            mc.font.draw(stack, s, x + 8, 12, color);
+            graphics.drawString(mc.font, s, x + 8, 12, color, false);
         }
         RenderSystem.disableBlend();
     }

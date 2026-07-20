@@ -2,7 +2,7 @@
     "name": "Action: Observe",
     "icon": "minecraft:observer",
     "category": "otherverse:contracts",
-    "sortnum": 11,
+    "sortnum": 110,
     "pages": [
         {
             "type": "patchouli:spotlight",

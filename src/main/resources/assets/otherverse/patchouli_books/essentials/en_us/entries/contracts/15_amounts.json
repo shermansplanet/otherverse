@@ -1,16 +1,16 @@
 {
     "name": "Amounts",
-    "icon": "minecraft:wheat_seeds",
+    "icon": "otherverse:chalk",
     "category": "otherverse:contracts",
-    "sortnum": 15,
+    "sortnum": 150,
     "pages": [
         {
             "type": "patchouli:text",        
-            "text": "If you crouch while placing any kind of seeds in a diagram, you can place up to a full stack in a single item focus.$(br2)This lets the spirits know that the seeds represent a quantity, rather than the concept of seeds."
+            "text": "If you crouch and use chalk on an empty item focus, a screen will open where you can inscribe custom text in the circle (visible in the Sight). If the circle influences an action in a contract, it can specify exact quantities or ranges that the mob must put or take."
         },
         {
-            "type": "patchouli:text",        
-            "text": "If such a quantity is influencing an action in a contract, it specifies that the mob must put or take exactly that number of items.$(br2)Two quantities instead define a range of permissible amounts."
+            "type": "patchouli:text",
+            "text": "Just writing a number makes the contract require exactly that number. Writing <[number] or >[number] permits any lower or any higher number. Writing [number]-[number] permits a specific range (inclusive)."
         }
     ]
 }

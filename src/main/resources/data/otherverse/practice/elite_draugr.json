@@ -1,0 +1,14 @@
+{
+	"other" : "cataclysm:elite_draugr",
+	"spirit" : "cold",
+	"healing": {
+		"otherverse:death": 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_ingot",
+			"health" : 27,
+			"output" : "cataclysm:black_steel_ingot"
+		}
+	]
+}

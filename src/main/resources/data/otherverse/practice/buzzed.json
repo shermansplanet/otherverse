@@ -1,0 +1,11 @@
+{
+	"other" : "otherverse:buzzed",
+	"spirit" : "light",
+	"transfusion" : [
+		{
+			"input" : "minecraft:honey_bottle",
+			"health" : 13,
+			"output" : "otherverse:blue_honey"
+		}
+	]
+}

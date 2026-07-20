@@ -1,0 +1,9 @@
+{
+    "name": "The Ruins",
+    "landing_text": "A guide to the Ruins dimension.",
+    "version": 3,
+    "model" : "otherverse:ruins",
+    "show_progress" : false,
+    "creative_tab" : "otherverse:practice",
+    "use_resource_pack": true
+}

@@ -31,13 +31,13 @@ public class ThrownTNT extends ThrowableItemProjectile {
 
     protected void onHit(HitResult p_37488_) {
         super.onHit(p_37488_);
-        if (this.level.isClientSide) return;
+        if (this.level().isClientSide) return;
         explode();
         this.discard();
     }
 
     protected void explode() {
         float f = 4.0F;
-        this.level.explode(this, this.getX(), this.getY(0.0625D), this.getZ(), 4.0F, Explosion.BlockInteraction.BREAK);
+        this.level().explode(this, this.getX(), this.getY(0.0625D), this.getZ(), 4.0F, Level.ExplosionInteraction.TNT);
     }
 }

@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "bbb",
+        "cdc"
+    ],
+    "key": {
+        "a": {
+            "item": "otherverse:gloom_tendril"
+        },
+        "b": {
+            "item": "otherverse:blue_honey"
+        },
+        "c": {
+            "item": "minecraft:sculk"
+        },
+        "d": {
+            "item": "minecraft:sculk_sensor"
+        }
+    },
+    "result": {
+        "item": "otherverse:memory_snare",
+        "count" : 1
+    }
+}

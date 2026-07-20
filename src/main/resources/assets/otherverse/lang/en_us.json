@@ -12,9 +12,21 @@
     "item.otherverse.escape_rope": "Escape Rope",
     "item.otherverse.charcoal_stick": "Charcoal Stick",
     "item.otherverse.realm_wracked_coal" : "Realm-Wracked Coal",
+    "item.otherverse.scrying_powder" : "Scrying Powder",
     "item.otherverse.connection_blocker" : "Connection Blocker",
     "item.otherverse.homunculus_heart" : "Homunculus Heart",
     "item.otherverse.self" : "Self",
+    "item.otherverse.witch_hat" : "Witch Hat",
+    "item.otherverse.snuffur" : "Snuffur",
+    "item.otherverse.shiver_tooth" : "Shiver Tooth",
+    "item.otherverse.gloom_tendril" : "Gloom Tendril",
+    "item.otherverse.ended_pearl" : "Ended Pearl",
+    "item.otherverse.banshee_membrane" : "Banshee Membrane",
+    "item.otherverse.fury_rod" : "Fury Rod",
+    "item.otherverse.blue_honey" : "Blue Honey",
+    "item.otherverse.rancid_flesh" : "Rancid Flesh",
+
+    "curios.identifier.implement" : "Implement",
 
     "item.otherverse.spindle_black": "Black Spindle",
     "item.otherverse.spindle_blue": "Blue Spindle",
@@ -33,6 +45,13 @@
     "item.otherverse.spindle_white": "White Spindle",
     "item.otherverse.spindle_yellow": "Yellow Spindle",
     "item.otherverse.spindle_bloody": "Bloody Spindle",
+
+    "item.otherverse.ruins_helmet": "Typhlotic Helmet",
+    "item.otherverse.ruins_chestplate": "Typhlotic Chestplate",
+    "item.otherverse.ruins_leggings": "Typhlotic Leggings",
+    "item.otherverse.ruins_boots": "Typhlotic Boots",
+    "item.otherverse.claim_arrow": "Claim Arrow",
+    "item.otherverse.eye_of_the_eyeless": "Eye of the Eyeless",
 
     "item.otherverse.chalk": "Chalk",
     "block.otherverse.chalk_line": "Chalk",
@@ -55,10 +74,15 @@
     "block.otherverse.demesne_beacon" : "Demesnes Beacon",
     "item.otherverse.biome_brazier" : "Biome Brazier",
     "block.otherverse.biome_brazier" : "Biome Brazier",
+    "item.otherverse.redstone_nether_bricks" : "Redstone Nether Bricks",
+    "block.otherverse.redstone_nether_bricks" : "Redstone Nether Bricks",
+    "item.otherverse.memory_snare": "Memory Snare",
+    "block.otherverse.memory_snare": "Memory Snare",
 
     "effect.otherverse.heaviness" : "Heaviness",
     "effect.otherverse.familiar_blessing" : "Familiar's Blessing",
     "effect.otherverse.connection_rebound" : "Connection Rebound",
+    "effect.otherverse.ruins_bound" : "Ruins-Bound",
     "item.minecraft.potion.effect.heaviness" : "Potion of Heaviness",
     "item.minecraft.splash_potion.effect.heaviness" : "Splash Potion of Heaviness",
     "item.minecraft.tipped_arrow.effect.heaviness" : "Arrow of Heaviness",
@@ -91,6 +115,7 @@
     "otherverse.jei.spirit_extraction": "Spiritual Composition",
     "otherverse.jei.transfusion": "Transfusion",
     "otherverse.jei.binding": "Binding and Healing",
+    "otherverse.jei.biome_code": "Biome Scrying",
 
     "key.categories.practice": "Pact Magic",
 
@@ -140,5 +165,24 @@
     "item.otherverse.spirit_magenta": "Magenta Spirits",
     "item.otherverse.spirit_pink": "Pink Spirits",
 
-    "item.otherverse.spirit_tablet": "Spirit Tablet"
+    "item.otherverse.spirit_tablet": "Spirit Tablet",
+
+    "entity.otherverse.typhlotic_shark": "Shiver",
+    "entity.otherverse.typhlotic_jellyfish": "Gloom",
+    "entity.otherverse.typhlotic_zombie": "Rotten",
+    "entity.otherverse.snuffer": "Snuffer",
+    "entity.otherverse.guest": "Guest",
+    "entity.otherverse.buzzed": "Buzzed",
+    "entity.otherverse.fury": "Fury",
+    "entity.otherverse.banshee": "Banshee",
+
+    "biome.otherverse.ruins_misery": "Misery Ruins",
+    "biome.otherverse.ruins_anger": "Anger Ruins",
+    "biome.otherverse.ruins_chaos": "Ruins Void",
+    "biome.otherverse.ruins_disgust": "Disgust Ruins",
+    "biome.otherverse.ruins_ecstasy": "Ecstasy Ruins",
+    "biome.otherverse.ruins_fear": "Fear Ruins",
+    "biome.otherverse.ruins_shock": "Shock Ruins",
+    "biome.otherverse.ruins_trust": "Trust Ruins",
+    "biome.otherverse.ruins_vigil": "Vigil Ruins"
 }

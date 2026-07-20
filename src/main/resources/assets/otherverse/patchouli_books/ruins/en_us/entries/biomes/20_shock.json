@@ -1,0 +1,17 @@
+{
+    "name": "Shock",
+    "sortnum": 20,
+    "icon": "minecraft:soul_sand",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title" : "Shock",
+            "text": "Shock is violent and stressful, possibly the least pleasant area of the Ruins. You'll want to keep moving while you're here: the slower you move, the darker the sky will get, and lightning will strike closer and closer. This is made difficult by the soul sand covering most of the ground."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The typhlotic beasts of Shock are called $(bold)snuffers$(). Like sniffers, they have very acute noses, and will track your scent trail through their native biome, converging from a distance on where you have previously stepped. If struck by lightning, a snuffer will gain a brief but intense speed boost."
+        }
+    ]
+}

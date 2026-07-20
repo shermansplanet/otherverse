@@ -1,7 +1,7 @@
 {
   "temperature": 0.75,
   "downfall": 0.4,
-  "precipitation": "none",
+  "has_precipitation": false,
   "effects": {
     "sky_color": 2773037,
     "fog_color": 5864253,
@@ -23,8 +23,30 @@
       "probability": 0.003
     }
   },
-  "spawners": {},
-  "spawn_costs": {},
+  "spawn_costs": {
+    "otherverse:typhlotic_zombie": {
+      "charge": 0.5,
+      "energy_budget": 0.15
+    },
+    "otherverse:typhlotic_jellyfish": {
+      "charge": 1,
+      "energy_budget": 0
+    },
+    "otherverse:banshee": {
+      "charge": 1,
+      "energy_budget": 0
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "otherverse:typhlotic_zombie",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ]
+  },
   "carvers": {},
   "features": [
     [

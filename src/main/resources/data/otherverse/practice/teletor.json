@@ -1,0 +1,21 @@
+{
+	"other" : "alexscaves:teletor",
+	"spirit": "technology",
+	"transfusion" : [
+		{
+			"input" : "minecraft:crimson_fungus",
+			"health" : 9,
+			"output" : "alexscaves:scarlet_neodymium_ingot"
+		},
+		{
+			"input" : "minecraft:warped_fungus",
+			"health" : 9,
+			"output" : "alexscaves:azure_neodymium_ingot"
+		},
+		{
+			"input" : "alexscaves:notor_gizmo",
+			"health" : 3,
+			"output" : "alexscaves:telecore"
+		}
+	]
+}

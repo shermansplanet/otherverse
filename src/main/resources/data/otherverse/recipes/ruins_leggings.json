@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+      "bbb",
+      "s s",
+      "s s"
+  ],
+  "key": {
+      "s": {"item": "otherverse:snuffur"},
+      "b": {"item": "otherverse:banshee_membrane"}
+  },
+  "result": {
+    "item": "otherverse:ruins_leggings",
+    "count" : 1
+  }
+}

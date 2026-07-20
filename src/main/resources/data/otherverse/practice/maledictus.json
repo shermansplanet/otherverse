@@ -1,0 +1,16 @@
+{
+	"other" : "cataclysm:maledictus",
+	"spirit" : "cold",
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_block",
+			"health" : 243,
+			"output" : "cataclysm:cursium_block"
+		},
+		{
+			"input" : "minecraft:iron_ingot",
+			"health" : 27,
+			"output" : "cataclysm:cursium_ingot"
+		}
+	]
+}

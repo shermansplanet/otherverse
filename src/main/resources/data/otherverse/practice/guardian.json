@@ -1,0 +1,14 @@
+{
+	"other" : "minecraft:guardian",
+	"spirit" : "water",
+	"binding" : {
+		"minecraft:sponge" : 13
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:amethyst_shard",
+			"health" : 3,
+			"output" : "minecraft:prismarine_shard"
+		}
+	]
+}

@@ -1,0 +1,14 @@
+{
+	"other" : "cataclysm:clawdian",
+	"spirit" : "protection",
+	"healing": {
+		"otherverse:water": 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:prismarine_shard",
+			"health" : 18,
+			"output" : "cataclysm:lacrima"
+		}
+	]
+}

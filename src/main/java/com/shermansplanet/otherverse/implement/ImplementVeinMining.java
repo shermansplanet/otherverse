@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.implement;
 
+import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import net.minecraft.core.BlockPos;
@@ -79,7 +80,7 @@ public class ImplementVeinMining {
 
     private static boolean isInDemesneServer(ServerPlayer sp, BlockPos bp) {
         var demesne = DemesnesManager.getData(sp);
-        return demesne != null && demesne == DemesnesManager.getData(sp.getLevel(), bp);
+        return demesne != null && demesne == DemesnesManager.getData(sp.serverLevel(), bp);
     }
 
     @SubscribeEvent
@@ -89,7 +90,7 @@ public class ImplementVeinMining {
         if (!(tool.getItem() instanceof DiggerItem diggerItem)) return;
         var blockBreakAmount = getBlockBreakAmount(tool, sp);
         if (blockBreakAmount <= 1) return;
-        var state = sp.getLevel().getBlockState(event.getPos());
+        var state = sp.serverLevel().getBlockState(event.getPos());
         if (!diggerItem.isCorrectToolForDrops(tool, state)) return;
         var demesne = DemesnesManager.getData(event.getPlayer());
 

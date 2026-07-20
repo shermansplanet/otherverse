@@ -18,8 +18,6 @@ public abstract class GrindstoneMenuInjector extends AbstractContainerMenu {
 
     @Inject(method = "removeNonCurses", at = @At("RETURN"))
     private void onRemoveNonCurses(ItemStack stack, int p_39581_, int p_39582_, CallbackInfoReturnable<ItemStack> ci) {
-        var tag = stack.getTag();
-        if(tag == null || !tag.contains("hallow")) return;
-        tag.remove("hallow");
+        stack.removeTagKey("hallow");
     }
 }

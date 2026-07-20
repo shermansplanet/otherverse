@@ -56,7 +56,9 @@ public class SpiritColorAnalyzer {
     public static InputStream getStreamFor(ResourceLocation resourceLocation, ArrayList<PackResources> packs) {
         for (PackResources pack : packs) {
             try {
-                return pack.getResource(PackType.CLIENT_RESOURCES, resourceLocation);
+                var resource = pack.getResource(PackType.CLIENT_RESOURCES, resourceLocation);
+                if(resource == null) continue;
+                return resource.get();
             } catch (IOException ignored) {
             }
         }
@@ -65,7 +67,7 @@ public class SpiritColorAnalyzer {
 
     private static ResourceLocation getLocationFor(String s, String directory, String extension) {
         int i = s.indexOf(':');
-        return new ResourceLocation(i == -1 ? "minecraft" : s.substring(0, i), directory + s.substring(i + 1) + extension);
+        return ResourceLocation.fromNamespaceAndPath(i == -1 ? "minecraft" : s.substring(0, i), directory + s.substring(i + 1) + extension);
     }
 
     public static void AnalyzeAllColors() {
@@ -99,7 +101,7 @@ public class SpiritColorAnalyzer {
         if (packCache != null) return packCache;
         Minecraft mc = Minecraft.getInstance();
         ArrayList<PackResources> packs = new ArrayList<>();
-        packs.add(mc.getClientPackSource().getVanillaPack());
+        packs.add(mc.getVanillaPackResources());
         for (Pack pack : mc.getResourcePackRepository().getSelectedPacks()) {
             PackResources pr = pack.open();
             if (!packs.contains(pr)) {
@@ -200,7 +202,7 @@ public class SpiritColorAnalyzer {
     public static ArrayList<NativeImage> getTexturesRecursive(Item item) {
         var packs = getPacks();
         var resourceLocation = ForgeRegistries.ITEMS.getKey(item);
-        resourceLocation = new ResourceLocation(resourceLocation.getNamespace(), "models/item/" + resourceLocation.getPath() + ".json");
+        resourceLocation = ResourceLocation.fromNamespaceAndPath(resourceLocation.getNamespace(), "models/item/" + resourceLocation.getPath() + ".json");
         JsonElement el = getJsonFor(resourceLocation, packs);
         if (el == null) {
             return null;

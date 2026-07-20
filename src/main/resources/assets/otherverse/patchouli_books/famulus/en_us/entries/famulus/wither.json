@@ -10,7 +10,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "It's difficult to keep such a power in check, and your concentration falters when you sleep. Wherever you wake, everything around you shall wither."
+            "text": "It's difficult to keep such a power in check, and your concentration falters when you sleep. Wherever you wake, everything around you (in a 33x33x33 block cube) shall wither."
         }
     ]
 }

@@ -1,0 +1,14 @@
+{
+	"other" : "cataclysm:royal_draugr",
+	"spirit" : "cold",
+	"healing": {
+		"otherverse:death": 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:gold_nugget",
+			"health" : 3,
+			"output" : "cataclysm:black_steel_nugget"
+		}
+	]
+}

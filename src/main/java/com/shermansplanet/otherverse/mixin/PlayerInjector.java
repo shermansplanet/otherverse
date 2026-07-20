@@ -44,7 +44,7 @@ public abstract class PlayerInjector extends LivingEntity implements net.minecra
         if(!(block instanceof BedBlock)) return;
         var demesne = DemesnesManager.getData(p_36131_, p_36132_);
         if(demesne == null || demesne.getPerkLevel(DemesnesManager.DemesnePerk.SPAWN_SET) == 0) return;
-        ci.setReturnValue(BedBlock.findStandUpPosition(EntityType.PLAYER, p_36131_, p_36132_, p_36133_));
+        ci.setReturnValue(BedBlock.findStandUpPosition(EntityType.PLAYER, p_36131_, p_36132_, blockstate.getValue(BedBlock.FACING), p_36133_));
         ci.cancel();
     }
 }

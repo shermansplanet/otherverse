@@ -1,0 +1,12 @@
+{
+    "name": "Guest",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'guest'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "A guest Familiar enforces Hospitality for you. If you are struck unprovoked, all mobs in a great distance who don't already have a target will target your assailant."
+        }
+    ]
+}

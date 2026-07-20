@@ -4,9 +4,11 @@ import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
@@ -23,6 +25,30 @@ public class TreeStripper {
 
     private static boolean stripping = false;
 
+    public static final Vec3i[] directionsAndDiagonals = new Vec3i[]{
+            new Vec3i(1, 0, 0),
+            new Vec3i(-1, 0, 0),
+            new Vec3i(0, 1, 0),
+            new Vec3i(0, -1, 0),
+            new Vec3i(0, 0, 1),
+            new Vec3i(0, 0, -1),
+
+            new Vec3i(1, 1, 0),
+            new Vec3i(1, -1, 0),
+            new Vec3i(-1, 1, 0),
+            new Vec3i(-1, -1, 0),
+
+            new Vec3i(0, 1, 1),
+            new Vec3i(0, -1, 1),
+            new Vec3i(0, 1, -1),
+            new Vec3i(0, -1, -1),
+
+            new Vec3i(1, 0, 1),
+            new Vec3i(-1, 0, 1),
+            new Vec3i(1, 0, -1),
+            new Vec3i(-1, 0, -1),
+    };
+
     @SubscribeEvent
     public static void onBreakBlock(BlockEvent.BreakEvent event) {
         if (stripping || !(event.getLevel() instanceof ServerLevel sl)) return;
@@ -31,7 +57,7 @@ public class TreeStripper {
         if (!(state.is(BlockTags.LEAVES)) && !(state.is(BlockTags.LOGS))) return;
         var isLeaves = state.is(BlockTags.LEAVES);
         if (!FamiliarManager.hasFamiliarType(event.getPlayer(), EntityType.PANDA)
-                && !(ImplementManager.isImplement(tool) && tool.is(isLeaves ? Tags.Items.SHEARS : Tags.Items.TOOLS_AXES)))
+                && !(ImplementManager.isImplement(tool) && tool.is(isLeaves ? Tags.Items.SHEARS : ItemTags.AXES)))
             return;
         stripping = true;
         for (var pos : getConnectedTree(event, sl, isLeaves ? BlockTags.LEAVES : BlockTags.LOGS)) {
@@ -50,8 +76,8 @@ public class TreeStripper {
         toSearch.add(event.getPos());
         while (searched.size() < 64 && !toSearch.isEmpty()) {
             var pos = toSearch.pop();
-            for (var dir : Direction.values()) {
-                var newpos = pos.relative(dir);
+            for (var dir : directionsAndDiagonals) {
+                var newpos = pos.offset(dir);
                 if (searched.contains(newpos) || toNotSearch.contains(newpos) || toSearch.contains(newpos)) continue;
                 var s = sl.getBlockState(newpos);
                 if (s.is(tag)) {

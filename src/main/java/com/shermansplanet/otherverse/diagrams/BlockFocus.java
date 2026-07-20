@@ -125,6 +125,11 @@ public class BlockFocus implements IFocus {
     }
 
     @Override
+    public void drainItem() {
+        removeItem();
+    }
+
+    @Override
     public boolean isBlock() {
         return true;
     }
@@ -158,6 +163,9 @@ public class BlockFocus implements IFocus {
         var capacity = 0;
         for (BlockPos sourcePos : hallowPositions) {
             var ht = data.getPlacedItemTag(sourcePos);
+            if(spiritType == Spirits.TECH && ht.contains("shrine") && level.hasNeighborSignal(blockPos)){
+                return 0;
+            }
             capacity += Math.max(0, ht.getInt("capacity") - ht.getInt("spirit_count"));
         }
         return capacity;

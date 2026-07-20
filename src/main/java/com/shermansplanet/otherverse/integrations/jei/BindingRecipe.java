@@ -5,6 +5,8 @@ import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.spirits.SpiritLabeler.SpiritAmount;
 import java.util.HashMap;
 import java.util.List;
+
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EntityType;
@@ -30,11 +32,6 @@ public class BindingRecipe implements Recipe<Container> {
   }
 
   @Override
-  public ItemStack getResultItem() {
-    return ItemStack.EMPTY;
-  }
-
-  @Override
   public ResourceLocation getId() {
     return id;
   }
@@ -57,12 +54,17 @@ public class BindingRecipe implements Recipe<Container> {
   }
 
   @Override
-  public ItemStack assemble(Container p_44001_) {
+  public ItemStack assemble(Container p_44001_, RegistryAccess p_267165_) {
     return null;
   }
 
   @Override
   public boolean canCraftInDimensions(int p_43999_, int p_44000_) {
     return false;
+  }
+
+  @Override
+  public ItemStack getResultItem(RegistryAccess p_267052_) {
+    return ItemStack.EMPTY;
   }
 }

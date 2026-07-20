@@ -14,6 +14,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
 public class SavedPracticeData extends SavedData {
 
     public Level level;
@@ -78,6 +81,18 @@ public class SavedPracticeData extends SavedData {
             var hitlist = tag.getCompound("hitlist");
             for (var id : hitlist.getAllKeys()) {
                 FamiliarManager.hitList.add(hitlist.getUUID(id));
+            }
+        }
+        if (tag.contains("selfPositions")) {
+            TransientDiagramData diagramData = DiagramManager.getOrCreateLevelData(level);
+            CompoundTag positions = tag.getCompound("selfPositions");
+            for (String key : positions.getAllKeys()) {
+                var ints = positions.getIntArray(key);
+                var positionsForPlayer = new HashSet<BlockPos>();
+                for (var i = 0; i < ints.length; i += 3) {
+                    positionsForPlayer.add(new BlockPos(ints[i], ints[i + 1], ints[i + 2]));
+                }
+                diagramData.selfPositions.put(key, positionsForPlayer);
             }
         }
     }

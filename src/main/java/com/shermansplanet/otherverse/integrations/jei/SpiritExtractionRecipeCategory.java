@@ -17,6 +17,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -48,8 +49,18 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
         this.guiHelper = guiHelper;
 
         blockIcon = guiHelper.createDrawable(
-                new ResourceLocation(Otherverse.MODID, "textures/gui/jei.png"),
+                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 0, 34, 9, 10);
+    }
+
+    @Override
+    public int getWidth() {
+        return 120;
+    }
+
+    @Override
+    public int getHeight() {
+        return 20;
     }
 
     @Override
@@ -60,11 +71,6 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
     @Override
     public Component getTitle() {
         return localizedName;
-    }
-
-    @Override
-    public IDrawable getBackground() {
-        return background;
     }
 
     @Override
@@ -104,7 +110,7 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
     }
 
     @Override
-    public void draw(SpiritExtractionRecipe recipe, IRecipeSlotsView recipeSlotsView, PoseStack stack,
+    public void draw(SpiritExtractionRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics,
                      double mouseX, double mouseY) {
         Minecraft mc = Minecraft.getInstance();
         int total = 0;
@@ -116,20 +122,20 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
         var totalColor = 0x333333;
         var implementData = ImplementManager.getImplementData(Minecraft.getInstance().player);
         if (!implementData.isEmpty()
-                && ForgeRegistries.ITEMS.getValue(new ResourceLocation(implementData.getString("item"))) == Items.BUCKET) {
+                && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.BUCKET) {
             total = (int) (total * ImplementManager.BUCKET_BONUS);
             totalColor = ImplementManager.IMPLEMENT_UI_COLOR;
         }
 
         var totalString = String.valueOf(total);
-        if(recipe.input.is(OtherverseItems.IDOL.get())){
+        if (recipe.input.is(OtherverseItems.IDOL.get())) {
             totalString = "";
         }
-        mc.font.draw(stack, totalString, 19, 6, totalColor);
+        graphics.drawString(mc.font, totalString, 19, 6, totalColor, false);
         if (ImplementManager.durabilities.containsKey(recipe.input.getItem())) {
-            blockIcon.draw(stack, 110, 1);
-            mc.font.draw(stack, String.valueOf(ImplementManager.durabilities.get(recipe.input.getItem())),
-                    109, 12, ImplementManager.IMPLEMENT_UI_COLOR);
+            blockIcon.draw(graphics, 110, 1);
+            graphics.drawString(mc.font, String.valueOf(ImplementManager.durabilities.get(recipe.input.getItem())),
+                    109, 12, ImplementManager.IMPLEMENT_UI_COLOR, false);
         }
     }
 }

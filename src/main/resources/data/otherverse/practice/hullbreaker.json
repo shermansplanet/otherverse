@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:hullbreaker",
+	"healing" : {
+		"entity.alexscaves.gossamer_worm" : 1,
+		"entity.minecraft.glow_squid" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:glass",
+			"health" : 7,
+			"output" : "alexscaves:depth_glass"
+		}
+	]
+}

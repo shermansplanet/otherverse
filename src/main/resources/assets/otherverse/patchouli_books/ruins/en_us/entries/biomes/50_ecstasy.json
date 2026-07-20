@@ -1,0 +1,17 @@
+{
+  "name": "Ecstasy",
+  "sortnum": 50,
+  "icon": "minecraft:honeycomb_block",
+  "category": "otherverse:biomes",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Ecstasy",
+      "text": "Ecstasy is blinding, full of dizzying heights and dripping with sweet honey. The force of your jumps here will be amplified and a running jump becomes a great leap, which can be a boon to exploration with the right equipment but quite dangerous for the unprepared."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Ecstasy is home to typhlotic bees called $(bold)buzzed$() which frenetically search for their next meal. Because of their immaterial diet, their senses are based on experience: they can only detect you in a radius equal to the number of XP levels you have (maxed out at 33).$(br2)Their bites drain not only Self but also levels. They will flee for a while after each successful bite."
+    }
+  ]
+}

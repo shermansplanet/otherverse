@@ -1,0 +1,19 @@
+{
+	"other" : "alexscaves:tremorsaurus",
+	"spirit": "time",
+	"binding" : {
+		"alexscaves:primitive_club" : 15
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:bone",
+			"health" : 3,
+			"output" : "alexscaves:heavy_bone"
+		},
+		{
+			"input" : "minecraft:bone_block",
+			"health" : 7,
+			"output" : "alexscaves:dinosaur_chop"
+		}
+	]
+}

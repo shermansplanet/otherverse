@@ -2,17 +2,15 @@ package com.shermansplanet.otherverse.binding;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.ReskinManager;
 import com.shermansplanet.otherverse.registries.CrownBlock;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EndCrystalRenderer;
 import net.minecraft.client.renderer.entity.EnderDragonRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -27,6 +25,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -39,7 +38,9 @@ import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Quaternionf;
 import org.slf4j.Logger;
+import software.bernie.geckolib.event.GeoRenderEvent;
 import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.*;
@@ -52,7 +53,8 @@ public class BindingRenderer {
     private static BlockRenderDispatcher blockRenderer;
     private static EntityRenderDispatcher entityRenderDispatcher;
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static HashSet<UUID> boundEntities = new HashSet<>();
+    private static HashSet<UUID> positiveBoundEntities = new HashSet<>();
+    private static HashSet<UUID> negativeBoundEntities = new HashSet<>();
     private static HashSet<UUID> contractEntities = new HashSet<>();
     private static HashMap<UUID, String> familiars = new HashMap<>();
     private static HashMap<String, EntityType<LivingEntity>> familiarsByPract = new HashMap<>();
@@ -76,7 +78,7 @@ public class BindingRenderer {
             var type = familiarsByPract.get(player.getGameProfile().getName());
             if (type == null) continue;
             if (type.equals(EntityType.ENDER_DRAGON)) {
-                List<EndCrystal> list = player.level.getEntitiesOfClass(EndCrystal.class, player.getBoundingBox().inflate(32.0D));
+                List<EndCrystal> list = player.level().getEntitiesOfClass(EndCrystal.class, player.getBoundingBox().inflate(32.0D));
                 EndCrystal endcrystal = null;
                 double d0 = Double.MAX_VALUE;
 
@@ -136,18 +138,30 @@ public class BindingRenderer {
     }
 
     @SubscribeEvent
-    public static void onLivingRender(RenderLivingEvent.Pre<?, ?> event) {
-        var entityId = event.getEntity().getUUID();
+    public static void onLivingRenderGecko(GeoRenderEvent.Entity.Post event) {
+        if (event.getEntity() instanceof LivingEntity le)
+            renderBindings(le, event.getPoseStack(), event.getBufferSource(), event.getPackedLight(), event.hashCode());
+    }
+
+    @SubscribeEvent
+    public static void onLivingRenderVanilla(RenderLivingEvent.Pre<?, ?> event) {
+        renderBindings(event.getEntity(), event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), event.hashCode());
+    }
+
+    private static void renderBindings(LivingEntity entity, PoseStack pose, MultiBufferSource multiBufferSource, int packedLight, int hashCode) {
+        hashCode++;
+        var entityId = entity.getUUID();
         var contractOnly = false;
-        if (!boundEntities.contains(entityId)) {
-            if(contractEntities.contains(entityId)){
-                contractOnly = true;
-            }else {
-                return;
-            }
-        }
         if (itemRenderer == null) {
             itemRenderer = Minecraft.getInstance().getItemRenderer();
+        }
+        var isPositive = positiveBoundEntities.contains(entityId);
+        if (!isPositive && !negativeBoundEntities.contains(entityId)) {
+            if (contractEntities.contains(entityId)) {
+                contractOnly = true;
+            } else {
+                return;
+            }
         }
         if (blockRenderer == null) {
             blockRenderer = Minecraft.getInstance().getBlockRenderer();
@@ -155,8 +169,7 @@ public class BindingRenderer {
         if (entityRenderDispatcher == null) {
             entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         }
-        LivingEntity mob = event.getEntity();
-        PoseStack pose = event.getPoseStack();
+        LivingEntity mob = entity;
         pose.pushPose();
         var isFamiliar = familiars.containsKey(mob.getUUID());
         var upnudge = 0.5f;
@@ -174,98 +187,156 @@ public class BindingRenderer {
         float rot = (contractEntities.contains(mob.getUUID()) || isFamiliar) ? (millis % 3600) / 10f : -mob.yHeadRot;
         var s = 10f / 16f;
         pose.scale(s, s, s);
-        pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, rot, 0)));
+        pose.mulPose(new Quaternionf().rotateY(rot * Mth.TWO_PI / 360));
         pose.pushPose();
-        if (isFamiliar || contractOnly) {
-            pose.translate(-0.5f, -0.4f, -0.5f);
-            blockRenderer.renderSingleBlock(
-                    OtherverseBlocks.FAMILIAR_CROWN.get().defaultBlockState().setValue(CrownBlock.demesne, contractOnly),
-                    pose, event.getMultiBufferSource(),
-                    event.getPackedLight(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
-        } else {
-            pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, 0, 90)));
-            for (int i = 0; i < 4; i++) {
-                pose.pushPose();
-                pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(90, 90, 90 * i)));
-                pose.translate(0.4f, 0f, 0f);
-                pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, 90, 0)));
-                itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemTransforms.TransformType.FIXED, event.getPackedLight(),
-                        OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), event.hashCode());
-                pose.popPose();
+        if (!mob.getPersistentData().contains("construct_type")) {
+            if (isFamiliar || contractOnly || isPositive) {
+                pose.translate(-0.5f, -0.4f, -0.5f);
+                blockRenderer.renderSingleBlock(
+                        OtherverseBlocks.FAMILIAR_CROWN.get().defaultBlockState().setValue(CrownBlock.demesne, !isFamiliar).setValue(CrownBlock.positive, true),
+                        pose, multiBufferSource,
+                        packedLight, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
+            } else {
+                pose.mulPose(new Quaternionf().rotateZ(Mth.PI / 2));
+                for (int i = 0; i < 4; i++) {
+                    pose.pushPose();
+                    pose.mulPose(new Quaternionf().rotateXYZ(Mth.PI / 2, Mth.PI / 2, Mth.PI / 2 * i));
+                    pose.translate(0.4f, 0f, 0f);
+                    pose.mulPose(new Quaternionf().rotateXYZ(0, Mth.PI / 2, 0));
+                    itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemDisplayContext.FIXED, packedLight,
+                            OverlayTexture.NO_OVERLAY, pose, multiBufferSource, mob.level(), hashCode);
+                    pose.popPose();
+                }
             }
+//            pose.translate(-0.5f, -0.4f, -0.5f);
+//            blockRenderer.renderSingleBlock(
+//                    OtherverseBlocks.FAMILIAR_CROWN.get().defaultBlockState()
+//                            .setValue(CrownBlock.demesne, !isFamiliar && isPositive)
+//                            .setValue(CrownBlock.positive, isPositive),
+//                    pose, event.getMultiBufferSource(),
+//                    event.getPackedLight(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
+
         }
         pose.popPose();
         if (!BindingManager.getHeldItem(mob).isEmpty()) {
             pose.translate(0, Math.sin(millis / 250.0) * 0.2, 0);
-            itemRenderer.renderStatic(BindingManager.getHeldItem(mob), ItemTransforms.TransformType.FIXED, event.getPackedLight(),
-                    OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), event.hashCode());
+            itemRenderer.renderStatic(BindingManager.getHeldItem(mob), ItemDisplayContext.FIXED, packedLight,
+                    OverlayTexture.NO_OVERLAY, pose, multiBufferSource, mob.level(), hashCode);
         }
         pose.popPose();
     }
 
+    public static boolean isBound(LivingEntity le) {
+        if (positiveBoundEntities.contains(le.getUUID()) || negativeBoundEntities.contains(le.getUUID()) || familiars.containsKey(le.getUUID())) {
+            return true;
+        }
+        if (le.getPersistentData().contains("construct_type")) return true;
+        if (le.getPersistentData().contains("practitioner_loyalty")) return true;
+        return false;
+    }
+
+    public static String getBindingInfo(LivingEntity le) {
+        var boundBy = le.getPersistentData().getString("last_bound_by");
+        if (familiars.containsKey(le.getUUID())) {
+            return "Familiar of " + familiars.get(le.getUUID());
+        } else if (positiveBoundEntities.contains(le.getUUID())) {
+            return "Positively bound by " + boundBy;
+        } else if (negativeBoundEntities.contains(le.getUUID())) {
+            return "Negatively bound by " + boundBy;
+        } else if (le.getPersistentData().contains("construct_type") && !boundBy.isEmpty()) {
+            return "Created by " + boundBy;
+        } else if (le.getPersistentData().contains("practitioner_loyalty")) {
+            return "Loyal to " + le.getPersistentData().getString("practitioner_loyalty");
+        }
+        return "";
+    }
+
     public static void updateBinding(LivingEntity le, BindingUpdateMessage update) {
-        RandomSource r = le.level.random;
+        RandomSource r = le.level().random;
         var updateType = update.updateType;
         var silent = update.silent;
-        if (updateType == BindingUpdateMessage.BindingUpdateType.BIND) {
-            boundEntities.add(le.getUUID());
-            if (silent) {
-                return;
+        switch (updateType) {
+            case BIND -> {
+                if (update.type == BindingUpdateMessage.BindingType.POSITIVE) {
+                    positiveBoundEntities.add(le.getUUID());
+                } else {
+                    negativeBoundEntities.add(le.getUUID());
+                }
+                le.getPersistentData().putString("last_bound_by", update.data.getString("last_bound_by"));
+                if (silent) {
+                    return;
+                }
+                Vec3 v1 = le.getEyePosition();
+                for (int i = 0; i < 8; i++) {
+                    le.level().addParticle(ParticleTypes.INSTANT_EFFECT,
+                            v1.x + (r.nextFloat() - 0.5) * 0.3,
+                            v1.y + 0.5,
+                            v1.z + (r.nextFloat() - 0.5) * 0.3,
+                            0, 0, 0);
+                }
+                le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 1, 1);
             }
-            Vec3 v1 = le.getEyePosition();
-            for (int i = 0; i < 8; i++) {
-                le.level.addParticle(ParticleTypes.INSTANT_EFFECT,
-                        v1.x + (r.nextFloat() - 0.5) * 0.3,
-                        v1.y + 0.5,
-                        v1.z + (r.nextFloat() - 0.5) * 0.3,
-                        0, 0, 0);
-            }
-            le.level.playSound(Minecraft.getInstance().player, le, SoundEvents.CHAIN_PLACE, SoundSource.NEUTRAL, 1, 1);
-        } else if (updateType == BindingUpdateMessage.BindingUpdateType.CONTRACT) {
-            LOGGER.debug("CONSTRUCT TYPE: " + update.data.getString("construct_type"));
-            if(update.data.contains("construct_type")){
-                ReskinManager.reskinMob(le, update.data.getString("construct_type"));
-            }else {
+            case CONTRACT -> {
+                if (update.data.contains("construct_type")) {
+                    var ct = update.data.getString("construct_type");
+                    ReskinManager.reskinMob(le, ct);
+                    le.getPersistentData().putString("construct_type", ct);
+                }
+                if (update.data.contains("practitioner_loyalty")) {
+                    le.getPersistentData().putString("practitioner_loyalty", update.data.getString("practitioner_loyalty"));
+                }
+                if (update.data.contains("last_bound_by")) {
+                    le.getPersistentData().putString("last_bound_by", update.data.getString("last_bound_by"));
+                }
                 contractEntities.add(le.getUUID());
+                if (silent) {
+                    return;
+                }
+                Vec3 v1 = le.position();
+                for (int i = 0; i < 16; i++) {
+                    le.level().addParticle(ParticleTypes.INSTANT_EFFECT,
+                            v1.x + (r.nextFloat() - 0.5) * le.getBoundingBox().getXsize(),
+                            v1.y + r.nextFloat() * le.getBoundingBox().getYsize(),
+                            v1.z + (r.nextFloat() - 0.5) * le.getBoundingBox().getZsize(),
+                            0, 0, 0);
+                }
+                le.level().playSound(Minecraft.getInstance().player, le, SoundEvents.BOOK_PAGE_TURN, SoundSource.NEUTRAL, 1, 1);
             }
-            if (silent) {
-                return;
-            }
-            Vec3 v1 = le.position();
-            for (int i = 0; i < 16; i++) {
-                le.level.addParticle(ParticleTypes.INSTANT_EFFECT,
-                        v1.x + (r.nextFloat() - 0.5) * le.getBoundingBox().getXsize(),
-                        v1.y + r.nextFloat() * le.getBoundingBox().getYsize(),
-                        v1.z + (r.nextFloat() - 0.5) * le.getBoundingBox().getZsize(),
-                        0, 0, 0);
-            }
-            le.level.playSound(Minecraft.getInstance().player, le, SoundEvents.BOOK_PAGE_TURN, SoundSource.NEUTRAL, 1, 1);
-        } else if (updateType == BindingUpdateMessage.BindingUpdateType.FAMILIAR) {
-            LOGGER.info("RECEIVED FAMILIAR UPDATE");
-            var name = update.data.getString("practitioner");
-            ReskinManager.reskinAsFamiliar(le, Minecraft.getInstance().player);
-            familiars.put(le.getUUID(), name);
-            familiarsByPract.put(name, (EntityType<LivingEntity>) le.getType());
-            boundEntities.add(le.getUUID());
-            le.getPersistentData().putString("practitioner", name);
-            var lvl = Minecraft.getInstance().level;
-            if (lvl != null) {
-                for (var p : lvl.players()) {
-                    p.refreshDimensions();
+            case FAMILIAR -> {
+                LOGGER.debug("RECEIVED FAMILIAR UPDATE");
+                var name = update.data.getString("practitioner");
+                for (var player : le.level().players()) {
+                    if (player.getGameProfile().getName().equals(name)) {
+                        ReskinManager.reskinAsFamiliar(le, player);
+                        break;
+                    }
+                }
+                familiars.put(le.getUUID(), name);
+                familiarsByPract.put(name, (EntityType<LivingEntity>) le.getType());
+                positiveBoundEntities.add(le.getUUID());
+                le.getPersistentData().putString("practitioner", name);
+                var lvl = Minecraft.getInstance().level;
+                if (lvl != null) {
+                    for (var p : lvl.players()) {
+                        p.refreshDimensions();
+                    }
+                }
+                if (silent) {
+                    return;
+                }
+                for (int i = 0; i < 7; ++i) {
+                    double d0 = r.nextGaussian() * 0.02D;
+                    double d1 = r.nextGaussian() * 0.02D;
+                    double d2 = r.nextGaussian() * 0.02D;
+                    le.level().addParticle(ParticleTypes.HEART, le.getRandomX(1.0D), le.getRandomY() + 0.5D, le.getRandomZ(1.0D), d0, d1, d2);
                 }
             }
-            if (silent) {
-                return;
+            case BREAK -> {
+                LOGGER.info("RECEIVED BROKEN BINDING UPDATE");
+                positiveBoundEntities.remove(le.getUUID());
+                negativeBoundEntities.remove(le.getUUID());
+                contractEntities.remove(le.getUUID());
             }
-            for (int i = 0; i < 7; ++i) {
-                double d0 = r.nextGaussian() * 0.02D;
-                double d1 = r.nextGaussian() * 0.02D;
-                double d2 = r.nextGaussian() * 0.02D;
-                le.level.addParticle(ParticleTypes.HEART, le.getRandomX(1.0D), le.getRandomY() + 0.5D, le.getRandomZ(1.0D), d0, d1, d2);
-            }
-        } else {
-            boundEntities.remove(le.getUUID());
-            contractEntities.remove(le.getUUID());
         }
     }
 

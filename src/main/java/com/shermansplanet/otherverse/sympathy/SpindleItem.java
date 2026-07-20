@@ -16,7 +16,7 @@ public class SpindleItem extends Item {
 
     public static BlockPos getBlockPos(Player player, BlockHitResult hitResult) {
         var selectedBlockPosition = hitResult.getBlockPos();
-        var block = player.level.getBlockState(selectedBlockPosition);
+        var block = player.level().getBlockState(selectedBlockPosition);
         if (!(block.is(OtherverseBlocks.CHALK_LINE.get()) || block.is(OtherverseBlocks.WEB_OF_FATE.get()))) {
             var dir = hitResult.getDirection();
             var vecToCam = player.getEyePosition().subtract(hitResult.getLocation()).normalize();
@@ -25,14 +25,6 @@ public class SpindleItem extends Item {
             }
         }
         return selectedBlockPosition;
-    }
-
-    public static BlockPos getBlockPos(ItemStack stack){
-        if(!stack.hasTag() || !stack.getTag().contains("boundpos_x")){
-            return null;
-        }
-        var tag = stack.getTag();
-        return new BlockPos(tag.getInt("boundpos_x"),tag.getInt("boundpos_y"),tag.getInt("boundpos_z"));
     }
 
     public static DyeColor getDyeColor(Item item) {

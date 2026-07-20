@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,10 +23,10 @@ import java.util.List;
 public abstract class BlockPlaceInjector {
 
     @Inject(method = "getDrops", at = @At("RETURN"))
-    protected void onGetDrops(BlockState blockState, LootContext.Builder context,
+    protected void onGetDrops(BlockState blockState, LootParams.Builder params,
                               CallbackInfoReturnable<List<ItemStack>> ci) {
-        BlockPos pos = new BlockPos(context.getParameter(LootContextParams.ORIGIN));
-        TransientDiagramData diagramData = DiagramManager.getOrCreateLevelData(context.getLevel());
+        BlockPos pos = BlockPos.containing(params.getParameter(LootContextParams.ORIGIN));
+        TransientDiagramData diagramData = DiagramManager.getOrCreateLevelData(params.getLevel());
         CompoundTag tag = diagramData.getPlacedItemTag(pos);
         if (tag == null) {
             return;

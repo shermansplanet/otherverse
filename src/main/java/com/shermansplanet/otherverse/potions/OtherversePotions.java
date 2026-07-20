@@ -21,6 +21,8 @@ public class OtherversePotions {
             () -> new FamiliarBlessingEffect(MobEffectCategory.BENEFICIAL, 0xffe300));
     public static final RegistryObject<MobEffect> REBOUND_EFFECT = EFFECTS.register("connection_rebound",
             () -> new ConnectionReboundEffect(MobEffectCategory.HARMFUL, 0xbb0000));
+    public static final RegistryObject<MobEffect> RUINS_BOUND = EFFECTS.register("ruins_bound",
+            () -> new RuinsBoundEffect(MobEffectCategory.BENEFICIAL, 0x002060));
 
     public static final DeferredRegister<Potion> POTIONS =
             DeferredRegister.create(ForgeRegistries.POTIONS, Otherverse.MODID);

@@ -1,15 +1,23 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.others.TyphloticZombie;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
 import com.shermansplanet.otherverse.spirits.Spirits;
+import com.shermansplanet.otherverse.sympathy.SympathyManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,8 +30,10 @@ public abstract class ItemEntityInjector extends Entity {
         super(p_19870_, p_19871_);
     }
 
+    private int secondsInDisgust = 0;
+
     @Shadow
-    public Entity getThrowingEntity() {
+    public Entity getOwner() {
         return null;
     }
 
@@ -32,17 +42,43 @@ public abstract class ItemEntityInjector extends Entity {
         return null;
     }
 
+    @Shadow
+    public void setItem(ItemStack p_32046_) {
+    }
+
+    @Inject(method = "tick", at = @At("RETURN"))
+    private void onTick(CallbackInfo ci) {
+        if (level().getGameTime() % 20 != 0) return;
+        if (level() instanceof ServerLevel sl && getItem().is(OtherverseItems.SPINDLE_BLOODY.get()) && getItem().getOrCreateTag().getBoolean("can_bind_remotely")) {
+            SympathyManager.tryBindFromSpindleItem(getItem(), sl, getBoundingBox());
+        }
+        if (!TyphloticZombie.isFreshFood(getItem())) return;
+        level().getBiome(blockPosition()).unwrapKey().ifPresent(biome -> {
+            var path = biome.location().getPath();
+            if (path.equals("ruins_disgust")) {
+                secondsInDisgust++;
+                if (secondsInDisgust == 7) {
+                    setItem(new ItemStack(Items.ROTTEN_FLESH, getItem().getCount()));
+                }
+            }
+        });
+    }
+
     @Inject(method = "setUnderwaterMovement", at = @At("RETURN"))
     private void onSetUnderwaterMovement(CallbackInfo ci) {
         //if (level.getGameTime() % 4 != 0) return;
+        var item = getItem();
+        if (item.is(OtherverseItems.SPINDLE_BLOODY.get())) {
+            setItem(new ItemStack(ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "spindle_white")), item.getCount()));
+            return;
+        }
 
-        var throwingEntity = getThrowingEntity();
+        var throwingEntity = getOwner();
         if (!(throwingEntity instanceof ServerPlayer sp)) return;
 
-        var item = getItem();
         if (item.isEmpty() || !item.hasTag() || !item.getTag().contains("hallow")) return;
 
-        var state = level.getBlockState(blockPosition());
+        var state = level().getBlockState(blockPosition());
         if (!state.getFluidState().is(Fluids.WATER)) return;
         var maxy = seek(1) + 1;
         var miny = seek(-1);
@@ -62,7 +98,7 @@ public abstract class ItemEntityInjector extends Entity {
         int y = pos.getY();
         for (var i = 1; i < 64; i++) {
             pos.setY(y + i * dy);
-            var state = level.getBlockState(pos);
+            var state = level().getBlockState(pos);
             if (!state.getFluidState().is(Fluids.WATER)) return y + (i - 1) * dy;
         }
         return y + 64 * dy;

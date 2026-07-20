@@ -1,20 +1,21 @@
 package com.shermansplanet.otherverse.binding;
 
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.ItemOrEntityType;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.integrations.jei.BindingRecipe;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
-import com.shermansplanet.otherverse.spirits.SpiritTransfer;
-import com.shermansplanet.otherverse.spirits.SpiritType;
-import com.shermansplanet.otherverse.spirits.Spirits;
+import com.shermansplanet.otherverse.spirits.*;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -35,6 +36,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
@@ -49,7 +51,8 @@ public class MobBindingInfluenceUtils {
     public final static PracticeWorldManager.WorldTraitComponent<HashMap<EntityType<? extends LivingEntity>, HashMap<ItemOrEntityType, Integer>>> GENERATED_BINDINGS = new PracticeWorldManager.WorldTraitComponent<>() {
     };
 
-    private static ServerLevel cachedLevel = null;
+    public static ServerLevel cachedLevel = null;
+    public static boolean serverMobInstancesAnalyzed = false;
 
     public final static PracticeWorldManager.WorldTrait<HashMap<EntityType<? extends LivingEntity>, HashMap<ItemOrEntityType, Integer>>> ALL_BINDING_INFLUENCES =
             new PracticeWorldManager.WorldTrait<>(new PracticeWorldManager.WorldTraitComponent[]{
@@ -59,6 +62,7 @@ public class MobBindingInfluenceUtils {
 
                 @Override
                 public boolean synthesize() {
+                    LOGGER.debug("BINDINGS FROM JSON: {}, GENERATED: {}", BINDINGS_FROM_JSON.data == null ? "NO" : "YES", GENERATED_BINDINGS.data == null ? "NO" : "YES");
                     for (var component : components) {
                         if (component.data == null) return false;
                     }
@@ -100,10 +104,10 @@ public class MobBindingInfluenceUtils {
         HashMap<EntityType<?>, Set<TagKey<Biome>>> mobTags = new HashMap<>();
         HashMap<EntityType<?>, Set<TagKey<Biome>>> forbiddenMobTags = new HashMap<>();
 
-        var registry = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        var registry = level.registryAccess().registryOrThrow(Registries.BIOME);
 
         for (var biomeKey : registry.registryKeySet()) {
-            var biome = registry.getOrCreateHolderOrThrow(biomeKey);
+            var biome = registry.getHolderOrThrow(biomeKey);
             var tags = new HashSet<TagKey<Biome>>();
             var antiTags = new HashSet<TagKey<Biome>>();
             for (var tag : biomeTags) {
@@ -196,7 +200,7 @@ public class MobBindingInfluenceUtils {
         var spiritTypes = new ArrayList<SpiritType>();
         var hasDimensionSpirit = false;
 
-        if (tags.contains(Tags.Biomes.IS_MAGICAL)) spiritTypes.add(Spirits.FATE);
+//        if (tags.contains(Tags.Biomes.IS_MAGICAL)) spiritTypes.add(Spirits.FATE);
         if (tags.contains(Tags.Biomes.IS_DEAD)) spiritTypes.add(Spirits.DEATH);
         if (tags.contains(Tags.Biomes.IS_LUSH)) spiritTypes.add(Spirits.NATURE);
         if (tags.contains(BiomeTags.IS_END)) {
@@ -218,12 +222,45 @@ public class MobBindingInfluenceUtils {
             spiritTypes.add(Spirits.OVERWORLD);
         }
 
-        var biomeName = getBiomeName(biome, level);
-        if (biomeName.equals("visceral_heap")) spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
-        if (biomeName.equals("erupting_inferno")) spiritTypes.add(0, Spirits.FIRE);
-        if (biomeName.equals("withered_abyss")) spiritTypes.add(0, Spirits.DEATH);
-        if (biomeName.equals("undergrowth")) spiritTypes.add(0, Spirits.NATURE);
-        if (biomeName.equals("crystalline_chasm")) spiritTypes.add(0, Spirits.FORTUNE);
+        var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(biome, level);
+        var biomeMod = biomeKeys.getNamespace();
+        var biomeName = biomeKeys.getPath();
+
+        if (biomeMod.equals("macabre")) {
+            if (biomeName.equals("mortem_swamp") || biomeName.equals("mortem_marsh")) {
+                spiritTypes.addAll(0, List.of(Spirits.DEATH, Spirits.DEATH));
+            } else {
+                spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
+            }
+            hasDimensionSpirit = true;
+        } else if (biomeMod.equals("otherverse")) {
+            if (biomeName.equals("ruins_anger")) spiritTypes.add(0, Spirits.FIRE);
+            if (biomeName.equals("ruins_chaos")) spiritTypes.add(0, Spirits.DEATH);
+            if (biomeName.equals("ruins_disgust")) spiritTypes.add(0, Spirits.FLESH);
+            if (biomeName.equals("ruins_ecstasy")) spiritTypes.add(0, Spirits.LIGHT);
+            if (biomeName.equals("ruins_fear")) spiritTypes.add(0, Spirits.COLD);
+            if (biomeName.equals("ruins_misery")) spiritTypes.add(0, Spirits.DARK);
+            if (biomeName.equals("ruins_shock")) spiritTypes.add(0, Spirits.AIR);
+            if (biomeName.equals("ruins_trust")) spiritTypes.add(0, Spirits.FOOD);
+            if (biomeName.equals("ruins_vigil")) spiritTypes.add(0, Spirits.TECH);
+            hasDimensionSpirit = true;
+        } else if (biomeMod.equals("biomesoplenty")) {
+            if (biomeName.equals("visceral_heap")) spiritTypes.addAll(0, List.of(Spirits.FLESH, Spirits.FLESH));
+            if (biomeName.equals("erupting_inferno")) spiritTypes.add(0, Spirits.FIRE);
+            if (biomeName.equals("withered_abyss")) spiritTypes.add(0, Spirits.DEATH);
+            if (biomeName.equals("undergrowth")) spiritTypes.add(0, Spirits.NATURE);
+            if (biomeName.equals("crystalline_chasm")) spiritTypes.add(0, Spirits.FORTUNE);
+        } else if (biomeMod.equals("alexscaves")) {
+            if (biomeName.equals("magnetic_caves")) spiritTypes.addAll(0, List.of(Spirits.TECH, Spirits.TECH));
+            if (biomeName.equals("primordial_caves")) spiritTypes.addAll(0, List.of(Spirits.TIME, Spirits.TIME));
+            if (biomeName.equals("toxic_caves")) spiritTypes.addAll(0, List.of(Spirits.WAR, Spirits.DEATH));
+            if (biomeName.equals("abyssal_chasm")) spiritTypes.addAll(0, List.of(Spirits.DARK, Spirits.WATER));
+            if (biomeName.equals("forlorn_hollows")) spiritTypes.addAll(0, List.of(Spirits.DARK, Spirits.DARK));
+            if (biomeName.equals("candy_cavity")) spiritTypes.addAll(0, List.of(Spirits.FOOD, Spirits.FOOD));
+        } else if (!biomeMod.equals("minecraft")) {
+            spiritTypes.add(Spirits.END);
+            hasDimensionSpirit = true;
+        }
 
         if (!hasDimensionSpirit) {
             var levelName = level.dimensionTypeId().location().getPath();
@@ -266,13 +303,13 @@ public class MobBindingInfluenceUtils {
         return spiritTypes;
     }
 
-    public static String getBiomeName(Holder<Biome> biome, Level level) {
+    public static ResourceLocation getBiomeKeys(Holder<Biome> biome, Level level) {
         var keyMaybe = biome.unwrap();
-        var biomeName = "";
+        ResourceLocation biomeName = null;
         if (keyMaybe.left().isPresent()) {
-            biomeName = keyMaybe.left().get().location().getPath();
+            biomeName = keyMaybe.left().get().location();
         } else if (keyMaybe.right().isPresent()) {
-            biomeName = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(keyMaybe.right().get()).getPath();
+            biomeName = level.registryAccess().registryOrThrow(Registries.BIOME).getKey(keyMaybe.right().get());
         }
         return biomeName;
     }
@@ -286,8 +323,10 @@ public class MobBindingInfluenceUtils {
             var foods = new HashMap<ItemOrEntityType, Integer>();
             var bindingInfluences = new HashMap<ItemOrEntityType, Integer>();
             for (var ee : entry.getValue().entrySet()) {
-                var target = ee.getValue() >= 0 ? bindingInfluences : foods;
-                target.put(ee.getKey(), Math.abs(ee.getValue()));
+                if (ee.getValue() < 0) {
+                    foods.put(ee.getKey(), Math.abs(ee.getValue()));
+                }
+                bindingInfluences.put(ee.getKey(), ee.getValue());
             }
             if (!foods.isEmpty()) allFoods.put(entry.getKey(), foods);
             if (!bindingInfluences.isEmpty()) allBindingInfluences.put(entry.getKey(), bindingInfluences);
@@ -305,6 +344,7 @@ public class MobBindingInfluenceUtils {
         if (practice.has("binding")) {
             for (var binding : practice.getAsJsonObject("binding").entrySet()) {
                 for (var item : MobTransfusions.getItemOrShortcut(binding.getKey())) {
+                    if (item == null) continue;
                     register(other, item, binding.getValue().getAsInt(), false);
                 }
             }
@@ -313,6 +353,7 @@ public class MobBindingInfluenceUtils {
         if (practice.has("healing")) {
             for (var healing : practice.getAsJsonObject("healing").entrySet()) {
                 for (var item : MobTransfusions.getItemOrShortcut(healing.getKey())) {
+                    if (item == null) continue;
                     registerFood(other, item, healing.getValue().getAsInt(), false);
                 }
             }
@@ -332,6 +373,9 @@ public class MobBindingInfluenceUtils {
         var defaultBindings = new HashMap<ItemOrEntityType, Integer>();
         defaultBindings.put(new ItemOrEntityType(Items.CHAIN), 7);
         defaultBindings.put(new ItemOrEntityType(Items.IRON_BARS), 3);
+
+        var totem = ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath("alexscaves", "totem_of_possession"));
+        if (totem != null && totem != Items.AIR) defaultBindings.put(new ItemOrEntityType(totem), 60);
 
         GENERATED_BINDINGS.data = new HashMap<>();
 
@@ -411,45 +455,78 @@ public class MobBindingInfluenceUtils {
 
         if (item.hasTag() && item.getTag().contains("hallow")) {
             CompoundTag hallowTag = item.getTag().getCompound("hallow");
-            ItemOrEntityType spiritItem = new ItemOrEntityType(Spirits.spiritItems
-                    .get(Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"))).get());
+            var st = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
+            ItemOrEntityType spiritItem = new ItemOrEntityType(Spirits.spiritItems.get(st).get());
             if (influenceMap.containsKey(spiritItem)) {
                 return influenceMap.get(spiritItem) * hallowTag.getInt("spirit_count");
+            }
+            var mobSpiritType = mobSpirits.get(mob.getType());
+            if (mobSpiritType == st) {
+                return -hallowTag.getInt("spirit_count");
             }
         }
         var ioe = new ItemOrEntityType(item.getItem());
         if (influenceMap.containsKey(ioe)) {
-            return Math.max(0, influenceMap.get(ioe));
+            return influenceMap.get(ioe);
         }
         return 0;
     }
 
-    public static int GetTotalInfluence(Mob mob, List<ItemStack> items) {
-        int totalInfluence = 0;
+    public static Pair<Integer, Integer> GetTotalInfluence(Mob mob, List<ItemStack> items) {
+        int positiveInfluence = 0;
+        int negativeInfluence = 0;
         for (ItemStack item : items) {
-            totalInfluence += GetInfluence(mob, item);
+            var influence = GetInfluence(mob, item);
+            positiveInfluence += Math.max(0, -influence);
+            negativeInfluence += Math.max(0, influence);
         }
-        return totalInfluence;
+        return new Pair<>(positiveInfluence, negativeInfluence);
     }
 
-    public static boolean CanBeBound(Mob mob, List<ItemStack> items, IFocus focus) {
-        int totalInfluence = GetTotalInfluence(mob, items);
+    public static Pair<Boolean, Boolean> CanBeBound(Mob mob, List<ItemStack> items, IFocus focus) {
+        var bothInfluence = GetTotalInfluence(mob, items);
+        var positiveInfluence = bothInfluence.getFirst();
+        var negativeInfluence = bothInfluence.getSecond();
+        var level = focus.getFocusLevel();
+
+        var mobSpiritType = mobSpirits.get(mob.getType());
+        if (mobSpiritType != null) {
+            for (var dx = -2; dx <= 2; dx++) {
+                for (var dy = -1; dy <= 1; dy++) {
+                    for (var dz = -2; dz <= 2; dz++) {
+                        var block = level.getBlockState(focus.getPos().offset(dx, dy, dz)).getBlock();
+                        var item = block.asItem();
+                        if (block == Blocks.WATER) item = Items.WATER_BUCKET;
+                        else if (block == Blocks.LAVA) item = Items.LAVA_BUCKET;
+                        var spiritsForItem = SpiritLabeler.getSpiritsFor(item);
+                        if (spiritsForItem == null || !spiritsForItem.containsKey(mobSpiritType)) continue;
+                        positiveInfluence += spiritsForItem.get(mobSpiritType);
+                    }
+                }
+            }
+        }
 
         var implementData = ImplementManager.getImplementData(focus);
         boolean hasChain = !implementData.isEmpty()
-                && ForgeRegistries.ITEMS.getValue(new ResourceLocation(implementData.getString("item"))) == Items.CHAIN;
+                && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.CHAIN;
+        if (hasChain) {
+            positiveInfluence = 0;
+        }
+
+        var isPositive = positiveInfluence > negativeInfluence;
+        var totalInfluence = isPositive ? positiveInfluence : negativeInfluence;
 
         if (!hasChain && mob instanceof TamableAnimal ta && ta.isTame()) {
-            return totalInfluence >= 0;
+            return new Pair<>(totalInfluence >= 0, isPositive);
         }
 
         var demesneCoeff = 1f;
-        var demesne = DemesnesManager.getData((ServerLevel) mob.level, focus.getPos());
+        var demesne = DemesnesManager.getData((ServerLevel) mob.level(), focus.getPos());
         if (demesne != null) {
             demesneCoeff = (float) Math.pow(2f / 3f, demesne.getPerkLevel(DemesnesManager.DemesnePerk.BINDING));
         }
-
-        return totalInfluence >= mob.getMaxHealth() * demesneCoeff * (hasChain ? 2 : 3);
+        var configCoeff = OtherverseConfig.BINDING_COST.get();
+        return new Pair<>(totalInfluence >= ((int) (mob.getMaxHealth() * demesneCoeff)) * (hasChain ? configCoeff * 2 / 3 : configCoeff) * (isPositive ? 3 : 1), isPositive);
     }
 
     public static List<BindingRecipe> GenerateRecipes() {
@@ -463,7 +540,7 @@ public class MobBindingInfluenceUtils {
                 continue; //IntelliJ says this can't be null, but it can be!!
             }
 
-            recipes.add(new BindingRecipe(new ResourceLocation(Otherverse.MODID, et.toString()), et, influenceMap));
+            recipes.add(new BindingRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, et.toString()), et, influenceMap));
         }
         return recipes;
     }
@@ -487,8 +564,6 @@ public class MobBindingInfluenceUtils {
         return idolCache.get(entityType);
     }
 
-    private static boolean serverMobInstancesAnalyzed = false;
-
     public static void analyzeMobInstances(ServerLevel level) {
         if (serverMobInstancesAnalyzed) return;
         serverMobInstancesAnalyzed = true;
@@ -501,7 +576,9 @@ public class MobBindingInfluenceUtils {
                 mob.tick();
                 var le = (EntityType<? extends LivingEntity>) et;
                 if (!mobSpirits.containsKey(et)) {
-                    if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
+                    if (ForgeRegistries.ENTITY_TYPES.getKey(et).getNamespace().equals("macabre")) {
+                        registerMobSpirit(le, Spirits.FLESH);
+                    } else if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
                         registerMobSpirit(le, Spirits.WATER);
                     } else if (mob instanceof FlyingMob || mob instanceof FlyingAnimal || mob.isNoGravity()
                             || mob.getNavigation() instanceof FlyingPathNavigation) {

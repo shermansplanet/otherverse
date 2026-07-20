@@ -13,7 +13,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Each point of health gained or lost through this Sympathetic connection costs one fate spirit from the hallow.$(br2)This Practice only works if the target mob is in a loaded chunk."
+            "text": "Odd amounts will be randomly rounded up or down. Each point of health gained or lost through this Sympathetic connection costs one fate spirit from the hallow.$(br2)This Practice only works if the target mob is in a loaded chunk.$(br2)A player can be substituted for either part of this setup using their Self in a chalk circle."
         }
     ]
 }

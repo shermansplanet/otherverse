@@ -2,7 +2,7 @@
     "name": "Comparators",
     "icon": "minecraft:comparator",
     "category": "otherverse:contracts",
-    "sortnum": 22,
+    "sortnum": 220,
     "pages": [
         {
             "type": "patchouli:text",        

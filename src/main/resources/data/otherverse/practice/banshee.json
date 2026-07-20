@@ -1,0 +1,11 @@
+{
+	"other" : "otherverse:banshee",
+	"spirit" : "technology",
+	"transfusion" : [
+		{
+			"input" : "minecraft:leather",
+			"health" : 13,
+			"output" : "otherverse:banshee_membrane"
+		}
+	]
+}

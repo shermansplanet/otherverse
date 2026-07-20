@@ -1,16 +1,51 @@
 {
   "temperature": 0.25,
   "downfall": 0.4,
-  "precipitation": "none",
+  "has_precipitation": false,
   "effects": {
     "sky_color": 9464235,
     "fog_color": 9464235,
     "water_color": 9464235,
     "water_fog_color": 9464235,
-    "grass_color": 9464235
+    "grass_color": 9464235,
+    "particle": {
+      "options": {
+        "type": "minecraft:cherry_leaves"
+      },
+      "probability": 0.002
+    }
   },
-  "spawners": {},
-  "spawn_costs": {},
+  "spawners": {
+    "monster": [
+      {
+        "type": "otherverse:guest",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ]
+  },
+  "spawn_costs": {
+    "otherverse:typhlotic_shark": {
+      "charge": 1,
+      "energy_budget": 0
+    },
+    "otherverse:guest": {
+      "charge": 0.5,
+      "energy_budget": 0.15
+    },
+    "otherverse:buzzed": {
+      "charge": 1,
+      "energy_budget": 0
+    }
+  },
   "carvers": {},
-  "features": []
+  "features": [
+    [],
+    [],
+    [
+      "otherverse:trust_trees",
+      "otherverse:trust_lights"
+    ]
+  ]
 }

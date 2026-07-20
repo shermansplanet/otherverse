@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:caramel_cube",
+	"spirit": "food",
+	"binding" : {
+		"minecraft:paper" : 8
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:sugar",
+			"health" : 3,
+			"output" : "alexscaves:caramel"
+		}
+	]
+}

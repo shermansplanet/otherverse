@@ -1,0 +1,11 @@
+{
+	"other" : "cataclysm:ignis",
+	"spirit" : "fire",
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_ingot",
+			"health" : 77,
+			"output" : "cataclysm:ignitium_ingot"
+		}
+	]
+}

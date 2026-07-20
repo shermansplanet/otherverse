@@ -1,0 +1,18 @@
+{
+	"other" : "cataclysm:the_harbinger",
+	"spirit" : "technology",
+	"binding" : {
+		"cataclysm:emp" : 256
+	},
+	"healing" : {
+		"otherverse:spirit_war" : 1,
+		"minecraft:iron_ingot" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_ingot",
+			"health" : 55,
+			"output" : "cataclysm:witherite_ingot"
+		}
+	]
+}

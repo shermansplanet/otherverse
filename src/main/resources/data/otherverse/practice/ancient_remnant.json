@@ -1,0 +1,24 @@
+{
+	"other" : "cataclysm:ancient_remnant",
+	"spirit" : "time",
+	"healing": {
+		"otherverse:spirit_death": 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_block",
+			"health" : 243,
+			"output" : "cataclysm:ancient_metal_block"
+		},
+		{
+			"input" : "minecraft:iron_ingot",
+			"health" : 27,
+			"output" : "cataclysm:ancient_metal_ingot"
+		},
+		{
+			"input" : "minecraft:iron_nugget",
+			"health" : 3,
+			"output" : "cataclysm:ancient_metal_nugget"
+		}
+	]
+}

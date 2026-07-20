@@ -2,8 +2,9 @@
 	"other" : "minecraft:iron_golem",
 	"spirit" : "technology",
 	"healing" : {
-		"minecraft:carved_pumpkin" : 2,
-		"minecraft:jack_o_lantern" : 6
+		"minecraft:carved_pumpkin" : 3,
+		"minecraft:poppy" : 3,
+		"minecraft:jack_o_lantern" : 7
 	},
 	"transfusion" : [
 		{

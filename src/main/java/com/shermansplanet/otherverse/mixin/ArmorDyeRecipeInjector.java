@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.mixin;
 
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ArmorDyeRecipe.class)
 public class ArmorDyeRecipeInjector {
     @Inject(method = "assemble", at = @At("RETURN"), cancellable = true)
-    public void onAssemble(CraftingContainer container, CallbackInfoReturnable<ItemStack> ci) {
+    public void onAssemble(CraftingContainer container, RegistryAccess p_267017_, CallbackInfoReturnable<ItemStack> ci) {
         var stack = ci.getReturnValue();
         if (stack.is(OtherverseItems.CHARCOAL_STICK.get())) {
             stack.setTag(new CompoundTag());

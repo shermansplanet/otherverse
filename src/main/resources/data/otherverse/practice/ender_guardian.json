@@ -1,0 +1,7 @@
+{
+	"other" : "cataclysm:ender_guardian",
+	"spirit" : "end",
+	"healing" : {
+		"otherverse:spirit_protection" : 1
+	}
+}

@@ -1,0 +1,16 @@
+{
+	"other" : "otherverse:guest",
+	"spirit" : "fortune",
+	"transfusion" : [
+		{
+			"input" : "minecraft:diamond",
+			"health" : 1,
+			"output" : "otherverse:ended_pearl"
+		},
+		{
+			"input" : "minecraft:emerald",
+			"health" : 9,
+			"output" : "otherverse:ended_pearl"
+		}
+	]
+}

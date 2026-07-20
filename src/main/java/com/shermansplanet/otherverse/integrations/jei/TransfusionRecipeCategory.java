@@ -13,6 +13,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
@@ -34,12 +35,22 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
         background = guiHelper.createBlankDrawable(100, 32);
         localizedName = Component.translatable("otherverse.jei.transfusion");
         overlay = guiHelper.createDrawable(
-                new ResourceLocation(Otherverse.MODID, "textures/gui/jei.png"),
+                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 0, 0, 62, 11);
         icon = guiHelper.createDrawable(
-                new ResourceLocation(Otherverse.MODID, "textures/gui/jei.png"),
+                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 0, 17, 16, 16);
         this.guiHelper = guiHelper;
+    }
+
+    @Override
+    public int getWidth() {
+        return 100;
+    }
+
+    @Override
+    public int getHeight() {
+        return 32;
     }
 
     @Override
@@ -50,11 +61,6 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
     @Override
     public Component getTitle() {
         return localizedName;
-    }
-
-    @Override
-    public IDrawable getBackground() {
-        return background;
     }
 
     @Override
@@ -78,13 +84,13 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
     }
 
     @Override
-    public void draw(TransfusionRecipe recipe, IRecipeSlotsView recipeSlotsView, PoseStack stack,
+    public void draw(TransfusionRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics,
                      double mouseX, double mouseY) {
         Minecraft mc = Minecraft.getInstance();
         RenderSystem.enableBlend();
-        overlay.draw(stack, 18, 8);
+        overlay.draw(graphics, 18, 8);
         RenderSystem.disableBlend();
         String s = recipe.cost + (recipe.isMob ? (recipe.transfusionSources.size() > 1 ? " total HP" : " HP") : "");
-        mc.font.draw(stack, s, 50 - s.length() * 3, 20, 0x333333);
+        graphics.drawString(mc.font, s, 50 - s.length() * 3, 20, 0x333333, false);
     }
 }

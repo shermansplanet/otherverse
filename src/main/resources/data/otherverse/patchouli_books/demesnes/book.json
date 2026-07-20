@@ -4,7 +4,7 @@
     "version": 3,
     "model" : "otherverse:demesnes",
     "show_progress" : false,
-    "creative_tab" : "otherverse",
+    "creative_tab" : "otherverse:practice",
     "use_resource_pack": true,
     "pamphlet" : true
 }

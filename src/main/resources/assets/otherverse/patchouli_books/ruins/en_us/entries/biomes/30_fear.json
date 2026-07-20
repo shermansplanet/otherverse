@@ -1,0 +1,17 @@
+{
+    "name": "Fear",
+    "sortnum": 30,
+    "icon": "minecraft:snow",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title" : "Fear",
+            "text": "Fear is frigid and foreboding; the icy wind carries memories of spine-chilling sounds. The ground is mostly powder snow, but a keen eye will reveal that some of it has been flattened slightly and is safe to walk upon."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The typhlotic beasts of Fear are called $(bold)shivers$(). These sharks swim through the snow and have limited flight. They can smell blood from very far away. Make sure you're at maximum health at all times, lest the shivers sense your injury and approach to finish you off."
+        }
+    ]
+}

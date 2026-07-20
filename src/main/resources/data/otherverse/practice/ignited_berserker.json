@@ -1,0 +1,11 @@
+{
+	"other" : "cataclysm:ignited_berserker",
+	"spirit" : "fire",
+	"transfusion" : [
+		{
+			"input" : "minecraft:gunpowder",
+			"health" : 9,
+			"output" : "cataclysm:dying_embers"
+		}
+	]
+}

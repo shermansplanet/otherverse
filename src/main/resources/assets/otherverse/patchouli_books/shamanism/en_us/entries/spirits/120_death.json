@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_death"
             },
-            "text": "If anything dies within range of a death shrine, the shrine will attempt to spend 444 spirits to prevent the death."
+            "text": "If a player or bound/tamed mob dies within range of a death shrine, the shrine will attempt to spend 444 spirits to prevent the death."
         }
     ]
 }

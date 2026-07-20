@@ -1,0 +1,9 @@
+{
+  "order": 50,
+  "size" : 0,
+  "icon": "otherverse:slot/implement_slot",
+  "validators": [
+    "otherverse:implement_predicate"
+  ],
+  "render_toggle": false
+}

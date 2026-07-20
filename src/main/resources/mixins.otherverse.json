@@ -18,7 +18,6 @@
     "MobInjector",
     "EnderDragonInjector",
     "DragonSittingScanningPhaseInjector",
-    "VibrationListenerInjector",
     "HttpTextureInjector",
     "ShulkerInjector",
     "PlayerInjector",
@@ -31,7 +30,9 @@
     "NearestAttackableTargetGoalInjector",
     "SensorInjector",
     "FlowingFluidInjector",
-    "BaseSpawnerInjector"
+    "BaseSpawnerInjector",
+    "MonsterInjector",
+    "PhantomInjector"
   ],
   "client":[
     "ModelBakeryInjector",
@@ -41,7 +42,8 @@
     "ClientLevelInjector",
     "ClientDataInjector",
     "ItemRendererInjector",
-    "BlockRenderDispatcherInjector"
+    "BlockRenderDispatcherInjector",
+    "GeoEntityRendererInjector"
   ],
   "injectors": {
     "defaultRequire": 1

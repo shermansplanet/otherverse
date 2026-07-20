@@ -1,0 +1,15 @@
+{
+	"other" : "enemyexpansion:crawler",
+	"spirit": "phlogiston",
+	"binding" : {
+		"entity.minecraft.cat" : 15,
+		"entity.minecraft.ocelot" : 15
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:sugar",
+			"health" : 9,
+			"output" : "minecraft:gunpowder"
+		}
+	]
+}

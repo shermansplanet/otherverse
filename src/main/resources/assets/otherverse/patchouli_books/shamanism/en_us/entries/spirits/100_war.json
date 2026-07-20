@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_war"
             },
-            "text": "When anything takes damage in range of a war shrine, the shrine will try to spend spirits equal to thrice the damage. This will double the damage taken. The effects of multiple shrines stack."
+            "text": "When a player or bound/tamed mob deals damage in range of a war shrine, the shrine will try to spend spirits equal to thrice the damage. This will double the damage taken. The effects of multiple shrines stack."
         },
         {
             "type": "patchouli:text",

@@ -1,10 +1,40 @@
 {
   "multipart": [
-    {   "when": { "lit": "true"},
-        "apply": { "model": "otherverse:block/biome_brazier_lit"}
+    {
+      "when": {
+        "lit": "true",
+        "scry": "false"
+      },
+      "apply": {
+        "model": "otherverse:block/biome_brazier_lit"
+      }
     },
-    {   "when": { "lit": "false"},
-        "apply": { "model": "otherverse:block/biome_brazier"}
+    {
+      "when": {
+        "lit": "false",
+        "scry": "true"
+      },
+      "apply": {
+        "model": "otherverse:block/biome_brazier_scry"
+      }
+    },
+    {
+      "when": {
+        "lit": "true",
+        "scry": "true"
+      },
+      "apply": {
+        "model": "otherverse:block/biome_brazier_chunkload"
+      }
+    },
+    {
+      "when": {
+        "lit": "false",
+        "scry": "false"
+      },
+      "apply": {
+        "model": "otherverse:block/biome_brazier"
+      }
     }
   ]
 }

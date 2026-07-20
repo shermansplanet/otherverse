@@ -1,0 +1,17 @@
+{
+	"other" : "alexscaves:gumbeeper",
+	"spirit": "food",
+	"binding" : {
+		"minecraft:sweet_berries" : 15
+	},
+	"healing" : {
+		"otherverse:spirit_phlogiston" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:sweet_berries",
+			"health" : 3,
+			"output" : "alexscaves:gumball_pile"
+		}
+	]
+}

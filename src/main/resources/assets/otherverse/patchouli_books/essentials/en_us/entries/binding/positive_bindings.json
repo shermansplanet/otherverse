@@ -1,0 +1,20 @@
+{
+    "name": "Positive Bindings",
+    "sortnum": 15,
+    "icon": "minecraft:lead",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Binding a mob with things that oppose its nature (a 'negative' binding) is the most efficient way, but there is another.$(br2)A 'positive' binding works the same way as a negative binding, but uses influences that would heal the mob, and requires $(bold)thrice the influence$() (9x the mob's health)."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Positive bindings also count all the spirits matching the mob's spirit type in every block in a 5x3x5 range centered on the binding focus. For instance, a zombie (death-aligned) can be positively bound even by an empty circle if it's surrounded with enough bone blocks and skulls, and a bee (air) wants lots of empty air blocks. Think of it as making a nice habitat."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Positively bound mobs will still 'attack' their binding influences just like negatively bound mobs; they may not be there against their will, but they still demand payment for their service and will turn against you if you can't pay. They only look at diagram foci for this, ignoring the 'habitat' portion of their binding."
+        }
+    ]
+}

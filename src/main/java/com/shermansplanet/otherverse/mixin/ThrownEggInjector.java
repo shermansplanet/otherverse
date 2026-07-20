@@ -27,13 +27,13 @@ public abstract class ThrownEggInjector extends ThrowableItemProjectile {
             return;
         }
         super.onHit(p_37488_);
-        if (!this.level.isClientSide) {
-            Chicken chicken = EntityType.CHICKEN.create(this.level);
+        if (!this.level().isClientSide) {
+            Chicken chicken = EntityType.CHICKEN.create(this.level());
             chicken.setAge(-1200);
             chicken.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
             BindingManager.enforceLoyalty(sp, chicken, true);
-            this.level.addFreshEntity(chicken);
-            this.level.broadcastEntityEvent(this, (byte) 3);
+            this.level().addFreshEntity(chicken);
+            this.level().broadcastEntityEvent(this, (byte) 3);
             this.discard();
         }
         ci.cancel();

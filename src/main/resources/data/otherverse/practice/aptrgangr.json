@@ -1,0 +1,14 @@
+{
+	"other" : "cataclysm:aptrgangr",
+	"spirit" : "cold",
+	"healing": {
+		"otherverse:death": 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_sword",
+			"health" : 9,
+			"output" : "cataclysm:strange_key"
+		}
+	]
+}

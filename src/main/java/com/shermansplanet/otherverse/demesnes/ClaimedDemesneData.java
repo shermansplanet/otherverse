@@ -1,5 +1,8 @@
 package com.shermansplanet.otherverse.demesnes;
 
+import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
@@ -18,6 +21,7 @@ import java.util.*;
 
 public class ClaimedDemesneData {
     public final BlockPos minPos, maxPos;
+    public final String biome;
     public final int range, levelId;
     public final String practitioner;
     private final HashMap<DemesnesManager.DemesnePerk, Integer> perkValues = new HashMap<>();
@@ -33,9 +37,10 @@ public class ClaimedDemesneData {
 
     public final SpiritType spiritType;
 
-    public ClaimedDemesneData(BlockPos minPos, BlockPos maxPos, String practitioner, int range, int levelId, SpiritType spiritType) {
+    public ClaimedDemesneData(BlockPos minPos, BlockPos maxPos, String biome, String practitioner, int range, int levelId, SpiritType spiritType) {
         this.minPos = minPos;
         this.maxPos = maxPos;
+        this.biome = biome;
         this.spiritType = spiritType;
         this.practitioner = practitioner;
         this.range = range;
@@ -52,6 +57,7 @@ public class ClaimedDemesneData {
         maxPos = new BlockPos(tag.getInt("max_x"),
                 tag.getInt("max_y"),
                 tag.getInt("max_z"));
+        biome = tag.getString("biome");
 
         fixedTime = tag.contains("fixedTime") ? tag.getLong("fixedTime") : -1;
 
@@ -100,7 +106,7 @@ public class ClaimedDemesneData {
         for (var key : namespaces.getAllKeys()) {
             var namespace = namespaces.getString(key);
             var path = paths.getString(key);
-            favoredMaterials.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(namespace, path)));
+            favoredMaterials.add(ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath(namespace, path)));
         }
 
         favoredSpirits.addAll(tag.getCompound("favoredSpirits").getAllKeys());
@@ -122,6 +128,7 @@ public class ClaimedDemesneData {
         tag.putInt("max_x", maxPos.getX());
         tag.putInt("max_y", maxPos.getY());
         tag.putInt("max_z", maxPos.getZ());
+        tag.putString("biome", biome);
 
         tag.putLong("fixedTime", fixedTime);
 
@@ -193,22 +200,23 @@ public class ClaimedDemesneData {
     public void addToChunks(HashMap<ServerLevel, HashMap<ChunkPos, ClaimedDemesneData>> claimedDemesnes, ServerLevel sl) {
         if (!claimedDemesnes.containsKey(sl)) claimedDemesnes.put(sl, new HashMap<>());
         var chunksForLevel = claimedDemesnes.get(sl);
-        var minChunk = sl.getChunkAt(minPos).getPos();
-        var maxChunk = sl.getChunkAt(maxPos).getPos();
+        var minChunk = Otherverse.chunkAt(minPos);
+        var maxChunk = Otherverse.chunkAt(maxPos);
         for (var x = minChunk.x; x <= maxChunk.x; x++) {
             for (var z = minChunk.z; z <= maxChunk.z; z++) {
                 var chunkPos = new ChunkPos(x, z);
                 chunksForLevel.put(chunkPos, this);
+                LogUtils.getLogger().debug("ADDED CHUNK AT {}", chunkPos);
                 if (minChronoPos == null) continue;
                 if (sl.getChunk(chunkPos.x, chunkPos.z) instanceof ISectionSetter ss) {
                     ss.setSections(minChronoPos.getY(), maxChronoPos.getY());
                 }
-                ;
             }
         }
     }
 
     public int getPerkLevel(DemesnesManager.DemesnePerk perk) {
+        if(OtherverseConfig.SKIPPED_PERKS.get().contains(perk.name)) return 0;
         return perkValues.get(perk);
     }
 
@@ -254,8 +262,8 @@ public class ClaimedDemesneData {
     }
 
     public void refreshChrono(ServerLevel sl) {
-        var minChunk = sl.getChunkAt(minPos).getPos();
-        var maxChunk = sl.getChunkAt(maxPos).getPos();
+        var minChunk = Otherverse.chunkAt(minPos);
+        var maxChunk = Otherverse.chunkAt(maxPos);
         for (var x = minChunk.x; x <= maxChunk.x; x++) {
             for (var z = minChunk.z; z <= maxChunk.z; z++) {
                 var chunkPos = new ChunkPos(x, z);

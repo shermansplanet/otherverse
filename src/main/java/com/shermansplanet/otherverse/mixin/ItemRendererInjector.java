@@ -12,18 +12,18 @@ import com.shermansplanet.otherverse.familiar.MobRetexturer;
 import com.shermansplanet.otherverse.spirits.HallowTextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.ItemModelGenerator;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.model.multipart.MultiPart;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HalfTransparentBlock;
@@ -39,23 +39,36 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 
 @Mixin(ItemRenderer.class)
 public class ItemRendererInjector {
+
+    private static final ModelBaker DUMMY_BAKER = new ModelBaker() {
+        @Override
+        public UnbakedModel getModel(ResourceLocation p_252194_) {
+            return null;
+        }
+
+        @Override
+        public @org.jetbrains.annotations.Nullable BakedModel bake(ResourceLocation p_250776_, ModelState p_251280_) {
+            return null;
+        }
+
+        @Override
+        public @org.jetbrains.annotations.Nullable BakedModel bake(ResourceLocation location, ModelState state, Function<Material, TextureAtlasSprite> sprites) {
+            return null;
+        }
+
+        @Override
+        public Function<Material, TextureAtlasSprite> getModelTextureGetter() {
+            return null;
+        }
+    };
+
     private static final RenderStateShard.OutputStateShard ITEM_ENTITY_TARGET = new RenderStateShard.OutputStateShard("item_entity_target", () -> {
-        if (Minecraft.useShaderTransparency()) {
-            Minecraft.getInstance().levelRenderer.getItemEntityTarget().bindWrite(false);
-        }
-
     }, () -> {
-        if (Minecraft.useShaderTransparency()) {
-            Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-        }
-
     });
     private static final RenderStateShard.ShaderStateShard RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeItemEntityTranslucentCullShader);
     private static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("translucent_transparency", () -> {
@@ -75,7 +88,7 @@ public class ItemRendererInjector {
     }
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    public void onRender(ItemStack stack, ItemTransforms.TransformType transformType, boolean p_115146_, PoseStack poseStack, MultiBufferSource p_115148_, int packedLight, int p_115150_, BakedModel bakedModel, CallbackInfo ci) {
+    public void onRender(ItemStack stack, ItemDisplayContext transformType, boolean p_115146_, PoseStack poseStack, MultiBufferSource p_115148_, int packedLight, int p_115150_, BakedModel bakedModel, CallbackInfo ci) {
         if (stack.isEmpty() || !stack.hasTag()) return;
         if (!stack.getTag().contains("hallow")) return;
         var spiritType = stack.getTag().getCompound("hallow").getString("spirit_type");
@@ -85,12 +98,12 @@ public class ItemRendererInjector {
         if (pair == null) return;
         var testRenderType = pair.getSecond();
         poseStack.pushPose();
-        boolean flag = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
+        boolean flag = transformType == ItemDisplayContext.GUI || transformType == ItemDisplayContext.GROUND || transformType == ItemDisplayContext.FIXED;
         if (flag) {
             if (stack.is(Items.TRIDENT)) {
-                bakedModel = this.getItemModelShaper().getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
+                bakedModel = this.getItemModelShaper().getModelManager().getModel(ModelResourceLocation.parse("minecraft:trident#inventory"));
             } else if (stack.is(Items.SPYGLASS)) {
-                bakedModel = this.getItemModelShaper().getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass#inventory"));
+                bakedModel = this.getItemModelShaper().getModelManager().getModel(ModelResourceLocation.parse("minecraft:spyglass#inventory"));
             }
         }
 
@@ -98,7 +111,7 @@ public class ItemRendererInjector {
         poseStack.translate(-0.5D, -0.5D, -0.5D);
         if (!bakedModel.isCustomRenderer() && (!stack.is(Items.TRIDENT) || flag)) {
             boolean flag1;
-            if (transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && stack.getItem() instanceof BlockItem) {
+            if (transformType != ItemDisplayContext.GUI && !transformType.firstPerson() && stack.getItem() instanceof BlockItem) {
                 Block block = ((BlockItem) stack.getItem()).getBlock();
                 flag1 = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
             } else {
@@ -109,10 +122,10 @@ public class ItemRendererInjector {
                 if (stack.is(ItemTags.COMPASSES) && stack.hasFoil()) {
                     poseStack.pushPose();
                     PoseStack.Pose posestack$pose = poseStack.last();
-                    if (transformType == ItemTransforms.TransformType.GUI) {
-                        posestack$pose.pose().multiply(0.5F);
+                    if (transformType == ItemDisplayContext.GUI) {
+                        posestack$pose.pose().scale(0.5F);
                     } else if (transformType.firstPerson()) {
-                        posestack$pose.pose().multiply(0.75F);
+                        posestack$pose.pose().scale(0.75F);
                     }
 
                     if (flag1) {
@@ -182,19 +195,62 @@ public class ItemRendererInjector {
         ci.cancel();
     }
 
+//    119249_.popPush("special");
+//      this.loadTopLevel(new ModelResourceLocation("minecraft:trident_in_hand#inventory"));
+//      this.loadTopLevel(new ModelResourceLocation("minecraft:spyglass_in_hand#inventory"));
+//      Set<ResourceLocation> additionalModels = Sets.newHashSet();
+//      net.minecraftforge.client.ForgeHooksClient.onRegisterAdditionalModels(additionalModels);
+//      for (ResourceLocation rl : additionalModels) {
+//         UnbakedModel unbakedmodel = this.getModel(rl); // loadTopLevel(...), but w/o ModelResourceLocation limitation
+//         this.unbakedCache.put(rl, unbakedmodel);
+//         this.topLevelModels.put(rl, unbakedmodel);
+//      }
+//      p_119249_.popPush("textures");
+//      Set<Pair<String, String>> set = Sets.newLinkedHashSet();
+//      Set<Material> set1 = this.topLevelModels.values().stream().flatMap((p_119340_) -> {
+//         return p_119340_.getMaterials(this::getModel, set).stream();
+//      }).collect(Collectors.toSet());
+//      set1.addAll(UNREFERENCED_TEXTURES);
+//      net.minecraftforge.client.ForgeHooksClient.gatherFluidTextures(set1);
+//      set.stream().filter((p_119357_) -> {
+//         return !p_119357_.getSecond().equals(MISSING_MODEL_LOCATION_STRING);
+//      }).forEach((p_119292_) -> {
+//         LOGGER.warn("Unable to resolve texture reference: {} in {}", p_119292_.getFirst(), p_119292_.getSecond());
+//      });
+//      Map<ResourceLocation, List<Material>> map = set1.stream().collect(Collectors.groupingBy(Material::atlasLocation));
+//      p_119249_.popPush("stitching");
+//      this.atlasPreparations = Maps.newHashMap();
+//
+//      for(Map.Entry<ResourceLocation, List<Material>> entry : map.entrySet()) {
+//         TextureAtlas textureatlas = new TextureAtlas(entry.getKey());
+//         TextureAtlas.Preparations textureatlas$preparations = textureatlas.prepareToStitch(this.resourceManager, entry.getValue().stream().map(Material::texture), p_119249_, p_119250_);
+//         this.atlasPreparations.put(entry.getKey(), Pair.of(textureatlas, textureatlas$preparations));
+//      }
+//
+//      p_119249_.pop();
+//   }
+
     private Pair<BakedModel, RenderType> getModel(Item item, String spiritName) {
         var bakery = Minecraft.getInstance().getModelManager().getModelBakery();
         var itemKey = ForgeRegistries.ITEMS.getKey(item);
         var modelLocation = new ModelResourceLocation(itemKey.getNamespace(), itemKey.getPath(), "inventory");
         var model = bakery.getModel(modelLocation);
-        var set = new HashSet<Pair<String, String>>();
-        var materials = model.getMaterials(bakery::getModel, set);
+        model.resolveParents(bakery::getModel);
         List<ResourceLocation> locations = new ArrayList<>();
-        for (var m : materials){
-            if(m.texture().getPath().equals("missingno")) continue;
-            locations.add(new ResourceLocation(m.texture().getNamespace(),
-                    "textures/" + m.texture().getPath() + ".png"));
+        Set<BlockModel> blockModels = new HashSet<>();
+        HallowTextureManager.GetBlockModels(model, blockModels);
+
+        for(BlockModel blockModel : blockModels) {
+            for (var s : blockModel.textureMap.keySet()) {
+                Material material = blockModel.getMaterial(s);
+                if (MissingTextureAtlasSprite.getLocation().equals(material.texture())) continue;
+                var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
+                        "textures/" + material.texture().getPath() + ".png");
+                if(locations.contains(rl)) continue;
+                locations.add(rl);
+            }
         }
+        if(locations.isEmpty()) return null;
         var primaryTex = MobRetexturer.makeSpiritVariant(locations, spiritName);
         if (primaryTex == null) {
             return null;
@@ -202,15 +258,15 @@ public class ItemRendererInjector {
 
         for (int i = 0; i < locations.size(); i++) {
             var loc = locations.get(i);
-            loc = new ResourceLocation(loc.getNamespace(),
+            loc = ResourceLocation.fromNamespaceAndPath(loc.getNamespace(),
                     loc.getPath().substring(9, loc.getPath().length() - 4));
             HallowTextureManager.offsetsByMaterial.put(loc, Pair.of(locations.size(), i));
         }
 
         ClientEvents.HALLOW_TEXTURE_MANAGER.quietReload();
-        BakedModel m = model.bake(bakery, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex, x, new HashMap<>()), BlockModelRotation.X0_Y0, modelLocation);
+        BakedModel m = model.bake(DUMMY_BAKER, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex, x, new HashMap<>()), BlockModelRotation.X0_Y0, modelLocation);
 
-        RenderType.CompositeState compState = RenderType.CompositeState.builder()
+        var compState = RenderType.CompositeState.builder()
                 .setShaderState(RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER)
                 .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)

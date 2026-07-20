@@ -1,0 +1,16 @@
+{
+	"other" : "alexscaves:relicheirus",
+	"spirit": "time",
+	"transfusion" : [
+		{
+			"input" : "minecraft:bone",
+			"health" : 7,
+			"output" : "alexscaves:heavy_bone"
+		},
+		{
+			"input" : "minecraft:bone_block",
+			"health" : 7,
+			"output" : "alexscaves:dinosaur_chop"
+		}
+	]
+}

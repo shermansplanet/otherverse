@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.ruins.RuinsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -18,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.Vec3;
@@ -53,13 +55,27 @@ public class EscapeRopeItem extends Item {
     private InteractionResultHolder<ItemStack> onUse(Level level, Player player, InteractionHand hand, Vec3 pos, boolean fromBlock) {
         var demesne = DemesnesManager.getData(player);
         var itemstack = player.getItemInHand(hand);
-        if (!(level instanceof ServerLevel sl)
-                || demesne == null) {
+        if (!(level instanceof ServerLevel sl)) {
+            return InteractionResultHolder.success(itemstack);
+        }
+
+        if (!itemstack.hasTag() || !itemstack.getTag().contains("escape_rope_x")) {
+            if (player instanceof ServerPlayer sp && sp.level().dimension().location().getPath().equals("ruins")) {
+                if (!player.getAbilities().instabuild) {
+                    itemstack.shrink(1);
+                    if (itemstack.isEmpty()) player.getInventory().removeItem(itemstack);
+                }
+                RuinsManager.returnFromRuins(sp);
+                return InteractionResultHolder.success(itemstack);
+            }
+        }
+
+        if (demesne == null) {
             return InteractionResultHolder.success(itemstack);
         }
 
         var playerLevelId = DiagramManager.getDimensionHash(level);
-        if (DemesnesManager.getData(sl, player.blockPosition()) == demesne) {
+        if (DemesnesManager.getData(sl, BlockPos.containing(pos)) == demesne) {
             var tag = itemstack.getOrCreateTag();
             tag.putFloat("escape_rope_x", (float) pos.x);
             tag.putFloat("escape_rope_y", (float) pos.y);
@@ -101,7 +117,7 @@ public class EscapeRopeItem extends Item {
             var newy = itemstack.getTag().getFloat("escape_rope_y");
             var newz = itemstack.getTag().getFloat("escape_rope_z");
             var levelId = itemstack.getTag().getInt("level_id");
-            if (levelId == demesne.levelId && DemesnesManager.getData(destLevel, new BlockPos(newx, newy, newz)) == demesne) {
+            if (levelId == demesne.levelId && DemesnesManager.getData(destLevel, BlockPos.containing(newx, newy, newz)) == demesne) {
                 x = newx;
                 y = newy;
                 z = newz;
@@ -120,10 +136,26 @@ public class EscapeRopeItem extends Item {
 
                 @Override
                 public PortalInfo getPortalInfo(Entity entity, ServerLevel destWorld, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
-                    var y = finalFromSetPosition ? playerPos.y
-                            : destWorld.getHeight(Heightmap.Types.MOTION_BLOCKING, (int) (playerPos.x), (int) (playerPos.y)) + 1f;
-                    var destPos = new Vec3(playerPos.x, y, playerPos.z);
-                    return new PortalInfo(destPos, Vec3.ZERO, entity.getYRot(), entity.getXRot());
+                    var dstPos = playerPos;
+                    if (!finalFromSetPosition) {
+                        destWorld.getPoiManager().ensureLoadedAndValid(destWorld, BlockPos.containing(dstPos), 16);
+                        var airBlocks = 0;
+                        var blockX = (int) Math.round(dstPos.x);
+                        var blockZ = (int) Math.round(dstPos.z);
+                        for (var blockY = destWorld.getMaxBuildHeight(); blockY >= destWorld.getMinBuildHeight(); blockY--) {
+                            var blockState = destWorld.getBlockState(new BlockPos(blockX, blockY, blockZ));
+                            if (blockState.is(Blocks.BEDROCK) || blockState.is(Blocks.LAVA)) {
+                                airBlocks = 0;
+                                continue;
+                            }
+                            if (airBlocks >= 2 && !blockState.isAir()) {
+                                dstPos = new Vec3(blockX + 0.5f, blockY + 1, blockZ + 0.5f);
+                                break;
+                            }
+                            if (blockState.isAir()) airBlocks++;
+                        }
+                    }
+                    return new PortalInfo(dstPos, Vec3.ZERO, entity.getYRot(), entity.getXRot());
                 }
             });
         } else {
@@ -136,6 +168,7 @@ public class EscapeRopeItem extends Item {
 
         if (!player.getAbilities().instabuild) {
             itemstack.shrink(1);
+            if (itemstack.isEmpty()) player.getInventory().removeItem(itemstack);
         }
 
         return InteractionResultHolder.consume(itemstack);

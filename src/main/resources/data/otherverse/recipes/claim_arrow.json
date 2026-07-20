@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " a",
+        "b "
+    ],
+    "key": {
+        "a": {
+            "item": "otherverse:shiver_tooth"
+        },
+        "b": {
+            "item": "otherverse:fury_rod"
+        }
+    },
+    "result": {
+        "item": "otherverse:claim_arrow",
+        "count" : 1
+    }
+}

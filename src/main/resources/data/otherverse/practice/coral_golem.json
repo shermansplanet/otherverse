@@ -1,0 +1,36 @@
+{
+	"other" : "cataclysm:coral_golem",
+	"spirit" : "water",
+	"transfusion" : [
+		{
+			"input" : "minecraft:fire_coral",
+			"health" : 9,
+			"output" : "cataclysm:crystallized_coral_fragments"
+		},
+		{
+			"input" : "minecraft:red_wool",
+			"health" : 7,
+			"output" : "minecraft:fire_coral_block"
+		},
+		{
+			"input" : "minecraft:blue_wool",
+			"health" : 7,
+			"output" : "minecraft:tube_coral_block"
+		},
+		{
+			"input" : "minecraft:pink_wool",
+			"health" : 7,
+			"output" : "minecraft:brain_coral_block"
+		},
+		{
+			"input" : "minecraft:magenta_wool",
+			"health" : 7,
+			"output" : "minecraft:bubble_coral_block"
+		},
+		{
+			"input" : "minecraft:yellow_wool",
+			"health" : 7,
+			"output" : "minecraft:horn_coral_block"
+		}
+	]
+}

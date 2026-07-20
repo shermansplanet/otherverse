@@ -1,0 +1,18 @@
+{
+    "name": "Typhlotic Armor",
+    "sortnum":40,
+    "icon": "otherverse:ruins_chestplate",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": "otherverse:ruins_helmet,otherverse:ruins_chestplate,otherverse:ruins_leggings,otherverse:ruins_boots",
+            "title" : "Typhlotic Armor",
+            "text": "Snuffur and banshee membrane can be crafted into a set of typhlotic armor. Each piece of this armor reduces Self damage by 25% and converts 25% of the experience lost upon death into a sculk bloom."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If you journey to one of the dark interstitial chasms where regions of the Ruins meet and plunge into the void, you can perform a special ritual. Place a piece of typhlotic armor in an item focus, influenced by 21 Self and hallows containing 99 protection spirits. The armor will be imbued with Mending and Protection V (a higher level than is possible via normal enchanting)."
+        }
+    ]
+}

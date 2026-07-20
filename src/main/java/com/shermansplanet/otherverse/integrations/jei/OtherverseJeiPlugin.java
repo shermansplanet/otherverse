@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.PracticeWorldUpdateMessage;
+import com.shermansplanet.otherverse.artifacts.BiomeCodeAssigner;
 import com.shermansplanet.otherverse.binding.FleshbindingManager;
 import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
@@ -17,6 +18,7 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
@@ -38,7 +40,7 @@ import java.util.function.Supplier;
 public class OtherverseJeiPlugin implements IModPlugin {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static IRecipeRegistration registry;
-    private static final ResourceLocation UID = new ResourceLocation(Otherverse.MODID, "jei_plugin");
+    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "jei_plugin");
 
     public static void handleWorldUpdate(PracticeWorldUpdateMessage msg, Supplier<NetworkEvent.Context> ctx) {
         SpiritLabeler.SPIRIT_TYPE_OF.data = msg.spiritMappings();
@@ -46,6 +48,7 @@ public class OtherverseJeiPlugin implements IModPlugin {
         MobTransfusions.ALL_MOB_TRANSFUSIONS.data = msg.mobTransfusions();
         MobBindingInfluenceUtils.putFoodsAndInfluences(msg.bindings());
         MobBindingInfluenceUtils.mobSpirits = msg.mobSpirits();
+        BiomeCodeAssigner.biomeCodes = msg.biomeCodes();
         PracticeWorldManager.worldSetUp = true;
         if (PracticeWorldManager.noJeiPending) {
             addPracticeRecipes();
@@ -71,6 +74,11 @@ public class OtherverseJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        registration.addRecipeCatalyst(OtherverseItems.BIOME_BRAZIER.get(), BiomeCodeRecipeCategory.TYPE);
+    }
+
+    @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {
         registry.addRecipeCategories(
                 new SpiritExtractionRecipeCategory(registry.getJeiHelpers().getGuiHelper()));
@@ -78,6 +86,8 @@ public class OtherverseJeiPlugin implements IModPlugin {
                 new BindingRecipeCategory(registry.getJeiHelpers().getGuiHelper()));
         registry.addRecipeCategories(
                 new TransfusionRecipeCategory(registry.getJeiHelpers().getGuiHelper()));
+        registry.addRecipeCategories(
+                new BiomeCodeRecipeCategory(registry.getJeiHelpers().getGuiHelper()));
     }
 
     @Override
@@ -100,8 +110,10 @@ public class OtherverseJeiPlugin implements IModPlugin {
             registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes());
             registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes());
             registry.addRecipes(BindingRecipeCategory.TYPE, MobBindingInfluenceUtils.GenerateRecipes());
+            registry.addRecipes(BiomeCodeRecipeCategory.TYPE, BiomeCodeAssigner.GenerateRecipes());
             FleshbindingManager.addWoodTextures();
             LOGGER.debug("PRACTICE RECIPES ADDED");
+            LOGGER.debug("{} BIOME CODES", BiomeCodeAssigner.biomeCodes.size());
             PracticeWorldManager.jeiInitialized = true;
             LOGGER.debug("JEI SET AS INITIALIZED");
         });

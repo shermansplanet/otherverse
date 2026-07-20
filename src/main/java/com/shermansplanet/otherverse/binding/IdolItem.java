@@ -1,11 +1,15 @@
 package com.shermansplanet.otherverse.binding;
 
+import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -33,11 +37,11 @@ public class IdolItem extends Item {
         var type = getType(stack);
         var location = useCtx.getClickLocation();
         if (!stack.hasTag() || !stack.getTag().contains("material")) {
-            var entity = type.create(sp.getLevel());
+            var entity = type.create(sp.level());
             entity.setPos(location);
-            sp.getLevel().addFreshEntityWithPassengers(entity);
+            sp.level().addFreshEntity(entity);
         } else {
-            FamiliarManager.makeMobFromTag(type, stack.getTag(), location, sp.getLevel());
+            FamiliarManager.makeMobFromTag(type, stack.getTag(), location, sp.serverLevel());
             stack.shrink(1);
             if (stack.getTag().getString("material").equals("otherverse:cinnabar_block")) {
                 var player = useCtx.getPlayer();
@@ -72,12 +76,32 @@ public class IdolItem extends Item {
         var loc = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType());
         tag.putString("entity_type_namespace", loc.getNamespace());
         tag.putString("entity_type_path", loc.getPath());
+        var heldItem = BindingManager.getHeldItem(mob);
+        if (!heldItem.isEmpty()) {
+            var nbt = new CompoundTag();
+            heldItem.save(nbt);
+            tag.put("held_item", nbt);
+        }
         return tag;
     }
 
     public static ItemStack makeFrom(Mob mob, String material) {
         var tag = mobToTag(mob);
         tag.putString("material", material);
+        if(material.equals("otherverse:cinnabar_block")){
+            LogUtils.getLogger().debug("MAKING MOB FROM CINNABAR");
+            CompoundTag persistentData = mob.getPersistentData();
+            if (persistentData.contains("bindingId")) {
+                LogUtils.getLogger().debug("HAS BINDING");
+                TransientDiagramData data = DiagramManager.getOrCreateLevelData(mob.level().getServer().overworld());
+                BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
+                if (binding != null) {
+                    LogUtils.getLogger().debug("MARKING BINDING AS CINNABAR");
+                    binding.isCinnabar = true;
+                    binding.mob = null;
+                }
+            }
+        }
         var stack = new ItemStack(OtherverseItems.IDOL.get(), 1);
         stack.setTag(tag);
         return stack;
@@ -92,17 +116,5 @@ public class IdolItem extends Item {
                 return IdolRenderer.instance;
             }
         });
-    }
-
-    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> list) {
-        if (tab != Otherverse.TAB_OTHERS) {
-            return;
-        }
-        var encounteredTypes = new HashSet<EntityType<?>>();
-        for (var item : MobBindingInfluenceUtils.typesByIdol.entrySet()) {
-            if (encounteredTypes.add(item.getValue())) {
-                list.add(item.getKey());
-            }
-        }
     }
 }

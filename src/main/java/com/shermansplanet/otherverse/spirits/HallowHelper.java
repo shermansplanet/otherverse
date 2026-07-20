@@ -3,6 +3,8 @@ package com.shermansplanet.otherverse.spirits;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
+import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
 import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
@@ -23,6 +25,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.player.Player;
@@ -32,16 +35,16 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.GrindstoneEvent;
+import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.ShieldBlockEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.level.PistonEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
@@ -85,10 +88,10 @@ public class HallowHelper {
     }
 
     @SubscribeEvent
-    public static void onGrindstoneChange(GrindstoneEvent.OnplaceItem event) {
+    public static void onGrindstoneChange(GrindstoneEvent.OnPlaceItem event) {
         if (!event.getTopItem().hasTag() || !event.getTopItem().getTag().contains("hallow")) return;
         var newstack = event.getTopItem().copy();
-        newstack.getTag().remove("hallow");
+        newstack.removeTagKey("hallow");
         event.setOutput(newstack);
     }
 
@@ -106,7 +109,7 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void onPlayerLogin(PlayerLoggedInEvent event) {
-        if (event.getEntity().getLevel() instanceof ServerLevel sl) {
+        if (event.getEntity().level() instanceof ServerLevel sl) {
             DiagramManager.getOrCreateLevelData(sl).retryUpdateClient();
             for (var pos : DiagramManager.getOrCreateLevelData(sl).getAllPlacedItemPositions()) {
                 ShrineHelper.getShrine(sl, pos);
@@ -116,19 +119,28 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void onChangeDimension(PlayerChangedDimensionEvent event) {
-        if (event.getEntity().getLevel() instanceof ServerLevel sl) {
+        if (event.getEntity().level() instanceof ServerLevel sl) {
             DiagramManager.getOrCreateLevelData(sl).retryUpdateClient();
         }
     }
 
     @SubscribeEvent
     static void onGrief(EntityMobGriefingEvent event) {
-        if (event.getEntity() == null || event.getEntity().getType() != EntityType.CREEPER) return;
-        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level);
+        if (!(event.getEntity() instanceof LivingEntity le) || BindingManager.isBoundOrContracted(le)) return;
         for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
-            if (!shrine.tryDrain(9, levelData)) continue;
+            if (!shrine.tryDrain(9)) continue;
             event.setResult(Event.Result.DENY);
-            event.setCanceled(true);
+            return;
+        }
+    }
+
+    @SubscribeEvent
+    static void onExplosion(ExplosionEvent.Detonate event) {
+        if (!(event.getExplosion().getDirectSourceEntity() instanceof LivingEntity le) || BindingManager.isBoundOrContracted(le))
+            return;
+        for (var shrine : ShrineHelper.getShrinesFor(le, Spirits.PROTECTION)) {
+            if (!shrine.tryDrain(9)) continue;
+            event.getAffectedBlocks().clear();
             return;
         }
     }
@@ -136,29 +148,36 @@ public class HallowHelper {
     @SubscribeEvent
     static void onAttack(LivingHurtEvent event) {
         if (event.getEntity() == null) return;
-        var levelData = DiagramManager.getOrCreateLevelData(event.getEntity().level);
-        for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
-            if (!shrine.tryDrain(Mth.ceil(event.getAmount() * 3), levelData)) continue;
-            event.setAmount(event.getAmount() / 2);
+        if (isPlayerOrTamedOrBound(event.getEntity())) {
+            for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
+                if (!shrine.tryDrain(Mth.ceil(event.getAmount() * 3))) continue;
+                event.setAmount(event.getAmount() / 2);
+            }
         }
-        for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.WAR)) {
-            if (!shrine.tryDrain(Mth.ceil(event.getAmount() * 3), levelData)) continue;
-            event.setAmount(event.getAmount() * 2);
+        var source = event.getSource().getEntity();
+        if (source instanceof LivingEntity le && isPlayerOrTamedOrBound(le)) {
+            for (var shrine : ShrineHelper.getShrinesFor(le, Spirits.WAR)) {
+                if (!shrine.tryDrain(Mth.ceil(event.getAmount() * 3))) continue;
+                event.setAmount(event.getAmount() * 2);
+            }
         }
     }
 
     @SubscribeEvent
     static void onDie(LivingDeathEvent event) {
         var entity = event.getEntity();
-        if (entity == null) return;
-        var levelData = DiagramManager.getOrCreateLevelData(entity.level);
+        if (!isPlayerOrTamedOrBound(entity)) return;
+        var levelData = DiagramManager.getOrCreateLevelData(entity.level());
         for (var shrine : ShrineHelper.getShrinesFor(entity, Spirits.DEATH)) {
-            if (!shrine.tryDrain(444, levelData)) continue;
-            entity.setHealth(1);
-            entity.removeAllEffects();
+            if (!shrine.tryDrain(444)) continue;
+            entity.setHealth(entity.getMaxHealth() / 2);
             event.setCanceled(true);
             return;
         }
+    }
+
+    private static boolean isPlayerOrTamedOrBound(LivingEntity entity) {
+        return entity != null && (entity.getType() == EntityType.PLAYER || (entity instanceof TamableAnimal ta && ta.isTame()) || BindingManager.isBoundOrContracted(entity));
     }
 
     @SubscribeEvent
@@ -241,7 +260,7 @@ public class HallowHelper {
 
         var entityData = BlockItem.getBlockEntityData(event.getItemStack());
         if (entityData != null && entityData.contains("spawn_altar_type")) {
-            var entityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityData.getString("spawn_altar_type")));
+            var entityType = ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(entityData.getString("spawn_altar_type")));
             event.getToolTip().add(Component.literal("Spawn type: ")
                     .append(entityType.getDescription()));
         }
@@ -267,7 +286,7 @@ public class HallowHelper {
             if (spirits == null) {
                 return false;
             }
-            if (diagram.trySpendPower(level, circle.getBlockPos(), (int) (10 * coeff), new HashSet<>())) {
+            if (diagram.trySpendPower(level, circle.getBlockPos(), (int) (9 * coeff), new HashSet<>())) {
                 CompoundTag tag = circle.item.getOrCreateTag();
                 CompoundTag hallowTag = new CompoundTag();
                 float capacity = 0f;
@@ -277,7 +296,7 @@ public class HallowHelper {
 
                 var implementData = ImplementManager.getImplementData(circle);
                 if (!implementData.isEmpty()
-                        && ForgeRegistries.ITEMS.getValue(new ResourceLocation(implementData.getString("item"))) == Items.BUCKET) {
+                        && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.BUCKET) {
                     capacity *= ImplementManager.BUCKET_BONUS;
                 }
 
@@ -301,7 +320,8 @@ public class HallowHelper {
         var data = DiagramManager.getOrCreateLevelData(event.getLevel());
         var tag = data.getPlacedItemTag(event.getPos());
         if (tag == null || tag.contains("shrine")) return;
-        if (!event.getEntity().getAbilities().instabuild) event.getEntity().hurt(DamageSource.MAGIC, 3);
+        if (!event.getEntity().getAbilities().instabuild)
+            event.getEntity().hurt(event.getEntity().damageSources().magic(), 3);
         for (var pos : ShrineHelper.getAllHallows(event.getPos(), tag.getString("spirit_type"), data)) {
             tag = data.getPlacedItemTag(pos);
             tag.putBoolean("shrine", true);
@@ -406,7 +426,7 @@ public class HallowHelper {
     public static void recolorChalk(PlayerInteractEvent.RightClickBlock event) {
         var player = event.getEntity();
         var itemstack = event.getItemStack();
-        var state = player.level.getBlockState(event.getPos());
+        var state = player.level().getBlockState(event.getPos());
         if (state.is(OtherverseBlocks.CHALK_LINE.get()) && player.isShiftKeyDown()
                 && itemstack.hasTag() && itemstack.getTag().contains("hallow")) {
             var hallowTag = itemstack.getTag().getCompound("hallow");
@@ -415,10 +435,10 @@ public class HallowHelper {
             var spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
             for (var dyeColor : Spirits.colorsByDye.entrySet()) {
                 if (dyeColor.getValue() != spiritType) continue;
-                var newstate = ChalkLineBlock.getConnectionState(player.level, event.getPos(), state.setValue(ChalkLineBlock.color, dyeColor.getKey()));
-                player.level.setBlockAndUpdate(event.getPos(), newstate);
-                ChalkLineBlock.refreshNeighborLines(player.level, event.getPos());
-                if (player.level instanceof ServerLevel sl) {
+                var newstate = ChalkLineBlock.getConnectionState(player.level(), event.getPos(), state.setValue(ChalkLineBlock.color, dyeColor.getKey()));
+                player.level().setBlockAndUpdate(event.getPos(), newstate);
+                ChalkLineBlock.refreshNeighborLines(player.level(), event.getPos());
+                if (player.level() instanceof ServerLevel sl) {
                     DiagramManager.OnDiagramBlockChanged(sl, event.getPos(), DiagramManager.BlockUpdateType.ADDED);
                 }
                 hallowTag.putInt("spirit_count", spiritCount - 1);
@@ -431,14 +451,15 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void mobDie(LivingDeathEvent event) {
-        if (!(event.getEntity().getLevel() instanceof ServerLevel sl)) return;
+        if (!(event.getEntity().level() instanceof ServerLevel sl)) return;
         EntityType<? extends LivingEntity> type = (EntityType<? extends LivingEntity>) event.getEntity().getType();
         var ct = event.getEntity().getPersistentData().getString("construct_type");
-        var spiritType = ct.isEmpty() ? MobBindingInfluenceUtils.mobSpirits.get(type).label() : ct;
+        var baseType = MobBindingInfluenceUtils.mobSpirits.get(type);
+        var spiritType = ct.isEmpty() ? baseType == null ? null : baseType.label() : ct;
         if (spiritType == null) return;
         var data = DiagramManager.getOrCreateLevelData(sl);
-        for(var offset : new float[]{0f,-1f}) {
-            var pos = new BlockPos(event.getEntity().position().add(0, offset, 0));
+        for (var offset : new float[]{0f, -1f}) {
+            var pos = BlockPos.containing(event.getEntity().position().add(0, offset, 0));
             var tag = data.getPlacedItemTag(pos);
             if (tag == null) continue;
             if (!tag.getString("spirit_type").equals(spiritType)) continue;
@@ -542,6 +563,8 @@ public class HallowHelper {
                 if (MobBindingInfluenceUtils.mobSpirits.get(et) != spiritType) return false;
                 var binding = BindingOrFleshbinding.getFromPosition(sl, source.getPos());
                 if (binding == null) return false;
+                if (hallowTag.contains("shrine") && (spiritType == Spirits.FLESH || spiritType == Spirits.TECH))
+                    return false;
                 return binding.getHealth() > 1;
             }
 
@@ -626,6 +649,7 @@ public class HallowHelper {
             var sourceItem = sourceFocus.getItem();
             if (willOverflow && sourceItem.hasTag() && sourceItem.getTag().contains("hallow")
                     && sourceItem.getTag().getCompound("hallow").getInt("spirit_count") <= 0) continue;
+            if (sourceFocus.getItem().is(Items.BEDROCK) && !OtherverseConfig.BEDROCK_REMOVAL.get()) continue;
             new SpiritTransfer(focus, sourceFocus, SpiritAffinityTracker.getTransferDuration(focus.getDiagram().getOwnerName(), spiritType));
         }
     }
@@ -714,6 +738,9 @@ public class HallowHelper {
                 var transferAmount = Math.min(remainingCapacity, remainingAmount);
                 drainPositions.put(sourcePos, transferAmount);
                 remainingAmount -= transferAmount;
+                if (spiritType == Spirits.TECH && ht.contains("shrine") && level.hasNeighborSignal(blockPos)) {
+                    return 0;
+                }
             }
         }
 

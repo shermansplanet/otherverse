@@ -1,6 +1,6 @@
 {
     "name": "Bloody Spindles",
-    "sortnum": 10,
+    "sortnum": 35,
     "icon": "otherverse:spindle_bloody",
     "category": "otherverse:binding",
     "pages": [
@@ -10,6 +10,10 @@
                 "item": "otherverse:spindle_bloody"
             },
             "text": "If you use a spindle to deal damage, it will become a bloody spindle, and maintain a Sympathetic link to the mob it injured.$(br2)If that mob is bound, the spindle can be used in diagrams as if it were that mob (so long as the mob is in a loaded chunk)."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If you give a bloody spindle to a bound mob, that mob will attempt to subdue and restrain the spindle's target. While the target has more than half the bound mob's health, the bound mob will attack the target. Otherwise, it will restrain the target and slowly drag it towards you.$(br2)Throwing a bloody spindle in water will wash off the blood."
         }
     ]
 }

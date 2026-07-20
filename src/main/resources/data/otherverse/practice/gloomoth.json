@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:gloomoth",
+	"spirit": "dark",
+	"healing" : {
+		"otherverse:spirit_air" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:sugar",
+			"health" : 3,
+			"output" : "alexscaves:moth_dust"
+		}
+	]
+}

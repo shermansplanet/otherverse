@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "There's another, bloodier way to increase the spiritual capacity of a hallow placed in the world. If you kill a mob with a matching spirit type on top of such a hallow, one third of the mob's max HP will be added to the hallow's capacity."
+            "text": "There's another, bloodier way to increase the spiritual capacity of a hallow placed in the world. If a mob with a matching spirit type dies on top of such a hallow, one third of the mob's max HP will be added to the hallow's capacity."
         }
     ]
 }

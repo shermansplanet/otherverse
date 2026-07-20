@@ -53,30 +53,30 @@ public class CreeperInjector extends Monster implements PowerableMob {
 
     @Inject(method = "explodeCreeper", at = @At("HEAD"), cancellable = true)
     private void explodeCreeper(CallbackInfo ci) {
-        if (this.level.isClientSide) return;
+        if (this.level().isClientSide) return;
         removeEffect(MobEffects.MOVEMENT_SPEED);
         removeEffect(MobEffects.DAMAGE_BOOST);
         if (!(getTarget() instanceof Player player) || !FamiliarManager.hasFamiliarType(player, EntityType.CREEPER))
             return;
-        AreaEffectCloud areaeffectcloud = new AreaEffectCloud(this.level, this.getX(), this.getY(), this.getZ());
+        AreaEffectCloud areaeffectcloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
         areaeffectcloud.setRadius(2.5F);
         areaeffectcloud.setRadiusOnUse(-0.5F);
         areaeffectcloud.setWaitTime(10);
         areaeffectcloud.setDuration(areaeffectcloud.getDuration() / 2);
         areaeffectcloud.setRadiusPerTick(-areaeffectcloud.getRadius() / (float) areaeffectcloud.getDuration());
-        var r = this.getLevel().getRandom();
+        var r = this.level().getRandom();
         var effectCount = r.nextInt(3) + 1;
         for (var i = 0; i < effectCount; i++) {
             var mobeffectinstance = possibleEffects[r.nextInt(possibleEffects.length)];
             areaeffectcloud.addEffect(new MobEffectInstance(mobeffectinstance));
         }
-        this.level.addFreshEntity(areaeffectcloud);
+        this.level().addFreshEntity(areaeffectcloud);
 
-        this.level.playSound(null, player, SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.HOSTILE, 1, 1);
-        this.level.playSound(null, player, SoundEvents.FIREWORK_ROCKET_TWINKLE, SoundSource.HOSTILE, 1, 1);
+        this.level().playSound(null, player, SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.HOSTILE, 1, 1);
+        this.level().playSound(null, player, SoundEvents.FIREWORK_ROCKET_TWINKLE, SoundSource.HOSTILE, 1, 1);
 
 
-        ((ServerLevel) this.getLevel()).sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+        ((ServerLevel) this.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER,
                 getX(), getY(0.5f), getZ(),
                 1, 0, 0, 0, 0.15f);
 

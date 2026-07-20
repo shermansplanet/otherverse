@@ -1,0 +1,18 @@
+{
+	"other" : "alexscaves:gum_worm",
+	"spirit": "food",
+	"binding" : {
+		"alexscaves:gobthumper" : 50,
+		"alexscaves:candy_cane_hook" : 40
+	},
+	"healing" : {
+		"alexscaves:gumball_pile" : 9
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:bone",
+			"health" : 18,
+			"output" : "alexscaves:sweet_tooth"
+		}
+	]
+}

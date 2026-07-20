@@ -4,7 +4,7 @@
       {"item": "minecraft:book"},
       {"item": "minecraft:string"},
       {"item": "minecraft:sand"},
-      {"tag" : "forge:tools/swords"},
+      {"tag" : "minecraft:swords"},
       {"item": "minecraft:bone"},
       {"tag": "forge:nuggets"}
   ],

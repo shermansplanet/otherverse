@@ -2,7 +2,7 @@
     "name": "Action: Take",
     "icon": "minecraft:hopper",
     "category": "otherverse:contracts",
-    "sortnum": 5,
+    "sortnum": 50,
     "pages": [
         {
             "type": "patchouli:spotlight",
@@ -10,12 +10,12 @@
                 "item": "minecraft:hopper"
             },
             "title" : "Take",
-            "text": "A hopper item denotes the \"take\" action, which by default means picking up loose items.$(br2)Filters in $(bold)item foci$() determine what a mob can pick up. If there are no such filters, it picks up anything."
+            "text": "A hopper item denotes the \"take\" action, which by default means picking up loose items. Bound pillagers can even pick up fired arrows as items.$(br2)Filters in $(bold)item foci$() determine what a mob can pick up. If there are no such filters, it picks up anything."
         },
         {
             "type": "patchouli:text",
             "title": "Block Foci Filters",
-            "text": "A blank $(bold)block focus$() tells the mob to take items from that world position.$(br2)A container block (barrel, furnace, etc.) in a block focus tells the mob to take items from containers of that type.$(br2)Non-container blocks tell the mob to take items that have been dropped on top of that block type."
+            "text": "A blank $(bold)block focus$() or Web of Fate tells the mob to take items from that world position, either loose or from an inventory.$(br2)A container block (barrel, furnace, etc.) in a block focus tells the mob to take items from containers of that type.$(br2)Non-container blocks tell the mob to take items that have been dropped on top of that block type."
         },
         {
             "type": "patchouli:image",

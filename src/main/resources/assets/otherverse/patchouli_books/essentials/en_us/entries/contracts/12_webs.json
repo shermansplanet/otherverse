@@ -2,11 +2,11 @@
     "name": "Webs and Spindles",
     "icon": "otherverse:spindle_light_gray",
     "category": "otherverse:contracts",
-    "sortnum": 12,
+    "sortnum": 120,
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "For some actions, an empty block influence can embed a reference to its own position in a contract. But it can often be useful to change that position on the fly, without having to make a new contract. That's where Webs of Fate and Spindles come in."
+            "text": "For some actions, an empty block influence can embed a reference to its own position in a contract. But it can often be useful to reference a position outside the diagram or even change that position on the fly. That's where Webs of Fate and Spindles come in."
         },
         {
             "type": "patchouli:spotlight",
@@ -24,6 +24,10 @@
         {
             "type": "patchouli:text",
             "text": "When you make a contract using a Web of Fate, you will see a variable (your name + the web's color) instead of a location.$(br2)You can use a spindle of that color on a block to update that location whenever you want, or use it on air to clear the location. Your Sight will reveal all the locations you've set."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Shift-clicking a Web of Fate with a spindle will instead bake the spindle's $(italic)current$() target into the Web. This position will not be updated when you use the spindle."
         }
     ]
 }

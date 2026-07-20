@@ -1,7 +1,6 @@
 package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import com.shermansplanet.otherverse.SightManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -53,7 +52,7 @@ public class DemesnesBeaconRenderer implements BlockEntityRenderer<DemesnesBeaco
             pose.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
             var scale = 0.005f * Mth.clamp(dist, 2, 100);
             pose.scale(-scale, -scale, scale);
-            Matrix4f matrix4f = pose.last().pose();
+            var matrix4f = pose.last().pose();
             Font font = Minecraft.getInstance().font;
             var hoverName = beacon.hoverName;
             float dx = (float) (-font.width(hoverName) / 2);
@@ -68,11 +67,11 @@ public class DemesnesBeaconRenderer implements BlockEntityRenderer<DemesnesBeaco
                 pose.translate(0, 0, 5);
                 var newMatrix = pose.last().pose();
                 hoverName = hoverName.copy().withStyle(Style.EMPTY.withColor(0));
-                font.drawInBatch(hoverName, dx, dy, 0xaa000000, false, newMatrix, buffers, true, 0xff000000, 0);
+                font.drawInBatch(hoverName, dx, dy, 0xaa000000, false, newMatrix, buffers, Font.DisplayMode.SEE_THROUGH, 0xff000000, 0);
                 hoverName = hoverName.copy().withStyle(Style.EMPTY.withColor(0xbcff00));
                 pose.popPose();
             }
-            font.drawInBatch(hoverName, dx, dy, tint, false, matrix4f, buffers, true, 0, 0xf000f0);
+            font.drawInBatch(hoverName, dx, dy, tint, false, matrix4f, buffers, Font.DisplayMode.SEE_THROUGH, 0, 0xf000f0);
             pose.popPose();
         }
         if (beacon.clientData == null) beacon.recalculatePositions();

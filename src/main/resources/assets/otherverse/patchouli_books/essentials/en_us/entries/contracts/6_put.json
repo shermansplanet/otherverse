@@ -2,7 +2,7 @@
     "name": "Action: Put",
     "icon": "minecraft:dispenser",
     "category": "otherverse:contracts",
-    "sortnum": 6,
+    "sortnum": 60,
     "pages": [
         {
             "type": "patchouli:spotlight",

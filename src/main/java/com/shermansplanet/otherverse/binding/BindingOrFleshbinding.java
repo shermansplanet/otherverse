@@ -37,8 +37,8 @@ public class BindingOrFleshbinding {
     public static BindingInfo getFromSpindle(ChalkCircle circle) {
         if (!(circle.getLevel() instanceof ServerLevel sl)) return null;
         if (!circle.getItem().hasTag()) return null;
-        if (!circle.getItem().getTag().contains("sympathy_target", 11)) return null;
-        var otherEntity = SympathyManager.getEntityByUniqueId(circle.getItem().getTag().getUUID("sympathy_target"), sl);
+        if (!circle.getItem().getTag().contains("sympathy_target")) return null;
+        var otherEntity = SympathyManager.getEntityByUniqueId(circle.getItem().getTag().getString("sympathy_target"), sl);
         if (!(otherEntity instanceof LivingEntity le)) return null;
         if (!le.getPersistentData().contains("bindingId")) return null;
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
@@ -50,7 +50,7 @@ public class BindingOrFleshbinding {
         this.circle = circle;
         if (item.is(OtherverseItems.SPINDLE_BLOODY.get())) {
             var binding = getFromSpindle(circle);
-            if (binding != null) {
+            if (binding != null && binding.mob != null) {
                 initFromBindingInfo(binding);
             }
             return;
@@ -82,7 +82,7 @@ public class BindingOrFleshbinding {
         entityType = info.mob.getType();
         bindingInfo = info;
         position = info.mob.blockPosition();
-        level = info.mob.level;
+        level = info.mob.level();
         efficiencyReduction = 1;
         isCreative = false;
         isIdol = false;
@@ -114,7 +114,7 @@ public class BindingOrFleshbinding {
         if (isCreative) return;
         int currentHealth = getHealth();
         if (isIdol) {
-            delta = SympathyManager.distributeHpChange(circle, delta, DamageSource.OUT_OF_WORLD);
+            delta = SympathyManager.distributeHpChange(circle, delta, sl.damageSources().fellOutOfWorld());
             int newHealth = currentHealth + delta;
             idolTag.putFloat("Health", newHealth);
             circle.markUpdated();
@@ -124,7 +124,7 @@ public class BindingOrFleshbinding {
                 var instance = entityType.create(sl);
                 if (instance instanceof LivingEntity le) {
                     var sound = isDead ? ((ISoundGetter) le).publicGetDeathSound()
-                            : ((ISoundGetter) le).publicGetHurtSound(DamageSource.GENERIC);
+                            : ((ISoundGetter) le).publicGetHurtSound(sl.damageSources().generic());
                     sl.playSound(null, position, sound, SoundSource.NEUTRAL, 1, 1);
                     sl.sendParticles(ParticleTypes.DAMAGE_INDICATOR,
                             position.getX() + 0.5,
@@ -140,10 +140,13 @@ public class BindingOrFleshbinding {
             }
         } else {
             if (delta < 0) {
-                bindingInfo.mob.hurt(DamageSource.OUT_OF_WORLD, -delta);
+                bindingInfo.mob.hurt(sl.damageSources().fellOutOfWorld(), -delta);
                 bindingInfo.mob.invulnerableTime = MobTransfusions.MOB_DRAIN_COOLDOWN;
                 if (circle != null && circle.getDiagram() != null) {
                     circle.getDiagram().mobsOnCooldown.add(bindingInfo.mob);
+                    if (bindingInfo.getFocus() != null && bindingInfo.getFocus().getDiagram() != null) {
+                        bindingInfo.getFocus().getDiagram().mobsOnCooldown.add(bindingInfo.mob);
+                    }
                 }
             } else {
                 bindingInfo.mob.heal(delta);

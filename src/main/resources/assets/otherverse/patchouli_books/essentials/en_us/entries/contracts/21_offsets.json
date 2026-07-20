@@ -2,15 +2,15 @@
     "name": "Offsets",
     "icon": "minecraft:compass",
     "category": "otherverse:contracts",
-    "sortnum": 21,
+    "sortnum": 210,
     "pages": [
         {
             "type": "patchouli:text",        
-            "text": "By default, actions like \"place items on top of dirt blocks\" have an $(bold)offset$() - that's the \"on top of\" part.$(br2)But the offset can be specified as well: if the action is influenced by a $(bold)compass item$(), any empty or or $(l:otherverse:contracts/12_webs)Fated$() block foci influencing the compass will determine a new set of offsets, using their own position relative to the compass."
+            "text": "By default, actions like \"place items on top of dirt blocks\" have an $(bold)offset$() - that's the \"on top of\" part.$(br2)But the offset can be specified as well: if the action is influenced by a $(bold)compass item$(), any empty or $(l:otherverse:contracts/12_webs)Fated$() block foci influencing the compass will determine a new set of offsets, using their own position relative to the compass."
         },
         {
             "type": "patchouli:text",
-            "text": "For instance, if a compass item has an empty block focus influence two blocks to the north and another one two blocks to the west, the action influenced by the compass will try to happen two blocks to the north or west of any specified target block, whether the target is a position or block type."
+            "text": "For instance, if a compass item has an empty block focus influence two blocks to the north and another one two blocks to the west, the action influenced by the compass will try to happen two blocks to the north or west of any specified target block, whether the target is a position or block type. $(l:otherverse:contracts/12_webs)Webs of Fate$() can also be used here, and are useful for vertical offsets."
         }
     ]
 }

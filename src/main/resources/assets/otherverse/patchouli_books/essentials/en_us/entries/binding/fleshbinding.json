@@ -1,12 +1,12 @@
 {
     "name": "Fleshbinding",
-    "sortnum": 3,
+    "sortnum": 30,
     "icon": "otherverse:salt",
     "category": "otherverse:binding",
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Fleshbinding is a powerful technique whereby a mob can be bound into item form called an $(bold)idol$().$(br2)This $(italic)only$() works on mobs that have been sufficiently weakened (brought to 10 or less health). Your Sight will indicate when a mob is weak enough. To release a mob from a fleshbinding, simply use its idol like a spawn egg."
+            "text": "Fleshbinding is a powerful technique whereby a mob can be bound into item form called an $(bold)idol$().$(br2)This $(italic)only$() works on mobs that have been sufficiently weakened (brought to 10 or less health). To release a mob from a fleshbinding, simply use its idol like a spawn egg."
         },
         {
             "type": "patchouli:image",
@@ -21,7 +21,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "To perform a Fleshbinding, you will need four items. $(br)1. An item that the mob might drop (or one of its mob transfusion results).$(br)2. The $(l:otherverse:items/resources)Prime$() of your current dimension (salt for the Overworld, sulfur for the Nether, quicksilver for the End).$(br)3. A tiny bit of power from any source, such as Self or an idol."
+            "text": "To perform a Fleshbinding, you will need four items. $(br)1. An item that the mob might drop (or one of its mob transfusion results).$(br)2. The $(l:otherverse:items/resources)Prime$() of your current dimension (salt for Overworld, sulfur for Nether, quicksilver for End, cinnabar elsewhere).$(br)3. A tiny bit of power from any source, such as Self or an idol."
         },
         {
             "type": "patchouli:text",

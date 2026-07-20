@@ -1,6 +1,6 @@
 {
     "name": "Mob Transfusion",
-    "sortnum": 2,
+    "sortnum": 20,
     "icon": "otherverse:self",
     "category": "otherverse:binding",
     "pages": [
@@ -17,6 +17,10 @@
         {
             "type": "patchouli:text",
             "text": "A binding will stop draining a mob before it dies. Bound mobs can also be $(italic)healed$() by consuming certain influences. These can be seen in the bindings section of JEI, indicated by red hearts instead of black chains. Note that some mobs can drain the health of certain other bound mobs to heal, and some require multiple spirits to heal one HP."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "By default, a mob will absorb a healing item even if it only needs part of the healing that item provides. If you instead want to not waste any healing, the healing item can be placed in a focus on top of an amethyst block, or influenced by an amethyst shard."
         }
     ]
 }

@@ -3,8 +3,7 @@ package com.shermansplanet.otherverse.diagrams;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
+import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -16,8 +15,11 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
 import org.slf4j.Logger;
 
 public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
@@ -34,7 +36,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                             MultiBufferSource multiBufferSource, float dx, float dz, float scale) {
         if (chalkCircle.animationTime < 0) {
             poseStack.translate(0.5f + dx, 0.0625D, 0.5f + dz);
-            poseStack.mulPose(Quaternion.fromXYZDegrees(new Vector3f(90, 0, 0)));
+            poseStack.mulPose(new Quaternionf().rotateX(Mth.PI / 2));
         } else {
             if (Minecraft.getInstance().isPaused()) {
                 return;
@@ -69,7 +71,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                 var s = Math.min(1, (10000 - t) / 200f);
 
                 poseStack.pushPose();
-                poseStack.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, (float) -chalkCircle.angleDegrees, 0)));
+                poseStack.mulPose(new Quaternionf().rotateY((float) -chalkCircle.angleDegrees * Mth.TWO_PI / 360));
 
                 var fade1 = (int) Math.max(0, (5000 - t) * 255 / 1000);
                 drawPolygon(poseStack, multiBufferSource, side, up, 4, 0.85f * s, r, 255, fade1, fade1, 255);
@@ -78,26 +80,27 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
 
                 if (t > 5000) {
                     var fade2 = (int) Math.max(0, (6000 - t) * 255 / 1000);
-                    drawPolygon(poseStack, multiBufferSource, side, up, 6, s, -r, 255, fade2, fade2,255);
-                    drawPolygon(poseStack, multiBufferSource, side, up, 24, s, -r, 255, fade2, fade2,255);
+                    drawPolygon(poseStack, multiBufferSource, side, up, 6, s, -r, 255, fade2, fade2, 255);
+                    drawPolygon(poseStack, multiBufferSource, side, up, 24, s, -r, 255, fade2, fade2, 255);
 
                     if (t > 6000) {
                         var fade3 = (int) Math.max(0, (7000 - t) * 255 / 1000);
-                        drawPolygon(poseStack, multiBufferSource, side, up, 4, 1.414f * s, r, 255, fade3, fade3,255);
-                        drawPolygon(poseStack, multiBufferSource, side, up, 4, 1.414f * s, r + 0.125f, 255, fade3, fade3,255);
-                        drawPolygon(poseStack, multiBufferSource, side, up, 24, 1.414f * s, r, 255, fade3, fade3,255);
+                        drawPolygon(poseStack, multiBufferSource, side, up, 4, 1.414f * s, r, 255, fade3, fade3, 255);
+                        drawPolygon(poseStack, multiBufferSource, side, up, 4, 1.414f * s, r + 0.125f, 255, fade3, fade3, 255);
+                        drawPolygon(poseStack, multiBufferSource, side, up, 24, 1.414f * s, r, 255, fade3, fade3, 255);
                     }
                 }
 
                 poseStack.popPose();
             }
             var spin = isSpecial ? (float) Math.pow(t, 2.1) / 40000f : 0;
-            poseStack.mulPose(Quaternion.fromXYZDegrees(
-                    new Vector3f(90 * (1 - riseLerp), 360 * riseLerp + spin, 0)));
+            spin *= Mth.DEG_TO_RAD;
+            poseStack.mulPose(new Quaternionf().rotateXYZ(
+                    Mth.PI / 2 * (1 - riseLerp), Mth.TWO_PI * riseLerp + spin, 0));
         }
         poseStack.scale(scale, scale, scale);
-        this.itemRenderer.renderStatic(chalkCircle.item, ItemTransforms.TransformType.FIXED, lightVal,
-                OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, chalkCircle.hashCode());
+        this.itemRenderer.renderStatic(chalkCircle.item, ItemDisplayContext.FIXED, lightVal,
+                OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, chalkCircle.getLevel(), chalkCircle.hashCode());
     }
 
     private static float smootherstep(float x) {
@@ -108,12 +111,13 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
     public void render(ChalkCircle chalkCircle, float p_112308_, PoseStack poseStack,
                        MultiBufferSource buffers, int lightVal, int p_112312_) {
         ItemStack itemstack = chalkCircle.item;
-        if (itemstack.isEmpty() || itemstack.getItem() instanceof ChalkItem) {
+        var isChalk = itemstack.getItem() instanceof ChalkItem;
+        if (itemstack.isEmpty() || (isChalk && chalkCircle.inscription.isEmpty())) {
             return;
         }
         poseStack.pushPose();
         poseStack.translate(0.5f, 0.0f, 0.5f);
-        poseStack.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, (float) chalkCircle.angleDegrees, 0)));
+        poseStack.mulPose(new Quaternionf().rotateY((float) chalkCircle.angleDegrees * Mth.TWO_PI / 360));
         poseStack.translate(-0.5f, 0.0f, -0.5f);
 
         if (itemstack.is(OtherverseItems.SELF.get())) {
@@ -125,6 +129,13 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                         offset[0] + scale / 32f, offset[1], scale);
                 poseStack.popPose();
             }
+        } else if (isChalk && !chalkCircle.inscription.isEmpty()) {
+            Minecraft.getInstance().getBlockRenderer().renderSingleBlock(
+                    OtherverseBlocks.CHALK_LINE.get().defaultBlockState(),
+                    poseStack, Minecraft.getInstance().renderBuffers().bufferSource(),
+                    lightVal,
+                    OverlayTexture.NO_OVERLAY,
+                    net.minecraftforge.client.model.data.ModelData.EMPTY, RenderType.cutout());
         } else {
             poseStack.pushPose();
             renderItem(poseStack, lightVal, chalkCircle, buffers, 0, 0, 0.5f);
@@ -149,10 +160,10 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                     (float) nrm.x, (float) nrm.y + (i % 2 == 0 ? -sideVertical : sideVertical), (float) nrm.z,
                     r, g, b, a, bufferSides);
         }
-        drawPolygon(ps, bufferSource, dir1, dir2, sides, radius, rotation,r,g,b,a);
+        drawPolygon(ps, bufferSource, dir1, dir2, sides, radius, rotation, r, g, b, a);
         ps.pushPose();
-        ps.translate(0,-height,0);
-        drawPolygon(ps, bufferSource, dir1, dir2, sides, radius, rotation,r,g,b,a);
+        ps.translate(0, -height, 0);
+        drawPolygon(ps, bufferSource, dir1, dir2, sides, radius, rotation, r, g, b, a);
         ps.popPose();
     }
 

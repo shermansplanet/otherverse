@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,6 +20,7 @@ public class DemesnesMenu extends AbstractContainerMenu {
 
     private ClaimedDemesneData claimedDemesneData;
     public final EnumMap<DemesnesManager.DemesnePerk, DataSlot> perks = new EnumMap<>(DemesnesManager.DemesnePerk.class);
+    public final EnumMap<DemesnesManager.DemesnePerk, DataSlot> skipped = new EnumMap<>(DemesnesManager.DemesnePerk.class);
     public final DataSlot beaconX = DataSlot.standalone();
     public final DataSlot beaconY = DataSlot.standalone();
     public final DataSlot beaconZ = DataSlot.standalone();
@@ -30,6 +32,7 @@ public class DemesnesMenu extends AbstractContainerMenu {
         claimedDemesneData = data;
         for (var perk : DemesnesManager.DemesnePerk.values()) {
             perks.get(perk).set(claimedDemesneData.getPerkLevel(perk));
+            skipped.get(perk).set(OtherverseConfig.SKIPPED_PERKS.get().contains(perk.name) ? 1 : 0);
         }
         beaconX.set(beaconPos.getX());
         beaconY.set(beaconPos.getY());
@@ -42,6 +45,10 @@ public class DemesnesMenu extends AbstractContainerMenu {
             var slot = DataSlot.standalone();
             perks.put(perk, slot);
             addDataSlot(slot);
+
+            var slot2 = DataSlot.standalone();
+            skipped.put(perk, slot2);
+            addDataSlot(slot2);
         }
         addDataSlot(beaconX);
         addDataSlot(beaconY);

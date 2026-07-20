@@ -11,6 +11,8 @@ import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.Structures;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -35,6 +37,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -42,6 +45,7 @@ import net.minecraftforge.common.extensions.IForgeBlockEntity;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -76,9 +80,10 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
             var blockBelow = level.getBlockState(getBlockPos().below());
 
             var structures = sl.structureManager().getAllStructuresAt(getBlockPos()).keySet();
-            if (structures.contains(Structures.BASTION_REMNANT.get()) || structures.contains(Structures.PILLAGER_OUTPOST.get()))
+            var registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+            if (structures.contains(registry.getHolderOrThrow(BuiltinStructures.BASTION_REMNANT).get()) || structures.contains(registry.getHolderOrThrow(BuiltinStructures.PILLAGER_OUTPOST).get()))
                 spiritType = Spirits.WAR;
-            else if (structures.contains(Structures.STRONGHOLD.get()) || structures.contains(Structures.FORTRESS.get()) || isInDragonArena(biome))
+            else if (structures.contains(registry.getHolderOrThrow(BuiltinStructures.STRONGHOLD).get()) || structures.contains(registry.getHolderOrThrow(BuiltinStructures.FORTRESS).get()) || isInDragonArena(biome))
                 spiritType = Spirits.FATE;
             else if (isSurroundedBy(sl, getBlockPos(), Blocks.FARMLAND)) spiritType = Spirits.FOOD;
             else if (blockBelow.is(Blocks.GOLD_BLOCK) || blockBelow.is(Blocks.EMERALD_BLOCK))
@@ -88,6 +93,7 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
             else if (levelName.equals("overworld") && getBlockPos().getY() > 190) spiritType = Spirits.AIR;
             else spiritType = MobBindingInfluenceUtils.getSpiritTypes(biome, sl).get(0);
 
+            LOGGER.debug("GETTING DATA FROM DEMESNE BEACON SET LEVEL");
             demesneData = DemesnesManager.getData(sl, getBlockPos());
             if (demesneData != null) {
                 inDemesneOf = demesneData.practitioner;

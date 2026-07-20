@@ -1,0 +1,14 @@
+{
+    "type": "minecraft:web_of_fate",
+    "pools": [
+    {
+        "rolls": 1.0,
+        "entries": [
+        {
+            "type": "minecraft:item",
+            "name": "otherverse:web_of_fate"
+        }
+        ]
+    }
+    ]
+} 

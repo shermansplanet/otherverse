@@ -1,0 +1,14 @@
+{
+	"other" : "cataclysm:scylla",
+	"spirit" : "air",
+	"healing": {
+		"otherverse:water": 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:prismarine_crystals",
+			"health" : 33,
+			"output" : "cataclysm:essence_of_the_storm"
+		}
+	]
+}

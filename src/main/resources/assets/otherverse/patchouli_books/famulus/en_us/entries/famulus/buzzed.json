@@ -1,0 +1,12 @@
+{
+    "name": "Buzzed",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'buzzed'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If you feed your buzzed Familiar a honey bottle, it will emit a pheromone that resets the breeding cooldowns of all animals within sixteen blocks. It will also give you slow creative flight in the Ruins."
+        }
+    ]
+}

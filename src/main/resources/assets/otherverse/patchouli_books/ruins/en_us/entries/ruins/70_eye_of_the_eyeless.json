@@ -1,0 +1,13 @@
+{
+    "name": "Eye of the Eyeless",
+    "sortnum":70,
+    "icon": "otherverse:eye_of_the_eyeless",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:eye_of_the_eyeless",
+            "text": "You can use an Eye of the Eyeless to point the way to Ancient Cities. If you're standing in a block focus influenced by twelve of these eyes, with sculk below you and the eyes, you will be transported to the Ruins."
+        }
+    ]
+}

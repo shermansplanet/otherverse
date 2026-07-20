@@ -1,0 +1,17 @@
+{
+	"other" : "alexscaves:mine_guardian",
+	"spirit" : "phlogiston",
+	"healing" : {
+		"otherverse:technology" : 1
+	},
+	"binding" : {
+		"minecraft:chain" : 15
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:tnt",
+			"health" : 7,
+			"output" : "alexscaves:depth_charge"
+		}
+	]
+}

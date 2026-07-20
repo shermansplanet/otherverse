@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:corrodent",
+	"spirit": "earth",
+	"binding" : {
+		"otherverse:spirit_light" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:bone",
+			"health" : 3,
+			"output" : "alexscaves:corrodent_teeth"
+		}
+	]
+}

@@ -27,6 +27,7 @@ public class SightManager {
         if (event.phase == TickEvent.Phase.END) return;
         if (!Keybindings.KEY_SIGHT.consumeClick()) return;
         isSightOn = !isSightOn;
+        System.out.println("SIGHT TOGGLED " + (isSightOn ? "ON" : "OFF"));
         ReskinManager.onSightUpdate();
         if(isSightOn) SightOverlay.instance.recalculateColor();
         OtherversePacketHandler.INSTANCE.sendToServer(new SightToggleMessage(isSightOn));

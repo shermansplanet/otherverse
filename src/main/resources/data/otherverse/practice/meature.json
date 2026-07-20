@@ -1,0 +1,16 @@
+{
+	"other" : "enemyexpansion:meature",
+	"spirit" : "flesh",
+	"transfusion" : [
+		{
+			"input" : "minecraft:red_mushroom",
+			"health" : 1,
+			"output" : "minecraft:rotten_flesh"
+		},
+		{
+			"input" : "minecraft:brown_mushroom",
+			"health" : 1,
+			"output" : "minecraft:rotten_flesh"
+		}
+	]
+}

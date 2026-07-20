@@ -21,8 +21,11 @@ public abstract class BucketItemInjector extends Item implements DispensibleCont
         if (!stack.hasTag()) return;
         var tag = stack.getTag();
         if (tag.contains("implement_max_uses")) {
-            var newAmount = tag.getInt("implement_remaining_uses") - 1;
-            tag.putInt("implement_remaining_uses", newAmount);
+            var newAmount = tag.getInt("implement_remaining_uses");
+            if (!player.getAbilities().instabuild) {
+                newAmount -= 1;
+                tag.putInt("implement_remaining_uses", newAmount);
+            }
             if (newAmount > 0) {
                 ci.setReturnValue(stack);
                 ci.cancel();

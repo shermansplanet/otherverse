@@ -1,0 +1,12 @@
+{
+    "name": "Banshee",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'banshee'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "If a banshee Familiar is holding anvils, it will fly above its target and drop anvils on it. It will also give you elytra-style flight, but only in the Ruins."
+        }
+    ]
+}

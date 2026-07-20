@@ -1,0 +1,13 @@
+{
+    "name": "Memory Snare",
+    "sortnum":60,
+    "icon": "otherverse:memory_snare",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:memory_snare",
+            "text": "If you use blue honey to graft gloom tendrils to a sculk sensor, you get a memory snare. This block absorbs all XP within four blocks, and regurgitates it when broken or given a redstone signal."
+        }
+    ]
+}

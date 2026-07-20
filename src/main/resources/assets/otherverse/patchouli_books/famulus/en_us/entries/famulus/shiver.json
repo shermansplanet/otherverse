@@ -1,0 +1,12 @@
+{
+    "name": "Shiver",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'typhlotic_shark'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "When you summon your shiver Familiar, all mobs that have lower health than you and your Familiar combined will flee in terror. It will also give you slow creative flight in the Ruins."
+        }
+    ]
+}

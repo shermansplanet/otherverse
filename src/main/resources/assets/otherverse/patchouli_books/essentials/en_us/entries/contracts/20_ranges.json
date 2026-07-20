@@ -2,7 +2,7 @@
     "name": "Ranges",
     "icon": "minecraft:glass",
     "category": "otherverse:contracts",
-    "sortnum": 20,
+    "sortnum": 200,
     "pages": [
         {
             "type": "patchouli:text",        

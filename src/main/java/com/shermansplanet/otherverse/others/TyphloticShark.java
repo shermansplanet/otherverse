@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.others;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.diagrams.SelfManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -38,7 +39,6 @@ public class TyphloticShark extends FlyingMob {
         if (spawnType == MobSpawnType.NATURAL || spawnType == MobSpawnType.CHUNK_GENERATION) {
             return true;
         }
-        if (r.nextFloat() > 0.5f) return false;
         var bs = level.getBlockState(blockPos.below());
         if (!bs.is(Blocks.POWDER_SNOW)) return false;
         return true;
@@ -74,7 +74,7 @@ public class TyphloticShark extends FlyingMob {
 
     public void customServerAiStep() {
         if (getTarget() == null) {
-            var p = level.getNearestPlayer(TargetingConditions
+            var p = level().getNearestPlayer(TargetingConditions
                             .forCombat()
                             .range(64)
                             .ignoreLineOfSight()
@@ -87,7 +87,7 @@ public class TyphloticShark extends FlyingMob {
     }
 
     public void swing(InteractionHand hand) {
-        if (this.level.isClientSide()) {
+        if (this.level().isClientSide()) {
             this.attackAnimationState.start(this.tickCount);
         } else {
             super.swing(hand);
@@ -118,17 +118,17 @@ public class TyphloticShark extends FlyingMob {
             if (target == null) return;
             pathfindCooldown--;
             if (pathfindCooldown <= 0) {
-                if (shark.level.getBlockState(shark.blockPosition()).is(Blocks.POWDER_SNOW)) {
+                if (shark.level().getBlockState(shark.blockPosition()).is(Blocks.POWDER_SNOW)) {
                     this.shark.setDeltaMovement(this.shark.getDeltaMovement().add(0, 0.2f, 0));
                 } else {
                     this.shark.getNavigation().moveTo(target, 1);
-                    pathfindCooldown = 5;
+                    pathfindCooldown = shark.random.nextInt(5, 10);
                 }
             }
             attackCooldown--;
-            if (attackCooldown <= 0 && shark.distanceTo(target) < 2f) {
+            if (attackCooldown <= 0 && shark.isWithinMeleeAttackRange(target)) {
                 shark.swing(InteractionHand.MAIN_HAND);
-                shark.doHurtTarget(target);
+                SelfManager.SelfDrainAttack(shark, target);
                 attackCooldown = 20;
             }
         }
@@ -160,10 +160,10 @@ public class TyphloticShark extends FlyingMob {
         public void tick() {
             if (shark.random.nextFloat() < 0.01f) coeff = -coeff;
             var castFromTop = shark.position().add(0f, shark.getBbHeight(), 0f);
-            BlockHitResult hitresultTop = shark.level.clip(new ClipContext(
+            BlockHitResult hitresultTop = shark.level().clip(new ClipContext(
                     castFromTop, castFromTop.add(shark.getForward().scale(lookAheadDist)),
                     ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shark));
-            BlockHitResult hitresultBottom = shark.level.clip(new ClipContext(
+            BlockHitResult hitresultBottom = shark.level().clip(new ClipContext(
                     shark.position(), shark.position().add(shark.getForward().scale(lookAheadDist)),
                     ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shark));
             var diff = shark.invulnerableTime > 0 ? shark.getDeltaMovement() : shark.getForward().scale(1f / 20f);
@@ -184,7 +184,7 @@ public class TyphloticShark extends FlyingMob {
 
             var pos = shark.blockPosition();
             for (var i = 2; i >= -2; i--) {
-                var bs = shark.level.getBlockState(pos.above(i));
+                var bs = shark.level().getBlockState(pos.above(i));
                 if (bs.is(Blocks.POWDER_SNOW)) {
                     var dy = (pos.getY() + i) - shark.position().y + 0.49f;
                     diff = diff.add(new Vec3(0, dy / 10f, 0));

@@ -32,32 +32,32 @@ import java.util.HashSet;
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FleshbindingManager {
 
-    private static final int FLESHBINDING_HP = 10;
+    public static final int FLESHBINDING_HP = 10;
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final HashMap<String, ResourceLocation> texturesByLabel = new HashMap<>();
 
     static {
-        texturesByLabel.put("minecraft:lapis_block", new ResourceLocation("textures/block/lapis_block.png"));
-        texturesByLabel.put("minecraft:diamond", new ResourceLocation("textures/block/diamond_block.png"));
-        texturesByLabel.put("otherverse:cinnabar_block", new ResourceLocation("otherverse", "textures/block/cinnabar_block.png"));
+        texturesByLabel.put("minecraft:lapis_block", ResourceLocation.parse("textures/block/lapis_block.png"));
+        texturesByLabel.put("minecraft:diamond", ResourceLocation.parse("textures/block/diamond_block.png"));
+        texturesByLabel.put("otherverse:cinnabar_block", ResourceLocation.fromNamespaceAndPath("otherverse", "textures/block/cinnabar_block.png"));
     }
 
-    @SubscribeEvent
-    public static void onEntityHurt(LivingDamageEvent event) {
-        if (!SightManager.shouldRenderSight()) return;
-        var entity = event.getEntity();
-        if (entity.getType() == EntityType.PLAYER) return;
-        var level = entity.getLevel();
-        if (!(level instanceof ServerLevel sl)) return;
-        var hp = entity.getHealth();
-        if (hp > FLESHBINDING_HP && hp - event.getAmount() <= FLESHBINDING_HP) {
-            for (var i = 0; i < 6; i++) {
-                sl.sendParticles(ParticleTypes.CRIMSON_SPORE, entity.getRandomX(0.5D), entity.getRandomY(), entity.getRandomZ(0.5D), 1, 0, 0, 0, 0.5D);
-            }
-            sl.playSound(null, entity.getX(), entity.getY(0.5D), entity.getZ(), SoundEvents.GLOW_SQUID_SQUIRT, SoundSource.HOSTILE, 0.7f, 0.8f);
-        }
-    }
+//    @SubscribeEvent
+//    public static void onEntityHurt(LivingDamageEvent event) {
+//        if (!SightManager.shouldRenderSight()) return;
+//        var entity = event.getEntity();
+//        if (entity.getType() == EntityType.PLAYER) return;
+//        var level = entity.level();
+//        if (!(level instanceof ServerLevel sl)) return;
+//        var hp = entity.getHealth();
+//        if (hp > FLESHBINDING_HP && hp - event.getAmount() <= FLESHBINDING_HP) {
+//            for (var i = 0; i < 6; i++) {
+//                sl.sendParticles(ParticleTypes.CRIMSON_SPORE, entity.getRandomX(0.5D), entity.getRandomY(), entity.getRandomZ(0.5D), 1, 0, 0, 0, 0.5D);
+//            }
+//            sl.playSound(null, entity.getX(), entity.getY(0.5D), entity.getZ(), SoundEvents.GLOW_SQUID_SQUIRT, SoundSource.HOSTILE, 0.7f, 0.8f);
+//        }
+//    }
 
     private static boolean canItemFleshbindEntity(Item item, EntityType<?> entityType) {
         var entities = LootHelper.entitiesThatDropItem.get(item);
@@ -97,9 +97,9 @@ public class FleshbindingManager {
         if (circleWithPrime == null || circleWithDrop == null || circleWithMaterial == null ||
                 !diagram.trySpendPower(level, focus.getPos(), 1, new HashSet<>())) return false;
 
-        circleWithPrime.removeItem();
-        circleWithDrop.removeItem();
-        circleWithMaterial.removeItem();
+        circleWithPrime.drainItem();
+        circleWithDrop.drainItem();
+        circleWithMaterial.drainItem();
 
         fleshbindMob(mob, material, level);
         Otherverse.ADVANCEMENTS.trigger(diagram.getOwner(level), "fleshbind");
@@ -119,9 +119,9 @@ public class FleshbindingManager {
         mob.remove(Entity.RemovalReason.KILLED);
         mob.discard();
         var item = IdolItem.makeFrom(mob, material);
-        ItemEntity itementity = new ItemEntity(mob.level, mob.getX(), mob.getY(0.5f), mob.getZ(), item);
+        ItemEntity itementity = new ItemEntity(mob.level(), mob.getX(), mob.getY(0.5f), mob.getZ(), item);
         itementity.setDefaultPickUpDelay();
-        mob.level.addFreshEntity(itementity);
+        mob.level().addFreshEntity(itementity);
     }
 
     public static boolean tryCinnabind(ServerLevel level, ChalkCircle circle, Diagram diagram) {
@@ -132,7 +132,7 @@ public class FleshbindingManager {
         if (targetBinding == null) return false;
         if (targetBinding.mob == null || targetBinding.mob.isRemoved()) return false;
         fleshbindMob(targetBinding.mob, "otherverse:cinnabar_block", level);
-        circle.removeItem();
+        circle.drainItem();
         return true;
     }
 
@@ -141,7 +141,7 @@ public class FleshbindingManager {
             var instance = item.getDefaultInstance();
             if (!instance.is(ItemTags.PLANKS) && !instance.is(ItemTags.LOGS)) continue;
             var key = ForgeRegistries.ITEMS.getKey(item);
-            var val = new ResourceLocation(key.getNamespace(), "textures/block/" + key.getPath() + ".png");
+            var val = ResourceLocation.fromNamespaceAndPath(key.getNamespace(), "textures/block/" + key.getPath() + ".png");
             texturesByLabel.put(key.toString(), val);
         }
     }

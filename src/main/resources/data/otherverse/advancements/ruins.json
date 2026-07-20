@@ -1,0 +1,19 @@
+{
+  "parent":"otherverse:diagram",
+  "display":{
+    "icon":{
+      "item": "minecraft:sculk"
+    },
+    "title": "At Least It's Not The Abyss",
+    "description": "Enter the Ruins."
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "ruins"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

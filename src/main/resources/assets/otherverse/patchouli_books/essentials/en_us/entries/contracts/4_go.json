@@ -2,7 +2,7 @@
     "name": "Action: Go",
     "icon": "minecraft:rail",
     "category": "otherverse:contracts",
-    "sortnum": 4,
+    "sortnum": 40,
     "pages": [
         {
             "type": "patchouli:spotlight",

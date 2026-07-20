@@ -2,6 +2,8 @@ package com.shermansplanet.otherverse;
 
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -53,7 +55,7 @@ public class ItemOrEntityType {
         if (isItem) {
             buffer.writeInt(Item.getId(item));
         } else {
-            buffer.writeInt(Registry.ENTITY_TYPE.getId(entityType));
+            buffer.writeInt(BuiltInRegistries.ENTITY_TYPE.getId(entityType));
         }
     }
 
@@ -62,7 +64,7 @@ public class ItemOrEntityType {
         if (isItem) {
             return new ItemOrEntityType(Item.byId(buffer.readInt()));
         } else {
-            return new ItemOrEntityType(Registry.ENTITY_TYPE.byId(buffer.readInt()));
+            return new ItemOrEntityType(BuiltInRegistries.ENTITY_TYPE.byId(buffer.readInt()));
         }
     }
 }

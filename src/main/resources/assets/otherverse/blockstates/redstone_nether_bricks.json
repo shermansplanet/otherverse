@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "otherverse:block/redstone_nether_bricks"
+    },
+    "powered=true": {
+      "model": "otherverse:block/redstone_nether_bricks_down"
+    }
+  }
+}

@@ -2,12 +2,16 @@ package com.shermansplanet.otherverse.spirits;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Vector3f;
+import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
+import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -38,6 +42,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -45,6 +50,8 @@ import java.util.*;
 public class ShrineHelper {
 
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final float SHRINE_MOB_MARGIN = 0.25f;
+    private static final float SHRINE_COMBINE_TOLERANCE = 0.8f;
 
     public enum ShrineShape {BELOW, ABOVE, CENTERED}
 
@@ -185,6 +192,7 @@ public class ShrineHelper {
                 if (bs.isAir()) return 0;
                 try {
                     var item = bs.getBlock().asItem();
+                    if (item == Items.BEDROCK && !OtherverseConfig.BEDROCK_REMOVAL.get()) return 0;
                     var spiritCount = SpiritLabeler.getSpiritsFor(item).get(Spirits.EARTH);
                     if (spiritCount == null) return 0;
                     if (!simulate) {
@@ -372,7 +380,7 @@ public class ShrineHelper {
             @Override
             public int overdrawBlock(BlockPos pos, Level level, int amount, boolean simulate) {
                 var bs = level.getFluidState(pos);
-                if(bs.is(Fluids.FLOWING_WATER)){
+                if (bs.is(Fluids.FLOWING_WATER)) {
                     if (!simulate) level.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
                     return 1;
                 }
@@ -412,7 +420,7 @@ public class ShrineHelper {
                     var player = sl.getRandomPlayer();
                     sl.explode(player, null, damageCalc,
                             pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f,
-                            4 * extra, false, Explosion.BlockInteraction.BREAK);
+                            4 * extra, false, Level.ExplosionInteraction.TNT);
                 }
                 return (extra + 1) * 33;
             }
@@ -533,13 +541,16 @@ public class ShrineHelper {
             @Override
             public int overflowEntity(Entity e, int amount, Shrine shrine, boolean simulate) {
                 if (!(e instanceof Mob mob)) return 0;
+                if (amount == 0) return 0;
                 if (!Objects.equals(mob.getPersistentData().getString("construct_type"), Spirits.TECH.label()))
                     return 0;
+                var targetAmplifier = Mth.floor(Math.log(amount) / Math.log(3) * 2.5f);
+                if (targetAmplifier < 1) return 0;
+                var cost = (int) Math.pow(3, targetAmplifier / 2.5f);
                 var effect = mob.getEffect(MobEffects.MOVEMENT_SPEED);
-                var amplifier = effect == null ? 0 : effect.getAmplifier() + 1;
-                var cost = (int) Math.pow(3, amplifier + 1);
-                if (amount < cost) return 0;
-                if (!simulate) mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 30, amplifier));
+                if (effect != null && effect.getAmplifier() >= targetAmplifier) return 0;
+                if (!simulate)
+                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 60, targetAmplifier));
                 return cost;
             }
         });
@@ -567,13 +578,15 @@ public class ShrineHelper {
             @Override
             public int overflowEntity(Entity e, int amount, Shrine shrine, boolean simulate) {
                 if (!(e instanceof Mob mob)) return 0;
+                if (amount == 0) return 0;
                 if (!Objects.equals(mob.getPersistentData().getString("construct_type"), Spirits.FLESH.label()))
                     return 0;
+                var targetAmplifier = Mth.floor(Math.log(amount) / Math.log(3));
+                if (targetAmplifier < 1) return 0;
+                var cost = (int) Math.pow(3, targetAmplifier);
                 var effect = mob.getEffect(MobEffects.DAMAGE_BOOST);
-                var amplifier = effect == null ? 0 : effect.getAmplifier() + 1;
-                var cost = (int) Math.pow(3, amplifier + 1);
-                if (amount < cost) return 0;
-                if (!simulate) mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 30, amplifier));
+                if (effect != null && effect.getAmplifier() >= targetAmplifier) return 0;
+                if (!simulate) mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 60, targetAmplifier));
                 return cost;
             }
         });
@@ -592,12 +605,32 @@ public class ShrineHelper {
 
             @Override
             public int overflowBlock(BlockPos pos, Level level, int amount, boolean simulate) {
-                if (!(level.getBlockState(pos).getBlock() instanceof BonemealableBlock)) return 0;
+                var state = level.getBlockState(pos);
+                if (!(state.getBlock() instanceof BonemealableBlock bb) || !bb.isValidBonemealTarget(level, pos, state, level.isClientSide))
+                    return 0;
                 if (!simulate) {
                     if (!BoneMealItem.applyBonemeal(ItemStack.EMPTY, level, pos, null)) return 0;
                     if (!level.isClientSide) level.levelEvent(1505, pos, 0);
                 }
                 return 33;
+            }
+        });
+        overflowBehaviors.put(Spirits.OVERWORLD, new OverflowBehavior() {
+            @Override
+            public ShrineShape getShape() {
+                return ShrineShape.CENTERED;
+            }
+        });
+        overflowBehaviors.put(Spirits.NETHER, new OverflowBehavior() {
+            @Override
+            public ShrineShape getShape() {
+                return ShrineShape.CENTERED;
+            }
+        });
+        overflowBehaviors.put(Spirits.END, new OverflowBehavior() {
+            @Override
+            public ShrineShape getShape() {
+                return ShrineShape.CENTERED;
             }
         });
     }
@@ -625,7 +658,7 @@ public class ShrineHelper {
             this.hallowPositions = hallowPositions;
             this.totalCapacity = totalCapacity;
             this.st = st;
-            range = isCombined ? getCombinedRange(network, totalCapacity) : getShrineRange(hallowPositions, totalCapacity, false);
+            range = isCombined ? getCombinedRange(network, totalCapacity, level) : getShrineRange(hallowPositions, totalCapacity, level);
             var data = DiagramManager.getOrCreateLevelData(level);
             for (var pos : hallowPositions) {
                 var tag = data.getPlacedItemTag(pos);
@@ -664,7 +697,7 @@ public class ShrineHelper {
                     for (var dy = 0; dy < range.height; dy++) {
                         var bp = new BlockPos(x, baseY - dy, z);
                         targetPositions.add(bp);
-                        chunkPositions.add(level.getChunkAt(bp).getPos());
+                        chunkPositions.add(Otherverse.chunkAt(bp));
                     }
                 }
             }
@@ -724,7 +757,6 @@ public class ShrineHelper {
 
         private static void refreshNetwork(HashSet<Shrine> network) {
             var avg = new Vec3(0, 0, 0);
-            Shrine key = null;
             var totalCapacity = 0;
             for (var shrine : network) {
                 if (shrine.parentShrine != null) {
@@ -732,38 +764,31 @@ public class ShrineHelper {
                     shrine.parentShrine = null;
                 }
                 avg = avg.add(shrine.range.center.scale(1f / network.size()));
-                key = shrine;
                 totalCapacity += shrine.totalCapacity;
             }
-            if (network.size() == 1) return;
-            var x = avg.x;
-            var z = avg.z;
-            var keyX = key.range.center.x;
-            var keyZ = key.range.center.z;
-            var r = Math.sqrt(Math.pow(x - keyX, 2) + Math.pow(z - keyZ, 2));
-            var startAngle = Math.atan2(keyZ - z, keyX - x);
-            LOGGER.debug(x + ", " + z + ", " + keyX + ", " + keyZ + ", " + r);
-            for (var i = 1; i < network.size(); i++) {
-                var angle = startAngle + Math.PI * 2 / network.size();
-                var targetX = x + Math.cos(angle) * r;
-                var targetZ = z + Math.sin(angle) * r;
-                LOGGER.debug("target: " + targetX + ", " + targetZ);
-                var shrineFound = false;
-                for (var shrine : network) {
-                    var shrineX = shrine.range.center.x;
-                    var shrineZ = shrine.range.center.z;
-                    var dist = Math.sqrt(Math.pow(targetX - shrineX, 2) + Math.pow(targetZ - shrineZ, 2));
-                    if (dist < r * 0.1f) {
-                        shrineFound = true;
-                        LOGGER.debug("shrine found :D");
-                        break;
-                    }
-                }
-                if (!shrineFound) {
-                    LOGGER.debug("no shrine found D:");
-                    return;
-                }
+            if (network.size() <= 2) return;
+
+            var centerX = avg.x;
+            var centerZ = avg.z;
+
+            var avgR = 0f;
+            for (var shrine : network) {
+                var x = shrine.range.center.x;
+                var z = shrine.range.center.z;
+                var r = Math.sqrt(Math.pow(centerX - x, 2) + Math.pow(centerZ - z, 2));
+                avgR += r / network.size();
             }
+
+            Shrine key = null;
+            for (var shrine : network) {
+                var x = shrine.range.center.x;
+                var z = shrine.range.center.z;
+                var r = Math.sqrt(Math.pow(centerX - x, 2) + Math.pow(centerZ - z, 2));
+                var ratio = r / avgR;
+                if (ratio < SHRINE_COMBINE_TOLERANCE || ratio > 1f / SHRINE_COMBINE_TOLERANCE) return;
+                key = shrine;
+            }
+
             var parentShrine = new Shrine(new HashSet<>(), totalCapacity, key.st, key.level, true, network);
             for (var shrine : network) {
                 shrine.parentShrine = parentShrine;
@@ -801,9 +826,9 @@ public class ShrineHelper {
         }
 
         public void markActive(Level level) {
-            if(isCombined){
-                for(var shrine : network){
-                    if(shrine.isCombined) continue;
+            if (isCombined) {
+                for (var shrine : network) {
+                    if (shrine.isCombined) continue;
                     shrine.markActive(level);
                 }
                 return;
@@ -827,8 +852,29 @@ public class ShrineHelper {
                 case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
             };
             var bottomY = topY - range.height;
-            if (entity.getBoundingBox().minY > topY || entity.getBoundingBox().maxY < bottomY) return false;
+            if (entity.getBoundingBox().minY > topY + SHRINE_MOB_MARGIN || entity.getBoundingBox().maxY < bottomY - SHRINE_MOB_MARGIN)
+                return false;
             var relative = entity.position().subtract(center);
+            return (relative.x * relative.x + relative.z * relative.z <= r * r);
+        }
+
+        public boolean isInRange(Entity entity, BlockPos pos) {
+            var center = range.center;
+            var r = range.radius;
+            var dy = entity == null ? 0 : pos.getY() - entity.getY();
+            var overflowBehavior = overflowBehaviors.get(st);
+            if (overflowBehavior == null) return false;
+            var topY = switch (overflowBehavior.getShape()) {
+                case BELOW -> range.bottom();
+                case ABOVE -> range.bottom() + range.height();
+                case CENTERED -> (int) Math.ceil(range.center().y + range.height() / 2f);
+            };
+            var bottomY = topY - range.height;
+            var eminY = entity == null ? pos.getY() : entity.getBoundingBox().minY;
+            var emaxY = entity == null ? pos.getY() + 1 : entity.getBoundingBox().maxY;
+            if (eminY + dy > topY + SHRINE_MOB_MARGIN || emaxY + dy < bottomY - SHRINE_MOB_MARGIN)
+                return false;
+            var relative = pos.getCenter().subtract(center);
             return (relative.x * relative.x + relative.z * relative.z <= r * r);
         }
 
@@ -847,12 +893,13 @@ public class ShrineHelper {
             }
         }
 
-        public boolean tryDrain(int price, TransientDiagramData data) {
+        public boolean tryDrain(int price) {
+            var data = DiagramManager.getOrCreateLevelData(level);
 
-            if(isCombined){
-                for(var shrine : network){
-                    if(shrine.isCombined) continue;
-                    if(shrine.tryDrain(price, data)) return true;
+            if (isCombined) {
+                for (var shrine : network) {
+                    if (shrine.isCombined) continue;
+                    if (shrine.tryDrain(price)) return true;
                 }
                 return false;
             }
@@ -975,7 +1022,7 @@ public class ShrineHelper {
 
         var remainingAmount = amount;
 
-        if(shrine.parentShrine != null) shrine = shrine.parentShrine;
+        if (shrine.parentShrine != null) shrine = shrine.parentShrine;
 
         if (overflowBehavior.affectsIndividualBlocks()) {
             for (var i = 0; i < shrine.targetPositions.size(); i++) {
@@ -995,9 +1042,9 @@ public class ShrineHelper {
                     break;
                 }
                 var pos = shrine.targetPositions.get(newIndex);
-                if(level instanceof ServerLevel sl) {
+                if (level instanceof ServerLevel sl) {
                     var demesne = DemesnesManager.getData(sl, pos);
-                    if(demesne != null && !demesne.hasSanction(DemesnesManager.DemesnePerk.SANCTION_BUILD, null)){
+                    if (demesne != null && !demesne.hasSanction(DemesnesManager.DemesnePerk.SANCTION_BUILD, null)) {
                         continue;
                     }
                 }
@@ -1014,24 +1061,58 @@ public class ShrineHelper {
             }
         } else {
             if (overdraw && (spiritType == Spirits.LIGHT || spiritType == Spirits.DARK)) return 0;
-            if (simulate && !overflowBehavior.multipleTargets()) return amount;
+            //if (simulate && !overflowBehavior.multipleTargets()) return amount;
+
+            var data = DiagramManager.getOrCreateLevelData(level);
+            var firstUse = true;
+            if (level instanceof ServerLevel sl) {
+                for (var pos : shrine.hallowPositions) {
+                    var focus = data.allBlockFoci.get(pos);
+                    if (focus == null || focus.getDiagram() == null) continue;
+                    var target = focus.getDiagram().influences.get(pos);
+                    if (target == null || !(level.getBlockEntity(target) instanceof ChalkCircle cc)) continue;
+                    if (cc.getItem().is(OtherverseItems.SELF.get()) && cc.player != null) {
+                        for (var player : sl.players()) {
+                            if (player.getGameProfile().getName().equals(cc.player)) {
+                                var spent = overflowBehavior.affectEntity(player, remainingAmount, overdraw, shrine, simulate);
+                                if (firstUse || overflowBehavior.multipleTargets()) {
+                                    remainingAmount -= spent;
+                                    if (!overflowBehavior.canRun(remainingAmount, overdraw)) break;
+                                    firstUse = false;
+                                }
+                            }
+                        }
+                    } else if (cc.getItem().is(OtherverseItems.SPINDLE_BLOODY.get())) {
+                        var otherEntity = SympathyManager.getEntityByUniqueId(cc.getItem().getTag().getString("sympathy_target"), sl);
+                        if (otherEntity != null) {
+                            var spent = overflowBehavior.affectEntity(otherEntity, remainingAmount, overdraw, shrine, simulate);
+                            if (firstUse || overflowBehavior.multipleTargets()) {
+                                remainingAmount -= spent;
+                                if (!overflowBehavior.canRun(remainingAmount, overdraw)) break;
+                                firstUse = false;
+                            }
+                        }
+                    }
+                }
+            }
+
             var center = shrine.range.center;
             var r = shrine.range.radius;
-            var h = shrine.range.height / 2f;
+            var h = shrine.range.height;
             var bounds = new AABB(center.x - r, center.y - h, center.z - r,
                     center.x + r, center.y + h, center.z + r);
-            var all = level.getEntities(null, bounds);
+            var all = level.getEntities(null, bounds.inflate(1));
             for (var e : all) {
-                var relative = e.position().subtract(center);
-                if (relative.x * relative.x + relative.z * relative.z > r * r) continue;
+                if (!shrine.isInRange(e)) continue;
                 var spent = overflowBehavior.affectEntity(e, remainingAmount, overdraw, shrine, simulate);
-                if (overflowBehavior.multipleTargets()) {
+                if (firstUse || overflowBehavior.multipleTargets()) {
                     remainingAmount -= spent;
                     if (!overflowBehavior.canRun(remainingAmount, overdraw)) break;
+                    firstUse = false;
                 }
             }
             if (!simulate) shrine.markActive(level);
-            return remainingAmount;
+            return amount - remainingAmount;
         }
 
         remainingAmount -= overflowBehavior.affectShrine(shrine, level, remainingAmount, overdraw, simulate);
@@ -1066,19 +1147,58 @@ public class ShrineHelper {
     }
 
     public static List<Shrine> getShrinesFor(Entity entity, SpiritType spiritType) {
-        var level = entity.level;
+        return getShrinesFor(entity, spiritType, true);
+    }
+
+    public static List<Shrine> getShrinesFor(Entity entity, SpiritType spiritType, boolean countRemote) {
+        var level = entity.level();
         var mobPos = entity.blockPosition();
+        var shrineSet = new HashSet<Shrine>();
+        if (countRemote && level instanceof ServerLevel sl && entity instanceof LivingEntity le) {
+            var circles = SympathyManager.getSympatheticLinks(le, sl);
+            for (var cc : circles) {
+                if (cc.getDiagram() == null) continue;
+                for (var influence : cc.getDiagram().influences.entrySet()) {
+                    if (!influence.getValue().equals(cc.getPos())) continue;
+                    var shrine = getShrine(cc.getLevel(), influence.getKey(), spiritType);
+                    if (shrine != null) {
+                        shrineSet.add(shrine);
+                    }
+                }
+            }
+        }
+
+        var levelShrines = ShrineHelper.shrinesByChunk.get(level);
+        if (levelShrines != null) {
+            var localShrines = levelShrines.get(Otherverse.chunkAt(mobPos));
+            if (localShrines != null && !localShrines.isEmpty()) {
+                for (var shrine : localShrines) {
+                    if (shrine.st != spiritType) {
+                        continue;
+                    }
+                    if (!shrine.isInRange(entity)) {
+                        continue;
+                    }
+                    shrineSet.add(shrine);
+                }
+            }
+        }
+        return shrineSet.stream().toList();
+    }
+
+    public static List<Shrine> getShrinesFor(Entity entity, BlockPos pos, SpiritType spiritType) {
+        var level = entity.level();
         var levelShrines = ShrineHelper.shrinesByChunk.get(level);
         if (levelShrines == null || levelShrines.isEmpty()) return List.of();
 
-        var shrines = levelShrines.get(level.getChunkAt(mobPos).getPos());
+        var shrines = levelShrines.get(Otherverse.chunkAt(pos));
         if (shrines == null || shrines.isEmpty()) return List.of();
         var list = new ArrayList<Shrine>();
         for (var shrine : shrines) {
             if (shrine.st != spiritType) {
                 continue;
             }
-            if (!shrine.isInRange(entity)) {
+            if (!shrine.isInRange(entity, pos)) {
                 continue;
             }
             list.add(shrine);
@@ -1086,15 +1206,15 @@ public class ShrineHelper {
         return list;
     }
 
-    private static Range getCombinedRange(HashSet<Shrine> network, float capacity) {
+    private static Range getCombinedRange(HashSet<Shrine> network, float capacity, Level level) {
         var positions = new ArrayList<BlockPos>();
         for (var shrine : network) {
             positions.addAll(shrine.hallowPositions);
         }
-        return getShrineRange(positions, capacity, true);
+        return getShrineRange(positions, capacity, level);
     }
 
-    public static Range getShrineRange(Collection<BlockPos> positions, float capacity, boolean isCombined) {
+    public static Range getShrineRange(Collection<BlockPos> positions, float capacity, Level level) {
         var minX = Integer.MAX_VALUE;
         var minY = Integer.MAX_VALUE;
         var minZ = Integer.MAX_VALUE;
@@ -1114,20 +1234,18 @@ public class ShrineHelper {
         }
         var center = new Vec3((minX + maxX + 1) / 2f, (minY + maxY + 1) / 2f, (minZ + maxZ + 1) / 2f);
         capacity = (float) Math.pow(capacity, 1.3f) * 0.25f;
+        var uniqueBlocks = new HashSet<>();
+        for (var pos : positions) {
+            var block = level.getBlockState(pos).getBlock();
+            uniqueBlocks.add(block);
+        }
+        capacity *= 3f - (8f / (uniqueBlocks.size() + 3));
         var shrineWidth = Math.max(maxX - minX, maxZ - minZ) + 1f;
         var shrineHeight = (maxY - minY) + 1f;
-        if (maxY == minY && maxZ == minZ) shrineHeight = 0.1f;
+        if (maxY == minY) shrineHeight = 0.1f;
         var aspectRatio = shrineWidth / shrineHeight;
         var pow = 3f;
         float r = (float) Math.pow(capacity * aspectRatio / Mth.PI, 1f / pow);
-        if (isCombined) {
-            var furthestDist = 0d;
-            for (var pos : positions) {
-                furthestDist = Math.max(furthestDist, (pos.distToCenterSqr(center.x, center.y, center.z)));
-            }
-            r = Math.min(r, (float) Math.sqrt(furthestDist)) + 0.5f;
-            aspectRatio = (float) Math.pow(r, pow) * Mth.PI / capacity;
-        }
         if (r < Mth.sqrt(2) / 2) {
             r = Mth.sqrt(2) / 2;
             aspectRatio = (float) Math.pow(r, pow) * Mth.PI / capacity;

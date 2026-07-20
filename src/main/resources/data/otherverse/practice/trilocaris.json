@@ -1,0 +1,11 @@
+{
+	"other" : "alexscaves:trilocaris",
+	"spirit": "time",
+	"transfusion" : [
+		{
+			"input" : "minecraft:seagrass",
+			"health" : 3,
+			"output" : "alexscaves:trilocaris_tail"
+		}
+	]
+}

@@ -7,23 +7,38 @@
         {
             "type": "patchouli:crafting",
             "recipe": "otherverse:biome_brazier",
-            "text": "The Biome Brazier has the ability to transform biomes and generate natural resources, when fed the right balance of spirits."
+            "text": "When fed the right balance of spirits, the Biome Brazier has the ability to load chunks, locate biomes from afar, and even transform biomes and generate natural resources."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:scrying_powder"
+            },
+            "text": "To locate a biome, first create scrying powder by infusing Fate spirits into blaze powder. Then use it on the biome brazier, which will erupt into blue flames. Once lit, the brazier will absorb one spirit at a time from any hallows influencing it."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Each biome has a specific sequence of four spirits, which must be fed to the brazier in that order. These sequences can be found in JEI via the biome brazier or spirit items. After feeding the four spirits to the brazier, it will start emitting flames that point in the direction of the nearest biome of that type."
         },
         {
             "type": "patchouli:spotlight",
             "item": {
               "item": "otherverse:realm_wracked_coal"
             },
-            "text": "To use a brazier, you must first toss coal or charcoal through a portal to create realm-wracked coal. Using this in a biome will imprint that biome on the coal. Its tooltip will reveal which spirits will be required to recreate the biome elsewhere."
+            "text": "To transform biomes, you must first toss coal or charcoal through a portal to create realm-wracked coal. Using this in a biome will imprint that biome on the coal. Its tooltip will reveal which spirits will be required to recreate the biome elsewhere."
         },
         {
             "type": "patchouli:text",
-            "text": "Use realm-wracked coal on a brazier to light it. Once lit, the brazier will absorb spirits from any hallows influencing it. Once it has enough spirits, it will transform a tiny area around it into the provided biome. Providing the same set of spirits to the brazier again will expand the radius. Once the maximum radius (16 blocks) is reached, the brazier will start generating biome features, such as trees."
+            "text": "Use realm-wracked coal on a brazier to light it. Once lit, the brazier will absorb spirits from any hallows influencing it. Once it has enough spirits, it will transform a tiny area around it into the provided biome. Providing the same set of spirits again will expand the radius. Once the maximum radius (16 blocks) is reached, the brazier will start generating biome features, such as trees or ores."
         },
         {
             "type": "patchouli:image",
             "images": ["otherverse:textures/gui/entries/brazier_1.png"],
             "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "text": "To use a biome brazier to load chunks, you'll need a dimension shrine. You can read more about those in the Shamanism book."
         }
     ]
 }

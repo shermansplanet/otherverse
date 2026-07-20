@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.binding.BindingManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.BossEvent;
@@ -36,7 +37,7 @@ public abstract class AllayInjector extends PathfinderMob implements InventoryCa
 
     @Inject(method = "customServerAiStep", at = @At("HEAD"), cancellable = true)
     protected void onAiStep(CallbackInfo ci) {
-        if (this.getPersistentData().hasUUID("bindingId")) {
+        if (BindingManager.isBoundOrContracted(this)) {
             ci.cancel();
         }
     }
@@ -48,7 +49,7 @@ public abstract class AllayInjector extends PathfinderMob implements InventoryCa
 
     @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
     protected void onMobInteract(Player p_218361_, InteractionHand p_218362_, CallbackInfoReturnable<InteractionResult> ci) {
-        if (this.getPersistentData().hasUUID("bindingId")) {
+        if (BindingManager.isBoundOrContracted(this)) {
             ci.setReturnValue(InteractionResult.PASS);
             ci.cancel();
         }

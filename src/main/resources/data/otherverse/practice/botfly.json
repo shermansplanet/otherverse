@@ -1,0 +1,11 @@
+{
+	"other" : "enemyexpansion:botfly",
+	"spirit" : "flesh",
+	"binding" : {
+		"minecraft:cobweb" : 12
+	},
+	"healing" : {
+		"otherverse:spirit_death" : 1,
+		"minecraft:rotten_flesh" : 9
+	}
+}

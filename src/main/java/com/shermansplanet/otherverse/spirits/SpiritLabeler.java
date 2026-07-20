@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.spirits;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.binding.MobTransfusions;
@@ -10,6 +11,7 @@ import com.shermansplanet.otherverse.diagrams.ChalkItem;
 import com.shermansplanet.otherverse.integrations.jei.SpiritExtractionRecipe;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -52,9 +54,9 @@ public class SpiritLabeler {
                 @Override
                 public boolean synthesize() {
                     LOGGER.debug("SPIRIT LABELER: SYNTHESIZING");
-                    if(SPIRITS_FROM_TAGS.data == null) LOGGER.debug("NO SPIRITS FROM TAGS");
-                    if(SPIRITS_FROM_COLORS.data == null) LOGGER.debug("NO SPIRITS FROM COLORS");
-                    if(SPIRITS_FROM_JSON.data == null) LOGGER.debug("NO SPIRITS FROM JSON");
+                    if (SPIRITS_FROM_TAGS.data == null) LOGGER.debug("NO SPIRITS FROM TAGS");
+                    if (SPIRITS_FROM_COLORS.data == null) LOGGER.debug("NO SPIRITS FROM COLORS");
+                    if (SPIRITS_FROM_JSON.data == null) LOGGER.debug("NO SPIRITS FROM JSON");
                     for (var component : components) {
                         if (component.data == null) return false;
                     }
@@ -64,13 +66,13 @@ public class SpiritLabeler {
                     itemsWithoutSpirits.add(OtherverseItems.SELF.get());
                     itemsWithoutSpirits.add(OtherverseItems.SPIRIT_TABLET.get());
                     itemsWithoutSpirits.add(OtherverseItems.IDOL.get());
-                    for(var item : Spirits.spiritItems.values()){
+                    for (var item : Spirits.spiritItems.values()) {
                         itemsWithoutSpirits.add(item.get());
                     }
                     data = new HashMap<>();
                     for (var component : Arrays.stream(components).map(t -> (HashMap<Item, SpiritLabeler.SpiritAmount[]>) t.data).toList()) {
                         for (var itemAmount : component.entrySet()) {
-                            if(itemsWithoutSpirits.contains(itemAmount.getKey())) continue;
+                            if (itemsWithoutSpirits.contains(itemAmount.getKey())) continue;
                             var table = data.computeIfAbsent(itemAmount.getKey(), x -> new Hashtable<>());
                             for (var spiritAmount : itemAmount.getValue()) {
                                 if (spiritAmount.amount() == 0) continue;
@@ -114,12 +116,12 @@ public class SpiritLabeler {
                 spiritAmounts.add(new SpiritAmount(k2, spiritsForItem.get(k2)));
             }
             spiritAmounts.sort((a, b) -> b.amount.compareTo(a.amount));
-            recipes.add(new SpiritExtractionRecipe(new ResourceLocation(Otherverse.MODID, k.toString()),
+            recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.toString()),
                     spiritAmounts, k.getDefaultInstance()));
         }
         for (var k : MobBindingInfluenceUtils.mobSpirits.entrySet()) {
             var item = MobBindingInfluenceUtils.getIdol(k.getKey());
-            recipes.add(new SpiritExtractionRecipe(new ResourceLocation(Otherverse.MODID, k.getKey().toString()),
+            recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.getKey().toString()),
                     List.of(new SpiritAmount(k.getValue(), 1)), item));
         }
         return recipes;
@@ -132,8 +134,8 @@ public class SpiritLabeler {
     public static void loadJsonSpirits(JsonObject practice) {
         var spirits = practice.get("spirits").getAsJsonObject();
         for (var itemstring : spirits.keySet()) {
-            var loc = new ResourceLocation(itemstring);
-            if(!ForgeRegistries.ITEMS.containsKey(loc)) continue;
+            var loc = ResourceLocation.parse(itemstring);
+            if (!ForgeRegistries.ITEMS.containsKey(loc)) continue;
             Item item = ForgeRegistries.ITEMS.getValue(loc);
             var spiritcounts = spirits.get(itemstring).getAsJsonArray();
             SpiritAmount[] amounts = new SpiritAmount[spiritcounts.size()];
@@ -181,6 +183,8 @@ public class SpiritLabeler {
             }
             ArrayList<SpiritAmount> spiritAmounts = new ArrayList<>();
 
+            var modId = ForgeRegistries.ITEMS.getKey(item).getNamespace();
+
             for (SpiritType spiritType : yieldingSpiritTypes) {
                 if (item == Spirits.spiritItems.get(spiritType).get()) {
                     spiritAmounts.add(new SpiritAmount(spiritType, 3));
@@ -203,13 +207,15 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Items.SAND, Spirits.TIME, 1);
             AddForTag(item, spiritAmounts, ItemTags.CANDLES, Spirits.TIME, 3);
 
-            AddForTag(item, spiritAmounts, Items.ARMORS, Spirits.PROTECTION,
-                    i -> i instanceof ArmorItem a ? (int) ((a.getDefense() + a.getToughness()) * 9) : 1);
-            AddForTag(item, spiritAmounts, Items.BONES, Spirits.DEATH, 9);
+            if (item instanceof ArmorItem a) {
+                spiritAmounts.add(new SpiritAmount(Spirits.PROTECTION, (int) ((a.getDefense() + a.getToughness()) * 9)));
+            }
 
             if (item instanceof HorseArmorItem horseArmor) {
                 spiritAmounts.add(new SpiritAmount(Spirits.PROTECTION, horseArmor.getProtection()));
             }
+
+            AddForTag(item, spiritAmounts, Items.BONES, Spirits.DEATH, 9);
 
             SpiritAmountDeterminer tierFunc = i -> i instanceof TieredItem t ?
                     (int) (t.getTier().getAttackDamageBonus() + t.getTier().getSpeed()) : 7;
@@ -225,15 +231,12 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Tags.Blocks.ORE_BEARING_GROUND_NETHERRACK, Spirits.NETHER, 3);
             AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_NETHERRACK, Spirits.OVERWORLD, 3);
 
-            AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.END, 3);
+//            AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.END, 3);
 
             AddForTag(item, spiritAmounts, BlockTags.CORAL_BLOCKS, Spirits.WATER, 2);
             AddForTag(item, spiritAmounts, BlockTags.UNDERWATER_BONEMEALS, Spirits.WATER, 1);
 
-            AddForTag(item, spiritAmounts, Items.TOOLS_AXES, Spirits.OVERWORLD, tierFunc);
-            AddForTag(item, spiritAmounts, Items.TOOLS_SHOVELS, Spirits.EARTH, tierFunc);
-            AddForTag(item, spiritAmounts, Items.TOOLS_HOES, Spirits.NATURE, tierFunc);
-            AddForTag(item, spiritAmounts, Items.TOOLS_PICKAXES, Spirits.FORTUNE, tierFunc);
+            AddForTag(item, spiritAmounts, Items.TOOLS, Spirits.OVERWORLD, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_BOWS, Spirits.AIR, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_CROSSBOWS, Spirits.AIR, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_FISHING_RODS, Spirits.WATER, tierFunc);
@@ -241,6 +244,7 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Items.TOOLS_SHIELDS, Spirits.PROTECTION, tierFunc);
 
             AddForTag(item, spiritAmounts, ItemTags.BUTTONS, Spirits.TECH, 1);
+            AddForTag(item, spiritAmounts, ItemTags.RAILS, Spirits.TECH, 1);
 
             var modifiers = item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND);
             if (!modifiers.get(Attributes.ATTACK_DAMAGE).isEmpty() && !modifiers
@@ -265,6 +269,7 @@ public class SpiritLabeler {
             }
 
             if (item.isEdible()) {
+                if (modId.equals("macabre")) spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 9));
                 var foodProps = item.getDefaultInstance().getFoodProperties(null);
                 int foodAmount = 1;
                 if (foodProps != null) {
@@ -299,11 +304,21 @@ public class SpiritLabeler {
                     spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 13));
                 }
 
-                if (item.toString().contains("copper")) {
-                    spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18));
+                var itemName = item.toString();
+                var time = itemName.contains("oxidized") ? 9
+                        : itemName.contains("weathered") ? 6
+                        : itemName.contains("exposed") ? 3 : 0;
+                if (time > 0) spiritAmounts.add(new SpiritAmount(Spirits.TIME, time));
+                if (itemName.contains("copper")) {
+                    if (time < 9) spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18 - time * 2));
                     spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
                 }
+
+                if(itemName.contains("end_stone") || itemName.contains("purpur") || itemName.contains("void") || itemName.contains("chorus")) spiritAmounts.add(new SpiritAmount(Spirits.END, 3));
+                if(itemName.contains("frosted_stone") || itemName.contains("black_steel")) spiritAmounts.add(new SpiritAmount(Spirits.COLD, 3));
+                if(itemName.contains("prismarine") || itemName.contains("seastone")) spiritAmounts.add(new SpiritAmount(Spirits.WATER, 3));
             }
+
 
             if (spiritAmounts.isEmpty()) {
                 continue;
@@ -314,22 +329,37 @@ public class SpiritLabeler {
         SPIRITS_FROM_TAGS.setData(spiritsFromTags);
     }
 
-    public static void analyzeSmeltingRecipes(List<SmeltingRecipe> smeltingRecipes) {
+    public static void analyzeSmeltingRecipes(List<SmeltingRecipe> smeltingRecipes, ServerLevel sl) {
         HashSet<Item> products = new HashSet<>();
         doubleSmeltItems = new HashSet<>();
         SpiritTransfusions.TRANSFUSIONS_FROM_RECIPES.data = new HashMap<>();
         MobTransfusions.TRANSFUSIONS_FROM_RECIPES.data = new HashMap<>();
         for (var recipe : smeltingRecipes) {
-            products.add(recipe.getResultItem().getItem());
-            SpiritTransfusions.analyzeSmeltingRecipe(recipe);
-            MobTransfusions.analyzeSmeltingRecipe(recipe);
+            products.add(recipe.getResultItem(sl.registryAccess()).getItem());
+            SpiritTransfusions.analyzeSmeltingRecipe(recipe, sl);
+            MobTransfusions.analyzeSmeltingRecipe(recipe, sl);
         }
         for (var recipe : smeltingRecipes) {
             for (Ingredient ingredient : recipe.getIngredients()) {
                 for (ItemStack input : ingredient.getItems()) {
                     if (products.contains(input.getItem())) {
-                        doubleSmeltItems.add(recipe.getResultItem().getItem());
+                        doubleSmeltItems.add(recipe.getResultItem(sl.registryAccess()).getItem());
                     }
+                }
+            }
+        }
+        for (var item : ForgeRegistries.ITEMS.getKeys()) {
+            var name = item.getPath();
+            var precursor = name
+                    .replace("exposed_", "")
+                    .replace("weathered_", "exposed_")
+                    .replace("oxidized", "weathered_");
+            if (precursor.equals(name)) continue;
+            var newKey = ResourceLocation.fromNamespaceAndPath(item.getNamespace(), precursor);
+            if (ForgeRegistries.ITEMS.containsKey(newKey)) {
+                var preItem = ForgeRegistries.ITEMS.getValue(newKey);
+                if (ForgeRegistries.ITEMS.getValue(item) instanceof BlockItem bi) {
+                    SpiritTransfusions.register(preItem, Spirits.TIME, 3, bi.getBlock());
                 }
             }
         }

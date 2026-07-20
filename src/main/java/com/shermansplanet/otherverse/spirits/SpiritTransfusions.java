@@ -154,6 +154,12 @@ public class SpiritTransfusions {
                 Blocks.PINK_CONCRETE_POWDER
         });
 
+        registerDyableItems(new Item[]{
+                Items.WHITE_DYE, Items.LIGHT_GRAY_DYE, Items.GRAY_DYE, Items.BLACK_DYE, Items.BROWN_DYE, Items.RED_DYE,
+                Items.ORANGE_DYE, Items.YELLOW_DYE, Items.LIME_DYE, Items.GREEN_DYE, Items.CYAN_DYE, Items.LIGHT_BLUE_DYE,
+                Items.BLUE_DYE, Items.PURPLE_DYE, Items.MAGENTA_DYE, Items.PINK_DYE
+        });
+
         for (int i = 0; i < 16; i++) {
             Item input = OtherverseItems.SPINDLES.get(i).get();
             for (int ii = 0; ii < 16; ii++) {
@@ -167,9 +173,9 @@ public class SpiritTransfusions {
         TRANSFUSIONS_FROM_JSON.setData(TRANSFUSIONS_FROM_JSON.data);
     }
 
-    public static void analyzeSmeltingRecipe(SmeltingRecipe recipe) {
+    public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
         register(recipe.getIngredients().get(0).getItems()[0].getItem(),
-                Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem().getItem(), true);
+                Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem(sl.registryAccess()).getItem(), true);
     }
 
     private static void registerDyableBlocks(Block[] blocks) {
@@ -182,11 +188,21 @@ public class SpiritTransfusions {
         }
     }
 
+    private static void registerDyableItems(Item[] items) {
+        for (int i = 0; i < 16; i++) {
+            Item input = items[i];
+            for (int ii = 0; ii < 16; ii++) {
+                if (ii == i) continue;
+                register(input, Spirits.colorSpiritTypes[ii], 3, items[ii], false);
+            }
+        }
+    }
+
     private static void register(Item input, SpiritType spiritType, int price, Item output, boolean fromRecipe) {
         register(input, spiritType, price, output.getDefaultInstance(), output instanceof BlockItem bi ? bi.getBlock() : null, fromRecipe);
     }
 
-    private static void register(Item input, SpiritType spiritType, int price, Block output) {
+    public static void register(Item input, SpiritType spiritType, int price, Block output) {
         register(input, spiritType, price, output.asItem().getDefaultInstance(), output);
         if (input == Items.DIRT && output != Blocks.GRASS_BLOCK) {
             register(Items.GRASS_BLOCK, spiritType, price, output.asItem().getDefaultInstance(), output);
@@ -198,6 +214,7 @@ public class SpiritTransfusions {
     }
 
     public static void register(Item input, SpiritType spiritType, int price, ItemStack output, Block blockOutput, boolean fromRecipe) {
+        if (input == Items.AIR || blockOutput == Blocks.AIR || output.is(Items.AIR)) return;
         var spiritTransfusions = fromRecipe ? TRANSFUSIONS_FROM_RECIPES.data : TRANSFUSIONS_FROM_JSON.data;
         if (!spiritTransfusions.containsKey(input)) {
             spiritTransfusions.put(input, new ArrayList<>());

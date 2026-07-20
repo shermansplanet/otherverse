@@ -2,7 +2,7 @@
     "name": "Contract Structure",
     "icon": "minecraft:red_dye",
     "category": "otherverse:contracts",
-    "sortnum": 2,
+    "sortnum": 20,
     "pages": [
         {
             "type": "patchouli:text",

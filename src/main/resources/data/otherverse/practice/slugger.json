@@ -1,0 +1,26 @@
+{
+	"other" : "enemyexpansion:slugger",
+	"binding" : {
+		"otherverse:spirit_light" : 1
+	},
+	"healing" : {
+		"otherverse:spirit_flesh" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:spider_eye",
+			"health" : 3,
+			"output" : "minecraft:fermented_spider_eye"
+		},
+		{
+			"input" : "minecraft:red_mushroom",
+			"health" : 1,
+			"output" : "minecraft:rotten_flesh"
+		},
+		{
+			"input" : "minecraft:brown_mushroom",
+			"health" : 1,
+			"output" : "minecraft:rotten_flesh"
+		}
+	]
+}

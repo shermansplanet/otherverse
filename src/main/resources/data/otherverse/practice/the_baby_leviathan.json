@@ -1,0 +1,17 @@
+{
+	"other" : "cataclysm:the_baby_leviathan",
+	"spirit" : "water",
+	"binding" : {
+		"cataclysm:blessed_amethyst_crab_meat" : 50
+	},
+	"healing" : {
+		"otherverse:spirit_dark" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:obsidian",
+			"health" : 33,
+			"output" : "minecraft:crying_obsidian"
+		}
+	]
+}

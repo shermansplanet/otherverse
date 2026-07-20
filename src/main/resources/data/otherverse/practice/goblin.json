@@ -1,0 +1,7 @@
+{
+	"other" : "enemyexpansion:goblin",
+	"spirit" : "fortune",
+	"healing" : {
+		"otherverse:memory_snare" : 99
+	}
+}

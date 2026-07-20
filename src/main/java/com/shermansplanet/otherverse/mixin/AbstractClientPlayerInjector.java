@@ -1,6 +1,8 @@
 package com.shermansplanet.otherverse.mixin;
 
 import com.mojang.authlib.GameProfile;
+import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.familiar.ITextureSetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -10,6 +12,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +28,7 @@ public class AbstractClientPlayerInjector extends Player implements ITextureSett
     private ResourceLocation overrideTexture;
 
     public AbstractClientPlayerInjector(Level p_219727_, BlockPos p_219728_, float p_219729_, GameProfile p_219730_, @Nullable ProfilePublicKey p_219731_) {
-        super(p_219727_, p_219728_, p_219729_, p_219730_, p_219731_);
+        super(p_219727_, p_219728_, p_219729_, p_219730_);
     }
 
     @Override
@@ -45,6 +49,11 @@ public class AbstractClientPlayerInjector extends Player implements ITextureSett
             ci.setReturnValue(overrideTexture);
             ci.cancel();
         }
+    }
+
+    protected float getBlockSpeedFactor() {
+        return this.onSoulSpeedBlock() && (EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, this) > 0
+                || FamiliarManager.hasFamiliarType(this, Otherverse.SNUFFER.get())) ? 1.0F : super.getBlockSpeedFactor();
     }
 
     @Override

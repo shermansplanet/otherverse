@@ -1,0 +1,11 @@
+{
+	"other" : "otherverse:fury",
+	"spirit" : "fire",
+	"transfusion" : [
+		{
+			"input" : "minecraft:stick",
+			"health" : 13,
+			"output" : "otherverse:fury_rod"
+		}
+	]
+}

@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:gingerbread_man",
+	"spirit": "food",
+	"healing" : {
+		"alexscaves:block_of_frosting" : 6
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:sugar",
+			"health" : 3,
+			"output" : "alexscaves:gingerbread_crumbs"
+		}
+	]
+}

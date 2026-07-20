@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.familiar;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.PowerSource;
 import net.minecraft.network.chat.Component;
@@ -28,7 +29,7 @@ public class FamiliarNameTagItem extends NameTagItem {
             LOGGER.debug("Name tag has no name!");
             return InteractionResult.PASS;
         }
-        if (player.level.isClientSide) {
+        if (player.level().isClientSide) {
             return InteractionResult.SUCCESS;
         }
         if (!FamiliarManager.isEligibleFamiliar(entity)) {
@@ -36,7 +37,7 @@ public class FamiliarNameTagItem extends NameTagItem {
             LOGGER.debug(entity.getType() + " cannot be a familiar");
             return InteractionResult.PASS;
         }
-        var sl = (ServerLevel) player.level;
+        var sl = (ServerLevel) player.level();
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
         if (binding == null || binding.mob != entity) return InteractionResult.PASS;
@@ -46,12 +47,15 @@ public class FamiliarNameTagItem extends NameTagItem {
         var playerSet = new HashSet<EntityType<?>>();
         playerSet.add(EntityType.PLAYER);
         var requiredPower = (int) (entity.getMaxHealth() / 2);
-        if (player.isCreative() || diagram.trySpendPower(sl, binding.position,
-                requiredPower * PowerSource.POWER_FROM_SELF, playerSet)) {
+        BlockFocus otherfocus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
+        if (player.isCreative()
+                || diagram.trySpendPower(sl, binding.position, requiredPower * PowerSource.POWER_FROM_SELF, playerSet)
+                || (otherfocus != null && otherfocus.getDiagram() != null &&
+                otherfocus.getDiagram().trySpendPower(sl, otherfocus.getPos(), requiredPower * PowerSource.POWER_FROM_SELF, playerSet))) {
             entity.setCustomName(stack.getHoverName());
             FamiliarManager.makeFamiliar(entity, player);
         } else {
-            player.sendSystemMessage(Component.literal("You need " + requiredPower + " Self to complete this ritual."));
+            player.sendSystemMessage(Component.literal("This mob needs to be influenced by " + requiredPower + " Self to complete this ritual."));
         }
         return InteractionResult.CONSUME;
     }

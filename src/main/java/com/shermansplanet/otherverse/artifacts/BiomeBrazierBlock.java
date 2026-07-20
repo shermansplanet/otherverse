@@ -11,18 +11,24 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.jetbrains.annotations.Nullable;
 
 public class BiomeBrazierBlock extends Block implements EntityBlock {
+    public static final BooleanProperty SCRY = BooleanProperty.create("scry");
+
     public BiomeBrazierBlock(Properties p_56359_) {
         super(p_56359_);
-        registerDefaultState(stateDefinition.any().setValue(BlockStateProperties.LIT, false));
+        registerDefaultState(stateDefinition.any()
+                .setValue(BlockStateProperties.LIT, false)
+                .setValue(SCRY, false));
     }
 
     @Override
     public void createBlockStateDefinition(StateDefinition.Builder builder) {
         super.createBlockStateDefinition(builder);
         builder.add(BlockStateProperties.LIT);
+        builder.add(SCRY);
     }
 
     @Nullable

@@ -2,8 +2,6 @@ package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import com.shermansplanet.otherverse.Otherverse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -14,15 +12,16 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import org.joml.Quaternionf;
 
 public class DemesnesPortalRenderer implements BlockEntityRenderer<DemesnesPortal> {
-    private static final ResourceLocation BEAM_LOCATION = new ResourceLocation(Otherverse.MODID, "textures/portal/beam.png");
+    private static final ResourceLocation BEAM_LOCATION = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/portal/beam.png");
     private static final ResourceLocation[] portalLocations = new ResourceLocation[]{
-            new ResourceLocation(Otherverse.MODID, "textures/portal/portal_0.png"),
-            new ResourceLocation(Otherverse.MODID, "textures/portal/portal_1.png"),
-            new ResourceLocation(Otherverse.MODID, "textures/portal/portal_2.png"),
-            new ResourceLocation(Otherverse.MODID, "textures/portal/portal_3.png"),
-            new ResourceLocation(Otherverse.MODID, "textures/portal/portal_4.png")
+            ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/portal/portal_0.png"),
+            ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/portal/portal_1.png"),
+            ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/portal/portal_2.png"),
+            ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/portal/portal_3.png"),
+            ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/portal/portal_4.png")
     };
 
     public DemesnesPortalRenderer(BlockEntityRendererProvider.Context ctx) {
@@ -38,7 +37,7 @@ public class DemesnesPortalRenderer implements BlockEntityRenderer<DemesnesPorta
         long millis = System.currentTimeMillis();
         var rot = (millis % Math.round(speed * 2 * 360)) * 1f / speed;
         pose.translate(0.5f, 0, 0.5f);
-        pose.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, rot, 0)));
+        pose.mulPose(new Quaternionf().rotateY(rot * Mth.TWO_PI / 360));
         pose.translate(-0.5f, 0, -0.5f);
         BeaconRenderer.renderBeaconBeam(pose, buffers, BEAM_LOCATION, mc.getPartialTick(), 1,
                 mc.level.getGameTime(), 0, height, portal.color, 0.2F, 0.3F);
@@ -81,7 +80,7 @@ public class DemesnesPortalRenderer implements BlockEntityRenderer<DemesnesPorta
         poseStack.translate(0.5f, 0, 0.5f);
         long millis = System.currentTimeMillis();
         var rot = (millis % (speed * 360L)) * 1f / speed;
-        poseStack.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0, rot, 0)));
+        poseStack.mulPose(new Quaternionf().rotateY(rot* Mth.TWO_PI / 360));
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 
         var pose = poseStack.last().pose();

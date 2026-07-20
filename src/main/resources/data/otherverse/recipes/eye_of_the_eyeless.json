@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+      {"item": "otherverse:ended_pearl"},
+      {"item": "otherverse:rancid_flesh"}
+  ],
+  "result": {
+    "item": "otherverse:eye_of_the_eyeless",
+    "count" : 1
+  }
+}

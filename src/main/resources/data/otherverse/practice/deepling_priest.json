@@ -1,0 +1,11 @@
+{
+	"other" : "cataclysm:deepling_priest",
+	"spirit" : "water",
+	"transfusion" : [
+		{
+			"input" : "minecraft:iron_sword",
+			"health" : 9,
+			"output" : "cataclysm:athame"
+		}
+	]
+}

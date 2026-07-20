@@ -1,0 +1,14 @@
+{
+	"other" : "alexscaves:vesper",
+	"spirit": "dark",
+	"healing" : {
+		"entity.alexscaves.gloomoth" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:leather",
+			"health" : 7,
+			"output" : "alexscaves:vesper_wing"
+		}
+	]
+}

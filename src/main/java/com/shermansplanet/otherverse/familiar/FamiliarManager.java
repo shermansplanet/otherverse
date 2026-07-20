@@ -6,15 +6,19 @@ import com.shermansplanet.otherverse.Keybindings;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.binding.*;
+import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.SelfManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.implement.ImplementManager;
+import com.shermansplanet.otherverse.others.Buzzed;
 import com.shermansplanet.otherverse.potions.OtherversePotions;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.ruins.RuinsManager;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
+import com.shermansplanet.otherverse.spirits.SpiritLabeler;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -28,10 +32,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -40,10 +45,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.animal.Fox;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
@@ -60,6 +62,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -115,6 +118,7 @@ public class FamiliarManager {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static ServerPlayer justJoinedPlayer;
     private static HashSet<EntityType<?>> flyingMobs = new HashSet<>();
+    private static HashSet<EntityType<?>> ruinsMobs = new HashSet<>();
     private static HashMap<EntityType<?>, Item> swarmMobs = new HashMap<>();
     private static HashMap<EntityType<?>, EntityType<? extends LivingEntity>> enemyMobs = new HashMap<>();
     private static HashMap<EntityType<?>, EntityType<? extends Mob>> zombification = new HashMap<>();
@@ -181,6 +185,23 @@ public class FamiliarManager {
         fishingMobs.addAll(List.of(EntityType.COD, EntityType.SALMON, EntityType.TROPICAL_FISH, EntityType.PIGLIN, EntityType.SQUID));
     }
 
+    public static void loadCustomMobs() {
+        flyingMobs.add(Otherverse.TYPHLOTIC_JELLYFISH.get());
+        flyingMobs.add(Otherverse.TYPHLOTIC_SHARK.get());
+        flyingMobs.add(Otherverse.FURY.get());
+        flyingMobs.add(Otherverse.BUZZED.get());
+        flyingMobs.add(Otherverse.BANSHEE.get());
+
+        ruinsMobs.add(Otherverse.TYPHLOTIC_JELLYFISH.get());
+        ruinsMobs.add(Otherverse.TYPHLOTIC_SHARK.get());
+        ruinsMobs.add(Otherverse.FURY.get());
+        ruinsMobs.add(Otherverse.BUZZED.get());
+        ruinsMobs.add(Otherverse.BANSHEE.get());
+        ruinsMobs.add(Otherverse.GUEST.get());
+        ruinsMobs.add(Otherverse.SNUFFER.get());
+        ruinsMobs.add(Otherverse.TYPHLOTIC_ZOMBIE.get());
+    }
+
     private static Mob getMobInstance(ServerLevel sl, EntityType<?> et) {
         var mob = mobInstances.get(et);
         if (mob != null) return mob;
@@ -224,7 +245,7 @@ public class FamiliarManager {
     @SubscribeEvent()
     public static void witherWake(PlayerWakeUpEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp) || !hasFamiliarType(sp, EntityType.WITHER)) return;
-        for (Entity e : sp.getLevel().getEntities(sp, sp.getBoundingBox().inflate(32))) {
+        for (Entity e : sp.serverLevel().getEntities(sp, sp.getBoundingBox().inflate(16))) {
             if (!(e instanceof LivingEntity le)) continue;
             le.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * (8 + sp.getRandom().nextInt(24)), 1));
         }
@@ -293,6 +314,38 @@ public class FamiliarManager {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onFeedHoney(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)
+                || !(event.getTarget() instanceof Buzzed buzzed)
+                || !event.getItemStack().is(Items.HONEY_BOTTLE)
+                || !getPractitionerForFamiliar(buzzed).equals(sp.getGameProfile().getName())) return;
+
+        for (var entity : sp.serverLevel().getEntities(null, buzzed.getBoundingBox().inflate(16))) {
+            if (!(entity instanceof Animal animal) || animal.isBaby()) continue;
+            animal.resetLove();
+            animal.setAge(0);
+        }
+
+        var r = buzzed.getRandom();
+        for (var i = 0; i < 16; i++) {
+            sp.serverLevel().sendParticles(ParticleTypes.END_ROD,
+                    buzzed.getX() + r.nextFloat() * 0.8f - 0.4f,
+                    buzzed.getY() + r.nextFloat() * 0.8f - 0.2f,
+                    buzzed.getZ() + r.nextFloat() * 0.8f - 0.4f,
+                    0, 0, 0, 0, 0.15f);
+        }
+        sp.serverLevel().playSound(null, buzzed, SoundEvents.HONEY_DRINK, SoundSource.NEUTRAL, 1, 1);
+
+        event.getItemStack().shrink(1);
+        if (event.getItemStack().isEmpty()) {
+            sp.getInventory().removeItem(event.getItemStack());
+        }
+        event.setResult(Event.Result.ALLOW);
+        event.setCancellationResult(InteractionResult.CONSUME);
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onFeed(PlayerInteractEvent.EntityInteractSpecific event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)
                 || !(event.getTarget() instanceof Cat cat)
@@ -309,27 +362,32 @@ public class FamiliarManager {
     @SubscribeEvent
     public static void onPlayerJump(LivingEvent.LivingJumpEvent event) {
         if (!(event.getEntity() instanceof Player player) || !hasFamiliarType(player, EntityType.FROG)) return;
-        var bs = player.getLevel().getBlockState(player.blockPosition());
+        var bs = player.level().getBlockState(player.blockPosition());
         if (!bs.is(Blocks.LILY_PAD) && !bs.is(Blocks.BIG_DRIPLEAF)) return;
         player.push(0, 1, 0);
         if (!(player instanceof ServerPlayer sp)) return;
         sp.getPersistentData().putBoolean("frogfall", true);
-        sp.getLevel().playSound(null, sp, SoundEvents.FROG_LONG_JUMP, SoundSource.PLAYERS, 1f, 1f);
+        sp.serverLevel().playSound(null, sp, SoundEvents.FROG_LONG_JUMP, SoundSource.PLAYERS, 1f, 1f);
     }
 
     @SubscribeEvent
     public static void onEffect(MobEffectEvent.Applicable event) {
         var effect = event.getEffectInstance();
-        if (effect.getEffect() != MobEffects.HUNGER) return;
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        if (!hasFamiliarType(sp, EntityType.HUSK) && !hasFamiliarType(sp, EntityType.ZOMBIE)) return;
+        if (effect.getEffect() == MobEffects.CONFUSION && hasFamiliarType(sp, Otherverse.TYPHLOTIC_ZOMBIE.get())) {
+            event.setResult(Event.Result.DENY);
+            return;
+        }
+        if (effect.getEffect() != MobEffects.HUNGER) return;
+        if (!hasFamiliarType(sp, EntityType.HUSK) && !hasFamiliarType(sp, EntityType.ZOMBIE) && !hasFamiliarType(sp, Otherverse.TYPHLOTIC_ZOMBIE.get()))
+            return;
         sp.addEffect(new MobEffectInstance(MobEffects.SATURATION, effect.getDuration(), effect.getAmplifier()));
         event.setResult(Event.Result.DENY);
     }
 
     @SubscribeEvent
     public static void onDie(LivingDeathEvent event) {
-        if (!(event.getEntity().getLevel() instanceof ServerLevel sl)) return;
+        if (!(event.getEntity().level() instanceof ServerLevel sl)) return;
         var cause = event.getSource().getEntity();
         if (!(cause instanceof Fox fox)) return;
         var sp = getPlayerFromName(sl, getPractitionerForFamiliar(fox));
@@ -365,7 +423,7 @@ public class FamiliarManager {
         CompoundTag tag = new CompoundTag();
         tag.putString("practitioner", practitioner);
         OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.FAMILIAR, tag, false));
+                new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.FAMILIAR, tag, BindingUpdateMessage.BindingType.FAMILIAR, false));
 
         var familiarTag = IdolItem.mobToTag(mob);
         player.getCapability(PRACTICE_HANDLER).ifPresent(practice -> practice.setFamiliar(familiarTag, sp));
@@ -385,6 +443,10 @@ public class FamiliarManager {
     @SubscribeEvent
     public static void changeMode(PlayerEvent.PlayerChangeGameModeEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+        if (event.getNewGameMode() == GameType.CREATIVE) {
+            sp.getAbilities().setFlyingSpeed(0.05f);
+            return;
+        }
         playersToUpdate.add(sp);
     }
 
@@ -418,7 +480,7 @@ public class FamiliarManager {
         } else if (type.equals(EntityType.STRIDER)) {
             event.player.clearFire();
             var pos = event.player.position().add(0, 0.5f, 0);
-            if (event.player.getLevel().getBlockState(new BlockPos(pos)).is(Blocks.LAVA)) {
+            if (event.player.level().getBlockState(BlockPos.containing(pos)).is(Blocks.LAVA)) {
                 event.player.push(0, 0.1f, 0);
             }
         }
@@ -427,7 +489,7 @@ public class FamiliarManager {
 
         if (type.equals(EntityType.DROWNED)) {
             if (sp.getAirSupply() < 0) {
-                if (sp.getLevel().getGameTime() % 10 != 0) {
+                if (sp.serverLevel().getGameTime() % 10 != 0) {
                     sp.setAirSupply(0);
                     sp.heal(1);
                     var duration = 60;
@@ -436,7 +498,7 @@ public class FamiliarManager {
                     sp.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * duration, 2, false, true, true));
                 }
             } else if (!sp.isUnderWater() && sp.getAirSupply() < sp.getMaxAirSupply()) {
-                var x = sp.getLevel().getGameTime() % 4 == 0 ? 3 : 4;
+                var x = sp.serverLevel().getGameTime() % 4 == 0 ? 3 : 4;
                 sp.setAirSupply(sp.getAirSupply() - x);
             }
         }
@@ -456,7 +518,7 @@ public class FamiliarManager {
 
         int checkInterval = 20;
 
-        if (sp.getLevel().getGameTime() % checkInterval != 0) return;
+        if (sp.serverLevel().getGameTime() % checkInterval != 0) return;
 
         var swarmItem = swarmMobs.get(type);
         if (swarmItem != null && sp.getInventory().contains(swarmItem.getDefaultInstance())) {
@@ -467,13 +529,13 @@ public class FamiliarManager {
             var targetCount = hp > 0.5f ? 0 : hp > 0.25f ? 2 : 8;
             if (targetCount > 0) maintainSwarm(sp, type, targetCount);
         } else if (type.equals(EntityType.PIG)) {
-            if (sp.getVehicle() instanceof Pig && sp.getLevel().dimensionTypeId().location().getPath().equals("the_nether")) {
+            if (sp.getVehicle() instanceof Pig && sp.serverLevel().dimensionTypeId().location().getPath().equals("the_nether")) {
                 maintainSwarm(sp, EntityType.PIGLIN_BRUTE, 1);
             }
         }
 
         if (NeutralMob.class.isAssignableFrom(type.getBaseClass())) {
-            for (Entity e : sp.getLevel().getEntities(sp, AABB.ofSize(sp.position(),
+            for (Entity e : sp.serverLevel().getEntities(sp, AABB.ofSize(sp.position(),
                     6, 6, 6))) {
                 if (e.getType() != type || !(e instanceof NeutralMob nm) || !nm.isAngryAt(sp)) continue;
                 nm.stopBeingAngry();
@@ -481,9 +543,9 @@ public class FamiliarManager {
         }
 
         if (type.equals(EntityType.FROG)) {
-            if (sp.isOnGround()) sp.getPersistentData().putBoolean("frogfall", false);
+            if (sp.onGround()) sp.getPersistentData().putBoolean("frogfall", false);
         } else if (type.equals(EntityType.ENDER_DRAGON)) {
-            List<EndCrystal> list = sp.level.getEntitiesOfClass(EndCrystal.class, sp.getBoundingBox().inflate(32.0D));
+            List<EndCrystal> list = sp.serverLevel().getEntitiesOfClass(EndCrystal.class, sp.getBoundingBox().inflate(32.0D));
             if (!list.isEmpty()) {
                 sp.heal(list.size());
             }
@@ -497,14 +559,14 @@ public class FamiliarManager {
                 } else {
                     var dir = sp.getLookAngle().scale(2.5f);
                     data.putInt(HARBINGER_KEY, sp.getRandom().nextInt(12000));
-                    DragonFireball dragonFireball = new DragonFireball(sp.level, sp, dir.x, dir.y, dir.z);
+                    DragonFireball dragonFireball = new DragonFireball(sp.serverLevel(), sp, dir.x, dir.y, dir.z);
                     dragonFireball.setPos(sp.getEyePosition());
-                    sp.level.addFreshEntity(dragonFireball);
+                    sp.serverLevel().addFreshEntity(dragonFireball);
                 }
             }
         } else if (type.equals(EntityType.ELDER_GUARDIAN)) {
             if (sp.isUnderWater()) {
-                for (Entity e : sp.getLevel().getEntities(sp, AABB.ofSize(sp.position(),
+                for (Entity e : sp.serverLevel().getEntities(sp, AABB.ofSize(sp.position(),
                         32, 32, 32))) {
                     if ((e instanceof Monster m) && m.isAggressive() && m.getTarget() == sp) {
                         m.setTarget(null);
@@ -517,7 +579,7 @@ public class FamiliarManager {
             }
         } else if (type.equals(EntityType.GLOW_SQUID)) {
             if (sp.getInventory().contains(Items.GLOW_INK_SAC.getDefaultInstance())) {
-                for (Entity e : sp.getLevel().getEntities(sp, AABB.ofSize(sp.position(),
+                for (Entity e : sp.serverLevel().getEntities(sp, AABB.ofSize(sp.position(),
                         32, 32, 32))) {
                     if ((e instanceof Mob m) && !m.hasEffect(MobEffects.GLOWING)) {
                         m.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 5, 0));
@@ -526,17 +588,17 @@ public class FamiliarManager {
                 sp.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 21 * 13, 0, false, false, false));
             }
         } else if (type.equals(EntityType.PHANTOM)) {
-            if (!sp.getLevel().isDay()) {
+            if (!sp.serverLevel().isDay()) {
                 var attr = sp.getAttribute(CaelusApi.getInstance().getFlightAttribute());
                 attr.setBaseValue(1);
             }
         } else if (type.equals(EntityType.SNOW_GOLEM)) {
             if (sp.getRandom().nextInt(20) == 0
-                    && (sp.getLevel().getBiome(sp.blockPosition()).value().shouldSnowGolemBurn(sp.blockPosition())
-                    || sp.getLevel().dimensionType().ultraWarm())) {
+                    && (sp.serverLevel().getBiome(sp.blockPosition()).is(BiomeTags.SNOW_GOLEM_MELTS)
+                    || sp.serverLevel().dimensionType().ultraWarm())) {
                 var slotIndex = sp.getInventory().findSlotMatchingItem(Items.SNOW_BLOCK.getDefaultInstance());
                 if (slotIndex < 0) {
-                    sp.hurt(DamageSource.HOT_FLOOR, 2);
+                    sp.hurt(sp.damageSources().hotFloor(), 2);
                 } else {
                     var stack = sp.getInventory().getItem(slotIndex);
                     stack.shrink(1);
@@ -551,7 +613,7 @@ public class FamiliarManager {
                 sp.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 200));
             }
         } else if (type.equals(EntityType.WOLF)) {
-            var isFullMoon = sp.getLevel().isNight() && sp.getLevel().getMoonPhase() == 0;
+            var isFullMoon = sp.serverLevel().isNight() && sp.serverLevel().getMoonPhase() == 0;
             var hasAttr = sp.getAttribute(Attributes.MAX_HEALTH).getModifier(FAMILIAR_MODIFIER) != null;
             if (isFullMoon != hasAttr) {
                 for (var attrName : new Attribute[]{Attributes.ATTACK_KNOCKBACK, Attributes.ATTACK_DAMAGE, Attributes.MOVEMENT_SPEED, Attributes.MAX_HEALTH, Attributes.KNOCKBACK_RESISTANCE}) {
@@ -564,12 +626,12 @@ public class FamiliarManager {
             }
         } else if (type.equals(EntityType.STRIDER)) {
             var positionBelow = sp.position().add(0, -0.5f, 0);
-            var inLava = sp.getLevel().getFluidState(new BlockPos(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
+            var inLava = sp.serverLevel().getFluidState(BlockPos.containing(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
             var attr = sp.getAttribute(Attributes.MOVEMENT_SPEED);
             attr.removePermanentModifier(FAMILIAR_MODIFIER);
             if (inLava) {
                 attr.addPermanentModifier(new AttributeModifier(FAMILIAR_MODIFIER, "Familiar", 0.8F, AttributeModifier.Operation.MULTIPLY_TOTAL));
-                if (sp.getLevel().getGameTime() % checkInterval * 3 == 0) {
+                if (sp.serverLevel().getGameTime() % checkInterval * 3 == 0) {
                     sp.heal(1);
                 }
             }
@@ -577,13 +639,13 @@ public class FamiliarManager {
 
         if (sp.isInWaterOrRain() && (type.fireImmune() || type.equals(EntityType.ENDERMAN))) {
             if (sp.isInWater() || !sp.hasItemInSlot(EquipmentSlot.HEAD) || sp.getRandom().nextInt(20) == 0) {
-                sp.hurt(DamageSource.MAGIC, 1);
+                sp.hurt(sp.serverLevel().damageSources().magic(), 1);
             }
         }
 
         var enemy = enemyMobs.get(type);
         if (enemy != null) {
-            for (Entity e : sp.getLevel().getEntities(sp, AABB.ofSize(sp.position(),
+            for (Entity e : sp.serverLevel().getEntities(sp, AABB.ofSize(sp.position(),
                     24, 8, 24))) {
                 if (e.getType() != enemy || !(e instanceof NeutralMob nm)) continue;
                 nm.setTarget(sp);
@@ -595,7 +657,7 @@ public class FamiliarManager {
             benefits.add(new MobBenefit(MobBenefitCondition.ANYTIME, MobEffects.FIRE_RESISTANCE, 0));
             sp.clearFire();
         }
-        var mobInstance = getMobInstance(sp.getLevel(), type);
+        var mobInstance = getMobInstance(sp.serverLevel(), type);
         if (mobInstance != null) {
             if (mobInstance.getMobType() == MobType.WATER && !mobInstance.canDrownInFluidType(ForgeMod.WATER_TYPE.get())) {
                 benefits.add(new MobBenefit(MobBenefitCondition.UNDERWATER, MobEffects.WATER_BREATHING, 0));
@@ -604,11 +666,11 @@ public class FamiliarManager {
         for (var benefit : benefits) {
             var lightLevel = 0;
             if (benefit.condition == MobBenefitCondition.DARK) {
-                lightLevel = sp.getLevel().getLightEngine().getRawBrightness(sp.blockPosition(), sp.getLevel().getSkyDarken());
+                lightLevel = sp.serverLevel().getLightEngine().getRawBrightness(sp.blockPosition(), sp.serverLevel().getSkyDarken());
                 if (type.equals(EntityType.BAT)) {
                     abilities.mayfly = lightLevel <= 10;
                     abilities.setFlyingSpeed(0.05f * (1f - lightLevel / 11f));
-                    if (!sp.isOnGround()) abilities.flying = abilities.mayfly;
+                    if (!sp.onGround()) abilities.flying = abilities.mayfly;
                     sp.onUpdateAbilities();
                 }
                 if (lightLevel > 10) continue;
@@ -617,7 +679,8 @@ public class FamiliarManager {
             } else if (benefit.condition == MobBenefitCondition.UNDERWATER) {
                 if (!sp.isUnderWater()) continue;
             } else if (benefit.condition == MobBenefitCondition.COLD) {
-                if (!sp.getLevel().getBiome(sp.blockPosition()).value().coldEnoughToSnow(sp.blockPosition())) continue;
+                if (!sp.serverLevel().getBiome(sp.blockPosition()).value().coldEnoughToSnow(sp.blockPosition()))
+                    continue;
             }
             var effect = sp.getEffect(benefit.effect);
             if (effect != null && effect.getDuration() > 21 * 12) continue;
@@ -628,25 +691,25 @@ public class FamiliarManager {
     private static void freezeUnderfoot(ServerPlayer sp) {
         if (!sp.getInventory().contains(Items.BLUE_ICE.getDefaultInstance())) return;
         var replacePos = sp.blockPosition().below();
-        var blockState = sp.getLevel().getBlockState(replacePos);
+        var blockState = sp.serverLevel().getBlockState(replacePos);
         if (blockState.is(Blocks.WATER)) {
             if (blockState.getFluidState().isSource()) {
-                sp.getLevel().setBlockAndUpdate(replacePos, Blocks.FROSTED_ICE.defaultBlockState());
-                sp.level.playSound(null, sp, SoundEvents.GLASS_PLACE, SoundSource.BLOCKS, 1f, 1f);
+                sp.serverLevel().setBlockAndUpdate(replacePos, Blocks.FROSTED_ICE.defaultBlockState());
+                sp.serverLevel().playSound(null, sp, SoundEvents.GLASS_PLACE, SoundSource.BLOCKS, 1f, 1f);
             }
         } else if (blockState.is(Blocks.LAVA)) {
-            sp.getLevel().setBlockAndUpdate(replacePos,
+            sp.serverLevel().setBlockAndUpdate(replacePos,
                     blockState.getFluidState().isSource()
                             ? Blocks.OBSIDIAN.defaultBlockState()
                             : Blocks.STONE.defaultBlockState());
-            sp.level.playSound(null, sp, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 1f, 1f);
+            sp.serverLevel().playSound(null, sp, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 1f, 1f);
         }
     }
 
     private static void maintainSwarm(ServerPlayer sp, EntityType<? extends LivingEntity> type, int targetCount) {
         if (type == EntityType.WOLF) {
-            if (sp.getLevel().dimensionTypeId().location().getPath().equals("overworld")) {
-                var phase = sp.getLevel().getMoonPhase();
+            if (sp.serverLevel().dimensionTypeId().location().getPath().equals("overworld")) {
+                var phase = sp.serverLevel().getMoonPhase();
                 targetCount = (new int[]{9, 7, 5, 3, 1, 3, 5, 7})[phase];
             } else {
                 targetCount = 3;
@@ -654,7 +717,7 @@ public class FamiliarManager {
         }
         var swarmCount = 0;
         var name = sp.getGameProfile().getName();
-        for (Entity e : sp.getLevel().getEntities(sp, AABB.ofSize(sp.position(),
+        for (Entity e : sp.serverLevel().getEntities(sp, AABB.ofSize(sp.position(),
                 TETHER_DISTANCE * 2, TETHER_DISTANCE * 2, TETHER_DISTANCE * 2))) {
             if (e.getType() != type) continue;
             if (!e.getPersistentData().getString("practitioner_loyalty").equals(name)) continue;
@@ -663,7 +726,7 @@ public class FamiliarManager {
 
         if (swarmCount >= targetCount) return;
 
-        var e = (Mob) type.create(sp.getLevel());
+        var e = (Mob) type.create(sp.serverLevel());
 
         var spawnDistance = TETHER_DISTANCE;
 
@@ -675,25 +738,25 @@ public class FamiliarManager {
         if (pos == null) return;
         e.setPos(pos);
 
-        sp.getLevel().addFreshEntity(e);
+        sp.serverLevel().addFreshEntity(e);
         BindingManager.enforceLoyalty(sp, e, true);
     }
 
     public static Vec3 getSpaceAroundPlayer(Player sp, float spawnDistance) {
-        var r = sp.getLevel().getRandom();
+        var r = sp.level().getRandom();
         var pos = sp.position().add(
                 (r.nextFloat() - 0.5f) * spawnDistance,
                 (r.nextFloat() * 0.5f) * spawnDistance,
                 (r.nextFloat() - 0.5f) * spawnDistance);
 
-        var blockPos = new BlockPos(pos);
-        var blockState = sp.getLevel().getBlockState(blockPos);
-        if (!blockState.is(Blocks.AIR) && !blockState.getCollisionShape(sp.getLevel(), blockPos).isEmpty()) return null;
+        var blockPos = BlockPos.containing(pos);
+        var blockState = sp.level().getBlockState(blockPos);
+        if (!blockState.is(Blocks.AIR) && !blockState.getCollisionShape(sp.level(), blockPos).isEmpty()) return null;
 
         while (blockPos.getY() > sp.blockPosition().getY() - TETHER_DISTANCE / 3) {
             var newblockpos = blockPos.below();
-            var bs = sp.getLevel().getBlockState(newblockpos);
-            if (!bs.is(Blocks.AIR) && !bs.getCollisionShape(sp.getLevel(), newblockpos).isEmpty()) break;
+            var bs = sp.level().getBlockState(newblockpos);
+            if (!bs.is(Blocks.AIR) && !bs.getCollisionShape(sp.level(), newblockpos).isEmpty()) break;
             blockPos = newblockpos;
             pos = pos.add(0, -1, 0);
         }
@@ -701,20 +764,30 @@ public class FamiliarManager {
     }
 
     @SubscribeEvent
-    public static void playHorn(LivingEntityUseItemEvent event) {
+    public static void playHorn(LivingEntityUseItemEvent.Start event) {
         if (!event.getItem().is(Items.GOAT_HORN)) return;
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!hasFamiliarType(sp, EntityType.GOAT)) return;
-        for (Entity e : sp.getLevel().getEntities(sp, sp.getBoundingBox().inflate(32))) {
+        for (Entity e : sp.serverLevel().getEntities(sp, sp.getBoundingBox().inflate(32))) {
             if (!(e instanceof LivingEntity le) || !le.getType().equals(EntityType.PLAYER) && !isFamiliar(le)) return;
             le.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 60, 1));
         }
     }
 
     @SubscribeEvent
+    public static void onEat(LivingEntityUseItemEvent.Finish event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp) || !hasFamiliarType(sp, Otherverse.TYPHLOTIC_ZOMBIE.get()) || !event.getItem().isEdible())
+            return;
+        if (SpiritLabeler.SPIRIT_TYPE_OF.data == null) return;
+        var spirits = SpiritLabeler.getSpiritsFor(event.getItem().getItem());
+        if (spirits == null || !spirits.containsKey(Spirits.FLESH)) return;
+        sp.addEffect(new MobEffectInstance(MobEffects.REGENERATION, spirits.get(Spirits.FLESH) * 20 * 3, 2, false, false, true));
+    }
+
+    @SubscribeEvent
     public static void mobGrief(LivingDestroyBlockEvent event) {
         if (!event.getState().is(OtherverseBlocks.CHALK_LINE.get())) return;
-        var lvl = event.getEntity().getLevel();
+        var lvl = event.getEntity().level();
         var below = event.getPos().below();
         var stateBelow = lvl.getBlockState(below);
         if (stateBelow.canEntityDestroy(lvl, below, event.getEntity())) return;
@@ -761,22 +834,33 @@ public class FamiliarManager {
             return;
         }
         if (flyingMobs.contains(type)) {
-            if (type.equals(EntityType.ENDER_DRAGON) || type.equals(EntityType.PHANTOM) || type.equals(EntityType.PARROT)) {
-                var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
-                if (type.equals(EntityType.PHANTOM)) {
-                    ServerStatsCounter serverstatscounter = player.getStats();
-                    int j = Mth.clamp(serverstatscounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
-                    attr.setBaseValue(j > 20 * 60 * 10 ? 1 : 0);
+            if (ruinsMobs.contains(type) && !RuinsManager.isInRuins(player)) {
+                if (type.equals(Otherverse.BANSHEE.get())) {
+                    var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
+                    attr.setBaseValue(0);
                 } else {
-                    attr.setBaseValue(1);
+                    abilities.mayfly = false;
+                    abilities.flying = false;
+                    player.onUpdateAbilities();
                 }
             } else {
-                abilities.mayfly = true;
-                if (setSpeed) {
-                    abilities.setFlyingSpeed(type.equals(EntityType.WITHER) ? 0.024f : 0.012f);
+                if (type.equals(EntityType.ENDER_DRAGON) || type.equals(EntityType.PHANTOM) || type.equals(EntityType.PARROT) || type.equals(Otherverse.BANSHEE.get())) {
+                    var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
+                    if (type.equals(EntityType.PHANTOM)) {
+                        ServerStatsCounter serverstatscounter = player.getStats();
+                        int j = Mth.clamp(serverstatscounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
+                        attr.setBaseValue(j > 20 * 60 * 10 ? 1 : 0);
+                    } else {
+                        attr.setBaseValue(1);
+                    }
+                } else {
+                    abilities.mayfly = true;
+                    if (setSpeed) {
+                        abilities.setFlyingSpeed(type.equals(EntityType.WITHER) ? 0.024f : 0.012f);
+                    }
+                    if (!player.onGround()) abilities.flying = true;
+                    player.onUpdateAbilities();
                 }
-                if (!player.isOnGround()) abilities.flying = true;
-                player.onUpdateAbilities();
             }
         }
     }
@@ -790,7 +874,7 @@ public class FamiliarManager {
     }
 
     public static EntityType<LivingEntity> getFamiliarType(Player player) {
-        if (player.getLevel().isClientSide()) {
+        if (player.level().isClientSide()) {
             return BindingRenderer.getFamiliarType(player);
         }
         var data = getFamiliarData(player);
@@ -816,31 +900,49 @@ public class FamiliarManager {
             entity.discard();
         }
 
-        var e = type.create(level, mobData, null, null,
-                new BlockPos(spawnPos), MobSpawnType.MOB_SUMMONED, false, false);
-
+        var e = type.create(level, mobData, null, BlockPos.containing(spawnPos),
+                MobSpawnType.MOB_SUMMONED, false, false);
+        e.load(mobData.getCompound("EntityTag"));
         e.setPos(spawnPos);
 
         addMobToLevel(e, level);
+
+        if (tag.contains("held_item") && e instanceof LivingEntity le) {
+            BindingManager.setHeldItem(le, ItemStack.of(tag.getCompound("held_item")));
+        }
+
         return e;
     }
 
     private static void addMobToLevel(Entity e, ServerLevel level) {
         CompoundTag persistentData = e.getPersistentData();
+        LogUtils.getLogger().debug("ADDING MOB TO LEVEL");
         if (persistentData.contains("bindingId") && e instanceof Mob mob) {
+            LOGGER.debug("HAS BINDING");
             TransientDiagramData data = DiagramManager.getOrCreateLevelData(level.getServer().overworld());
             BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
             if (binding == null) {
-                persistentData.remove("bindingId");
+                LOGGER.debug("COULDN'T FIND BINDING");
+                BindingManager.removeBindingFromMob(mob);
             } else {
                 binding.mob = mob;
+                binding.isCinnabar = false;
                 if (isFamiliar(mob)) {
                     binding.dimensionHash = DiagramManager.getDimensionHash(level);
-                    if (data.savedData != null) {
-                        data.savedData.setDirty();
+                    data.setDirty();
+                } else {
+                    if (binding.getFocus() == null || !BindingManager.tryBindMob(mob, binding.getFocus(), level)) {
+                        BindingManager.breakBinding(binding);
                     }
                 }
-                data.retryUpdateClient();
+            }
+            BlockFocus focus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(level), mob.getBoundingBox());
+            if (focus != null && (binding == null || !focus.getPos().equals(binding.position))) {
+                if (BindingManager.tryBindMob(mob, focus, level, true) && binding != null) {
+                    var localData = DiagramManager.getOrCreateLevelData(binding.dimensionHash, false);
+                    localData.bindingsByPosition.remove(binding.position);
+                    localData.setDirty();
+                }
             }
         }
         level.addFreshEntityWithPassengers(e);
@@ -852,13 +954,13 @@ public class FamiliarManager {
         if (event.getEntity() instanceof ServerPlayer player) {
             var familiarData = getFamiliarData(player);
             if (familiarData.isEmpty()) return;
-            LOGGER.debug("PLAYER JOINING");
             justJoinedPlayer = player;
             var mobData = familiarData.getCompound("mob_data");
             var entityTag = mobData.getCompound("EntityTag");
             var data = DiagramManager.getOrCreateLevelData(player.getServer().overworld());
-            var binding = data.bindingsById.get(entityTag.getCompound("ForgeData").getUUID("bindingId"));
-            if (binding != null) {
+            var forgeData = entityTag.getCompound("ForgeData");
+            if (forgeData.contains("bindingId")) {
+                var binding = data.bindingsById.get(forgeData.getUUID("bindingId"));
                 for (var level : sl.getServer().getAllLevels()) {
                     if (DiagramManager.getDimensionHash(level) != binding.dimensionHash) continue;
                     EntityType<?> type = getEntityTypeFromTag(familiarData);
@@ -867,14 +969,11 @@ public class FamiliarManager {
                     var mob = (Mob) type.create(level);
                     mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.MOB_SUMMONED, null, entityTag);
                     var listTag = entityTag.getList("Pos", 6);
-                    LOGGER.debug("FAMILIAR POSITION: " + listTag.getDouble(0) + ", " + listTag.getDouble(2));
                     EntityType.updateCustomEntityTag(level, player, mob, mobData);
                     addMobToLevel(mob, level);
-                    LOGGER.debug("MOB ADDED");
                     break;
                 }
             }
-            LOGGER.debug("DONE SEARCHING LEVELS");
             updateAbilities(player);
             justJoinedPlayer = null;
             return;
@@ -882,30 +981,33 @@ public class FamiliarManager {
         var practitioner = getPractitionerForFamiliar(event.getEntity());
         if (practitioner.isEmpty()) return;
         if (hitList.contains(event.getEntity().getUUID())) {
-            event.getEntity().discard();
+            event.setCanceled(true);
             return;
         }
-        if (getPlayerFromName(sl, practitioner) == null) {
-            LOGGER.debug("NULL PLAYER FOR FAMILIAR");
+        var player = getPlayerFromName(sl, practitioner);
+        if (player == null) {
             event.setCanceled(true);
-            event.getEntity().discard();
+            return;
+        }
+        var familiarData = getFamiliarData(player);
+        var mobData = familiarData.getCompound("mob_data");
+        var entityTag = mobData.getCompound("EntityTag");
+        if (entityTag == null || !entityTag.hasUUID("UUID")) return;
+        var familiarId = entityTag.getUUID("UUID");
+        if (!familiarId.equals(event.getEntity().getUUID())) {
+            event.setCanceled(true);
             return;
         }
 
-        LOGGER.debug("FAMILIAR JOINING LEVEL: " + sl.dimension() + " " + DiagramManager.getDimensionHash(sl));
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         if (!event.getEntity().getPersistentData().contains("bindingId")) return;
         var binding = data.bindingsById.get(event.getEntity().getPersistentData().getUUID("bindingId"));
         if (binding == null) {
-            LOGGER.debug("NULL BINDING FOR FAMILIAR");
             return;
         }
-        var localLevel = binding.getLocalLevel();
-
-        LOGGER.debug("BINDING LEVEL: " + (localLevel == null ? "null" : localLevel.dimension()) + " " + binding.dimensionHash);
         if (binding.dimensionHash != DiagramManager.getDimensionHash(sl)) {
             event.setCanceled(true);
-            event.getEntity().discard();
+            return;
         }
     }
 
@@ -920,7 +1022,7 @@ public class FamiliarManager {
         var familiarData = getFamiliarData(player);
         if (familiarData.isEmpty()) return;
         var id = familiarData.getCompound("mob_data").getCompound("EntityTag").getUUID("UUID");
-        for (var level : player.getLevel().getServer().getAllLevels()) {
+        for (var level : player.level().getServer().getAllLevels()) {
             var entity = level.getEntity(id);
             if (!(entity instanceof Mob mob)) continue;
             var familiarTag = IdolItem.mobToTag(mob);
@@ -938,7 +1040,7 @@ public class FamiliarManager {
         if (practitioner.isEmpty()) return;
         var player = getPlayerFromName(sl, practitioner);
         if (player == null) {
-            LOGGER.debug("NULL PLAYER");
+            LOGGER.debug("NULL PLAYER {}", practitioner);
             return;
         }
         var familiarTag = IdolItem.mobToTag(mob);
@@ -956,7 +1058,7 @@ public class FamiliarManager {
 
     @SubscribeEvent
     public static void onDimensionTravel(EntityTravelToDimensionEvent event) {
-        if (!(event.getEntity().getLevel() instanceof ServerLevel sl)) return;
+        if (!(event.getEntity().level() instanceof ServerLevel sl)) return;
         var destination = sl.getServer().getLevel(event.getDimension());
         var id = event.getEntity().getUUID();
         var obsoleteClone = destination.getEntity(id);
@@ -985,16 +1087,21 @@ public class FamiliarManager {
 
         var entityTag = familiarData.getCompound("mob_data").getCompound("EntityTag");
         var id = entityTag.getUUID("UUID");
-        var entity = player.getLevel().getEntity(id);
+        var entity = player.serverLevel().getEntity(id);
+        LOGGER.debug("FOUND ENTITY: {}", entity != null);
         var spawnPos = player.getEyePosition().add(player.getLookAngle());
+        EntityType<LivingEntity> type = (EntityType<LivingEntity>) getEntityTypeFromTag(familiarData);
         if (hitResult != null) {
             var nrm = hitResult.getDirection().getNormal();
             spawnPos = hitResult.getLocation().add(nrm.getX() / 2f, 0, nrm.getZ() / 2f);
+            if (nrm.getY() < -0.9f) {
+                spawnPos = spawnPos.add(0, -type.getHeight(), 0);
+            }
         }
 
         var hp = entityTag.getFloat("Health");
         var deathTime = entityTag.getShort("DeathTime");
-        EntityType<LivingEntity> type = (EntityType<LivingEntity>) getEntityTypeFromTag(familiarData);
+        var revived = false;
         if (deathTime > 0 || hp <= 0) {
             if (entity != null) {
                 entity.discard();
@@ -1002,22 +1109,23 @@ public class FamiliarManager {
             }
             var maxHp = (float) DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH);
             var cost = (int) Math.ceil(Mth.log2((int) maxHp) * 0.6f);
-            if (!player.isCreative() && !SelfManager.ChangeSelf(player, -cost)) {
+            if (!player.isCreative() && !SelfManager.changeSelf(player, -cost)) {
                 player.displayClientMessage(Component.literal("You need " + cost + " Self to revive your Familiar!"), true);
             } else {
                 entityTag.putFloat("Health", maxHp);
                 entityTag.putShort("DeathTime", (short) 0);
                 player.getCapability(PRACTICE_HANDLER).ifPresent(practice -> practice.setFamiliar(familiarData, player));
+                revived = true;
                 if (type.equals(EntityType.VEX)) {
                     entityTag.putInt("LifeTicks", 60 * (30 + player.getRandom().nextInt(90)));
-                    var spawnBlock = new BlockPos(spawnPos);
+                    var spawnBlock = BlockPos.containing(spawnPos);
                     for (var i = 0; i < 6; i++) {
-                        Vex vex = EntityType.VEX.create(player.level);
+                        Vex vex = EntityType.VEX.create(player.serverLevel());
                         vex.moveTo(spawnBlock, 0.0F, 0.0F);
-                        vex.finalizeSpawn(player.getLevel(), player.level.getCurrentDifficultyAt(spawnBlock), MobSpawnType.MOB_SUMMONED, (SpawnGroupData) null, (CompoundTag) null);
+                        vex.finalizeSpawn(player.serverLevel(), player.serverLevel().getCurrentDifficultyAt(spawnBlock), MobSpawnType.MOB_SUMMONED, (SpawnGroupData) null, (CompoundTag) null);
                         vex.setBoundOrigin(spawnBlock);
                         vex.setLimitedLife(20 * (30 + player.getRandom().nextInt(90)));
-                        player.getLevel().addFreshEntityWithPassengers(vex);
+                        player.level().addFreshEntity(vex);
                         BindingManager.enforceLoyalty(player, vex, false);
                     }
                 }
@@ -1027,20 +1135,21 @@ public class FamiliarManager {
         var data = DiagramManager.getOrCreateLevelData(player.getServer().overworld());
         var binding = data.bindingsById.get(entityTag.getCompound("ForgeData").getUUID("bindingId"));
         var oldDimensionHash = binding.dimensionHash;
-        var level = player.getLevel();
+        LOGGER.debug("OLD DIMENSION: {}", oldDimensionHash);
+        var level = player.serverLevel();
         var playerDimensionHash = DiagramManager.getDimensionHash(level);
+        LOGGER.debug("PLAYER DIMENSION: {}", oldDimensionHash);
         if (oldDimensionHash != playerDimensionHash) {
             var oldDimension = binding.getLocalLevel();
             if (oldDimension != null) {
                 var oldEntity = oldDimension.getEntity(id);
                 if (oldEntity != null) {
+                    LOGGER.debug("DISCARDING OTHER DIMENSION ENTITY");
                     oldEntity.discard();
                 }
             }
             binding.dimensionHash = DiagramManager.getDimensionHash(level);
-            if (data.savedData != null) {
-                data.savedData.setDirty();
-            }
+            data.setDirty();
         }
 
         if (entity == null) {
@@ -1049,17 +1158,37 @@ public class FamiliarManager {
             hitList.add(id);
             data.savedData.setDirty();
             entityTag.putUUID("UUID", UUID.randomUUID());
+            player.getCapability(PRACTICE_HANDLER).ifPresent(practice -> {
+                practice.setFamiliar(familiarData, player);
+            });
             entity = makeMobFromTag(type, familiarData, spawnPos, level);
         } else {
-            entity.setPos(spawnPos);
+            entity.moveTo(spawnPos);
+        }
+
+        if (revived) {
+            SelfManager.changeSelf((LivingEntity) entity, SelfManager.SELF_TOTAL);
+        }
+
+        if (entity.getType() == Otherverse.FURY.get()) {
+            for (var otherEntity : level.getEntities(null, entity.getBoundingBox().inflate(64))) {
+                if (otherEntity instanceof Mob mob && mob.getTarget() == player)
+                    BindingManager.forceAttack(mob, (LivingEntity) entity);
+            }
+        } else if (entity.getType() == Otherverse.TYPHLOTIC_SHARK.get()) {
+            var combinedHealth = player.getHealth() + ((LivingEntity) entity).getHealth();
+            for (var otherEntity : level.getEntities(null, entity.getBoundingBox().inflate(32))) {
+                if (!(otherEntity instanceof Mob mob) || mob.getHealth() >= combinedHealth) continue;
+                var targetPos = mob.position().add(mob.position().subtract(player.position()).normalize().scale(100));
+                mob.getNavigation().moveTo(targetPos.x, targetPos.y, targetPos.z, 2);
+                mob.getPersistentData().putInt("panicTicks", 200);
+            }
         }
 
         setFamiliarSize(entity, 1);
         BlockHitResult hitresultTop = level.clip(new ClipContext(
                 spawnPos, spawnPos.add(0, entity.getBbHeight(), 0),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
-
-        LOGGER.debug(hitresultTop.getType().name());
 
         if (hitresultTop.getType() == HitResult.Type.BLOCK) {
             var scale = (float) (hitresultTop.getLocation().y - spawnPos.y) * 0.95f / entity.getBbHeight();
@@ -1068,7 +1197,6 @@ public class FamiliarManager {
     }
 
     private static void setFamiliarSize(Entity entity, float scale) {
-        LOGGER.debug("SETTING SCALE TO " + scale);
         ScaleTypes.WIDTH.getScaleData(entity).setScale(scale);
         ScaleTypes.HEIGHT.getScaleData(entity).setScale(scale);
         ScaleTypes.REACH.getScaleData(entity).setScale(scale);
@@ -1098,12 +1226,12 @@ public class FamiliarManager {
         var start = player.getEyePosition();
         var trajectory = player.getLookAngle().scale(16);
         Vec3 trajectoryNrm = trajectory.normalize();
-        for (Entity e : player.getLevel().getEntities(player, player.getBoundingBox().inflate(16))) {
+        for (Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(16))) {
             if (!(e instanceof LivingEntity target)) continue;
             if (target.getBoundingBox().clip(start, start.add(trajectory)).isEmpty()) continue;
             trajectory = target.getEyePosition().subtract(start);
             trajectoryNrm = trajectory.normalize();
-            target.hurt(DamageSource.sonicBoom(player), 10.0F);
+            target.hurt(sp.serverLevel().damageSources().sonicBoom(player), 10.0F);
             var knockback = (1.0D - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
             target.push(trajectoryNrm.x() * 2.5D * knockback,
                     trajectoryNrm.y() * 0.5D * knockback,
@@ -1113,7 +1241,7 @@ public class FamiliarManager {
 
         for (int i = 1; i < Mth.floor(trajectory.length()) + 7; ++i) {
             Vec3 vec33 = start.add(trajectoryNrm.scale(i));
-            sp.getLevel().sendParticles(ParticleTypes.SONIC_BOOM, vec33.x, vec33.y, vec33.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            sp.serverLevel().sendParticles(ParticleTypes.SONIC_BOOM, vec33.x, vec33.y, vec33.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
 
         player.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
@@ -1132,15 +1260,15 @@ public class FamiliarManager {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (event.getItemStack().is(Items.SHEARS) && FamiliarManager.hasFamiliarType(player, EntityType.MOOSHROOM)) {
             event.setResult(Event.Result.ALLOW);
-            player.hurt(DamageSource.MAGIC, 1);
+            player.hurt(sl.damageSources().magic(), 1);
             var dropped = player.getRandom().nextInt(4) + 1;
-            var mushroomList = player.getLevel().dimensionType().bedWorks()
+            var mushroomList = player.level().dimensionType().bedWorks()
                     ? new Item[]{Items.BROWN_MUSHROOM, Items.RED_MUSHROOM}
                     : new Item[]{Items.CRIMSON_FUNGUS, Items.WARPED_FUNGUS};
             for (var i = 0; i < dropped; i++) {
                 var mushroom = mushroomList[player.getRandom().nextInt(2)];
                 player.drop(new ItemStack(mushroom, 1), false);
-                player.level.playSound(null, player, SoundEvents.MOOSHROOM_SHEAR, SoundSource.PLAYERS, 1f, 1f);
+                player.serverLevel().playSound(null, player, SoundEvents.MOOSHROOM_SHEAR, SoundSource.PLAYERS, 1f, 1f);
             }
             return;
         }
@@ -1196,11 +1324,15 @@ public class FamiliarManager {
         double d3 = player.getLookAngle().x;
         double d4 = player.getLookAngle().y;
         double d5 = player.getLookAngle().z;
-        WitherSkull witherskull = new WitherSkull(player.level, player, d3, d4, d5);
+        WitherSkull witherskull = new WitherSkull(player.level(), player, d3, d4, d5);
         witherskull.setOwner(player);
         witherskull.setDangerous(true);
         witherskull.setPosRaw(d0, d1, d2);
-        sp.getLevel().addFreshEntity(witherskull);
+        var power = player.getLookAngle().normalize().scale(0.5f);
+        witherskull.xPower = power.x;
+        witherskull.yPower = power.y;
+        witherskull.zPower = power.z;
+        sp.serverLevel().addFreshEntity(witherskull);
 
         if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
@@ -1233,12 +1365,12 @@ public class FamiliarManager {
                 player.getInventory().removeItem(itemstack);
             }
         }
-        ThrownTNT thrownTnt = new ThrownTNT(player.level, player);
+        ThrownTNT thrownTnt = new ThrownTNT(player.level(), player);
         var otherstack = event.getItemStack().copy();
         otherstack.setCount(1);
         thrownTnt.setItem(otherstack);
         thrownTnt.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
-        player.getLevel().addFreshEntity(thrownTnt);
+        player.level().addFreshEntity(thrownTnt);
     }
 
     @SubscribeEvent
@@ -1249,11 +1381,16 @@ public class FamiliarManager {
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 120, 2, false, true, true));
             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 120, 2, false, true, true));
         }
+        if (event.getEntity() instanceof ServerPlayer player && hasFamiliarType(player, Otherverse.SNUFFER.get())) {
+            event.setCanceled(true);
+            player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 20 * 120, 3, false, true, true));
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 120, 3, false, true, true));
+        }
     }
 
     @SubscribeEvent
     public static void onHurt(LivingHurtEvent event) {
-        if (event.getEntity() instanceof Player p && event.getSource().isFall()) {
+        if (event.getEntity() instanceof Player p && event.getSource().is(DamageTypes.FALL)) {
             var scale = ScaleTypes.BASE.getScaleData(p).getScale();
             var newAmount = event.getAmount() * scale + 1 - 1f / scale;
             if (newAmount <= 0) event.setCanceled(true);
@@ -1282,18 +1419,18 @@ public class FamiliarManager {
                 } else if (type.equals(EntityType.GOAT)) {
                     var diff = event.getEntity().position().subtract(p.position());
                     var len = diff.length();
-                    if (len < p.getReachDistance()) {
+                    if (len < p.getEntityReach()) {
                         diff = diff.scale(event.getAmount() / len / 2);
                         diff = diff.add(p.getDeltaMovement());
                         p.setDeltaMovement(Vec3.ZERO);
                         event.getEntity().push(diff.x, diff.y, diff.z);
-                        event.getEntity().causeFallDamage(p.fallDistance, 1, DamageSource.FALL);
+                        event.getEntity().causeFallDamage(p.fallDistance, 1, event.getEntity().level().damageSources().fall());
                         p.resetFallDistance();
                     }
                 } else if (type.equals(EntityType.HOGLIN)) {
                     var diff = event.getEntity().position().subtract(p.position());
                     var len = diff.length();
-                    if (len < p.getReachDistance()) {
+                    if (len < p.getEntityReach()) {
                         event.getEntity().push(0, event.getAmount() / 4, 0);
                         event.getEntity().setOnGround(false);
                     }
@@ -1310,22 +1447,23 @@ public class FamiliarManager {
             }
         }
         if (isFamiliar(event.getEntity())) {
-            if (event.getSource() == DamageSource.DRY_OUT) event.setCanceled(true);
-            else if (event.getSource() == DamageSource.DROWN && event.getEntity() instanceof WaterAnimal)
+            if (event.getSource().is(DamageTypes.DRY_OUT)) event.setCanceled(true);
+            else if (event.getSource().is(DamageTypes.DROWN) && event.getEntity() instanceof WaterAnimal)
                 event.setCanceled(true);
         }
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         var familiarType = getFamiliarType(sp);
         if (familiarType == null) return;
         tryChangeScale(sp);
-        if (event.getSource().isFall()) {
+        if (event.getSource().is(DamageTypes.FALL)) {
             var scale = ScaleTypes.BASE.getScaleData(sp).getScale();
             var newAmount = event.getAmount() * scale + 1 - 1f / scale;
             if (newAmount <= 0) event.setCanceled(true);
         }
-        if (event.getSource().isFall() && hasCatlikeBlessing(sp)) event.setCanceled(true);
-        else if (familiarType.equals(EntityType.CREEPER) && event.getSource().isExplosion()) event.setCanceled(true);
-        else if (familiarType.equals(EntityType.ENDER_DRAGON) && event.getSource() == DamageSource.OUT_OF_WORLD) {
+        if (event.getSource().is(DamageTypes.FALL) && hasCatlikeBlessing(sp)) event.setCanceled(true);
+        else if (familiarType.equals(EntityType.CREEPER) && event.getSource().is(DamageTypes.EXPLOSION))
+            event.setCanceled(true);
+        else if (familiarType.equals(EntityType.ENDER_DRAGON) && event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
             var end = sp.getServer().getLevel(Level.END);
             sp.changeDimension(end, new ITeleporter() {
                 @Override
@@ -1336,10 +1474,10 @@ public class FamiliarManager {
                     return e;
                 }
             });
-        } else if (familiarType.equals(EntityType.FROG) && event.getSource().isFall() && sp.getPersistentData().getBoolean("frogfall")) {
+        } else if (familiarType.equals(EntityType.FROG) && event.getSource().is(DamageTypes.FALL) && sp.getPersistentData().getBoolean("frogfall")) {
             event.setCanceled(true);
             sp.getPersistentData().putBoolean("frogfall", false);
-        } else if (event.getSource() == DamageSource.FREEZE && (familiarType.equals(EntityType.SNOW_GOLEM) || familiarType.equals(EntityType.POLAR_BEAR))) {
+        } else if (event.getSource().is(DamageTypes.FREEZE) && (familiarType.equals(EntityType.SNOW_GOLEM) || familiarType.equals(EntityType.POLAR_BEAR))) {
             event.setCanceled(true);
         } else if (familiarType.equals(EntityType.SLIME) || familiarType.equals(EntityType.MAGMA_CUBE)) {
             if (event.getSource().getEntity() != null && event.getSource().getEntity().getType().equals(familiarType)) {
@@ -1350,12 +1488,16 @@ public class FamiliarManager {
             if (sp.getHealth() > cutoff && sp.getHealth() - event.getAmount() < cutoff) {
                 sp.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 8, 2));
             }
-        } else if (familiarType.equals(EntityType.WITHER) && event.getSource() == DamageSource.WITHER) {
+        } else if (familiarType.equals(EntityType.WITHER) && event.getSource().is(DamageTypes.WITHER)) {
             event.setCanceled(true);
-        } else if (familiarType.equals(EntityType.STRIDER) && event.getSource().isFall()) {
+        } else if (familiarType.equals(EntityType.STRIDER) && event.getSource().is(DamageTypes.FALL)) {
             var positionBelow = sp.position().add(0, -0.5f, 0);
-            var inLava = sp.getLevel().getFluidState(new BlockPos(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
+            var inLava = sp.serverLevel().getFluidState(BlockPos.containing(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
             if (inLava) event.setCanceled(true);
+        } else if (familiarType.equals(Otherverse.GUEST.get()) && event.getSource().getEntity() instanceof LivingEntity le && sp.getLastHurtMob() != le && le.getLastHurtByMob() != sp) {
+            for (var e : sp.serverLevel().getEntities(le, le.getBoundingBox().inflate(64))) {
+                if (e instanceof Mob mob && mob.getTarget() == null) BindingManager.forceAttack(mob, le);
+            }
         }
     }
 
@@ -1397,10 +1539,24 @@ public class FamiliarManager {
             var possibleTransfusion = transfusions.get(i);
             if (possibleTransfusion.entityTypes().size() != 1) continue;
             if (!possibleTransfusion.entityTypes().contains(et)) continue;
+            var tagsToDrain = new HashMap<CompoundTag, Integer>();
             if (!player.isCreative()) {
                 var price = possibleTransfusion.price();
                 for (var itemstack : player.getInventory().items) {
                     if (itemstack == null) continue;
+                    if (itemstack.hasTag() && itemstack.getOrCreateTag().contains("hallow")) {
+                        var hallowTag = itemstack.getOrCreateTag().getCompound("hallow");
+                        var spiritType = MobBindingInfluenceUtils.mobSpirits.get(et);
+                        if (hallowTag.getString("spirit_type").equals(spiritType.label())) {
+                            var drain = Math.min(price, hallowTag.getInt("spirit_count"));
+                            price -= drain;
+                            tagsToDrain.put(hallowTag, drain);
+                            if (price <= 0) {
+                                break;
+                            }
+                        }
+                        continue;
+                    }
                     var hp = MobBindingInfluenceUtils.allFoods.get(et).get(new ItemOrEntityType(itemstack.getItem()));
                     if (hp == null) continue;
                     var itemsToRemove = Math.min(itemstack.getCount(), (int) Math.ceil(price / (float) hp));
@@ -1417,9 +1573,13 @@ public class FamiliarManager {
 
                 if (price > 0) {
                     if (player.getHealth() + player.getAbsorptionAmount() <= price) continue;
-                    if (!player.hurt(DamageSource.OUT_OF_WORLD, price)) {
+                    if (!player.hurt(player.damageSources().outOfBorder(), price)) {
                         continue;
                     }
+                }
+
+                for (var entry : tagsToDrain.entrySet()) {
+                    entry.getKey().putInt("spirit_count", entry.getKey().getInt("spirit_count") - entry.getValue());
                 }
             }
             var stack = possibleTransfusion.destItem().copy();
@@ -1433,8 +1593,8 @@ public class FamiliarManager {
                 player.setItemInHand(hand, stack);
             }
 
-            var temp = et.create(player.level);
-            player.level.playSound(null, player, ((ISoundGetter) temp).publicGetHurtSound(DamageSource.GENERIC), SoundSource.NEUTRAL, 1, 1);
+            var temp = et.create(player.level());
+            player.level().playSound(null, player, ((ISoundGetter) temp).publicGetHurtSound(player.damageSources().generic()), SoundSource.NEUTRAL, 1, 1);
             temp.discard();
 
             return true;
@@ -1475,12 +1635,12 @@ public class FamiliarManager {
         ItemStack contract = OtherverseItems.CONTRACT.get().getDefaultInstance();
         contract.getOrCreateTag().put("contract", contractTag);
         player.setItemInHand(InteractionHand.MAIN_HAND, contract);
-        player.level.playSound(null, player, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS, 1f, 1f);
+        player.level().playSound(null, player, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS, 1f, 1f);
         return true;
     }
 
     public static EntityType<?> getEntityTypeFromTag(CompoundTag tag) {
-        return ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(tag.getString("entity_type_namespace"), tag.getString("entity_type_path")));
+        return ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.fromNamespaceAndPath(tag.getString("entity_type_namespace"), tag.getString("entity_type_path")));
     }
 
     public static boolean isFamiliar(Entity entity) {
