@@ -10,7 +10,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Many shrines can be $(bold)overflowed$() (filled while already full) or $(bold)overdrawn$() (extracted from when empty) to cause effects in a range around the shrine. You can see these ranges in your Sight. The volume of a shrine's range is proportional to its total capacity. Wider shrines will have wider ranges, and taller shrines will have taller ranges."
+            "text": "Many shrines can be $(bold)overflowed$() (filled while already full) or $(bold)overdrawn$() (extracted from when empty) to cause effects in a range around the shrine. You can see these ranges in your Sight. A shrine's range is proportional to its total capacity. Wider/taller shrines will have wider/taller ranges. Shrines get a bonus range multiplier for each unique block type they contain."
         },
         {
             "type": "patchouli:text",

@@ -1,0 +1,14 @@
+{
+	"other" : "cataclysm:ender_golem",
+	"spirit" : "end",
+	"healing" : {
+		"otherverse:spirit_technology" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:end_crystal",
+			"health" : 33,
+			"output" : "cataclysm:void_core"
+		}
+	]
+}

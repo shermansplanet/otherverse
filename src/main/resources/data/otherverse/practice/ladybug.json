@@ -1,0 +1,14 @@
+{
+	"other" : "enemyexpansion:ladybug",
+	"spirit" : "air",
+	"binding" : {
+		"minecraft:cobweb" : 11
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:spider_eye",
+			"health" : 9,
+			"output" : "enemyexpansion:healing_eye"
+		}
+	]
+}

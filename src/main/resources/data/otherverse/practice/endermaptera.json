@@ -1,0 +1,11 @@
+{
+	"other" : "cataclysm:endermaptera",
+	"spirit" : "end",
+	"transfusion" : [
+		{
+			"input" : "minecraft:amethyst_shard",
+			"health" : 3,
+			"output" : "cataclysm:void_jaw"
+		}
+	]
+}

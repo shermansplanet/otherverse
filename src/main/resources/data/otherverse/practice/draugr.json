@@ -1,0 +1,7 @@
+{
+	"other" : "cataclysm:draugr",
+	"spirit" : "cold",
+	"healing": {
+		"otherverse:death": 1
+	}
+}

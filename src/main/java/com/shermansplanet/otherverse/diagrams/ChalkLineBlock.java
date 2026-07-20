@@ -7,7 +7,6 @@ import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,7 +35,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -44,8 +42,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-
-import java.util.ArrayList;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Bus.FORGE)
 public class ChalkLineBlock extends Block implements EntityBlock {
@@ -247,7 +243,7 @@ public class ChalkLineBlock extends Block implements EntityBlock {
                 return InteractionResult.SUCCESS;
             }
             if (!player.isCreative()) {
-                if (!SelfManager.ChangeSelf(player, -1)) {
+                if (!SelfManager.changeSelf(player, -1)) {
                     return InteractionResult.SUCCESS;
                 }
             }

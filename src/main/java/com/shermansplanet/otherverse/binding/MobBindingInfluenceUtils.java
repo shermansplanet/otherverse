@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.ItemOrEntityType;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
@@ -343,6 +344,7 @@ public class MobBindingInfluenceUtils {
         if (practice.has("binding")) {
             for (var binding : practice.getAsJsonObject("binding").entrySet()) {
                 for (var item : MobTransfusions.getItemOrShortcut(binding.getKey())) {
+                    if (item == null) continue;
                     register(other, item, binding.getValue().getAsInt(), false);
                 }
             }
@@ -351,6 +353,7 @@ public class MobBindingInfluenceUtils {
         if (practice.has("healing")) {
             for (var healing : practice.getAsJsonObject("healing").entrySet()) {
                 for (var item : MobTransfusions.getItemOrShortcut(healing.getKey())) {
+                    if (item == null) continue;
                     registerFood(other, item, healing.getValue().getAsInt(), false);
                 }
             }
@@ -522,7 +525,8 @@ public class MobBindingInfluenceUtils {
         if (demesne != null) {
             demesneCoeff = (float) Math.pow(2f / 3f, demesne.getPerkLevel(DemesnesManager.DemesnePerk.BINDING));
         }
-        return new Pair<>(totalInfluence >= ((int) (mob.getMaxHealth() * demesneCoeff)) * (hasChain ? 2 : 3) * (isPositive ? 3 : 1), isPositive);
+        var configCoeff = OtherverseConfig.BINDING_COST.get();
+        return new Pair<>(totalInfluence >= ((int) (mob.getMaxHealth() * demesneCoeff)) * (hasChain ? configCoeff * 2 / 3 : configCoeff) * (isPositive ? 3 : 1), isPositive);
     }
 
     public static List<BindingRecipe> GenerateRecipes() {

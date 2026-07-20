@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.spirits;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
 import com.shermansplanet.otherverse.binding.IdolItem;
@@ -34,16 +35,16 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.GrindstoneEvent;
+import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.ShieldBlockEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.level.PistonEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
@@ -125,10 +126,21 @@ public class HallowHelper {
 
     @SubscribeEvent
     static void onGrief(EntityMobGriefingEvent event) {
-        if (event.getEntity() == null || event.getEntity().getType() != EntityType.CREEPER) return;
+        if (!(event.getEntity() instanceof LivingEntity le) || BindingManager.isBoundOrContracted(le)) return;
         for (var shrine : ShrineHelper.getShrinesFor(event.getEntity(), Spirits.PROTECTION)) {
             if (!shrine.tryDrain(9)) continue;
             event.setResult(Event.Result.DENY);
+            return;
+        }
+    }
+
+    @SubscribeEvent
+    static void onExplosion(ExplosionEvent.Detonate event) {
+        if (!(event.getExplosion().getDirectSourceEntity() instanceof LivingEntity le) || BindingManager.isBoundOrContracted(le))
+            return;
+        for (var shrine : ShrineHelper.getShrinesFor(le, Spirits.PROTECTION)) {
+            if (!shrine.tryDrain(9)) continue;
+            event.getAffectedBlocks().clear();
             return;
         }
     }
@@ -637,6 +649,7 @@ public class HallowHelper {
             var sourceItem = sourceFocus.getItem();
             if (willOverflow && sourceItem.hasTag() && sourceItem.getTag().contains("hallow")
                     && sourceItem.getTag().getCompound("hallow").getInt("spirit_count") <= 0) continue;
+            if (sourceFocus.getItem().is(Items.BEDROCK) && !OtherverseConfig.BEDROCK_REMOVAL.get()) continue;
             new SpiritTransfer(focus, sourceFocus, SpiritAffinityTracker.getTransferDuration(focus.getDiagram().getOwnerName(), spiritType));
         }
     }

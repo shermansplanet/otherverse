@@ -13,12 +13,12 @@ showAsResourcePack = false
 
 [[mods]]
 modId = "otherverse"
-version = "1.2.1"
+version = "1.2.6"
 displayName = "Pact Magic"
 logoFile = "logo.png"
 authors = "Tickbug"
 description = '''
-  A powerful open-ended magic mod.
+  An expansive open-ended magic mod.
   '''
 displayTest = "MATCH_VERSION"
 
@@ -54,6 +54,17 @@ versionRange = "[1.0,)"
 
 [[dependencies.otherverse]]
 modId = "jei"
-mandatory = false
+mandatory = true
 side = "CLIENT"
+versionRange = "[1.0,)"
+
+[[dependencies.otherverse]]
+modId = "geckolib"
+mandatory = true
+side = "CLIENT"
+versionRange = "[1.0,)"
+
+[[dependencies.otherverse]]
+modId = "curios"
+mandatory = true
 versionRange = "[1.0,)"

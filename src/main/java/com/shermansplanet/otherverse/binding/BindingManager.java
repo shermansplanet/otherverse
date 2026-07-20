@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.binding;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherverseClientPacketHandler;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.artifacts.ArtifactManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
@@ -17,11 +18,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -51,9 +52,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -203,6 +206,9 @@ public class BindingManager {
             } else {
                 return false;
             }
+        }
+        if (OtherverseConfig.UNBINDABLE_MOBS.get().contains(ForgeRegistries.ENTITY_TYPES.getKey(mob.getType()).toString())) {
+            return false;
         }
         List<ItemStack> influenceItems = new ArrayList<>();
         CompoundTag contract = null;
@@ -404,6 +410,12 @@ public class BindingManager {
         for (var goal : mob.goalSelector.getAvailableGoals()) {
             goal.stop();
         }
+        var typestring = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType()).toString();
+        if (typestring.equals("enemyexpansion:vampire") || typestring.equals("enemyexpansion:vampflyer") || typestring.equals("enemyexpansion:vampbiter")
+                || typestring.equals("enemyexpansion:troll") || typestring.equals("enemyexpansion:trollenraged")) {
+            var morphlock = ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "morphlocked"));
+            mob.addEffect(new MobEffectInstance(morphlock, 20 * 60 * 60 * 999, 0, false, false, false));
+        }
         BoundGoal boundGoal = new BoundGoal(mob, binding);
         mob.goalSelector.addGoal(-1, boundGoal);
         mob.getNavigation().stop();
@@ -437,7 +449,7 @@ public class BindingManager {
         }
     }
 
-    public static void startAttacking(Mob mob, LivingEntity targetMob) {
+    public static void forceAttack(Mob mob, LivingEntity targetMob) {
         if (mob == targetMob) return;
         mob.setTarget(targetMob);
         mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, targetMob);
@@ -450,12 +462,24 @@ public class BindingManager {
             banshee.tryAnvilDrop();
             return;
         }
+        var isCataclysm = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType()).getNamespace().equals("cataclysm");
+        var usedFlags = new HashSet<>();
         for (var goal : mob.goalSelector.getAvailableGoals()) {
-            if (BoundGoal.isAttackGoal(goal.getGoal())) {
+            if (goal.getGoal() instanceof BoundGoal) continue;
+            if (isCataclysm || BoundGoal.isAttackGoal(goal.getGoal())) {
+                if (goal.getFlags().stream().anyMatch(usedFlags::contains)) {
+                    continue;
+                }
                 if (!goal.isRunning() && goal.canUse()) {
                     goal.start();
                 }
-                goal.tick();
+                if (goal.isRunning() && !goal.canContinueToUse()) {
+                    goal.stop();
+                }
+                if (goal.isRunning()) {
+                    usedFlags.addAll(goal.getFlags());
+                    goal.tick();
+                }
             }
         }
     }
@@ -488,7 +512,7 @@ public class BindingManager {
         if (closest != null) {
             mob.setLastHurtByPlayer(closest);
             mob.setLastHurtByMob(closest);
-            startAttacking(mob, closest);
+            forceAttack(mob, closest);
         }
         mob.getPersistentData().remove("bindingId");
         Goal bg = null;
@@ -608,7 +632,7 @@ public class BindingManager {
 
     public static boolean drainsBindings(EntityType<? extends LivingEntity> type) {
         var maxHp = DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH);
-        if (maxHp <= 20) return false;
+        if (maxHp <= OtherverseConfig.BINDING_ATTACK_CUTOFF.get()) return false;
         if (maxHp > 100) return true;
         if (type.getCategory() == MobCategory.MONSTER) return true;
         if (DefaultAttributes.getSupplier(type).hasAttribute(Attributes.ATTACK_DAMAGE)) return true;

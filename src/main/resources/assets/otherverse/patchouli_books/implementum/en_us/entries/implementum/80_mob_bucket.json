@@ -8,7 +8,7 @@
             "type": "patchouli:spotlight",
             "item": {"item" : "minecraft:cod_bucket"},
             "title" : "Mob Bucket",
-            "text": "A fish bucket Implement will allow you to use it repeatedly, spawning many of that type of fish before you have to refill your Implement with Self."
+            "text": "A mob bucket Implement will allow you to use it repeatedly, spawning many of that type of mob before you have to refill your Implement with Self."
         }
     ]
 }

@@ -14,6 +14,7 @@ import com.shermansplanet.otherverse.echoes.EchoEntity;
 import com.shermansplanet.otherverse.echoes.EchoRenderer;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.familiar.ThrownTNT;
+import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.integrations.jei.BindingRecipe;
 import com.shermansplanet.otherverse.integrations.jei.BiomeCodeRecipe;
 import com.shermansplanet.otherverse.integrations.jei.SpiritExtractionRecipe;
@@ -41,6 +42,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -59,7 +61,9 @@ import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -67,6 +71,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
+import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -229,6 +234,11 @@ public class Otherverse {
         forgeEventBus.addListener(this::addReloadListeners);
 
         OtherversePacketHandler.register();
+
+        CuriosApi.registerCurioPredicate(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "implement_predicate"),
+                (slotResult) -> ImplementManager.isImplement(slotResult.stack()));
+
+        context.registerConfig(ModConfig.Type.SERVER, OtherverseConfig.SPEC, Otherverse.MODID + "-server.toml");
     }
 
     public static ChunkPos chunkAt(BlockPos pos) {

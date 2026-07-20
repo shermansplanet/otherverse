@@ -94,6 +94,7 @@ public class ChalkCircleRenderer implements BlockEntityRenderer<ChalkCircle> {
                 poseStack.popPose();
             }
             var spin = isSpecial ? (float) Math.pow(t, 2.1) / 40000f : 0;
+            spin *= Mth.DEG_TO_RAD;
             poseStack.mulPose(new Quaternionf().rotateXYZ(
                     Mth.PI / 2 * (1 - riseLerp), Mth.TWO_PI * riseLerp + spin, 0));
         }

@@ -1,7 +1,7 @@
 {
     "name": "Shiver",
     "sortnum": 10,
-    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'shiver'}",
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'typhlotic_shark'}",
     "category": "otherverse:famulus",
     "pages": [
         {

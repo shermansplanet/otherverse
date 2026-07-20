@@ -1,0 +1,10 @@
+{
+	"other" : "enemyexpansion:vampbiter",
+	"spirit" : "dark",
+	"binding" : {
+		"minecraft:wheat_seeds" : 8,
+		"minecraft:stick" : 8,
+		"!doors" : 16,
+		"farmersdelight:rice" : 24
+	}
+}

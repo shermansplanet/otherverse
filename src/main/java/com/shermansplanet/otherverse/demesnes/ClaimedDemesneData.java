@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
@@ -215,6 +216,7 @@ public class ClaimedDemesneData {
     }
 
     public int getPerkLevel(DemesnesManager.DemesnePerk perk) {
+        if(OtherverseConfig.SKIPPED_PERKS.get().contains(perk.name)) return 0;
         return perkValues.get(perk);
     }
 

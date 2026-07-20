@@ -1,0 +1,14 @@
+{
+	"other" : "enemyexpansion:wasp",
+	"spirit" : "war",
+	"binding" : {
+		"minecraft:cobweb" : 11
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:egg",
+			"health" : 9,
+			"output" : "enemyexpansion:wasp_thorax"
+		}
+	]
+}

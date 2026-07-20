@@ -1,0 +1,19 @@
+{
+	"other" : "cataclysm:amethyst_crab",
+	"spirit" : "protection",
+	"healing" : {
+		"minecraft:amethyst_shard" : 18
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:scute",
+			"health" : 3,
+			"output" : "cataclysm:amethyst_crab_shell"
+		},
+		{
+			"input" : "minecraft:rotten_flesh",
+			"health" : 7,
+			"output" : "cataclysm:amethyst_crab_meat"
+		}
+	]
+}

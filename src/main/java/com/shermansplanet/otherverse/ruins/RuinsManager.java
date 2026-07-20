@@ -5,7 +5,6 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
-import com.shermansplanet.otherverse.demesnes.DemesnesPortal;
 import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.others.Banshee;
@@ -13,7 +12,6 @@ import com.shermansplanet.otherverse.others.Buzzed;
 import com.shermansplanet.otherverse.others.Fury;
 import com.shermansplanet.otherverse.others.Guest;
 import com.shermansplanet.otherverse.potions.OtherversePotions;
-import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import com.shermansplanet.otherverse.sympathy.SpindleItem;
@@ -31,6 +29,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -397,7 +396,7 @@ public class RuinsManager {
             claim.remove(mob);
         }
         if (e instanceof Guest || e instanceof Fury || e instanceof Banshee) {
-            SelfManager.ChangeSelf(sp, -(int) (event.getAmount() * SelfManager.getSelfCoeff(sp)));
+            SelfManager.changeSelf(sp, -(int) (event.getAmount() * SelfManager.getSelfCoeff(sp)));
         }
         if (!event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD) || sp.level().dimension() != ModDimensions.RUINS_KEY) {
             return;
@@ -540,7 +539,7 @@ public class RuinsManager {
             if (result == null || result.getFirst() == null) {
                 player.displayClientMessage(Component.literal("Could not find ancient city."), false);
             } else {
-                var r = sl.getRandom();
+                var r = RandomSource.create(sl.getGameTime());
                 var pos = player.position().add(0, 1, 0);
                 var dir = result.getFirst().getCenter().subtract(pos).with(Direction.Axis.Y, 0);
                 var isClose = dir.lengthSqr() < 32 * 32;

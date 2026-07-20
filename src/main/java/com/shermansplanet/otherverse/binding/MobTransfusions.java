@@ -26,9 +26,11 @@ import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
@@ -43,9 +45,13 @@ public class MobTransfusions {
     public static void setupReplacements() {
         transfusionShortcuts.clear();
         transfusionShortcuts.put("!flowers", new ArrayList<>());
+        transfusionShortcuts.put("!doors", new ArrayList<>());
         for (Item item : ForgeRegistries.ITEMS) {
             if (item.getDefaultInstance().is(ItemTags.FLOWERS)) {
                 transfusionShortcuts.get("!flowers").add(new ItemOrEntityType(item));
+            }
+            if (item instanceof BlockItem bi && bi.getBlock() instanceof DoorBlock) {
+                transfusionShortcuts.get("!doors").add(new ItemOrEntityType(item));
             }
             if (item instanceof BlockItem bi) {
                 if (bi.getBlock() instanceof FlowerBlock && !item.equals(Items.WITHER_ROSE)) {
@@ -141,14 +147,16 @@ public class MobTransfusions {
     public static Collection<ItemOrEntityType> getItemOrShortcut(String s) {
         if (s.startsWith("entity.")) {
             var parts = s.split("\\.");
-            return List.of(new ItemOrEntityType(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(
+            return List.of(new ItemOrEntityType(ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.fromNamespaceAndPath(
                     parts[1], parts[2]
             ))));
         }
         if (transfusionShortcuts.containsKey(s)) {
             return transfusionShortcuts.get(s);
         }
-        return List.of(new ItemOrEntityType(ForgeRegistries.ITEMS.getValue(new ResourceLocation(s))));
+        var key = ResourceLocation.parse(s);
+        if(!ForgeRegistries.ITEMS.containsKey(key)) return List.of();
+        return List.of(new ItemOrEntityType(ForgeRegistries.ITEMS.getValue(key)));
     }
 
     public static void processOther(EntityType<? extends LivingEntity> other, JsonObject practice) {

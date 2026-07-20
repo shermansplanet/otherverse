@@ -1,0 +1,7 @@
+{
+	"other" : "enemyexpansion:troll",
+	"spirit" : "earth",
+	"binding" : {
+		"otherverse:spirit_light" : 1
+	}
+}

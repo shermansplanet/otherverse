@@ -1,0 +1,18 @@
+{
+	"other" : "cataclysm:the_watcher",
+	"spirit" : "technology",
+	"binding" : {
+		"cataclysm:emp" : 256
+	},
+	"healing" : {
+		"otherverse:spirit_war" : 1,
+		"minecraft:iron_ingot" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:sugar",
+			"health" : 1,
+			"output" : "minecraft:redstone"
+		}
+	]
+}

@@ -4,15 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.ReskinManager;
-import com.shermansplanet.otherverse.SightManager;
 import com.shermansplanet.otherverse.registries.CrownBlock;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
-import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EndCrystalRenderer;
 import net.minecraft.client.renderer.entity.EnderDragonRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -41,9 +39,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
 import org.slf4j.Logger;
+import software.bernie.geckolib.event.GeoRenderEvent;
 import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.*;
@@ -141,8 +138,19 @@ public class BindingRenderer {
     }
 
     @SubscribeEvent
-    public static void onLivingRender(RenderLivingEvent.Pre<?, ?> event) {
-        var entityId = event.getEntity().getUUID();
+    public static void onLivingRenderGecko(GeoRenderEvent.Entity.Post event) {
+        if (event.getEntity() instanceof LivingEntity le)
+            renderBindings(le, event.getPoseStack(), event.getBufferSource(), event.getPackedLight(), event.hashCode());
+    }
+
+    @SubscribeEvent
+    public static void onLivingRenderVanilla(RenderLivingEvent.Pre<?, ?> event) {
+        renderBindings(event.getEntity(), event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), event.hashCode());
+    }
+
+    private static void renderBindings(LivingEntity entity, PoseStack pose, MultiBufferSource multiBufferSource, int packedLight, int hashCode) {
+        hashCode++;
+        var entityId = entity.getUUID();
         var contractOnly = false;
         if (itemRenderer == null) {
             itemRenderer = Minecraft.getInstance().getItemRenderer();
@@ -161,8 +169,7 @@ public class BindingRenderer {
         if (entityRenderDispatcher == null) {
             entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         }
-        LivingEntity mob = event.getEntity();
-        PoseStack pose = event.getPoseStack();
+        LivingEntity mob = entity;
         pose.pushPose();
         var isFamiliar = familiars.containsKey(mob.getUUID());
         var upnudge = 0.5f;
@@ -187,8 +194,8 @@ public class BindingRenderer {
                 pose.translate(-0.5f, -0.4f, -0.5f);
                 blockRenderer.renderSingleBlock(
                         OtherverseBlocks.FAMILIAR_CROWN.get().defaultBlockState().setValue(CrownBlock.demesne, !isFamiliar).setValue(CrownBlock.positive, true),
-                        pose, event.getMultiBufferSource(),
-                        event.getPackedLight(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
+                        pose, multiBufferSource,
+                        packedLight, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.cutout());
             } else {
                 pose.mulPose(new Quaternionf().rotateZ(Mth.PI / 2));
                 for (int i = 0; i < 4; i++) {
@@ -196,8 +203,8 @@ public class BindingRenderer {
                     pose.mulPose(new Quaternionf().rotateXYZ(Mth.PI / 2, Mth.PI / 2, Mth.PI / 2 * i));
                     pose.translate(0.4f, 0f, 0f);
                     pose.mulPose(new Quaternionf().rotateXYZ(0, Mth.PI / 2, 0));
-                    itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemDisplayContext.FIXED, event.getPackedLight(),
-                            OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
+                    itemRenderer.renderStatic(Items.CHAIN.getDefaultInstance(), ItemDisplayContext.FIXED, packedLight,
+                            OverlayTexture.NO_OVERLAY, pose, multiBufferSource, mob.level(), hashCode);
                     pose.popPose();
                 }
             }
@@ -213,10 +220,19 @@ public class BindingRenderer {
         pose.popPose();
         if (!BindingManager.getHeldItem(mob).isEmpty()) {
             pose.translate(0, Math.sin(millis / 250.0) * 0.2, 0);
-            itemRenderer.renderStatic(BindingManager.getHeldItem(mob), ItemDisplayContext.FIXED, event.getPackedLight(),
-                    OverlayTexture.NO_OVERLAY, event.getPoseStack(), event.getMultiBufferSource(), mob.level(), event.hashCode());
+            itemRenderer.renderStatic(BindingManager.getHeldItem(mob), ItemDisplayContext.FIXED, packedLight,
+                    OverlayTexture.NO_OVERLAY, pose, multiBufferSource, mob.level(), hashCode);
         }
         pose.popPose();
+    }
+
+    public static boolean isBound(LivingEntity le) {
+        if (positiveBoundEntities.contains(le.getUUID()) || negativeBoundEntities.contains(le.getUUID()) || familiars.containsKey(le.getUUID())) {
+            return true;
+        }
+        if (le.getPersistentData().contains("construct_type")) return true;
+        if (le.getPersistentData().contains("practitioner_loyalty")) return true;
+        return false;
     }
 
     public static String getBindingInfo(LivingEntity le) {
@@ -229,7 +245,7 @@ public class BindingRenderer {
             return "Negatively bound by " + boundBy;
         } else if (le.getPersistentData().contains("construct_type") && !boundBy.isEmpty()) {
             return "Created by " + boundBy;
-        }else if(le.getPersistentData().contains("practitioner_loyalty")) {
+        } else if (le.getPersistentData().contains("practitioner_loyalty")) {
             return "Loyal to " + le.getPersistentData().getString("practitioner_loyalty");
         }
         return "";

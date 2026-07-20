@@ -1,0 +1,18 @@
+{
+	"other" : "alexscaves:gossamer_worm",
+	"healing" : {
+		"otherverse:spirit_light" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:torch",
+			"health" : 9,
+			"output" : "alexscaves:bioluminescent_torch"
+		},
+		{
+			"input" : "minecraft:slime_ball",
+			"health" : 3,
+			"output" : "alexscaves:bioluminesscence"
+		}
+	]
+}

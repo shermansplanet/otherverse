@@ -35,6 +35,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.StructureTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -644,7 +645,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                             player.displayClientMessage(Component.literal("Could not find ").append(biomeComponent), false);
                     } else {
                         for (var i = 0; i < 8; i++) {
-                            var r = sl.getRandom();
+                            var r = RandomSource.create(sl.getGameTime());
                             var dir = result.getFirst().getCenter().subtract(pos.getCenter()).normalize();
                             sl.playSound(null, pos, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 1, 1);
                             sl.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,

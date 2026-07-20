@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.SightManager;
 import com.shermansplanet.otherverse.binding.ContractManager;

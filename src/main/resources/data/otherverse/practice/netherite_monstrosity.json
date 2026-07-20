@@ -1,0 +1,25 @@
+{
+	"other" : "cataclysm:netherite_monstrosity",
+	"spirit" : "nether",
+	"healing" : {
+		"otherverse:spirit_war" : 1,
+		"minecraft:netherite_ingot" : 100
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:diamond_ore",
+			"health" : 200,
+			"output" : "minecraft:ancient_debris"
+		},
+		{
+			"input" : "minecraft:deepslate_diamond_ore",
+			"health" : 200,
+			"output" : "minecraft:ancient_debris"
+		},
+		{
+			"input" : "minecraft:iron_block",
+			"health" : 33,
+			"output" : "cataclysm:lava_power_cell"
+		}
+	]
+}

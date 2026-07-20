@@ -15,12 +15,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -118,8 +116,11 @@ public class FleshTechManager {
         mobData.put("unbound_contract", binding.contract);
         tag.remove("UUID");
         tag.putInt("EggLayTime", 20 * 60 * 60 * 100);
-        if(diagram.getOwnerName() != null) {
+        if (diagram.getOwnerName() != null) {
             mobData.putString("last_bound_by", diagram.getOwnerName());
+        }
+        if(tag.contains("Items")){
+            tag.remove("Items");
         }
 
 
@@ -132,7 +133,12 @@ public class FleshTechManager {
                 spawnPos.getZ() + 0.4f + level.random.nextFloat() * 0.2f));
 
         level.addFreshEntityWithPassengers(e);
-        BindingManager.setHeldItem(e, ItemStack.EMPTY);
+        for (var slot : EquipmentSlot.values()) {
+            e.setItemSlot(slot, ItemStack.EMPTY);
+        }
+        if(e instanceof AbstractChestedHorse ach){
+            ach.setChest(false);
+        }
         if (shrine.st == Spirits.FLESH) {
             var attr = e.getAttribute(Attributes.ATTACK_DAMAGE);
             if (attr != null) attr.addPermanentModifier(

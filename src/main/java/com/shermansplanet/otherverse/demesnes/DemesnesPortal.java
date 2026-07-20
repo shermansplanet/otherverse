@@ -94,12 +94,10 @@ public class DemesnesPortal extends BlockEntity implements IForgeBlockEntity {
     }
 
     private void teleportEntity(ServerLevel sl, Entity entity) {
-        LOGGER.debug("TELEPORTING " + entity.getType());
         var sourceLevelId = DiagramManager.getDimensionHash(sl);
         var destLevel = DiagramManager.levelFromHash(sl, destinationLevel);
-        var destPos = new Vec3(destinationPosition.getX() + 0.5f, destinationPosition.getY(), destinationPosition.getZ());
+        var destPos = new Vec3(destinationPosition.getX() + 0.5f, destinationPosition.getY(), destinationPosition.getZ() + 0.5f);
         if (sourceLevelId != destinationLevel) {
-            LOGGER.debug("TO OTHER LEVEL");
             entity = entity.changeDimension(destLevel, new ITeleporter() {
                 @Override
                 public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {

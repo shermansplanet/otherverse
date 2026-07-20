@@ -91,7 +91,6 @@ public class ReskinManager {
     }
 
     public static ResourceLocation getSkinLocation(LivingEntity le) {
-
         return reskinnedMobs.get(le);
     }
 }

@@ -1,0 +1,14 @@
+{
+	"other" : "enemyexpansion:flutterfly",
+	"spirit" : "air",
+	"binding" : {
+		"minecraft:cobweb" : 11
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:glass_bottle",
+			"health" : 33,
+			"output" : "enemyexpansion:bottled_flutterfly"
+		}
+	]
+}

@@ -34,38 +34,42 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
     private class PerkButton extends ImageButton {
         public final DemesnesManager.DemesnePerk perk;
 
-        public PerkButton(DemesnesManager.DemesnePerk perk, boolean isActive, boolean sanction, boolean isClickable, int perkVal) {
-            super(0, 0, sanction ? 17 : 22, sanction ? 18 : 23, sanction ? 239 : 234,
-                    sanction ? (isActive ? 158 : 120) : (isActive ? 72 : 0), sanction ? 19 : 24,
+        public PerkButton(DemesnesManager.DemesnePerk perk, boolean isActive, boolean sanction, boolean isClickable, int perkVal, boolean skipped) {
+            super(0, 0, (sanction && !skipped) ? 17 : 22, (sanction && !skipped) ? 18 : 23, (sanction && !skipped) ? 239 : 234,
+                    skipped ? 200 : (sanction ? (isActive ? 158 : 120) : (isActive ? 72 : 0)), skipped ? 0 : sanction ? 19 : 24,
                     SCREEN_LOCATION, 256, 256, (p_170074_) -> {
                         activatePerk(perk);
                     }, Component.literal(perk.name));
 
             var tooltip = Component.empty();
-            List<Component> components = perk.tooltip;
-            for (int i = 0; i < components.size(); i++) {
-                var tt = components.get(i);
-                if (i > 0) tooltip.append("\n");
-                tooltip.append(tt);
-            }
-            if (perk.isSanction) {
-                tooltip.append("\n");
-                tooltip.append(Component.literal("Currently granted to: ").append(
-                        Component.literal(isActive ? "only those with writs and their bound mobs" : "anyone")
-                                .withStyle(Style.EMPTY.withColor(0x90c833))).append(Component.literal(".")));
-                tooltip.append(Component.literal("\nClick to toggle.").withStyle(Style.EMPTY.withColor(0x888888)));
-                if (isActive) {
-                    tooltip.append(Component.literal("\nShift-click to produce a writ.").withStyle(Style.EMPTY.withColor(0x888888)));
+            if (skipped) {
+                tooltip.append(Component.literal("This perk has been disabled by a config file. You cannot select it. All adjacent perks will become available if any of them are selected.").withStyle(Style.EMPTY.withColor(0xdd3333)));
+            } else {
+                List<Component> components = perk.tooltip;
+                for (int i = 0; i < components.size(); i++) {
+                    var tt = components.get(i);
+                    if (i > 0) tooltip.append("\n");
+                    tooltip.append(tt);
                 }
-            } else if (isClickable) {
-                tooltip.append("\n");
-                var cost = DemesnesManager.getLevelCost(claimedPerkCount);
-                if (cost > Minecraft.getInstance().player.experienceLevel) {
-                    tooltip.append(Component.literal("You need " + cost + " levels to claim this perk!").withStyle(Style.EMPTY.withColor(0x888888)));
-                } else {
-                    tooltip.append(Component.literal("Click to claim. This will cost " + cost + " levels.").withStyle(Style.EMPTY.withColor(0x888888)));
+                if (perk.isSanction) {
+                    tooltip.append("\n");
+                    tooltip.append(Component.literal("Currently granted to: ").append(
+                            Component.literal(isActive ? "only those with writs and their bound mobs" : "anyone")
+                                    .withStyle(Style.EMPTY.withColor(0x90c833))).append(Component.literal(".")));
+                    tooltip.append(Component.literal("\nClick to toggle.").withStyle(Style.EMPTY.withColor(0x888888)));
+                    if (isActive) {
+                        tooltip.append(Component.literal("\nShift-click to produce a writ.").withStyle(Style.EMPTY.withColor(0x888888)));
+                    }
+                } else if (isClickable) {
+                    tooltip.append("\n");
+                    var cost = DemesnesManager.getLevelCost(claimedPerkCount);
+                    if (cost > Minecraft.getInstance().player.experienceLevel) {
+                        tooltip.append(Component.literal("You need " + cost + " levels to claim this perk!").withStyle(Style.EMPTY.withColor(0x888888)));
+                    } else {
+                        tooltip.append(Component.literal("Click to claim. This will cost " + cost + " levels.").withStyle(Style.EMPTY.withColor(0x888888)));
+                    }
+                    tooltip.append(Component.literal("\nYou have claimed " + claimedPerkCount + " out of " + DemesnesManager.MAX_CHOICES + " perks.").withStyle(Style.EMPTY.withColor(0x888888)));
                 }
-                tooltip.append(Component.literal("\nYou have claimed " + claimedPerkCount + " out of " + DemesnesManager.MAX_CHOICES + " perks.").withStyle(Style.EMPTY.withColor(0x888888)));
             }
 
 
@@ -90,6 +94,7 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
     private void refreshButtons() {
         enabledPerks = new HashSet<>();
         claimedPerkCount = 0;
+        var skipped = new HashSet<DemesnesManager.DemesnePerk>();
         for (var perk : perkValues) {
             var perkVal = menu.perks.get(perk).get();
             if (perkVal > 0) {
@@ -98,8 +103,10 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
             if (!perk.isSanction) {
                 claimedPerkCount += perkVal;
             }
+            if (menu.skipped.get(perk).get() == 1) skipped.add(perk);
         }
         children.clear();
+
         for (var perk : perkValues) {
             var isUnlocked = enabledPerks.contains(perk);
             var isClickable = perk.isSanction || isUnlocked
@@ -107,21 +114,35 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
                     || perk == DemesnesManager.DemesnePerk.PROTECTION
                     || perk == DemesnesManager.DemesnePerk.BEACON_HIDE
                     || perk == DemesnesManager.DemesnePerk.RECOVERY;
-            if (!isClickable) {
-                for (var connected : DemesnesManager.connections.get(perk)) {
-                    if (!enabledPerks.contains(connected)) continue;
-                    isClickable = true;
-                    break;
-                }
-            }
+            var isSkipped = skipped.contains(perk);
             var perkVal = menu.perks.get(perk).get();
-            if (!perk.isSanction && perkVal == perk.maxValue) {
+            if (isSkipped) {
                 isClickable = false;
+            } else {
+                if (!isClickable) {
+                    isClickable = isNextToClickablePerk(perk, enabledPerks, skipped, new HashSet<>());
+                }
+                if (!perk.isSanction && perkVal == perk.maxValue) {
+                    isClickable = false;
+                }
+                isClickable = isClickable && (claimedPerkCount < DemesnesManager.MAX_CHOICES || perk.isSanction);
             }
-            isClickable = isClickable && (claimedPerkCount < DemesnesManager.MAX_CHOICES || perk.isSanction);
-            var button = new PerkButton(perk, isUnlocked, perk.isSanction, isClickable, perkVal);
+            var button = new PerkButton(perk, isUnlocked, perk.isSanction, isClickable, perkVal, isSkipped);
             children.add(button);
         }
+    }
+
+    private boolean isNextToClickablePerk(DemesnesManager.DemesnePerk perk,
+                                          HashSet<DemesnesManager.DemesnePerk> enabledPerks,
+                                          HashSet<DemesnesManager.DemesnePerk> skipped,
+                                          HashSet<DemesnesManager.DemesnePerk> checked) {
+        checked.add(perk);
+        for (var connected : DemesnesManager.connections.get(perk)) {
+            if (enabledPerks.contains(connected)) return true;
+            if (skipped.contains(connected) && !checked.contains(connected) && isNextToClickablePerk(connected, enabledPerks, skipped, checked))
+                return true;
+        }
+        return false;
     }
 
     private void activatePerk(DemesnesManager.DemesnePerk perk) {

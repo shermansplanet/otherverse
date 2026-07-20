@@ -1,26 +1,33 @@
 package com.shermansplanet.otherverse;
 
+import com.shermansplanet.otherverse.binding.BindingManager;
+import com.shermansplanet.otherverse.binding.BindingRenderer;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.others.Buzzed;
 import com.shermansplanet.otherverse.others.BuzzedSoundInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.client.resources.sounds.BeeAggressiveSoundInstance;
-import net.minecraft.client.resources.sounds.BeeFlyingSoundInstance;
-import net.minecraft.client.resources.sounds.BeeSoundInstance;
-import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import top.theillusivec4.curios.api.client.ICuriosScreen;
+
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ForgeClientEvents {
+
+    private static final HashMap<UUID, Optional<LivingEntity>> bossCache = new HashMap<>();
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRelease(ScreenEvent.MouseButtonReleased.Pre event) {
         onMouseEvent(event);
@@ -35,6 +42,7 @@ public class ForgeClientEvents {
         var mc = Minecraft.getInstance();
         if (mc.player == null) return;
         if (!(mc.screen instanceof AbstractContainerScreen<?> containerScreen)) return;
+        if (containerScreen instanceof ICuriosScreen) return;
         var menu = mc.player.containerMenu;
         if (menu.containerId == mc.player.inventoryMenu.containerId) return;
         var stack = menu.getCarried();
@@ -53,6 +61,30 @@ public class ForgeClientEvents {
         event.setNearPlaneDistance(-32);
         event.setFarPlaneDistance(200);
         event.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onRenderBoss(CustomizeGuiOverlayEvent.BossEventProgress event) {
+        var bossUUID = event.getBossEvent().getId();
+        var level = net.minecraft.client.Minecraft.getInstance().level;
+        if (level == null) return;
+        Optional<LivingEntity> entityHolder = Optional.empty();
+        if (bossCache.containsKey(bossUUID)) {
+            entityHolder = bossCache.get(bossUUID);
+        } else {
+            var toMatch = event.getBossEvent().getName().getString();
+            for (var e : level.entitiesForRendering()) {
+                if (!e.getDisplayName().getString().equals(toMatch)) continue;
+                if (e instanceof LivingEntity le) {
+                    entityHolder = Optional.of(le);
+                }
+                break;
+            }
+            bossCache.put(bossUUID, entityHolder);
+        }
+        if (entityHolder.isEmpty()) return;
+        var entity = entityHolder.get();
+        if (BindingRenderer.isBound(entity)) event.setCanceled(true);
     }
 
     public static void addBuzzed(Buzzed buzzed) {

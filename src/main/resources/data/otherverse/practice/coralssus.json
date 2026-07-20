@@ -1,0 +1,61 @@
+{
+	"other" : "cataclysm:coralssus",
+	"spirit" : "water",
+	"transfusion" : [
+		{
+			"input" : "minecraft:fire_coral_block",
+			"health" : 36,
+			"output" : "cataclysm:coral_chunk"
+		},
+		{
+			"input" : "minecraft:red_wool",
+			"health" : 7,
+			"output" : "minecraft:fire_coral"
+		},
+		{
+			"input" : "minecraft:blue_wool",
+			"health" : 7,
+			"output" : "minecraft:tube_coral"
+		},
+		{
+			"input" : "minecraft:pink_wool",
+			"health" : 7,
+			"output" : "minecraft:brain_coral"
+		},
+		{
+			"input" : "minecraft:magenta_wool",
+			"health" : 7,
+			"output" : "minecraft:bubble_coral"
+		},
+		{
+			"input" : "minecraft:yellow_wool",
+			"health" : 7,
+			"output" : "minecraft:horn_coral"
+		},
+		{
+			"input" : "minecraft:red_carpet",
+			"health" : 7,
+			"output" : "minecraft:fire_coral_fan"
+		},
+		{
+			"input" : "minecraft:blue_carpet",
+			"health" : 7,
+			"output" : "minecraft:tube_coral_fan"
+		},
+		{
+			"input" : "minecraft:pink_carpet",
+			"health" : 7,
+			"output" : "minecraft:brain_coral_fan"
+		},
+		{
+			"input" : "minecraft:magenta_carpet",
+			"health" : 7,
+			"output" : "minecraft:bubble_coral_fan"
+		},
+		{
+			"input" : "minecraft:yellow_carpet",
+			"health" : 7,
+			"output" : "minecraft:horn_coral_fan"
+		}
+	]
+}

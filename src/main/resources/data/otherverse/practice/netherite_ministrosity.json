@@ -1,0 +1,7 @@
+{
+	"other" : "cataclysm:netherite_ministrosity",
+	"spirit" : "nether",
+	"healing" : {
+		"cataclysm:lava_power_cell" : 40
+	}
+}

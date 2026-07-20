@@ -19,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.Vec3;
@@ -135,10 +136,26 @@ public class EscapeRopeItem extends Item {
 
                 @Override
                 public PortalInfo getPortalInfo(Entity entity, ServerLevel destWorld, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
-                    var y = finalFromSetPosition ? playerPos.y
-                            : destWorld.getHeight(Heightmap.Types.MOTION_BLOCKING, (int) (playerPos.x), (int) (playerPos.y)) + 1f;
-                    var destPos = new Vec3(playerPos.x, y, playerPos.z);
-                    return new PortalInfo(destPos, Vec3.ZERO, entity.getYRot(), entity.getXRot());
+                    var dstPos = playerPos;
+                    if (!finalFromSetPosition) {
+                        destWorld.getPoiManager().ensureLoadedAndValid(destWorld, BlockPos.containing(dstPos), 16);
+                        var airBlocks = 0;
+                        var blockX = (int) Math.round(dstPos.x);
+                        var blockZ = (int) Math.round(dstPos.z);
+                        for (var blockY = destWorld.getMaxBuildHeight(); blockY >= destWorld.getMinBuildHeight(); blockY--) {
+                            var blockState = destWorld.getBlockState(new BlockPos(blockX, blockY, blockZ));
+                            if (blockState.is(Blocks.BEDROCK) || blockState.is(Blocks.LAVA)) {
+                                airBlocks = 0;
+                                continue;
+                            }
+                            if (airBlocks >= 2 && !blockState.isAir()) {
+                                dstPos = new Vec3(blockX + 0.5f, blockY + 1, blockZ + 0.5f);
+                                break;
+                            }
+                            if (blockState.isAir()) airBlocks++;
+                        }
+                    }
+                    return new PortalInfo(dstPos, Vec3.ZERO, entity.getYRot(), entity.getXRot());
                 }
             });
         } else {

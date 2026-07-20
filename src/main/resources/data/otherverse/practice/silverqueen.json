@@ -1,0 +1,39 @@
+{
+	"other" : "enemyexpansion:silverqueen",
+	"spirit" : "flesh",
+	"healing" : {
+		"otherverse:spirit_death" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:chiseled_stone_bricks",
+			"health" : 3,
+			"output" : "minecraft:infested_chiseled_stone_bricks"
+		},
+		{
+			"input" : "minecraft:cobblestone",
+			"health" : 3,
+			"output" : "minecraft:infested_cobblestone"
+		},
+		{
+			"input" : "minecraft:cracked_stone_bricks",
+			"health" : 3,
+			"output" : "minecraft:infested_cracked_stone_bricks"
+		},
+		{
+			"input" : "minecraft:deepslate",
+			"health" : 3,
+			"output" : "minecraft:infested_deepslate"
+		},
+		{
+			"input" : "minecraft:stone_bricks",
+			"health" : 3,
+			"output" : "minecraft:infested_stone_bricks"
+		},
+		{
+			"input" : "minecraft:stone",
+			"health" : 3,
+			"output" : "minecraft:infested_stone"
+		}
+	]
+}

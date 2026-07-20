@@ -12,7 +12,6 @@ import com.shermansplanet.otherverse.diagrams.SelfManager;
 import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.others.Buzzed;
-import com.shermansplanet.otherverse.others.TyphloticZombie;
 import com.shermansplanet.otherverse.potions.OtherversePotions;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
@@ -25,12 +24,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
@@ -39,7 +36,6 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -86,7 +82,6 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
@@ -97,7 +92,6 @@ import virtuoel.pehkui.api.ScaleTypes;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.shermansplanet.otherverse.implement.ImplementManager.PRACTICE_HANDLER;
 
@@ -841,10 +835,10 @@ public class FamiliarManager {
         }
         if (flyingMobs.contains(type)) {
             if (ruinsMobs.contains(type) && !RuinsManager.isInRuins(player)) {
-                if(type.equals(Otherverse.BANSHEE.get())) {
+                if (type.equals(Otherverse.BANSHEE.get())) {
                     var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
                     attr.setBaseValue(0);
-                }else{
+                } else {
                     abilities.mayfly = false;
                     abilities.flying = false;
                     player.onUpdateAbilities();
@@ -998,6 +992,7 @@ public class FamiliarManager {
         var familiarData = getFamiliarData(player);
         var mobData = familiarData.getCompound("mob_data");
         var entityTag = mobData.getCompound("EntityTag");
+        if (entityTag == null || !entityTag.hasUUID("UUID")) return;
         var familiarId = entityTag.getUUID("UUID");
         if (!familiarId.equals(event.getEntity().getUUID())) {
             event.setCanceled(true);
@@ -1095,14 +1090,18 @@ public class FamiliarManager {
         var entity = player.serverLevel().getEntity(id);
         LOGGER.debug("FOUND ENTITY: {}", entity != null);
         var spawnPos = player.getEyePosition().add(player.getLookAngle());
+        EntityType<LivingEntity> type = (EntityType<LivingEntity>) getEntityTypeFromTag(familiarData);
         if (hitResult != null) {
             var nrm = hitResult.getDirection().getNormal();
             spawnPos = hitResult.getLocation().add(nrm.getX() / 2f, 0, nrm.getZ() / 2f);
+            if (nrm.getY() < -0.9f) {
+                spawnPos = spawnPos.add(0, -type.getHeight(), 0);
+            }
         }
 
         var hp = entityTag.getFloat("Health");
         var deathTime = entityTag.getShort("DeathTime");
-        EntityType<LivingEntity> type = (EntityType<LivingEntity>) getEntityTypeFromTag(familiarData);
+        var revived = false;
         if (deathTime > 0 || hp <= 0) {
             if (entity != null) {
                 entity.discard();
@@ -1110,12 +1109,13 @@ public class FamiliarManager {
             }
             var maxHp = (float) DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH);
             var cost = (int) Math.ceil(Mth.log2((int) maxHp) * 0.6f);
-            if (!player.isCreative() && !SelfManager.ChangeSelf(player, -cost)) {
+            if (!player.isCreative() && !SelfManager.changeSelf(player, -cost)) {
                 player.displayClientMessage(Component.literal("You need " + cost + " Self to revive your Familiar!"), true);
             } else {
                 entityTag.putFloat("Health", maxHp);
                 entityTag.putShort("DeathTime", (short) 0);
                 player.getCapability(PRACTICE_HANDLER).ifPresent(practice -> practice.setFamiliar(familiarData, player));
+                revived = true;
                 if (type.equals(EntityType.VEX)) {
                     entityTag.putInt("LifeTicks", 60 * (30 + player.getRandom().nextInt(90)));
                     var spawnBlock = BlockPos.containing(spawnPos);
@@ -1166,10 +1166,14 @@ public class FamiliarManager {
             entity.moveTo(spawnPos);
         }
 
+        if (revived) {
+            SelfManager.changeSelf((LivingEntity) entity, SelfManager.SELF_TOTAL);
+        }
+
         if (entity.getType() == Otherverse.FURY.get()) {
             for (var otherEntity : level.getEntities(null, entity.getBoundingBox().inflate(64))) {
                 if (otherEntity instanceof Mob mob && mob.getTarget() == player)
-                    BindingManager.startAttacking(mob, (LivingEntity) entity);
+                    BindingManager.forceAttack(mob, (LivingEntity) entity);
             }
         } else if (entity.getType() == Otherverse.TYPHLOTIC_SHARK.get()) {
             var combinedHealth = player.getHealth() + ((LivingEntity) entity).getHealth();
@@ -1492,7 +1496,7 @@ public class FamiliarManager {
             if (inLava) event.setCanceled(true);
         } else if (familiarType.equals(Otherverse.GUEST.get()) && event.getSource().getEntity() instanceof LivingEntity le && sp.getLastHurtMob() != le && le.getLastHurtByMob() != sp) {
             for (var e : sp.serverLevel().getEntities(le, le.getBoundingBox().inflate(64))) {
-                if (e instanceof Mob mob && mob.getTarget() == null) BindingManager.startAttacking(mob, le);
+                if (e instanceof Mob mob && mob.getTarget() == null) BindingManager.forceAttack(mob, le);
             }
         }
     }

@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.spirits;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.binding.MobTransfusions;
@@ -230,7 +231,7 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Tags.Blocks.ORE_BEARING_GROUND_NETHERRACK, Spirits.NETHER, 3);
             AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_NETHERRACK, Spirits.OVERWORLD, 3);
 
-            AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.END, 3);
+//            AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.END, 3);
 
             AddForTag(item, spiritAmounts, BlockTags.CORAL_BLOCKS, Spirits.WATER, 2);
             AddForTag(item, spiritAmounts, BlockTags.UNDERWATER_BONEMEALS, Spirits.WATER, 1);
@@ -243,6 +244,7 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Items.TOOLS_SHIELDS, Spirits.PROTECTION, tierFunc);
 
             AddForTag(item, spiritAmounts, ItemTags.BUTTONS, Spirits.TECH, 1);
+            AddForTag(item, spiritAmounts, ItemTags.RAILS, Spirits.TECH, 1);
 
             var modifiers = item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND);
             if (!modifiers.get(Attributes.ATTACK_DAMAGE).isEmpty() && !modifiers
@@ -305,12 +307,16 @@ public class SpiritLabeler {
                 var itemName = item.toString();
                 var time = itemName.contains("oxidized") ? 9
                         : itemName.contains("weathered") ? 6
-                          : itemName.contains("exposed") ? 3 : 0;
+                        : itemName.contains("exposed") ? 3 : 0;
                 if (time > 0) spiritAmounts.add(new SpiritAmount(Spirits.TIME, time));
                 if (itemName.contains("copper")) {
                     if (time < 9) spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18 - time * 2));
                     spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
                 }
+
+                if(itemName.contains("end_stone") || itemName.contains("purpur") || itemName.contains("void") || itemName.contains("chorus")) spiritAmounts.add(new SpiritAmount(Spirits.END, 3));
+                if(itemName.contains("frosted_stone") || itemName.contains("black_steel")) spiritAmounts.add(new SpiritAmount(Spirits.COLD, 3));
+                if(itemName.contains("prismarine") || itemName.contains("seastone")) spiritAmounts.add(new SpiritAmount(Spirits.WATER, 3));
             }
 
 

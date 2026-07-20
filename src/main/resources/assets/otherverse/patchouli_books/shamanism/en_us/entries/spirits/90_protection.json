@@ -13,7 +13,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "A protection shrine will also spend nine spirits to nullify any creeper explosions in its range.$(br2)Farmland will not become trampled in the range of a protection shrine."
+            "text": "A protection shrine will also spend nine spirits to nullify any mob griefing in its range (unless performed by a bound/tamed mob). Modded mobs might circumvent this.$(br2)Farmland will not become trampled in the range of a protection shrine."
         }
     ]
 }

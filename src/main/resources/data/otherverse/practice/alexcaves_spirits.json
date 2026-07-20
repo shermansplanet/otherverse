@@ -67,6 +67,29 @@
     "alexscaves:sundae": ["9 cold"],
     "alexscaves:frostmint": ["33 cold"],
     "alexscaves:frostmint_spwar": ["55 cold"],
-    "alexscaves:radiant_essence": ["111 light"]
+    "alexscaves:radiant_essence": ["111 light"],
+
+    "alexscaves:bioluminesscence": ["9 light"],
+    "alexscaves:depth_charge": ["5 water", "30 phlogiston", "10 war"],
+    "alexscaves:immortal_embryo": ["33 flesh", "11 water", "11 fate", "11 time"],
+    "alexscaves:ink_bomb": ["9 dark", "9 war"],
+    "alexscaves:glow_ink_bomb": ["9 light", "9 war"],
+    "alexscaves:magic_conch": ["33 fate", "22 war", "22 water"],
+    "alexscaves:sea_staff": ["33 fate", "22 war", "22 water"],
+    "alexscaves:marine_snow": ["3 water"],
+    "alexscaves:ortholance": ["24 water"],
+    "alexscaves:pearl": ["11 fortune", "3 water"],
+    "alexscaves:sea_glass_shards": ["4 water", "2 technology"],
+    "alexscaves:enigmatic_engine": ["33 technology"],
+    "alexscaves:submarine": ["55 technology"],
+    "alexscaves:tube_worm": ["9 flesh"],
+    "alexscaves:geothermal_vent": ["9 fire", "9 earth"],
+    "alexscaves:geothermal_vent_medium": ["6 fire", "6 earth"],
+    "alexscaves:geothermal_vent_thin": ["3 fire", "3 earth"],
+    "alexscaves:abyssal_altar": ["9 fortune", "9 water", "9 dark", "9 fate"],
+    "alexscaves:hollow_bone": ["27 death"],
+    "alexscaves:smooth_bone_wall": ["18 death"],
+    "alexscaves:smooth_bone_slab": ["9 death"],
+    "alexscaves:smooth_bone_stairs": ["18 death"]
   }
 }

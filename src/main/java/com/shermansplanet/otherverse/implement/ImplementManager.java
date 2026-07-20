@@ -64,6 +64,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
+import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -145,7 +146,7 @@ public class ImplementManager {
     @SubscribeEvent
     public static void fillBucket(FillBucketEvent event) {
         var stack = event.getEmptyBucket().copy();
-        if (!isImplement(stack)) return;
+        if (!stack.is(Items.BUCKET) || !isImplement(stack)) return;
         SpiritType targetSpiritType = null;
         var newSpirits = 0;
 
@@ -453,6 +454,8 @@ public class ImplementManager {
             mostSpirit = Spirits.spiritsByLabel.get(item.getTag().getCompound("hallow").getString("spirit_type"));
         } else if (item.is(Items.BUCKET)) {
             mostSpirit = Spirits.TECH;
+        } else if (item.getItem() instanceof MobBucketItem) {
+            mostSpirit = Spirits.FLESH;
         } else {
             var mostAmount = 0;
             for (var spiritType : SpiritLabeler.getSpiritsFor(item.getItem()).entrySet()) {
@@ -470,6 +473,11 @@ public class ImplementManager {
         playerImplementTag.putString("spirit", mostSpirit.label());
         addImplementTag(item, playerImplementTag);
         player.getCapability(PRACTICE_HANDLER).ifPresent(practice -> practice.setImplement(playerImplementTag, player));
+        CuriosApi.getCuriosInventory(player).ifPresent(inventory -> {
+            var uuid = UUID.fromString("fad38921-4c76-46fe-b5fa-14a6eede9dba");
+            inventory.removeSlotModifier("implement", uuid);
+            inventory.addPermanentSlotModifier("implement", uuid, "Implement", 1, AttributeModifier.Operation.ADDITION);
+        });
         Otherverse.ADVANCEMENTS.trigger(player, "implementum");
     }
 
@@ -506,7 +514,7 @@ public class ImplementManager {
                 LOGGER.debug("already has implement: " + item);
                 if (item.getTag().contains("hallow")) {
                     var hallow = item.getTag().getCompound("hallow");
-                    if (!player.isCreative() && !SelfManager.ChangeSelf(player, -1)) return;
+                    if (!player.isCreative() && !SelfManager.changeSelf(player, -1)) return;
                     hallow.putInt("spirit_count", hallow.getInt("capacity"));
                 }
                 if (item.getItem() instanceof DiggerItem) {
@@ -519,7 +527,7 @@ public class ImplementManager {
             player.displayClientMessage(Component.literal("No free inventory slot in which to summon your Implement!"), true);
             return;
         }
-        if (!player.isCreative() && !SelfManager.ChangeSelf(player, -1)) return;
+        if (!player.isCreative() && !SelfManager.changeSelf(player, -1)) return;
         LOGGER.debug("adding implement: " + implement + " in " + player.getInventory().getFreeSlot());
         player.getInventory().add(implement);
     }

@@ -37,7 +37,7 @@ public class SelfManager {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static boolean ChangeSelf(LivingEntity le, int selfDelta) {
+    public static boolean changeSelf(LivingEntity le, int selfDelta) {
         LOGGER.debug("Changing Self by " + selfDelta);
         AttributeInstance healthAttribute = le.getAttribute(Attributes.MAX_HEALTH);
         AttributeModifier prevMod = healthAttribute.getModifier(selfModifierId);
@@ -82,7 +82,7 @@ public class SelfManager {
         if (player.level().isClientSide() || display == null || display.isHidden()) {
             return;
         }
-        if (ChangeSelf(player, SELF_TOTAL)) {
+        if (changeSelf(player, SELF_TOTAL)) {
             player.displayClientMessage(Component.translatable("otherverse.self.restored_advancement"), true);
         }
     }
@@ -97,7 +97,7 @@ public class SelfManager {
         if (isNowDay == wasDay) return;
         for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
             FamiliarManager.updateAbilities(player);
-            if (isNowDay && ChangeSelf(player, 3)) {
+            if (isNowDay && changeSelf(player, 3)) {
                 player.displayClientMessage(Component.translatable("otherverse.self.restored_dawn"), true);
             }
         }
@@ -109,7 +109,7 @@ public class SelfManager {
         attacker.doHurtTarget(target);
         var selfDamage = target.getHealth() - prevHp;
         selfDamage *= getSelfCoeff(target);
-        SelfManager.ChangeSelf(target, Math.round(selfDamage / 2f));
+        SelfManager.changeSelf(target, Math.round(selfDamage / 2f));
     }
 
     public static float getSelfCoeff(LivingEntity target) {

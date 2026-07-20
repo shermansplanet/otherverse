@@ -5,7 +5,7 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-version = '1.20.1-1.2.1'
+version = '1.20.1-1.2.6'
 group = 'com.shermansplanet.otherverse' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'otherverse'
 
@@ -182,7 +182,16 @@ dependencies {
     runtimeOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:${caelus_version}")
 
     implementation fg.deobf("com.github.Virtuoel:Pehkui:3.8.2-1.20.1-forge")
+    implementation fg.deobf("flat.dir:geckolib-forge-1.20.1:4.8.3")
 
+    // Compile against only the API artifact
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.14.1+1.20.1:api")
+    // Use the full Curios API jar at runtime
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.14.1+1.20.1")
+
+    implementation fg.deobf("flat.dir:L_Enders_Cataclysm:3.31")
+    implementation fg.deobf("flat.dir:lionfishapi:3.0")
+//    implementation fg.deobf("flat.dir:enemyexpansion-2.3.1-forge:1.20.1")
 //    implementation fg.deobf("flat.dir:alexscaves:2.0.2")
 //    implementation fg.deobf("flat.dir:appleskin-forge-mc1.20.1:2.5.1")
 //    implementation fg.deobf("flat.dir:baguettelib-1.20.1-Forge:1.1.6")
@@ -194,7 +203,6 @@ dependencies {
 //    implementation fg.deobf("flat.dir:curios-forge:5.14.1+1.20.1")
 //    implementation fg.deobf("flat.dir:FarmersDelight-1.20.1:1.2.11a")
 //    implementation fg.deobf("flat.dir:ferritecore:6.0.1:forge")
-//    implementation fg.deobf("flat.dir:geckolib-forge-1.20.1:4.8.3")
 //    implementation fg.deobf("flat.dir:GlitchCore-forge-1.20.1:0.0.1.1")
 //    implementation fg.deobf("flat.dir:macabre-0.8.4-forge:1.20.1")
 //    implementation fg.deobf("flat.dir:modernfix-forge:5.26.2+mc1.20.1")

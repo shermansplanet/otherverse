@@ -3,8 +3,8 @@ package com.shermansplanet.otherverse.spirits;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
-import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
@@ -192,6 +192,7 @@ public class ShrineHelper {
                 if (bs.isAir()) return 0;
                 try {
                     var item = bs.getBlock().asItem();
+                    if (item == Items.BEDROCK && !OtherverseConfig.BEDROCK_REMOVAL.get()) return 0;
                     var spiritCount = SpiritLabeler.getSpiritsFor(item).get(Spirits.EARTH);
                     if (spiritCount == null) return 0;
                     if (!simulate) {
@@ -657,7 +658,7 @@ public class ShrineHelper {
             this.hallowPositions = hallowPositions;
             this.totalCapacity = totalCapacity;
             this.st = st;
-            range = isCombined ? getCombinedRange(network, totalCapacity) : getShrineRange(hallowPositions, totalCapacity, false);
+            range = isCombined ? getCombinedRange(network, totalCapacity, level) : getShrineRange(hallowPositions, totalCapacity, level);
             var data = DiagramManager.getOrCreateLevelData(level);
             for (var pos : hallowPositions) {
                 var tag = data.getPlacedItemTag(pos);
@@ -1205,15 +1206,15 @@ public class ShrineHelper {
         return list;
     }
 
-    private static Range getCombinedRange(HashSet<Shrine> network, float capacity) {
+    private static Range getCombinedRange(HashSet<Shrine> network, float capacity, Level level) {
         var positions = new ArrayList<BlockPos>();
         for (var shrine : network) {
             positions.addAll(shrine.hallowPositions);
         }
-        return getShrineRange(positions, capacity, true);
+        return getShrineRange(positions, capacity, level);
     }
 
-    public static Range getShrineRange(Collection<BlockPos> positions, float capacity, boolean isCombined) {
+    public static Range getShrineRange(Collection<BlockPos> positions, float capacity, Level level) {
         var minX = Integer.MAX_VALUE;
         var minY = Integer.MAX_VALUE;
         var minZ = Integer.MAX_VALUE;
@@ -1233,20 +1234,18 @@ public class ShrineHelper {
         }
         var center = new Vec3((minX + maxX + 1) / 2f, (minY + maxY + 1) / 2f, (minZ + maxZ + 1) / 2f);
         capacity = (float) Math.pow(capacity, 1.3f) * 0.25f;
+        var uniqueBlocks = new HashSet<>();
+        for (var pos : positions) {
+            var block = level.getBlockState(pos).getBlock();
+            uniqueBlocks.add(block);
+        }
+        capacity *= 3f - (8f / (uniqueBlocks.size() + 3));
         var shrineWidth = Math.max(maxX - minX, maxZ - minZ) + 1f;
         var shrineHeight = (maxY - minY) + 1f;
         if (maxY == minY) shrineHeight = 0.1f;
         var aspectRatio = shrineWidth / shrineHeight;
         var pow = 3f;
         float r = (float) Math.pow(capacity * aspectRatio / Mth.PI, 1f / pow);
-//        if (isCombined) {
-//            var furthestDist = 0d;
-//            for (var pos : positions) {
-//                furthestDist = Math.max(furthestDist, (pos.distToCenterSqr(center.x, center.y, center.z)));
-//            }
-//            r = Math.min(r, (float) Math.sqrt(furthestDist)) + 0.5f;
-//            aspectRatio = (float) Math.pow(r, pow) * Mth.PI / capacity;
-//        }
         if (r < Mth.sqrt(2) / 2) {
             r = Mth.sqrt(2) / 2;
             aspectRatio = (float) Math.pow(r, pow) * Mth.PI / capacity;

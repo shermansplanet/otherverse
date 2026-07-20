@@ -15,11 +15,15 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Once you're ready, click the Claim button to begin the ritual. To succeed, you will have to defeat three waves of challengers who dispute your Claim to the space. They will spawn around the border and be highlighted in your Sight. Leaving the space or dying will end the ritual and dismiss the challengers, and you will have to try again."
+            "text": "Once you're ready, click the Claim button to begin the ritual. To succeed, you will have to defeat three waves of challengers who dispute your Claim to the space. They will spawn around the border and be highlighted in your Sight. Leaving the bounds or dying will end the ritual and dismiss the challengers, and you will have to try again."
         },
         {
             "type": "patchouli:text",
-            "text": "The difficulty of the ritual scales exponentially with the size of your Claim. A 1x1 Claim might attract a few zombies per wave, a 3x3 Claim is similar to a Raid, and anything higher will likely require preparation of the area. The type of challengers will vary depending on factors such as dimension, time of day, and local terrain."
+            "text": "The difficulty of the ritual scales exponentially with the size of your Claim. A 1x1 Claim might attract a few zombies per wave, a 3x3 Claim is similar to a Raid, and anything higher will likely require preparation of the area. Be forewarned that ghasts or creepers might show up, but remember that protection shrines can prevent mob griefing."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "The type of challengers that show up will vary depending on factors such as dimension, installed mods, and time of day. They will try to spawn near your Y-level and adapt to the local terrain (water will attract water mobs, empty air will attract flying mobs). Later waves might attract challengers from other dimensions."
         }
     ]
 }

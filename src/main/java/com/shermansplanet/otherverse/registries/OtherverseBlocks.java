@@ -61,8 +61,6 @@ public class OtherverseBlocks {
             () -> new RedstoneNetherBricksBlock(BlockBehaviour.Properties.copy(Blocks.RED_NETHER_BRICKS)));
     public static final RegistryObject<Block> MEMORY_SNARE = BLOCKS.register("memory_snare",
             () -> new MemorySnareBlock(BlockBehaviour.Properties.copy(Blocks.DIRT).sound(SoundType.SCULK_SENSOR).lightLevel(bs -> 8)));
-    public static final RegistryObject<Block> WITCH_HAT = BLOCKS.register("witch_hat",
-            () -> new Block(BlockBehaviour.Properties.copy(Blocks.BLACK_WOOL)));
 
     public static final RegistryObject<Block> PLUM_BRICKS = BLOCKS.register("plum_bricks",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.BRICKS)));

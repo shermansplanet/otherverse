@@ -401,6 +401,7 @@ public class DiagramManager {
                 if (!event.getPlayer().addItem(drop)) {
                     event.getPlayer().drop(drop, false);
                 }
+                if (sl.getBlockEntity(event.getPos()) instanceof ChalkCircle cc) cc.markUpdated();
                 return;
             }
         }

@@ -1,0 +1,11 @@
+{
+	"other" : "enemyexpansion:scorpion",
+	"spirit" : "phlogiston",
+	"transfusion" : [
+		{
+			"input" : "minecraft:bone",
+			"health" : 3,
+			"output" : "enemyexpansion:scorpion_tail"
+		}
+	]
+}

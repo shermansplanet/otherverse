@@ -1,0 +1,20 @@
+{
+	"other" : "alexscaves:sea_pig",
+	"healing" : {
+		"alexscaves:muck" : 3,
+		"minecraft:mud" : 3,
+		"minecraft:clay_ball" : 3
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:snow",
+			"health" : 3,
+			"output" : "alexscaves:marine_snow"
+		},
+		{
+			"input" : "minecraft:ender_pearl",
+			"health" : 3,
+			"output" : "alexscaves:pearl"
+		}
+	]
+}

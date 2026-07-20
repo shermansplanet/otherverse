@@ -1,8 +1,11 @@
 package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
@@ -11,6 +14,7 @@ import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -21,7 +25,7 @@ public class DemesnesWave {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public enum EntityTag {
-        OVERWORLD, NETHER, END, FLYING, NIGHT, UNDERWATER, RIDEABLE, RIDER, NOVERWORLD
+        OVERWORLD, NETHER, END, RUINS, FLYING, NIGHT, UNDERWATER, RIDEABLE, RIDER, PIT, NOVERWORLD
     }
 
     public static HashMap<EntityType<? extends Mob>, Set<EntityTag>> entityTagsByType = new HashMap<>();
@@ -36,7 +40,6 @@ public class DemesnesWave {
         register(EntityType.STRAY, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.NIGHT, EntityTag.RIDER});
         register(EntityType.SPIDER, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDEABLE});
         register(EntityType.CAVE_SPIDER, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDEABLE});
-        register(EntityType.CREEPER, new EntityTag[]{EntityTag.OVERWORLD});
         register(EntityType.WITCH, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDER});
         register(EntityType.WARDEN, new EntityTag[]{EntityTag.OVERWORLD});
         register(EntityType.SILVERFISH, new EntityTag[]{EntityTag.OVERWORLD});
@@ -52,7 +55,6 @@ public class DemesnesWave {
         register(EntityType.ELDER_GUARDIAN, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.UNDERWATER});
         register(EntityType.DROWNED, new EntityTag[]{EntityTag.OVERWORLD, EntityTag.UNDERWATER, EntityTag.NIGHT});
 
-        register(EntityType.GHAST, new EntityTag[]{EntityTag.NETHER, EntityTag.FLYING});
         register(EntityType.PIGLIN_BRUTE, new EntityTag[]{EntityTag.NETHER, EntityTag.NOVERWORLD});
         register(EntityType.HOGLIN, new EntityTag[]{EntityTag.NETHER, EntityTag.RIDEABLE, EntityTag.NOVERWORLD});
         register(EntityType.BLAZE, new EntityTag[]{EntityTag.NETHER, EntityTag.FLYING});
@@ -63,7 +65,80 @@ public class DemesnesWave {
         register(EntityType.SHULKER, new EntityTag[]{EntityTag.END});
         register(EntityType.ENDERMITE, new EntityTag[]{EntityTag.END});
 
+        register(Otherverse.TYPHLOTIC_JELLYFISH.get(), new EntityTag[]{EntityTag.RUINS, EntityTag.FLYING, EntityTag.UNDERWATER});
+        register(Otherverse.TYPHLOTIC_SHARK.get(), new EntityTag[]{EntityTag.RUINS, EntityTag.FLYING, EntityTag.UNDERWATER});
+        register(Otherverse.TYPHLOTIC_ZOMBIE.get(), new EntityTag[]{EntityTag.RUINS, EntityTag.NIGHT});
+        register(Otherverse.SNUFFER.get(), new EntityTag[]{EntityTag.RUINS});
+        register(Otherverse.GUEST.get(), new EntityTag[]{EntityTag.RUINS});
+        register(Otherverse.BUZZED.get(), new EntityTag[]{EntityTag.RUINS, EntityTag.FLYING});
+        register(Otherverse.BANSHEE.get(), new EntityTag[]{EntityTag.RUINS, EntityTag.FLYING, EntityTag.NIGHT});
+        register(Otherverse.FURY.get(), new EntityTag[]{EntityTag.RUINS, EntityTag.FLYING});
+
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "boundroid"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "brainiac"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "caniac"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "caramel_cube"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "corrodent"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "ferrouslime"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.FLYING});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "gammaroach"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDEABLE});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "grottoceratops"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDEABLE});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "gum_worm"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "gumbeeper"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "hullbreaker"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.UNDERWATER});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "licowitch"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDER});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "magnetron"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "relicheirus"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "teletor"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "tremorsaurus"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "underzealot"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "vallumraptor"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "vesper"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "deep_one_knight"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.UNDERWATER});
+        register(ResourceLocation.fromNamespaceAndPath("alexscaves", "deep_one_mage"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.UNDERWATER});
+
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "crawler"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "direwolf"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDEABLE});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "equestrian"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.NIGHT});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "faller"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "intruder"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "huntsman"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDER, EntityTag.NIGHT});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "meature"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "scorpion"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "silverqueen"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "slugger"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.NIGHT});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "sprinter"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.NIGHT});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "starved"), new EntityTag[]{EntityTag.OVERWORLD});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "tarantula"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.RIDEABLE});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "troll"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.NIGHT});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "vampire"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.NIGHT});
+        register(ResourceLocation.fromNamespaceAndPath("enemyexpansion", "wasp"), new EntityTag[]{EntityTag.OVERWORLD, EntityTag.NIGHT});
+
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "skinmaw"), new EntityTag[]{EntityTag.PIT});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "limbsplitter"), new EntityTag[]{EntityTag.PIT});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "marrow"), new EntityTag[]{EntityTag.PIT});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "spitter"), new EntityTag[]{EntityTag.PIT});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "cave_maggot"), new EntityTag[]{EntityTag.PIT});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "gorehound"), new EntityTag[]{EntityTag.PIT});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "crawler"), new EntityTag[]{EntityTag.PIT});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "gorebat"), new EntityTag[]{EntityTag.PIT, EntityTag.FLYING});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "ribserpent"), new EntityTag[]{EntityTag.PIT, EntityTag.UNDERWATER});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "stinger"), new EntityTag[]{EntityTag.PIT, EntityTag.UNDERWATER});
+        register(ResourceLocation.fromNamespaceAndPath("macabre", "crack"), new EntityTag[]{EntityTag.PIT, EntityTag.UNDERWATER});
+
         effectiveHpOverrides.put(EntityType.EVOKER, 200f);
+
+        if(OtherverseConfig.DEMESNES_MOB_GRIEFING.get()) {
+            register(EntityType.GHAST, new EntityTag[]{EntityTag.NETHER, EntityTag.FLYING});
+            register(EntityType.CREEPER, new EntityTag[]{EntityTag.OVERWORLD});
+            effectiveHpOverrides.put(EntityType.GHAST, 50f);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void register(ResourceLocation resourceLocation, EntityTag[] entityTags) {
+        var type = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
+        if (type == null) return;
+        register((EntityType<? extends Mob>) type, entityTags);
     }
 
     private static void register(EntityType<? extends Mob> type, EntityTag[] entityTags) {
@@ -143,7 +218,7 @@ public class DemesnesWave {
             return true;
         }).toList();
         if (spawnPool.isEmpty()) return null;
-        if(dimensionTag != null) {
+        if (dimensionTag != null) {
             var newSpawnPool = spawnPool.stream().filter(et -> entityTagsByType.getOrDefault(et, new HashSet<>()).contains(dimensionTag)).toList();
             if (!newSpawnPool.isEmpty() && r.nextInt(waveIndex * 4) < newSpawnPool.size()) spawnPool = newSpawnPool;
         }
@@ -178,6 +253,8 @@ public class DemesnesWave {
             case "overworld" -> EntityTag.OVERWORLD;
             case "the_nether" -> EntityTag.NETHER;
             case "the_end" -> EntityTag.END;
+            case "ruins" -> EntityTag.RUINS;
+            case "the_pit" -> EntityTag.PIT;
             default -> null;
         };
     }
@@ -204,7 +281,7 @@ public class DemesnesWave {
             hpRemaining -= (int) getEffectiveHp(entity);
         }
         for (var entity : entities) {
-            BindingManager.startAttacking(entity, ritual.claimant);
+            BindingManager.forceAttack(entity, ritual.claimant);
         }
     }
 

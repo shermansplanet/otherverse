@@ -44,7 +44,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -314,7 +313,7 @@ public class BoundGoal extends Goal {
         if (!(target instanceof Mob targetMob)) return;
         if (targetMob.getHealth() > mob.getHealth() / 2) {
             if (!isAttacking || mob.getTarget() != targetMob) {
-                BindingManager.startAttacking(mob, targetMob);
+                BindingManager.forceAttack(mob, targetMob);
                 isAttacking = true;
             }
             return;
@@ -484,7 +483,7 @@ public class BoundGoal extends Goal {
             targetMob = practitioner.getLastHurtByMob();
         }
         if (targetMob == null || targetMob.isDeadOrDying()) {
-            for (var e : mob.level().getEntities(mob, mob.getBoundingBox().inflate(16))) {
+            for (var e : mob.level().getEntities(mob, mob.getBoundingBox().inflate(32))) {
                 if (!(e instanceof Mob otherMob)) continue;
                 if (otherMob.getTarget() == practitioner) {
                     targetMob = otherMob;
@@ -526,7 +525,7 @@ public class BoundGoal extends Goal {
     }
 
     public void startAttacking(LivingEntity targetMob) {
-        BindingManager.startAttacking(mob, targetMob);
+        BindingManager.forceAttack(mob, targetMob);
         isAttacking = true;
     }
 

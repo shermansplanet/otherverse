@@ -42,7 +42,8 @@
     "ClientLevelInjector",
     "ClientDataInjector",
     "ItemRendererInjector",
-    "BlockRenderDispatcherInjector"
+    "BlockRenderDispatcherInjector",
+    "GeoEntityRendererInjector"
   ],
   "injectors": {
     "defaultRequire": 1

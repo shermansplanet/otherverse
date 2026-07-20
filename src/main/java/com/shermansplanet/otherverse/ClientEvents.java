@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.artifacts.WitchHatRenderer;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.demesnes.DemesnesClaimScreen;
 import com.shermansplanet.otherverse.demesnes.DemesnesScreen;
@@ -28,6 +29,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
+import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
 
 import java.util.HashSet;
 
@@ -89,7 +91,10 @@ public class ClientEvents {
                 OtherverseItems.CHALK.get());
 
         event.register((stack, colorIndex) ->
-                        stack.hasTag() ? DyeColor.values()[stack.getTag().getInt(colorIndex == 0 ? "main_color" : "buckle_color")].getFireworkColor() : 1973019,
+                {
+                    var key = colorIndex == 0 ? "main_color" : "buckle_color";
+                    return stack.hasTag() && stack.getTag().contains(key) ? DyeColor.values()[stack.getTag().getInt(key)].getFireworkColor() : 1973019;
+                },
                 OtherverseItems.WITCH_HAT.get());
     }
 
@@ -111,5 +116,7 @@ public class ClientEvents {
 
         HALLOW_TEXTURE_MANAGER = new HallowTextureManager(Minecraft.getInstance().getTextureManager());
         ((ReloadableResourceManager) (Minecraft.getInstance().getResourceManager())).registerReloadListener(HALLOW_TEXTURE_MANAGER);
+
+        CuriosRendererRegistry.register(OtherverseItems.WITCH_HAT.get(), WitchHatRenderer::new);
     }
 }
