@@ -407,7 +407,7 @@ public class ImplementManager {
     private static boolean canBeImplement(ItemStack item) {
         if (item.getTags().anyMatch(t -> t.location().getPath().contains("tool"))) return true;
         if (allowedImplements.contains(ForgeRegistries.ITEMS.getKey(item.getItem()).toString())) return true;
-        return item.is(Tags.Items.TOOLS) || item.is(Tags.Items.ARMORS) || item.is(Tags.Items.DYES)
+        return item.is(Tags.Items.TOOLS) || item.is(Tags.Items.ARMORS) || item.is(Tags.Items.DYES) || item.getItem() instanceof ArmorItem
                 || durabilities.containsKey(item.getItem()) || item.isEdible() || item.is(Items.SCULK_SHRIEKER)
                 || item.is(Items.CHAIN) || item.is(Items.BUCKET) || item.is(Items.FLINT_AND_STEEL)
                 || item.is(Items.CLOCK) || item.is(OtherverseItems.HOMUNCULUS_HEART.get());

@@ -5,7 +5,7 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-version = '1.20.1-1.2.9'
+version = '1.20.1-1.2.10'
 group = 'com.shermansplanet.otherverse' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'otherverse'
 
