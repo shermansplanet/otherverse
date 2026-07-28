@@ -7,6 +7,7 @@ import com.shermansplanet.otherverse.binding.BindingManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -127,7 +128,7 @@ public class DemesnesWave {
 
         effectiveHpOverrides.put(EntityType.EVOKER, 200f);
 
-        if(OtherverseConfig.DEMESNES_MOB_GRIEFING.get()) {
+        if (OtherverseConfig.DEMESNES_MOB_GRIEFING.get()) {
             register(EntityType.GHAST, new EntityTag[]{EntityTag.NETHER, EntityTag.FLYING});
             register(EntityType.CREEPER, new EntityTag[]{EntityTag.OVERWORLD});
             effectiveHpOverrides.put(EntityType.GHAST, 50f);
@@ -200,7 +201,8 @@ public class DemesnesWave {
         if (bestPos == null) {
             return null;
         }
-        var isWater = level.isWaterAt(bestPos);
+        var isWater = level.isWaterAt(bestPos) && level.isWaterAt(bestPos.above());
+        var isLava = level.getFluidState(bestPos).is(FluidTags.LAVA) || level.getFluidState(bestPos.above()).is(FluidTags.LAVA);
         var dimensionTag = getDimensionTag(level);
         boolean finalIsMidair = isMidair;
         int finalAmountOfSpace = amountOfSpace;
@@ -208,6 +210,7 @@ public class DemesnesWave {
         var spawnPool = allTypes.stream().filter(et -> {
             var tags = entityTagsByType.get(et);
             if (isWater != tags.contains(EntityTag.UNDERWATER)) return false;
+            if (isLava && !et.fireImmune()) return false;
             if (dimensionTag == EntityTag.OVERWORLD && tags.contains(EntityTag.NOVERWORLD)) return false;
             if (finalIsMidair && !tags.contains(EntityTag.FLYING)) return false;
             if (finalAmountOfSpace < et.getHeight()) return false;

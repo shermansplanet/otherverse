@@ -462,6 +462,7 @@ public class BindingManager {
             banshee.tryAnvilDrop();
             return;
         }
+        if(!isBoundOrContracted(mob)) return;
         var isCataclysm = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType()).getNamespace().equals("cataclysm");
         var usedFlags = new HashSet<>();
         for (var goal : mob.goalSelector.getAvailableGoals()) {
@@ -633,7 +634,7 @@ public class BindingManager {
     public static boolean drainsBindings(EntityType<? extends LivingEntity> type) {
         var maxHp = DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH);
         if (maxHp <= OtherverseConfig.BINDING_ATTACK_CUTOFF.get()) return false;
-        if (maxHp > 100) return true;
+        if (maxHp > OtherverseConfig.BINDING_ATTACK_CUTOFF_ANY.get()) return true;
         if (type.getCategory() == MobCategory.MONSTER) return true;
         if (DefaultAttributes.getSupplier(type).hasAttribute(Attributes.ATTACK_DAMAGE)) return true;
         return false;

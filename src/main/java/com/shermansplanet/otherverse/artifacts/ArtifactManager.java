@@ -3,11 +3,14 @@ package com.shermansplanet.otherverse.artifacts;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.ReskinManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.*;
+import com.shermansplanet.otherverse.familiar.MobRetexturer;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.ruins.MemorySnareBlockEntity;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
+import com.shermansplanet.otherverse.spirits.SpiritLabeler;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.Holder;
@@ -30,6 +33,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -400,29 +404,30 @@ public class ArtifactManager {
     public static boolean tryColorHat(ServerLevel level, ChalkCircle circle, Diagram diagram) {
         var hat = circle.getItem();
         if (!hat.is(OtherverseItems.WITCH_HAT.get())) return false;
+        var colorSpiritCounts = new HashMap<DyeColor, Integer>();
         for (var influence : diagram.influences.entrySet()) {
             if (!circle.getPos().equals(influence.getValue())) continue;
             var source = DiagramManager.getFocus(influence.getKey(), level);
             if (source == null) continue;
             var item = source.getItem();
-            if (!item.hasTag() || !item.getTag().contains("hallow")) continue;
-            CompoundTag hallowTag = item.getTag().getCompound("hallow");
-            var count = hallowTag.getInt("spirit_count");
-            if (count <= 0) continue;
-            var spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
-            for (var dyeCol : Spirits.colorsByDye.entrySet()) {
-                if (dyeCol.getValue() != spiritType) continue;
-                hat.getOrCreateTag().putInt(count >= 13 ? "main_color" : "buckle_color", dyeCol.getKey().getId());
-                circle.markUpdated();
-                source.drainHallow(spiritType, count, false, false);
-                var bp = circle.getPos();
-                for (var i = 0; i < 8; i++) {
-                    level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, Spirits.spiritItems.get(spiritType).get().getDefaultInstance()),
-                            bp.getX() + 0.5, bp.getY() + 0.1, bp.getZ() + 0.5, 1, 0, 0, 0, 0.1D);
+            var spiritAmounts = SpiritLabeler.getSpiritsFor(item.getItem());
+            if(spiritAmounts == null) continue;
+            for(var spirit : spiritAmounts.entrySet()){
+                for(var col : Spirits.colorsByDye.entrySet()) {
+                    if(col.getValue() != spirit.getKey()) continue;
+                    var existingAmount = colorSpiritCounts.getOrDefault(col.getKey(), 0);
+                    colorSpiritCounts.put(col.getKey(), existingAmount + spirit.getValue());
+                    break;
                 }
-                return true;
             }
         }
+        if(colorSpiritCounts.isEmpty()) return false;
+        var colors = colorSpiritCounts.keySet().stream().sorted(Comparator.comparingInt(colorSpiritCounts::get)).toList();
+        var mainColor = colors.get(colors.size() - 1);
+        var buckleColor = colors.get(Math.max(0, colors.size() - 2));
+        hat.getOrCreateTag().putInt("main_color", mainColor.getId());
+        hat.getOrCreateTag().putInt("buckle_color", buckleColor.getId());
+        circle.markUpdated();
         return false;
     }
 }

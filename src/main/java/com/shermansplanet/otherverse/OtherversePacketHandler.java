@@ -20,6 +20,7 @@ import com.shermansplanet.otherverse.spirits.OverflowMessage;
 import com.shermansplanet.otherverse.sympathy.SympathyRangeUpdateMessage;
 import com.shermansplanet.otherverse.sympathy.SympathySelectRenderer;
 import com.shermansplanet.otherverse.sympathy.SympathyUpdateMessage;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -322,5 +323,11 @@ public class OtherversePacketHandler {
                         () -> () -> OtherverseClientPacketHandler.handleHallowPacket(message, ctx))
         );
         ctx.get().setPacketHandled(true);
+    }
+
+    public static void ensureRunOnClient(Runnable func) {
+        if (Minecraft.getInstance().isSameThread()) {
+            func.run();
+        }
     }
 }

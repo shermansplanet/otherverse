@@ -139,8 +139,16 @@ public class BindingRenderer {
 
     @SubscribeEvent
     public static void onLivingRenderGecko(GeoRenderEvent.Entity.Post event) {
-        if (event.getEntity() instanceof LivingEntity le)
+        if (event.getEntity() instanceof LivingEntity le) {
             renderBindings(le, event.getPoseStack(), event.getBufferSource(), event.getPackedLight(), event.hashCode());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingRenderGeckoReplaced(GeoRenderEvent.ReplacedEntity.Post event) {
+        if (event.getReplacedEntity() instanceof LivingEntity le) {
+            renderBindings(le, event.getPoseStack(), event.getBufferSource(), event.getPackedLight(), event.hashCode());
+        }
     }
 
     @SubscribeEvent
@@ -148,20 +156,21 @@ public class BindingRenderer {
         renderBindings(event.getEntity(), event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), event.hashCode());
     }
 
-    private static void renderBindings(LivingEntity entity, PoseStack pose, MultiBufferSource multiBufferSource, int packedLight, int hashCode) {
+    private static void renderBindings(LivingEntity mob, PoseStack pose, MultiBufferSource multiBufferSource, int packedLight, int hashCode) {
         hashCode++;
-        var entityId = entity.getUUID();
+        var entityId = mob.getUUID();
         var contractOnly = false;
-        if (itemRenderer == null) {
-            itemRenderer = Minecraft.getInstance().getItemRenderer();
-        }
         var isPositive = positiveBoundEntities.contains(entityId);
-        if (!isPositive && !negativeBoundEntities.contains(entityId)) {
+        var isFamiliar = familiars.containsKey(mob.getUUID());
+        if (!isFamiliar && !isPositive && !negativeBoundEntities.contains(entityId)) {
             if (contractEntities.contains(entityId)) {
                 contractOnly = true;
             } else {
                 return;
             }
+        }
+        if (itemRenderer == null) {
+            itemRenderer = Minecraft.getInstance().getItemRenderer();
         }
         if (blockRenderer == null) {
             blockRenderer = Minecraft.getInstance().getBlockRenderer();
@@ -169,9 +178,7 @@ public class BindingRenderer {
         if (entityRenderDispatcher == null) {
             entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         }
-        LivingEntity mob = entity;
         pose.pushPose();
-        var isFamiliar = familiars.containsKey(mob.getUUID());
         var upnudge = 0.5f;
         if (mob.shouldShowName() && mob.hasCustomName()) {
             double d0 = entityRenderDispatcher.distanceToSqr(mob);
@@ -189,6 +196,7 @@ public class BindingRenderer {
         pose.scale(s, s, s);
         pose.mulPose(new Quaternionf().rotateY(rot * Mth.TWO_PI / 360));
         pose.pushPose();
+        if(isFamiliar) LOGGER.debug("FAMILIAR: {}", mob);
         if (!mob.getPersistentData().contains("construct_type")) {
             if (isFamiliar || contractOnly || isPositive) {
                 pose.translate(-0.5f, -0.4f, -0.5f);

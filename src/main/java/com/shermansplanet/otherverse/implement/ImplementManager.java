@@ -28,6 +28,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.SpawnUtil;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -43,6 +46,7 @@ import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
@@ -66,10 +70,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -78,6 +79,7 @@ public class ImplementManager {
     public static final Capability<IPracticeCapability> PRACTICE_HANDLER = CapabilityManager.get(new CapabilityToken<>() {
     });
     public static final int BUCKET_CAPACITY = 333;
+    public static final int REFILL_AMOUNT = 33;
     public static final float BUCKET_BONUS = 4f / 3f;
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -87,6 +89,9 @@ public class ImplementManager {
     public static final int IMPLEMENT_UI_COLOR = 0xaa2200;
 
     private static AttributeModifier implementModifier = new AttributeModifier("implement_bonus", 1f / 3f, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static HashSet<String> allowedImplements = new HashSet<>();
+
+    private static final String[] preservedTags = new String[]{"Trim", "Enchantments"};
 
     static {
         durabilities.put(Items.COBBLESTONE, 64);
@@ -134,6 +139,38 @@ public class ImplementManager {
         durabilities.put(Items.TNT, 16);
 
         durabilities.put(Items.WITHER_SKELETON_SKULL, 3);
+
+        allowedImplements.add("cataclysm:coral_spear");
+        allowedImplements.add("cataclysm:coral_bardiche");
+        allowedImplements.add("cataclysm:athame");
+        allowedImplements.add("cataclysm:black_steel_sword");
+        allowedImplements.add("cataclysm:black_steel_shovel");
+        allowedImplements.add("cataclysm:black_steel_pickaxe");
+        allowedImplements.add("cataclysm:black_steel_axe");
+        allowedImplements.add("cataclysm:black_steel_hoe");
+        allowedImplements.add("cataclysm:black_steel_targe");
+        allowedImplements.add("cataclysm:azure_sea_shield");
+        allowedImplements.add("cataclysm:bulwark_of_the_flame");
+        allowedImplements.add("cataclysm:gauntlet_of_guard");
+        allowedImplements.add("cataclysm:gauntlet_of_bulwark");
+        allowedImplements.add("cataclysm:gauntlet_of_maelstrom");
+        allowedImplements.add("cataclysm:the_incinerator");
+        allowedImplements.add("cataclysm:cursed_bow");
+        allowedImplements.add("cataclysm:wrath_of_the_desert");
+        allowedImplements.add("cataclysm:soul_render");
+        allowedImplements.add("cataclysm:the_annihilator");
+        allowedImplements.add("cataclysm:the_immolator");
+        allowedImplements.add("cataclysm:meat_shredder");
+        allowedImplements.add("cataclysm:laser_gatling");
+        allowedImplements.add("cataclysm:wither_assault_shoulder_weapon");
+        allowedImplements.add("cataclysm:void_assault_shoulder_weapon");
+        allowedImplements.add("cataclysm:void_forge");
+        allowedImplements.add("cataclysm:tidal_claws");
+        allowedImplements.add("cataclysm:infernal_forge");
+        allowedImplements.add("cataclysm:ancient_spear");
+        allowedImplements.add("cataclysm:astrape");
+        allowedImplements.add("cataclysm:ceraunus");
+        allowedImplements.add("cataclysm:brontes");
     }
 
     public static final AttributeModifier singleRangeAttributeModifier =
@@ -144,20 +181,44 @@ public class ImplementManager {
             ImmutableMultimap.of(ForgeMod.BLOCK_REACH.get(), singleRangeAttributeModifier));
 
     @SubscribeEvent
+    public static void milkCow(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (event.getTarget().getType() != EntityType.COW) return;
+        var stack = event.getItemStack();
+        if (!isImplement(stack)) return;
+        event.getTarget().hurt(event.getLevel().damageSources().magic(), 1);
+        var hallowSpiritType = HallowHelper.getSpiritType(stack);
+        var itemTag = stack.getOrCreateTag();
+        var spiritsFromCow = 3;
+        if (hallowSpiritType == null) {
+            var hallowTag = new CompoundTag();
+            hallowTag.putInt("capacity", BUCKET_CAPACITY);
+            hallowTag.putInt("spirit_count", spiritsFromCow);
+            hallowTag.putString("spirit_type", Spirits.FOOD.label());
+            itemTag.put("hallow", hallowTag);
+        } else if (hallowSpiritType == Spirits.FOOD) {
+            var hallowTag = itemTag.getCompound("hallow");
+            var spiritCount = hallowTag.getInt("spirit_count");
+            hallowTag.putInt("spirit_count", Math.min(spiritCount + spiritsFromCow, BUCKET_CAPACITY));
+        }
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.CONSUME);
+    }
+
+    @SubscribeEvent
     public static void fillBucket(FillBucketEvent event) {
         var stack = event.getEmptyBucket().copy();
         if (!stack.is(Items.BUCKET) || !isImplement(stack)) return;
         SpiritType targetSpiritType = null;
         var newSpirits = 0;
 
-        var blockhitresult = (BlockHitResult) event.getTarget();
         var p_40703_ = event.getLevel();
         var p_40704_ = event.getEntity();
-        if (blockhitresult.getType() == HitResult.Type.MISS) {
+        if (event.getTarget().getType() == HitResult.Type.MISS) {
             return;
-        } else if (blockhitresult.getType() != HitResult.Type.BLOCK) {
+        } else if (event.getTarget().getType() != HitResult.Type.BLOCK) {
             return;
         } else {
+            var blockhitresult = (BlockHitResult) event.getTarget();
             BlockPos blockpos = blockhitresult.getBlockPos();
             Direction direction = blockhitresult.getDirection();
             BlockPos blockpos1 = blockpos.relative(direction);
@@ -189,7 +250,7 @@ public class ImplementManager {
             hallowSpiritType = targetSpiritType;
             HallowHelper.addFakeEnchantment(itemTag);
             var hallowTag = new CompoundTag();
-            hallowTag.putInt("capacity", 999);
+            hallowTag.putInt("capacity", BUCKET_CAPACITY);
             hallowTag.putInt("spirit_count", 0);
             hallowTag.putString("spirit_type", hallowSpiritType.label());
             itemTag.put("hallow", hallowTag);
@@ -197,7 +258,7 @@ public class ImplementManager {
         if (hallowSpiritType == targetSpiritType) {
             var hallowTag = itemTag.getCompound("hallow");
             var spiritCount = hallowTag.getInt("spirit_count");
-            hallowTag.putInt("spirit_count", Math.min(spiritCount + newSpirits, 999));
+            hallowTag.putInt("spirit_count", Math.min(spiritCount + newSpirits, BUCKET_CAPACITY));
         }
         event.setFilledBucket(stack);
         event.setResult(Event.Result.ALLOW);
@@ -344,6 +405,8 @@ public class ImplementManager {
     }
 
     private static boolean canBeImplement(ItemStack item) {
+        if (item.getTags().anyMatch(t -> t.location().getPath().contains("tool"))) return true;
+        if (allowedImplements.contains(ForgeRegistries.ITEMS.getKey(item.getItem()).toString())) return true;
         return item.is(Tags.Items.TOOLS) || item.is(Tags.Items.ARMORS) || item.is(Tags.Items.DYES)
                 || durabilities.containsKey(item.getItem()) || item.isEdible() || item.is(Items.SCULK_SHRIEKER)
                 || item.is(Items.CHAIN) || item.is(Items.BUCKET) || item.is(Items.FLINT_AND_STEEL)
@@ -430,8 +493,10 @@ public class ImplementManager {
             itemTag.put("hallow", hallowTag);
         }
         itemTag.putString("implement_spirit", playerImplementTag.getString("spirit"));
-        if (playerImplementTag.contains("Enchantments")) {
-            itemTag.put("Enchantments", playerImplementTag.get("Enchantments"));
+        for (var s : preservedTags) {
+            if (playerImplementTag.contains(s)) {
+                itemTag.put(s, playerImplementTag.get(s));
+            }
         }
         var durability = durabilities.get(item.getItem());
         if (item.isEdible()) {
@@ -446,8 +511,10 @@ public class ImplementManager {
     public static void makeImplement(ServerPlayer player, ItemStack item) {
         var playerImplementTag = new CompoundTag();
         playerImplementTag.putString("item", ForgeRegistries.ITEMS.getKey(item.getItem()).toString());
-        if (item.hasTag() && item.getTag().contains("Enchantments")) {
-            playerImplementTag.put("Enchantments", item.getTag().get("Enchantments"));
+        for (var s : preservedTags) {
+            if (item.hasTag() && item.getTag().contains(s)) {
+                playerImplementTag.put(s, item.getTag().get(s));
+            }
         }
         var mostSpirit = Spirits.OVERWORLD;
         if (item.hasTag() && item.getTag().contains("hallow")) {
@@ -498,6 +565,16 @@ public class ImplementManager {
                 inventory.removeItem(i, item.getCount());
             }
         }
+        CuriosApi.getCuriosInventory(p).ifPresent(inv -> {
+            inv.getCurios().forEach((slotId, curioInventory) -> {
+                var stacks = curioInventory.getStacks();
+                for (var i = 0; i < stacks.getSlots(); i++) {
+                    if (isImplement(stacks.getStackInSlot(i))) {
+                        stacks.setStackInSlot(i, ItemStack.EMPTY);
+                    }
+                }
+            });
+        });
     }
 
     public static void fetchImplement(ServerPlayer player) {
@@ -509,19 +586,32 @@ public class ImplementManager {
         }
         var implement = getImplementInstance(player);
         if (implement.isEmpty()) return;
-        for (var item : player.getInventory().items) {
-            if (isImplement(item)) {
-                LOGGER.debug("already has implement: " + item);
-                if (item.getTag().contains("hallow")) {
-                    var hallow = item.getTag().getCompound("hallow");
-                    if (!player.isCreative() && !SelfManager.changeSelf(player, -1)) return;
-                    hallow.putInt("spirit_count", hallow.getInt("capacity"));
-                }
-                if (item.getItem() instanceof DiggerItem) {
-                    changeImplementMode(item, player);
-                }
-                return;
+        var items = player.getInventory().items;
+        var curioInv = CuriosApi.getCuriosInventory(player);
+        ItemStack implementItem = null;
+        if (curioInv.isPresent()) {
+            var itemHolder = curioInv.resolve().get().findFirstCurio(ImplementManager::isImplement);
+            if (itemHolder.isPresent()) {
+                implementItem = itemHolder.get().stack();
             }
+        }
+        if (implementItem == null) {
+            for (var item : items) {
+                if (isImplement(item)) {
+                    implementItem = item;
+                }
+            }
+        }
+        if (implementItem != null) {
+            LOGGER.debug("already has implement: " + implementItem);
+            if (implementItem.getItem() instanceof DiggerItem) {
+                changeImplementMode(implementItem, player);
+            } else if (implementItem.getTag().contains("hallow")) {
+                var hallow = implementItem.getTag().getCompound("hallow");
+                if (!player.isCreative() && !SelfManager.changeSelf(player, -1)) return;
+                hallow.putInt("spirit_count", Math.min(hallow.getInt("capacity"), hallow.getInt("spirit_count") + REFILL_AMOUNT));
+            }
+            return;
         }
         if (player.getInventory().getFreeSlot() == -1) {
             player.displayClientMessage(Component.literal("No free inventory slot in which to summon your Implement!"), true);

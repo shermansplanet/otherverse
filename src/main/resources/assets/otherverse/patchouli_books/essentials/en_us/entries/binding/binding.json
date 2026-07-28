@@ -26,7 +26,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Most mobs will stay bound indefinitely. But hostile mobs with $(bold)more than 20$() max health will slowly attack their binding, draining spirits/health or destroying items. The rate of this increases exponentially with the mob's max health. They will always target the most $(italic)unique$() influence; e.g. if a hoglin is bound by seven warped fungi and a chain, it will attack the chain."
+            "text": "Minor mobs will stay bound indefinitely. But hostile mobs with more than 20 max health or any mob with more than 100 max health will slowly attack their binding, draining spirits/health or destroying items. The rate of this increases exponentially with the mob's max health. They will always target the most $(italic)unique$() influence; e.g. if a hoglin is bound by seven warped fungi and a chain, it will attack the chain."
         },
         {
             "type": "patchouli:text",

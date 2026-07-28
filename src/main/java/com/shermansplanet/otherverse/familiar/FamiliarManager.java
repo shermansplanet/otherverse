@@ -1396,6 +1396,59 @@ public class FamiliarManager {
             if (newAmount <= 0) event.setCanceled(true);
             else event.setAmount(newAmount);
         }
+        if (isFamiliar(event.getEntity())) {
+            if (event.getSource().is(DamageTypes.DRY_OUT)) event.setCanceled(true);
+            else if (event.getSource().is(DamageTypes.DROWN) && event.getEntity() instanceof WaterAnimal)
+                event.setCanceled(true);
+        }
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+        var familiarType = getFamiliarType(sp);
+        if (familiarType == null) return;
+        tryChangeScale(sp);
+        if (event.getSource().is(DamageTypes.FALL)) {
+            var scale = ScaleTypes.BASE.getScaleData(sp).getScale();
+            var newAmount = event.getAmount() * scale + 1 - 1f / scale;
+            if (newAmount <= 0) event.setCanceled(true);
+        }
+        if (event.getSource().is(DamageTypes.FALL) && hasCatlikeBlessing(sp)) event.setCanceled(true);
+        else if (familiarType.equals(EntityType.CREEPER) && (event.getSource().is(DamageTypes.EXPLOSION) || event.getSource().is(DamageTypes.PLAYER_EXPLOSION))) {
+            event.setCanceled(true);
+        }else if (familiarType.equals(EntityType.ENDER_DRAGON) && event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
+            var end = sp.getServer().getLevel(Level.END);
+            sp.changeDimension(end, new ITeleporter() {
+                @Override
+                public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+                    var y = end.getMaxBuildHeight();
+                    var e = ITeleporter.super.placeEntity(entity, currentWorld, destWorld, yaw, repositionEntity);
+                    e.moveTo(0.5f, y, 0.5f);
+                    return e;
+                }
+            });
+        } else if (familiarType.equals(EntityType.FROG) && event.getSource().is(DamageTypes.FALL) && sp.getPersistentData().getBoolean("frogfall")) {
+            event.setCanceled(true);
+            sp.getPersistentData().putBoolean("frogfall", false);
+        } else if (event.getSource().is(DamageTypes.FREEZE) && (familiarType.equals(EntityType.SNOW_GOLEM) || familiarType.equals(EntityType.POLAR_BEAR))) {
+            event.setCanceled(true);
+        } else if (familiarType.equals(EntityType.SLIME) || familiarType.equals(EntityType.MAGMA_CUBE)) {
+            if (event.getSource().getEntity() != null && event.getSource().getEntity().getType().equals(familiarType)) {
+                event.setCanceled(true);
+            }
+        } else if (familiarType.equals(EntityType.SQUID)) {
+            var cutoff = sp.getMaxHealth() / 3;
+            if (sp.getHealth() > cutoff && sp.getHealth() - event.getAmount() < cutoff) {
+                sp.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 8, 2));
+            }
+        } else if (familiarType.equals(EntityType.WITHER) && event.getSource().is(DamageTypes.WITHER)) {
+            event.setCanceled(true);
+        } else if (familiarType.equals(EntityType.STRIDER) && event.getSource().is(DamageTypes.FALL)) {
+            var positionBelow = sp.position().add(0, -0.5f, 0);
+            var inLava = sp.serverLevel().getFluidState(BlockPos.containing(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
+            if (inLava) event.setCanceled(true);
+        } else if (familiarType.equals(Otherverse.GUEST.get()) && event.getSource().getEntity() instanceof LivingEntity le && sp.getLastHurtMob() != le && le.getLastHurtByMob() != sp) {
+            for (var e : sp.serverLevel().getEntities(le, le.getBoundingBox().inflate(64))) {
+                if (e instanceof Mob mob && mob.getTarget() == null) BindingManager.forceAttack(mob, le);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -1444,59 +1497,6 @@ public class FamiliarManager {
                         event.getEntity().hurt(event.getSource(), event.getAmount());
                     }
                 }
-            }
-        }
-        if (isFamiliar(event.getEntity())) {
-            if (event.getSource().is(DamageTypes.DRY_OUT)) event.setCanceled(true);
-            else if (event.getSource().is(DamageTypes.DROWN) && event.getEntity() instanceof WaterAnimal)
-                event.setCanceled(true);
-        }
-        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        var familiarType = getFamiliarType(sp);
-        if (familiarType == null) return;
-        tryChangeScale(sp);
-        if (event.getSource().is(DamageTypes.FALL)) {
-            var scale = ScaleTypes.BASE.getScaleData(sp).getScale();
-            var newAmount = event.getAmount() * scale + 1 - 1f / scale;
-            if (newAmount <= 0) event.setCanceled(true);
-        }
-        if (event.getSource().is(DamageTypes.FALL) && hasCatlikeBlessing(sp)) event.setCanceled(true);
-        else if (familiarType.equals(EntityType.CREEPER) && event.getSource().is(DamageTypes.EXPLOSION))
-            event.setCanceled(true);
-        else if (familiarType.equals(EntityType.ENDER_DRAGON) && event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
-            var end = sp.getServer().getLevel(Level.END);
-            sp.changeDimension(end, new ITeleporter() {
-                @Override
-                public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
-                    var y = end.getHeight(Heightmap.Types.MOTION_BLOCKING, 0, 0);
-                    var e = ITeleporter.super.placeEntity(entity, currentWorld, destWorld, yaw, repositionEntity);
-                    e.moveTo(0.5f, y, 0.5f);
-                    return e;
-                }
-            });
-        } else if (familiarType.equals(EntityType.FROG) && event.getSource().is(DamageTypes.FALL) && sp.getPersistentData().getBoolean("frogfall")) {
-            event.setCanceled(true);
-            sp.getPersistentData().putBoolean("frogfall", false);
-        } else if (event.getSource().is(DamageTypes.FREEZE) && (familiarType.equals(EntityType.SNOW_GOLEM) || familiarType.equals(EntityType.POLAR_BEAR))) {
-            event.setCanceled(true);
-        } else if (familiarType.equals(EntityType.SLIME) || familiarType.equals(EntityType.MAGMA_CUBE)) {
-            if (event.getSource().getEntity() != null && event.getSource().getEntity().getType().equals(familiarType)) {
-                event.setCanceled(true);
-            }
-        } else if (familiarType.equals(EntityType.SQUID)) {
-            var cutoff = sp.getMaxHealth() / 3;
-            if (sp.getHealth() > cutoff && sp.getHealth() - event.getAmount() < cutoff) {
-                sp.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 8, 2));
-            }
-        } else if (familiarType.equals(EntityType.WITHER) && event.getSource().is(DamageTypes.WITHER)) {
-            event.setCanceled(true);
-        } else if (familiarType.equals(EntityType.STRIDER) && event.getSource().is(DamageTypes.FALL)) {
-            var positionBelow = sp.position().add(0, -0.5f, 0);
-            var inLava = sp.serverLevel().getFluidState(BlockPos.containing(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
-            if (inLava) event.setCanceled(true);
-        } else if (familiarType.equals(Otherverse.GUEST.get()) && event.getSource().getEntity() instanceof LivingEntity le && sp.getLastHurtMob() != le && le.getLastHurtByMob() != sp) {
-            for (var e : sp.serverLevel().getEntities(le, le.getBoundingBox().inflate(64))) {
-                if (e instanceof Mob mob && mob.getTarget() == null) BindingManager.forceAttack(mob, le);
             }
         }
     }

@@ -482,6 +482,7 @@ public class BoundGoal extends Goal {
         if (targetMob == null || targetMob.isDeadOrDying()) {
             targetMob = practitioner.getLastHurtByMob();
         }
+        if (targetMob == practitioner) targetMob = null;
         if (targetMob == null || targetMob.isDeadOrDying()) {
             for (var e : mob.level().getEntities(mob, mob.getBoundingBox().inflate(32))) {
                 if (!(e instanceof Mob otherMob)) continue;

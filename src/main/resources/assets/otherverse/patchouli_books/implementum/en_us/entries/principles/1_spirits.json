@@ -10,7 +10,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "See the 'Spirit Affinity' section of Essentials for more information on spirit affinities and a list of opposing spirit types."
+            "text": "See the 'Spirit Affinity' section of Essentials for more information on spirit affinities and a list of opposing spirit types.$(br2)If your Implement is a hallow, you can use your Implement key to refill it with up to 33 spirits at the cost of Self."
         }
     ]
 }

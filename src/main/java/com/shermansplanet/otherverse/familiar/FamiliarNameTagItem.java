@@ -46,7 +46,7 @@ public class FamiliarNameTagItem extends NameTagItem {
         if (blockFocus != null) diagram = blockFocus.getDiagram();
         var playerSet = new HashSet<EntityType<?>>();
         playerSet.add(EntityType.PLAYER);
-        var requiredPower = (int) (entity.getMaxHealth() / 2);
+        var requiredPower = (int) (entity.getMaxHealth() / (binding.isPositive ? 4 : 2));
         BlockFocus otherfocus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
         if (player.isCreative()
                 || diagram.trySpendPower(sl, binding.position, requiredPower * PowerSource.POWER_FROM_SELF, playerSet)

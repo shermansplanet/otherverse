@@ -147,9 +147,9 @@ public class MobTransfusions {
     public static Collection<ItemOrEntityType> getItemOrShortcut(String s) {
         if (s.startsWith("entity.")) {
             var parts = s.split("\\.");
-            return List.of(new ItemOrEntityType(ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.fromNamespaceAndPath(
-                    parts[1], parts[2]
-            ))));
+            var rl = ResourceLocation.fromNamespaceAndPath(parts[1], parts[2]);
+            if(!ForgeRegistries.ENTITY_TYPES.containsKey(rl)) return List.of();
+            return List.of(new ItemOrEntityType(ForgeRegistries.ENTITY_TYPES.getValue(rl)));
         }
         if (transfusionShortcuts.containsKey(s)) {
             return transfusionShortcuts.get(s);

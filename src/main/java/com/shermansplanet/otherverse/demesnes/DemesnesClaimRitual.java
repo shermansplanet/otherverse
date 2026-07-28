@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
@@ -93,9 +94,13 @@ public class DemesnesClaimRitual {
         if (currentWave == null) return;
 
         for (var mob : currentWave.entities) {
+            BindingManager.forceAttack(mob, claimant);
             if (ritualBounds.intersects(mob.getBoundingBox())) continue;
-            mob.setTarget(claimant);
-            mob.getNavigation().moveTo(claimant, 1);
+            mob.setPos(
+                    Mth.clamp(mob.getX(), ritualBounds.minX, ritualBounds.maxX),
+                    mob.getY(),
+                    Mth.clamp(mob.getZ(), ritualBounds.minZ, ritualBounds.maxZ)
+            );
         }
 
         var remainingHp = currentWave.getRemainingHp();
@@ -164,7 +169,7 @@ public class DemesnesClaimRitual {
     public void onChallengerDeath(LivingDeathEvent event) {
         allKills++;
         var source = event.getSource();
-        if (source.is(DamageTypes.IN_FIRE) || source.is(DamageTypes.ON_FIRE)|| source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.LAVA)) {
+        if (source.is(DamageTypes.IN_FIRE) || source.is(DamageTypes.ON_FIRE) || source.is(DamageTypes.HOT_FLOOR) || source.is(DamageTypes.LAVA)) {
             burnKills++;
         } else if (source.is(DamageTypes.CRAMMING) || source.is(DamageTypes.FALL) || source.is(DamageTypes.FALLING_BLOCK) || source.is(DamageTypes.FALLING_ANVIL)
                 || source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.FALLING_STALACTITE) || source.is(DamageTypes.STALAGMITE)) {

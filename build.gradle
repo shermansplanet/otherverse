@@ -5,7 +5,7 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-version = '1.20.1-1.2.6'
+version = '1.20.1-1.2.9'
 group = 'com.shermansplanet.otherverse' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'otherverse'
 
@@ -189,8 +189,8 @@ dependencies {
     // Use the full Curios API jar at runtime
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.14.1+1.20.1")
 
-    implementation fg.deobf("flat.dir:L_Enders_Cataclysm:3.31")
-    implementation fg.deobf("flat.dir:lionfishapi:3.0")
+//    implementation fg.deobf("flat.dir:L_Enders_Cataclysm:3.31")
+//    implementation fg.deobf("flat.dir:lionfishapi:3.0")
 //    implementation fg.deobf("flat.dir:enemyexpansion-2.3.1-forge:1.20.1")
 //    implementation fg.deobf("flat.dir:alexscaves:2.0.2")
 //    implementation fg.deobf("flat.dir:appleskin-forge-mc1.20.1:2.5.1")

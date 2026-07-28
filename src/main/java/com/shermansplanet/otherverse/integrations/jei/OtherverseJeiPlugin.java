@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.integrations.jei;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.PracticeWorldUpdateMessage;
 import com.shermansplanet.otherverse.artifacts.BiomeCodeAssigner;
@@ -103,19 +104,21 @@ public class OtherverseJeiPlugin implements IModPlugin {
     public static void addPracticeRecipes() {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
         {
-            //debugPracticeRecipes();
-            LOGGER.debug("ADDING PRACTICE RECIPES...");
-            if (PracticeWorldManager.jeiInitialized) return;
-            registry.addRecipes(SpiritExtractionRecipeCategory.TYPE, SpiritLabeler.GenerateRecipes());
-            registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes());
-            registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes());
-            registry.addRecipes(BindingRecipeCategory.TYPE, MobBindingInfluenceUtils.GenerateRecipes());
-            registry.addRecipes(BiomeCodeRecipeCategory.TYPE, BiomeCodeAssigner.GenerateRecipes());
-            FleshbindingManager.addWoodTextures();
-            LOGGER.debug("PRACTICE RECIPES ADDED");
-            LOGGER.debug("{} BIOME CODES", BiomeCodeAssigner.biomeCodes.size());
-            PracticeWorldManager.jeiInitialized = true;
-            LOGGER.debug("JEI SET AS INITIALIZED");
+            OtherversePacketHandler.ensureRunOnClient(()-> {
+                //debugPracticeRecipes();
+                LOGGER.debug("ADDING PRACTICE RECIPES...");
+                if (PracticeWorldManager.jeiInitialized) return;
+                registry.addRecipes(SpiritExtractionRecipeCategory.TYPE, SpiritLabeler.GenerateRecipes());
+                registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes());
+                registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes());
+                registry.addRecipes(BindingRecipeCategory.TYPE, MobBindingInfluenceUtils.GenerateRecipes());
+                registry.addRecipes(BiomeCodeRecipeCategory.TYPE, BiomeCodeAssigner.GenerateRecipes());
+                FleshbindingManager.addWoodTextures();
+                LOGGER.debug("PRACTICE RECIPES ADDED");
+                LOGGER.debug("{} BIOME CODES", BiomeCodeAssigner.biomeCodes.size());
+                PracticeWorldManager.jeiInitialized = true;
+                LOGGER.debug("JEI SET AS INITIALIZED");
+            });
         });
     }
 

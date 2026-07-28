@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "To perform the Famulus ritual, name a bound mob with a Familiar Nametag. For the ritual to succeed, the mob must be influenced by an amount of your Self equal to half its health."
+            "text": "To perform the Famulus ritual, name a bound mob with a Familiar Nametag. For the ritual to succeed, the mob must be influenced by an amount of your Self equal to half its health (or a quarter of its health, if it is positively bound)."
         },
         {
             "type": "patchouli:crafting",

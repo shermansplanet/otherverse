@@ -14,6 +14,7 @@ public class OtherverseConfig {
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SKIPPED_PERKS;
     public static final ForgeConfigSpec.ConfigValue<Float> BINDING_COST;
     public static final ForgeConfigSpec.ConfigValue<Float> BINDING_ATTACK_CUTOFF;
+    public static final ForgeConfigSpec.ConfigValue<Float> BINDING_ATTACK_CUTOFF_ANY;
     public static final ForgeConfigSpec.ConfigValue<Integer> DAILY_SELF;
     public static final ForgeConfigSpec.ConfigValue<Boolean> BEDROCK_REMOVAL;
 
@@ -23,7 +24,8 @@ public class OtherverseConfig {
         DEMESNES_MOB_GRIEFING = BUILDER.comment("If enabled, ghasts and creepers may spawn during the demesnes ritual.").define("demesnes_mob_griefing", true);
         SKIPPED_PERKS = BUILDER.comment("Demesne perks in this list will be disabled (but will not block progress in the perk tree). Format them as they appear in the perk tree, e.g. \"Mandatory Hospitality\".").defineListAllowEmpty("skipped_perks", new ArrayList<>(), e -> e instanceof String);
         BINDING_COST = BUILDER.comment("Base multiplier of a mob's max health required to bind it.").define("binding_cost", 3f);
-        BINDING_ATTACK_CUTOFF = BUILDER.comment("Hostile mobs with more than this much max HP will attack their bindings.").define("binding_attack_cutoff", 20f);
+        BINDING_ATTACK_CUTOFF = BUILDER.comment("Hostile mobs with more than this much max HP will attack their bindings.").define("binding_attack_cutoff_hostile", 20f);
+        BINDING_ATTACK_CUTOFF_ANY = BUILDER.comment("ALL mobs with more than this much max HP will attack their bindings.").define("binding_attack_cutoff_any", 100f);
         DAILY_SELF = BUILDER.comment("Self recovered by sleeping.").define("daily_self", 3);
         BEDROCK_REMOVAL = BUILDER.comment("Can earth shrines / diagrams break bedrock?").define("bedrock_removal", true);
         BUILDER.pop();

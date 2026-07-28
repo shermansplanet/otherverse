@@ -136,7 +136,7 @@ public class SpiritColorAnalyzer {
         JsonObject obj = el.getAsJsonObject();
         if (obj.has("parent")) {
             JsonElement subElement = getJsonFor(getLocationFor(obj.get("parent").getAsString(), "models/", ".json"), packs);
-            if (subElement != null) {
+            if (subElement != null && !subElement.equals(el)) {
                 getTexturesRecursive(item, subElement, textures, packs);
             }
         }
@@ -153,8 +153,7 @@ public class SpiritColorAnalyzer {
                 }
                 try {
                     textures.add(NativeImage.read(resource));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                } catch (IOException ignored) {
                 }
             }
         }

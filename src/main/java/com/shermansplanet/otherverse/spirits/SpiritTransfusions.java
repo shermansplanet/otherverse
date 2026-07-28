@@ -66,17 +66,17 @@ public class SpiritTransfusions {
     public static void loadJsonTransfusion(JsonObject practice) {
         if (practice.has("block")) {
             register(
-                    ForgeRegistries.ITEMS.getValue(new ResourceLocation(practice.get("input").getAsString())),
+                    ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(practice.get("input").getAsString())),
                     Spirits.spiritsByLabel.get(practice.get("spirit").getAsString()),
                     practice.get("count").getAsInt(),
-                    ForgeRegistries.BLOCKS.getValue(new ResourceLocation(practice.get("block").getAsString()))
+                    ForgeRegistries.BLOCKS.getValue(ResourceLocation.parse(practice.get("block").getAsString()))
             );
         } else {
             register(
-                    ForgeRegistries.ITEMS.getValue(new ResourceLocation(practice.get("input").getAsString())),
+                    ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(practice.get("input").getAsString())),
                     Spirits.spiritsByLabel.get(practice.get("spirit").getAsString()),
                     practice.get("count").getAsInt(),
-                    ForgeRegistries.ITEMS.getValue(new ResourceLocation(practice.get("item").getAsString())),
+                    ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(practice.get("item").getAsString())),
                     false
             );
         }
@@ -174,8 +174,11 @@ public class SpiritTransfusions {
     }
 
     public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
-        register(recipe.getIngredients().get(0).getItems()[0].getItem(),
-                Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem(sl.registryAccess()).getItem(), true);
+        var ingredients = recipe.getIngredients();
+        if (ingredients.isEmpty()) return;
+        var items = ingredients.get(0).getItems();
+        if (items.length == 0) return;
+        register(items[0].getItem(), Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem(sl.registryAccess()).getItem(), true);
     }
 
     private static void registerDyableBlocks(Block[] blocks) {
@@ -349,7 +352,7 @@ public class SpiritTransfusions {
                 set.add(Spirits.spiritItems.get(transfusionData.spiritType).get().getDefaultInstance());
                 recipes.add(
                         new TransfusionRecipe(
-                                new ResourceLocation(Otherverse.MODID, "spirit_transfusion_" + i++), set,
+                                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "spirit_transfusion_" + i++), set,
                                 transfusionSet.getKey().getDefaultInstance(), transfusionData.output,
                                 transfusionData.price));
             }

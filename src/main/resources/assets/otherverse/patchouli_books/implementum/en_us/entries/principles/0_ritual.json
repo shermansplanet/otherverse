@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "To perform the Implementum ritual, simply go to sleep in a bed that is being influenced by your chosen Implement. When you awake, the item will bind itself to you."
+            "text": "To perform the Implementum ritual, simply go to sleep in a bed that is being influenced by your chosen Implement. When you awake, the item will bind itself to you. You will also unlock a new curio slot that can only hold an Implement."
         },
         {
             "type": "patchouli:text",
