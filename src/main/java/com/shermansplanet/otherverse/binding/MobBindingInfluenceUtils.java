@@ -573,7 +573,10 @@ public class MobBindingInfluenceUtils {
             Entity instance = et.create(level);
             if (instance instanceof Mob mob) {
                 MakeIdol(et);
-                mob.tick();
+                try {
+                    mob.tick();
+                } catch (Exception ignored) {
+                }
                 var le = (EntityType<? extends LivingEntity>) et;
                 if (!mobSpirits.containsKey(et)) {
                     if (ForgeRegistries.ENTITY_TYPES.getKey(et).getNamespace().equals("macabre")) {

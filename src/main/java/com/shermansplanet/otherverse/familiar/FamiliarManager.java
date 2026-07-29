@@ -1396,6 +1396,56 @@ public class FamiliarManager {
             if (newAmount <= 0) event.setCanceled(true);
             else event.setAmount(newAmount);
         }
+    }
+
+    @SubscribeEvent
+    public static void onHurt(LivingAttackEvent event) {
+        if (event.getSource().getEntity() instanceof Player p) {
+            var type = getFamiliarType(p);
+            if (type != null) {
+                if (type.equals(EntityType.CAVE_SPIDER)) {
+                    event.getEntity().addEffect(new MobEffectInstance(MobEffects.POISON, 7 * 20, 0), p);
+                } else if (type.equals(EntityType.STRAY)) {
+                    event.getEntity().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 7 * 20, 1), p);
+                } else if (type.equals(EntityType.WITHER_SKELETON)) {
+                    var weapon = p.getMainHandItem();
+                    if (weapon.is(Items.STONE_SWORD)) {
+                        if (ImplementManager.isImplement(weapon)) {
+                            event.getEntity().addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 60, 2), p);
+                        } else {
+                            event.getEntity().addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 10), p);
+                        }
+                    }
+                } else if (type.equals(EntityType.GOAT)) {
+                    var diff = event.getEntity().position().subtract(p.position());
+                    var len = diff.length();
+                    if (len < p.getEntityReach()) {
+                        diff = diff.scale(event.getAmount() / len / 2);
+                        diff = diff.add(p.getDeltaMovement());
+                        p.setDeltaMovement(Vec3.ZERO);
+                        event.getEntity().push(diff.x, diff.y, diff.z);
+                        event.getEntity().causeFallDamage(p.fallDistance, 1, event.getEntity().level().damageSources().fall());
+                        p.resetFallDistance();
+                    }
+                } else if (type.equals(EntityType.HOGLIN)) {
+                    var diff = event.getEntity().position().subtract(p.position());
+                    var len = diff.length();
+                    if (len < p.getEntityReach()) {
+                        event.getEntity().push(0, event.getAmount() / 4, 0);
+                        event.getEntity().setOnGround(false);
+                    }
+                } else if (type.equals(EntityType.ZOMBIE) || type.equals(EntityType.HUSK)) {
+                    if (event.getEntity().getRandom().nextInt(7) == 0) {
+                        var zombieResult = zombification.get(event.getEntity().getType());
+                        if (zombieResult != null && event.getEntity() instanceof Mob mob) {
+                            mob.convertTo(zombieResult, true);
+                        }
+                        p.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 5, 1));
+                        event.getEntity().hurt(event.getSource(), event.getAmount());
+                    }
+                }
+            }
+        }
         if (isFamiliar(event.getEntity())) {
             if (event.getSource().is(DamageTypes.DRY_OUT)) event.setCanceled(true);
             else if (event.getSource().is(DamageTypes.DROWN) && event.getEntity() instanceof WaterAnimal)
@@ -1447,56 +1497,6 @@ public class FamiliarManager {
         } else if (familiarType.equals(Otherverse.GUEST.get()) && event.getSource().getEntity() instanceof LivingEntity le && sp.getLastHurtMob() != le && le.getLastHurtByMob() != sp) {
             for (var e : sp.serverLevel().getEntities(le, le.getBoundingBox().inflate(64))) {
                 if (e instanceof Mob mob && mob.getTarget() == null) BindingManager.forceAttack(mob, le);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onHurt(LivingAttackEvent event) {
-        if (event.getSource().getEntity() instanceof Player p) {
-            var type = getFamiliarType(p);
-            if (type != null) {
-                if (type.equals(EntityType.CAVE_SPIDER)) {
-                    event.getEntity().addEffect(new MobEffectInstance(MobEffects.POISON, 7 * 20, 0), p);
-                } else if (type.equals(EntityType.STRAY)) {
-                    event.getEntity().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 7 * 20, 1), p);
-                } else if (type.equals(EntityType.WITHER_SKELETON)) {
-                    var weapon = p.getMainHandItem();
-                    if (weapon.is(Items.STONE_SWORD)) {
-                        if (ImplementManager.isImplement(weapon)) {
-                            event.getEntity().addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 60, 2), p);
-                        } else {
-                            event.getEntity().addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 10), p);
-                        }
-                    }
-                } else if (type.equals(EntityType.GOAT)) {
-                    var diff = event.getEntity().position().subtract(p.position());
-                    var len = diff.length();
-                    if (len < p.getEntityReach()) {
-                        diff = diff.scale(event.getAmount() / len / 2);
-                        diff = diff.add(p.getDeltaMovement());
-                        p.setDeltaMovement(Vec3.ZERO);
-                        event.getEntity().push(diff.x, diff.y, diff.z);
-                        event.getEntity().causeFallDamage(p.fallDistance, 1, event.getEntity().level().damageSources().fall());
-                        p.resetFallDistance();
-                    }
-                } else if (type.equals(EntityType.HOGLIN)) {
-                    var diff = event.getEntity().position().subtract(p.position());
-                    var len = diff.length();
-                    if (len < p.getEntityReach()) {
-                        event.getEntity().push(0, event.getAmount() / 4, 0);
-                        event.getEntity().setOnGround(false);
-                    }
-                } else if (type.equals(EntityType.ZOMBIE) || type.equals(EntityType.HUSK)) {
-                    if (event.getEntity().getRandom().nextInt(7) == 0) {
-                        var zombieResult = zombification.get(event.getEntity().getType());
-                        if (zombieResult != null && event.getEntity() instanceof Mob mob) {
-                            mob.convertTo(zombieResult, true);
-                        }
-                        p.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 5, 1));
-                        event.getEntity().hurt(event.getSource(), event.getAmount());
-                    }
-                }
             }
         }
     }

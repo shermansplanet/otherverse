@@ -111,6 +111,7 @@ public class ImplementManager {
         durabilities.put(Items.ICE, 64);
         durabilities.put(Items.REDSTONE, 64);
         durabilities.put(Items.NETHER_BRICKS, 64);
+        durabilities.put(Items.END_STONE, 64);
         durabilities.put(Items.BLACKSTONE, 64);
         durabilities.put(Items.BASALT, 64);
         durabilities.put(Items.TORCH, 64);

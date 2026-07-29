@@ -31,6 +31,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -55,10 +56,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Bus.FORGE)
 public class BindingManager {
@@ -462,25 +460,22 @@ public class BindingManager {
             banshee.tryAnvilDrop();
             return;
         }
-        if(!isBoundOrContracted(mob)) return;
-        var isCataclysm = ForgeRegistries.ENTITY_TYPES.getKey(mob.getType()).getNamespace().equals("cataclysm");
+        if (!isBoundOrContracted(mob)) return;
         var usedFlags = new HashSet<>();
-        for (var goal : mob.goalSelector.getAvailableGoals()) {
+        for (var goal : mob.goalSelector.getAvailableGoals().stream().sorted(Comparator.comparingInt(WrappedGoal::getPriority)).toList()) {
             if (goal.getGoal() instanceof BoundGoal) continue;
-            if (isCataclysm || BoundGoal.isAttackGoal(goal.getGoal())) {
-                if (goal.getFlags().stream().anyMatch(usedFlags::contains)) {
-                    continue;
-                }
-                if (!goal.isRunning() && goal.canUse()) {
-                    goal.start();
-                }
-                if (goal.isRunning() && !goal.canContinueToUse()) {
-                    goal.stop();
-                }
-                if (goal.isRunning()) {
-                    usedFlags.addAll(goal.getFlags());
-                    goal.tick();
-                }
+            if (goal.getFlags().stream().anyMatch(usedFlags::contains)) {
+                continue;
+            }
+            if (!goal.isRunning() && goal.canUse()) {
+                goal.start();
+            }
+            if (goal.isRunning() && !goal.canContinueToUse()) {
+                goal.stop();
+            }
+            if (goal.isRunning()) {
+                usedFlags.addAll(goal.getFlags());
+                goal.tick();
             }
         }
     }
@@ -549,10 +544,11 @@ public class BindingManager {
         }
     }
 
-    private static boolean isOverrideItem(ItemStack stack) {
+    private static boolean isOverrideItem(ItemStack stack, EntityType<?> type) {
         return stack.is(OtherverseItems.FAMILIAR_NAME_TAG.get())
                 || stack.is(OtherverseItems.CONTRACT.get())
-                || stack.is(Items.SADDLE);
+                || stack.is(Items.SADDLE)
+                || (type == EntityType.IRON_GOLEM && stack.is(Items.IRON_INGOT));
     }
 
     @SubscribeEvent
@@ -575,7 +571,7 @@ public class BindingManager {
             return;
         }
 
-        if (isOverrideItem(event.getItemStack()) && target instanceof LivingEntity le) {
+        if (isOverrideItem(event.getItemStack(), target.getType()) && target instanceof LivingEntity le) {
             InteractionResult interactionresult = event.getItemStack().interactLivingEntity(event.getEntity(), le, event.getHand());
             if (interactionresult.consumesAction()) {
                 event.setCancellationResult(interactionresult);

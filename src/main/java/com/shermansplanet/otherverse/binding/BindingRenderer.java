@@ -196,7 +196,6 @@ public class BindingRenderer {
         pose.scale(s, s, s);
         pose.mulPose(new Quaternionf().rotateY(rot * Mth.TWO_PI / 360));
         pose.pushPose();
-        if(isFamiliar) LOGGER.debug("FAMILIAR: {}", mob);
         if (!mob.getPersistentData().contains("construct_type")) {
             if (isFamiliar || contractOnly || isPositive) {
                 pose.translate(-0.5f, -0.4f, -0.5f);

@@ -120,13 +120,10 @@ public class PracticeWorldManager {
             return;
         worldSetUp = true;
         LOGGER.debug("WORLD MANAGER: SENDING MESSAGE");
-        DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () ->
-                {
-                    LOGGER.debug("SERVER SENDING...");
-                    OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), getUpdateMessage());
-                    LOGGER.debug("SERVER SENT");
-                }
-        );
+
+        LOGGER.debug("SERVER SENDING...");
+        OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), getUpdateMessage());
+        LOGGER.debug("SERVER SENT");
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
                 {
                     LOGGER.debug("CLIENT UPDATING...");

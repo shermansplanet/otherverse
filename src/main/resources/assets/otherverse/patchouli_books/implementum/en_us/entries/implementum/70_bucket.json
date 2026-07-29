@@ -12,7 +12,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "A Bucket Implement is a universal hallow, which can accept spirits of any type when empty. It also picks up fluids as spirits. Like any hallow, it can be used on blocks to transfuse them or hallow-blocks to transfer spirits.$(br2)As noted in the Block Implement section, a lava bucket Implement will place lava as if it were a block Implement, and will not confer the hallow capacity bonus."
+            "text": "A Bucket Implement is a universal hallow, which can accept spirits of any type when empty. It also picks up fluids as spirits. Like any hallow, it can be used on blocks to transfuse them or hallow-blocks to transfer spirits.$(br2)As noted in the Block Implement section, a lava bucket Implement will place lava as if it were a block Implement, and does not count as a bucket hallow."
         }
     ]
 }

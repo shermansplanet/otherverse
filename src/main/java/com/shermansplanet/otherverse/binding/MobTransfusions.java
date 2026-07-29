@@ -118,7 +118,11 @@ public class MobTransfusions {
     }
 
     public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
-        register(EntityType.BLAZE, recipe.getIngredients().get(0).getItems()[0].getItem(),
+        var ingredients = recipe.getIngredients();
+        if (ingredients.isEmpty()) return;
+        var items = ingredients.get(0).getItems();
+        if (items.length == 0) return;
+        register(EntityType.BLAZE, items[0].getItem(),
                 recipe.getResultItem(sl.registryAccess()), 1, true);
     }
 
