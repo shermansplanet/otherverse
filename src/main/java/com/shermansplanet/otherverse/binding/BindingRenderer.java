@@ -343,6 +343,7 @@ public class BindingRenderer {
                 positiveBoundEntities.remove(le.getUUID());
                 negativeBoundEntities.remove(le.getUUID());
                 contractEntities.remove(le.getUUID());
+                familiars.remove(le.getUUID());
             }
         }
     }

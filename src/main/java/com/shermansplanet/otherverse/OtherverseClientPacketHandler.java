@@ -97,4 +97,10 @@ public class OtherverseClientPacketHandler {
             entity.yRotO = entity.getYRot();
         }
     }
+
+    public static void ensureRunOnClient(Runnable func) {
+        if (Minecraft.getInstance().isSameThread()) {
+            func.run();
+        }
+    }
 }

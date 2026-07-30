@@ -53,6 +53,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     public int cooldownTicks = 0;
     public String player = "";
     public String inscription = "";
+    private boolean enqueuedUpdate = false;
 
     LazyOptional<IItemHandler> inventoryHandlerLazyOptional = LazyOptional.of(() -> this);
 
@@ -99,7 +100,6 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     public void onChunkUnloaded() {
         super.onChunkUnloaded();
         if (diagram != null) {
-            LOGGER.debug("unloading diagram because chunk unloaded");
             DiagramManager.unloadDiagram(diagram, level, true);
         }
     }
@@ -389,6 +389,11 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
         if (!sl.players().get(0).isAddedToWorld()) return;
 
         var cc = (ChalkCircle) t;
+        if (cc.enqueuedUpdate) {
+            cc.markUpdated();
+            cc.enqueuedUpdate = false;
+        }
+
         if (cc.cooldownTicks > 0) {
             cc.cooldownTicks--;
             if (cc.cooldownTicks == 0) {
@@ -436,11 +441,17 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
 
     public String getLockStatus() {
         var diagram = getDiagram();
-        if(diagram == null) return "No diagram";
-        if(level == null) return "No level";
-        if(!diagram.processes.isEmpty()) return "Has " + diagram.processes.size() + " ongoing processes.";
-        if(!diagram.mobsOnCooldown.isEmpty()) return "Has mobs on cooldown: " + String.join(", ", diagram.mobsOnCooldown.stream().map(m -> m.getType().toString()).toList());
-        if(DiagramManager.getOrCreateLevelData(level).diagramsToActivate.contains(diagram)) return "Marked for activation this tick";
+        if (diagram == null) return "No diagram";
+        if (level == null) return "No level";
+        if (!diagram.processes.isEmpty()) return "Has " + diagram.processes.size() + " ongoing processes.";
+        if (!diagram.mobsOnCooldown.isEmpty())
+            return "Has mobs on cooldown: " + String.join(", ", diagram.mobsOnCooldown.stream().map(m -> m.getType().toString()).toList());
+        if (DiagramManager.getOrCreateLevelData(level).diagramsToActivate.contains(diagram))
+            return "Marked for activation this tick";
         return "Unlocked";
+    }
+
+    public void enqueueUpdate() {
+        enqueuedUpdate = true;
     }
 }

@@ -107,7 +107,6 @@ public class Diagram {
     }
 
     public boolean tryActivateDiagram(ServerLevel level) {
-        LOGGER.debug("activating diagram");
         powerSourceCache = new HashMap<>();
         for (BlockPos pos : itemFocusPositions) {
             if (level.getBlockEntity(pos) instanceof ChalkCircle circle && !circle.item.isEmpty()
@@ -300,8 +299,6 @@ public class Diagram {
 
     private int getPowerSources(ServerLevel level, BlockPos targetPos, List<PowerSource> powerSources,
                                 HashSet<EntityType<?>> requiredEntities) {
-        LOGGER.debug("Getting power sources for " + String.join(", ",
-                requiredEntities.stream().map(EntityType::toString).toList()));
         int totalPower = 0;
         for (BlockPos pos : influences.keySet()) {
             if (!influences.get(pos).equals(targetPos)) {
@@ -366,7 +363,6 @@ public class Diagram {
                 }
             }
         }
-        LOGGER.debug("total power " + totalPower);
         return totalPower;
     }
 

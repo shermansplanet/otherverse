@@ -224,10 +224,11 @@ public class ChalkLineBlock extends Block implements EntityBlock {
                 if (!player.addItem(drop)) {
                     player.drop(drop, false);
                 }
-            } else {
+            } else if(!player.getAbilities().instabuild){
                 itemstack.split(1);
             }
             level.setBlockAndUpdate(pos, state.setValue(hasScaffolding, !hadScaffolding));
+            circle.markUpdated();
             return InteractionResult.SUCCESS;
         }
         if (hadScaffolding && itemstack.getItem() instanceof ChalkItem

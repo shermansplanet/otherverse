@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
@@ -21,6 +22,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -190,7 +192,11 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
         recalculatePositions();
         var data = DemesnesManager.getData(player);
         if (data != null) {
-            return new DemesnesMenu(i, data, getBlockPos());
+            if (player instanceof ServerPlayer sp) {
+                if (!(OtherverseConfig.CAN_REDO_RITUALS.get() || player.isCreative()) || (DemesnesManager.getData(sp.serverLevel(), getBlockPos()) != null)) {
+                    return new DemesnesMenu(i, data, getBlockPos());
+                }
+            }
         }
 
         return new DemesnesClaimMenu(i, inventory, ContainerLevelAccess.create(level, getBlockPos()));

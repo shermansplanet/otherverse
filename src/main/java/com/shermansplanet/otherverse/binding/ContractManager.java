@@ -41,10 +41,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.slf4j.Logger;
 import oshi.util.tuples.Pair;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Bus.FORGE)
 public class ContractManager {
@@ -171,7 +168,7 @@ public class ContractManager {
         CompoundTag tag = new CompoundTag();
         int i = 0;
         int range = 8;
-        for (var influencePos : diagram.influences.entrySet()) {
+        for (var influencePos : diagram.influences.entrySet().stream().sorted(Comparator.comparingInt(entry -> entry.getKey().getZ() * 64 + entry.getKey().getX())).toList()) {
             if (!influencePos.getValue().equals(circle.getPos()) || influencePos.getKey().equals(originalPos)) {
                 continue;
             }
@@ -191,8 +188,7 @@ public class ContractManager {
                 if (taskTag.isEmpty()) {
                     continue;
                 }
-                tag.put("task_" + i++, taskTag);
-                i++;
+                tag.put("Task_" + i++, taskTag);
             }
         }
         if (tag.isEmpty()) return tag;
@@ -436,7 +432,7 @@ public class ContractManager {
             var item = Item.byId(contractTag.getInt("recipe_result"));
             toolTip.add(Component.literal(prefix).append(item.getDescription()));
         }
-        for (String key : contractTag.getAllKeys()) {
+        for (String key : contractTag.getAllKeys().stream().sorted().toList()) {
             if (key.startsWith("corner") || key.startsWith("tag") || key.startsWith("recipe") || key.equals("min") || key.equals("max") || key.equals("range")) {
                 continue;
             }
@@ -459,9 +455,9 @@ public class ContractManager {
                     if (key.startsWith("block") || key.startsWith("inventory")) {
                         var s = item == Items.HAY_BLOCK ? "passive mobs"
                                 : item == Items.TARGET ? "hostile mobs"
-                                  : item == Items.CRAFTING_TABLE ? "players"
-                                    : item == Items.CHAIN ? "bound mobs"
-                                      : "";
+                                : item == Items.CRAFTING_TABLE ? "players"
+                                : item == Items.CHAIN ? "bound mobs"
+                                : "";
                         if (!s.isEmpty()) {
                             toolTip.add(Component.literal(prefix + s));
                             continue;
@@ -508,7 +504,7 @@ public class ContractManager {
                 toolTip.add(Component.literal(prefix + contractTag.getString(key)));
                 continue;
             }
-            if (key.startsWith("task")) {
+            if (key.startsWith("Task")) {
                 CompoundTag subTag = contractTag.getCompound(key);
                 if (subTag.contains("type")) {
                     String typestring = subTag.getString("type");

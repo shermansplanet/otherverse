@@ -9,13 +9,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.client.ICuriosScreen;
 
 import java.awt.*;
@@ -61,6 +64,32 @@ public class ForgeClientEvents {
         event.setNearPlaneDistance(-32);
         event.setFarPlaneDistance(200);
         event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void clientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) return;
+        if (!Keybindings.KEY_SIGHT.consumeClick()) return;
+        if (!canToggleSight()) return;
+        SightManager.toggleSight();
+    }
+
+    private static boolean canToggleSight() {
+        var sightItems = OtherverseConfig.getSightItems();
+        if (sightItems.isEmpty()) return true;
+        var player = Minecraft.getInstance().player;
+        for (var item : player.getInventory().items) {
+            if (sightItems.contains(item.getItem())) return true;
+        }
+        var inv = CuriosApi.getCuriosInventory(player);
+        if (!inv.isPresent() || inv.resolve().isEmpty()) return false;
+        for(var curioInventory : inv.resolve().get().getCurios().values()){
+            var stacks = curioInventory.getStacks();
+            for (var i = 0; i < stacks.getSlots(); i++) {
+                if (sightItems.contains(stacks.getStackInSlot(i).getItem())) return true;
+            }
+        }
+        return false;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

@@ -2,7 +2,9 @@ package com.shermansplanet.otherverse.spirits;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
+import com.shermansplanet.otherverse.diagrams.SelfManager;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import org.slf4j.Logger;
@@ -50,6 +52,12 @@ public class SpiritAffinityTracker {
             baseAffinities.put(spiritType, current * (1 - lerp) + goal * lerp);
         }
 
+        public void decreaseAllAffinities() {
+            for (var spiritType : Spirits.allSpiritTypes) {
+                baseAffinities.put(spiritType, -1f);
+            }
+        }
+
         public float getTotalFor(SpiritType spiritType) {
             var total = baseAffinities.getOrDefault(spiritType, 0f);
 
@@ -88,6 +96,13 @@ public class SpiritAffinityTracker {
     public static void decreaseAffinity(SpiritType spiritType, ServerPlayer player) {
         if (spiritType == null) return;
         getAffinities(player).pullAffinityTowards(spiritType, -1f);
+        markUpdated(player);
+    }
+
+    public static void decreaseAllAffinities(ServerPlayer player) {
+        SelfManager.changeSelf(player, -3);
+        player.sendSystemMessage(Component.literal("The spirits are not impressed with your lack of commitment..."));
+        getAffinities(player).decreaseAllAffinities();
         markUpdated(player);
     }
 

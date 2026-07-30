@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "A mob will attempt to do any possible action influencing its root contract. Orange dye, when placed as an action, denotes a $(bold)fallback$(); if none of the other actions are possible, the mob switches to choosing from all the actions influencing the dye (as if the dye were the contract)"
+            "text": "A mob will attempt to do any possible action influencing its root contract. Orange dye, when placed as an action, denotes a $(bold)fallback$(); if none of the other actions are possible, the mob switches to choosing from all the actions influencing the dye (as if the dye were the contract)."
         },
         {
             "type": "patchouli:image",
@@ -25,7 +25,7 @@
         {
             "title": "Conditionals",
             "type": "patchouli:text",
-            "text": "If red, yellow, and/or green dye are influencing an action and have actions of their own influencing them, they will become the new \"decider\" when the action they're infuencing succeeds (green), fails (red), or does either (yellow).$(br2)This diagram makes a mob eternally walk between sand and red sand."
+            "text": "If red, yellow, and/or green dye are influencing an action and have actions of their own influencing them, they will become the new \"decider\" when the action they're influencing succeeds (green), fails (red), or does either (yellow).$(br2)This diagram makes a mob eternally walk between sand and red sand."
         },
         {
             "type": "patchouli:image",
@@ -33,8 +33,12 @@
             "text": "go(sand, success(go(red sand)))."
         },
         {
-        "type": "patchouli:text",
+            "type": "patchouli:text",
             "text": "To summarize: a $(italic)fallback$() (orange dye as an action) activates if none of its neighboring actions are possible, e.g. there is no sand around to walk towards. A conditional (green/yellow/red dye as a filter) activates if its parent action ends, e.g. a mob has reached the sand or the sand has become inaccessible."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "With clever arrangement, you might not need fallbacks. Multiple actions can influence a node (dye/contract), and they will be checked in the order in which they appear in the contract tooltip. If you're looking at your diagram from above and facing north, this order is 'English reading order' (top to bottom, left to right)."
         }
     ]
 }

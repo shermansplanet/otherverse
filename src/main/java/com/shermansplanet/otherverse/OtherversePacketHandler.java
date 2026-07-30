@@ -324,10 +324,4 @@ public class OtherversePacketHandler {
         );
         ctx.get().setPacketHandled(true);
     }
-
-    public static void ensureRunOnClient(Runnable func) {
-        if (Minecraft.getInstance().isSameThread()) {
-            func.run();
-        }
-    }
 }

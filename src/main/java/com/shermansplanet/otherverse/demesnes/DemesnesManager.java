@@ -196,6 +196,12 @@ public class DemesnesManager {
     }
 
     public static void startClaim(DemesnesClaimStartMessage msg, ServerPlayer player) {
+        if (!player.isCreative() && getData(player) != null) {
+            if (!OtherverseConfig.CAN_REDO_RITUALS.get()) {
+                return;
+            }
+            SpiritAffinityTracker.decreaseAllAffinities(player);
+        }
         var ritual = new DemesnesClaimRitual(msg, player);
         if (ritual.range == -1) return;
         player.giveExperienceLevels(-Mth.square(ritual.range * 2 + 1));

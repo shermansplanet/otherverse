@@ -20,6 +20,7 @@ import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
 import com.shermansplanet.otherverse.spirits.SpiritLabeler;
 import com.shermansplanet.otherverse.spirits.Spirits;
+import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -108,6 +109,25 @@ public class FamiliarManager {
         if (!isFamiliar(entity)) return false;
         var t = entity.getType();
         return t.equals(EntityType.DONKEY) || t.equals(EntityType.LLAMA) || t.equals(EntityType.MULE) || t.equals(EntityType.TRADER_LLAMA);
+    }
+
+    public static void abandonFamiliar(ServerPlayer sp) {
+        var familiarData = getFamiliarData(sp);
+        var entityTag = familiarData.getCompound("mob_data").getCompound("EntityTag");
+        var id = entityTag.getUUID("UUID");
+        var entity = sp.serverLevel().getEntity(id);
+        if (entity instanceof Mob mob) {
+            var persistentData = mob.getPersistentData();
+            persistentData.remove("practitioner");
+            if (persistentData.contains("bindingId")) {
+                LOGGER.debug("HAS BINDING");
+                TransientDiagramData data = DiagramManager.getOrCreateLevelData(sp.getServer().overworld());
+                BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
+                if (binding != null) {
+                    BindingManager.breakBinding(binding);
+                }
+            }
+        }
     }
 
     private enum MobBenefitCondition {ANYTIME, UNDERWATER, IN_WATER, DARK, COLD}
@@ -904,6 +924,7 @@ public class FamiliarManager {
                 MobSpawnType.MOB_SUMMONED, false, false);
         e.load(mobData.getCompound("EntityTag"));
         e.setPos(spawnPos);
+        SympathyManager.setEntityUUID(e, id);
 
         addMobToLevel(e, level);
 
@@ -1461,9 +1482,11 @@ public class FamiliarManager {
             if (newAmount <= 0) event.setCanceled(true);
         }
         if (event.getSource().is(DamageTypes.FALL) && hasCatlikeBlessing(sp)) event.setCanceled(true);
+        else if (event.getSource().is(DamageTypes.FALL) && familiarType.equals(EntityType.CHICKEN))
+            event.setCanceled(true);
         else if (familiarType.equals(EntityType.CREEPER) && (event.getSource().is(DamageTypes.EXPLOSION) || event.getSource().is(DamageTypes.PLAYER_EXPLOSION))) {
             event.setCanceled(true);
-        }else if (familiarType.equals(EntityType.ENDER_DRAGON) && event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
+        } else if (familiarType.equals(EntityType.ENDER_DRAGON) && event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
             var end = sp.getServer().getLevel(Level.END);
             sp.changeDimension(end, new ITeleporter() {
                 @Override

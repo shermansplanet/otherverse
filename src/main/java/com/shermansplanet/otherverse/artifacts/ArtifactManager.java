@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.artifacts;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.ReskinManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.*;
@@ -246,7 +247,8 @@ public class ArtifactManager {
     public static void onUse(PlayerInteractEvent.RightClickBlock event) {
         var be = event.getLevel().getBlockEntity(event.getPos());
         if (be instanceof BiomeBrazierBlockEntity brazier) {
-            if (event.getItemStack().is(Otherverse.primeForDimension(event.getLevel()))) {
+            var primes = OtherverseConfig.getPrimesForDimension(event.getLevel());
+            if (primes.contains(event.getItemStack().getItem())) {
                 if (!event.getEntity().isCreative()) {
                     event.getItemStack().shrink(1);
                     if (event.getItemStack().isEmpty())
@@ -411,17 +413,17 @@ public class ArtifactManager {
             if (source == null) continue;
             var item = source.getItem();
             var spiritAmounts = SpiritLabeler.getSpiritsFor(item.getItem());
-            if(spiritAmounts == null) continue;
-            for(var spirit : spiritAmounts.entrySet()){
-                for(var col : Spirits.colorsByDye.entrySet()) {
-                    if(col.getValue() != spirit.getKey()) continue;
+            if (spiritAmounts == null) continue;
+            for (var spirit : spiritAmounts.entrySet()) {
+                for (var col : Spirits.colorsByDye.entrySet()) {
+                    if (col.getValue() != spirit.getKey()) continue;
                     var existingAmount = colorSpiritCounts.getOrDefault(col.getKey(), 0);
                     colorSpiritCounts.put(col.getKey(), existingAmount + spirit.getValue());
                     break;
                 }
             }
         }
-        if(colorSpiritCounts.isEmpty()) return false;
+        if (colorSpiritCounts.isEmpty()) return false;
         var colors = colorSpiritCounts.keySet().stream().sorted(Comparator.comparingInt(colorSpiritCounts::get)).toList();
         var mainColor = colors.get(colors.size() - 1);
         var buckleColor = colors.get(Math.max(0, colors.size() - 2));

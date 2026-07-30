@@ -33,6 +33,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
@@ -242,7 +243,6 @@ public class BindingManager {
             }
             return false;
         }
-        LOGGER.debug("BINDING");
         if (rebinding) {
             return true;
         }
@@ -392,7 +392,7 @@ public class BindingManager {
     }
 
     public static int getBindingWearInterval(float maxHealth) {
-        return 6561 / (int) Math.ceil(maxHealth);
+        return 6561 / Math.max((int) Math.ceil(maxHealth), 20);
     }
 
     public static void applyBinding(BindingInfo binding, Mob mob, boolean silent) {
@@ -417,6 +417,9 @@ public class BindingManager {
         BoundGoal boundGoal = new BoundGoal(mob, binding);
         mob.goalSelector.addGoal(-1, boundGoal);
         mob.getNavigation().stop();
+        if (mob instanceof Chicken chicken) {
+            chicken.eggTime = 20 * 60 * 60 * 100;
+        }
         if (mob instanceof WanderingTrader wt) wt.setDespawnDelay(-1);
         if (!binding.contract.isEmpty()) {
             boundGoal.applyContract();
@@ -548,6 +551,7 @@ public class BindingManager {
         return stack.is(OtherverseItems.FAMILIAR_NAME_TAG.get())
                 || stack.is(OtherverseItems.CONTRACT.get())
                 || stack.is(Items.SADDLE)
+                || stack.is(Items.WATER_BUCKET)
                 || (type == EntityType.IRON_GOLEM && stack.is(Items.IRON_INGOT));
     }
 
@@ -573,6 +577,12 @@ public class BindingManager {
 
         if (isOverrideItem(event.getItemStack(), target.getType()) && target instanceof LivingEntity le) {
             InteractionResult interactionresult = event.getItemStack().interactLivingEntity(event.getEntity(), le, event.getHand());
+            if (interactionresult.consumesAction()) {
+                event.setCancellationResult(interactionresult);
+                event.setCanceled(true);
+                return;
+            }
+            interactionresult = le.interact(event.getEntity(), event.getHand());
             if (interactionresult.consumesAction()) {
                 event.setCancellationResult(interactionresult);
                 event.setCanceled(true);
@@ -628,6 +638,8 @@ public class BindingManager {
     }
 
     public static boolean drainsBindings(EntityType<? extends LivingEntity> type) {
+        if (DefaultAttributes.getSupplier(type) == null) return false;
+        if (!DefaultAttributes.getSupplier(type).hasAttribute(Attributes.MAX_HEALTH)) return false;
         var maxHp = DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH);
         if (maxHp <= OtherverseConfig.BINDING_ATTACK_CUTOFF.get()) return false;
         if (maxHp > OtherverseConfig.BINDING_ATTACK_CUTOFF_ANY.get()) return true;

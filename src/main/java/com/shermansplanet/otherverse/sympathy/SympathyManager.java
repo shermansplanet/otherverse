@@ -122,9 +122,9 @@ public class SympathyManager {
                 var targetPos = data.getSympathyPosition(key);
                 if (targetPos != null) {
                     data.putSympathyPosition(bindPos.toString(), targetPos);
+                    event.getEntity().displayClientMessage(Component.literal("Web of Fate bound to " + targetPos.getX() + ", " + targetPos.getY() + ", " + targetPos.getZ()), true);
+                    col = DyeColor.WHITE;
                 }
-                event.getEntity().displayClientMessage(Component.literal("Web of Fate bound to " + targetPos.getX() + ", " + targetPos.getY() + ", " + targetPos.getZ()), true);
-                col = DyeColor.WHITE;
             }
             event.getEntity().level().setBlockAndUpdate(bindPos, state.setValue(ColorableBlock.color, col));
         } else {
@@ -297,5 +297,9 @@ public class SympathyManager {
         BlockFocus focus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), bb);
         if(focus == null) return;
         DiagramManager.onMobInFocus(mob, focus, sl);
+    }
+
+    public static void setEntityUUID(Entity e, UUID id) {
+        entitiesByUUID.put(id.toString(), e);
     }
 }

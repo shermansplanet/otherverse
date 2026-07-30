@@ -2,10 +2,7 @@ package com.shermansplanet.otherverse.integrations.jei;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import com.shermansplanet.otherverse.Otherverse;
-import com.shermansplanet.otherverse.OtherversePacketHandler;
-import com.shermansplanet.otherverse.PracticeWorldManager;
-import com.shermansplanet.otherverse.PracticeWorldUpdateMessage;
+import com.shermansplanet.otherverse.*;
 import com.shermansplanet.otherverse.artifacts.BiomeCodeAssigner;
 import com.shermansplanet.otherverse.binding.FleshbindingManager;
 import com.shermansplanet.otherverse.binding.IdolItem;
@@ -104,7 +101,7 @@ public class OtherverseJeiPlugin implements IModPlugin {
     public static void addPracticeRecipes() {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
         {
-            OtherversePacketHandler.ensureRunOnClient(()-> {
+            OtherverseClientPacketHandler.ensureRunOnClient(()-> {
                 //debugPracticeRecipes();
                 LOGGER.debug("ADDING PRACTICE RECIPES...");
                 if (PracticeWorldManager.jeiInitialized) return;

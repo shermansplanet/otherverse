@@ -22,18 +22,15 @@ public class SightManager {
         return isSightOn;
     }
 
-    @SubscribeEvent
-    public static void clientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) return;
-        if (!Keybindings.KEY_SIGHT.consumeClick()) return;
+    public static void onToggleServer(SightToggleMessage sightToggleMessage, Supplier<NetworkEvent.Context> contextSupplier) {
+        isSightOn = sightToggleMessage.isOn();
+    }
+
+    public static void toggleSight() {
         isSightOn = !isSightOn;
         System.out.println("SIGHT TOGGLED " + (isSightOn ? "ON" : "OFF"));
         ReskinManager.onSightUpdate();
         if(isSightOn) SightOverlay.instance.recalculateColor();
         OtherversePacketHandler.INSTANCE.sendToServer(new SightToggleMessage(isSightOn));
-    }
-
-    public static void onToggleServer(SightToggleMessage sightToggleMessage, Supplier<NetworkEvent.Context> contextSupplier) {
-        isSightOn = sightToggleMessage.isOn();
     }
 }

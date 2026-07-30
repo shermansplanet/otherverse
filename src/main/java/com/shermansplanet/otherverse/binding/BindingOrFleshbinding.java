@@ -40,6 +40,7 @@ public class BindingOrFleshbinding {
         if (!circle.getItem().getTag().contains("sympathy_target")) return null;
         var otherEntity = SympathyManager.getEntityByUniqueId(circle.getItem().getTag().getString("sympathy_target"), sl);
         if (!(otherEntity instanceof LivingEntity le)) return null;
+        if (le.isRemoved() || !le.isAlive()) return null;
         if (!le.getPersistentData().contains("bindingId")) return null;
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         return data.bindingsById.get(le.getPersistentData().getUUID("bindingId"));

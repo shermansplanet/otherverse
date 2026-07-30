@@ -100,6 +100,8 @@ public class ContractTask {
     private int ticksInSameBlock = 0;
     private BlockPos lastPos = null;
 
+    private static final Pair<IItemHandler, Integer> HELD_ITEM = new Pair<>(null, null);
+
     public void getDebugMessage(StringBuilder s) {
         s.append("task: ").append(taskType).append("\n");
         s.append("my position: ").append(mob.blockPosition()).append("\n");
@@ -496,7 +498,7 @@ public class ContractTask {
                 }
                 return false;
             case ATTACK:
-                return canAttackPosition(mob.getType());
+                return inPositionFilter && canAttackPosition(mob.getType());
             case CRAFT:
                 if (mob.level().getBlockState(pos).getBlock() != Blocks.CRAFTING_TABLE) return false;
                 usedIngredientsCache.clear();
@@ -542,6 +544,19 @@ public class ContractTask {
 
     private boolean findCraftingIngredient(Ingredient ingredient, BlockPos pos, HashMap<Pair<IItemHandler, Integer>, Integer> usedIngredients) {
         if (ingredient.isEmpty()) return true;
+        ItemStack heldStack = BindingManager.getHeldItem(mob);
+        if (!heldStack.isEmpty() && ingredient.test(heldStack)) {
+            var pair = HELD_ITEM;
+            if (!usedIngredients.containsKey(pair)) {
+                usedIngredients.put(pair, 1);
+                return true;
+            }
+            var usedCount = usedIngredients.get(pair);
+            if (usedCount < heldStack.getCount()) {
+                usedIngredients.put(pair, usedCount + 1);
+                return true;
+            }
+        }
         for (var dir : Direction.values()) {
             var be = mob.level().getBlockEntity(pos.relative(dir));
             if (be != null) {
@@ -613,18 +628,18 @@ public class ContractTask {
         }
 
         if (taskType == TaskType.ATTACK) {
-            if (targetMob == null) {
+            if (targetMob == null && targetPos != null) {
                 var target = new Vec3(targetPos.getX() + 0.5f, targetPos.getY() + 0.5f, targetPos.getZ() + 0.5f);
                 mob.lookAt(EntityAnchorArgument.Anchor.FEET, target);
                 if (boundGoal.cooldown > 0) return false;
                 attackPosition(target);
                 return succeed();
             }
-            if (targetMob.isDeadOrDying()) {
-                return succeed();
-            }
             if (targetMob == null || !targetMob.isAttackable()) {
                 return fail();
+            }
+            if (targetMob.isDeadOrDying()) {
+                return succeed();
             }
             boundGoal.startAttacking(targetMob);
             return false;
@@ -814,7 +829,7 @@ public class ContractTask {
                 }
             }
             int newBlockDamage = destroyTime < 0 ? -1 : destroyTime == 0 ? 10
-                                                        : (int) Math.floor(doActionTicks * attackDamage / destroyTime / 20);
+                    : (int) Math.floor(doActionTicks * attackDamage / destroyTime / 20);
             if (newBlockDamage != blockDamage) {
                 if (newBlockDamage >= 10) {
                     if (felling && blockstate.is(BlockTags.LOGS)) {
@@ -859,25 +874,37 @@ public class ContractTask {
             if (!isBlockAcceptableTarget(targetPos, false)) return fail();
             var craftAmount = resultItem.getMaxStackSize();
             for (var ingredient : usedIngredientsCache.entrySet()) {
-                var amount = ingredient.getKey().getFirst().getStackInSlot(ingredient.getKey().getSecond()).getCount();
+                var amount = (ingredient.getKey() == HELD_ITEM ? BindingManager.getHeldItem(mob)
+                        : ingredient.getKey().getFirst().getStackInSlot(ingredient.getKey().getSecond())).getCount();
                 craftAmount = Math.min(craftAmount, amount / ingredient.getValue());
                 if (craftAmount == 0) return fail();
             }
             for (var ingredient : usedIngredientsCache.entrySet()) {
-                var amount = ingredient.getKey().getFirst().extractItem(ingredient.getKey().getSecond(), craftAmount * ingredient.getValue(), true).getCount();
+                var amount = (ingredient.getKey() == HELD_ITEM ? BindingManager.getHeldItem(mob)
+                        : ingredient.getKey().getFirst().extractItem(ingredient.getKey().getSecond(), craftAmount * ingredient.getValue(), true)).getCount();
                 if (amount / ingredient.getValue() != craftAmount) return fail();
             }
             for (var ingredient : usedIngredientsCache.entrySet()) {
-                ingredient.getKey().getFirst().extractItem(ingredient.getKey().getSecond(), craftAmount * ingredient.getValue(), false);
+                if (ingredient.getKey() == HELD_ITEM) {
+                    BindingManager.getHeldItem(mob).shrink(craftAmount * ingredient.getValue());
+                } else {
+                    ingredient.getKey().getFirst().extractItem(ingredient.getKey().getSecond(), craftAmount * ingredient.getValue(), false);
+                }
             }
             var held = BindingManager.getHeldItem(mob);
-            var stack = recipe.getResultItem(mob.level().registryAccess()).copyWithCount(craftAmount);
-            if (held.isEmpty() || (held.is(stack.getItem()) &&
-                    Objects.equals(held.getTag(), stack.getTag()) &&
-                    held.getCount() + stack.getCount() <= stack.getMaxStackSize())) {
-                BindingManager.setHeldItem(mob, stack);
-            } else {
-                spawnAtTargetPos(stack);
+            var ri = recipe.getResultItem(mob.level().registryAccess());
+            var stack = ri.copyWithCount(ri.getCount() * craftAmount);
+            var total = ri.getCount() * craftAmount;
+            var itemsMatch = held.isEmpty() || (held.is(stack.getItem()) &&
+                    Objects.equals(held.getTag(), stack.getTag()));
+            if (itemsMatch) {
+                total += held.getCount();
+                var newHeldSize = Math.min(total, ri.getMaxStackSize());
+                BindingManager.setHeldItem(mob, ri.copyWithCount(newHeldSize));
+                total -= newHeldSize;
+            }
+            if (total > 0) {
+                spawnAtTargetPos(ri.copyWithCount(total));
             }
         }
         return succeed();
@@ -964,7 +991,7 @@ public class ContractTask {
 
     private void attackPosition(Vec3 target) {
         var type = mob.getType();
-        var source = new Vec3(mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f));
+        var source = new Vec3(mob.getX(0.5f), mob.getY(0.75f), mob.getZ(0.5f));
         var diff = target.subtract(source);
         Level level = mob.level();
         if (type == EntityType.BLAZE) {

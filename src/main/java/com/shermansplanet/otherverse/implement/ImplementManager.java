@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Keybindings;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.capabilities.IPracticeCapability;
 import com.shermansplanet.otherverse.capabilities.PracticeCapabilityAttacher;
@@ -383,8 +384,14 @@ public class ImplementManager {
     @SubscribeEvent
     public static void wakeUp(PlayerWakeUpEvent e) {
         var player = e.getEntity();
-        if (player.level().isClientSide) return;
-        if (!getImplementData(player).isEmpty() && !player.isCreative()) return;
+        if (!(player instanceof ServerPlayer sp)) return;
+        if (!getImplementData(player).isEmpty() && !player.isCreative()) {
+            if (OtherverseConfig.CAN_REDO_RITUALS.get()) {
+                SpiritAffinityTracker.decreaseAllAffinities(sp);
+            } else {
+                return;
+            }
+        }
         var positionsToCheck = new ArrayList<BlockPos>();
         positionsToCheck.add(player.blockPosition());
         positionsToCheck.add(player.blockPosition().north());
@@ -399,7 +406,7 @@ public class ImplementManager {
                 if (!influence.getValue().equals(focus.getPos())) continue;
                 if (!(player.level().getBlockEntity(influence.getKey()) instanceof ChalkCircle cc)) continue;
                 if (!canBeImplement(cc.getItem())) continue;
-                new ImplementumProcess(cc, 200, (ServerPlayer) player);
+                new ImplementumProcess(cc, 200, sp);
                 return;
             }
         }

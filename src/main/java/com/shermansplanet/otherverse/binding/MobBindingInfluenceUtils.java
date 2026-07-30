@@ -395,11 +395,8 @@ public class MobBindingInfluenceUtils {
             for (var binding : defaultBindings.entrySet()) {
                 register(entityType, binding.getKey(), binding.getValue(), true);
             }
-            if (entityType.getCategory() == MobCategory.MONSTER) {
-                int hp = (int) DefaultAttributes.getSupplier(entityType).getValue(Attributes.MAX_HEALTH);
-                if (hp > 20) {
-                    register(entityType, EntityType.WARDEN, 999, true);
-                }
+            if (BindingManager.drainsBindings(entityType)) {
+                register(entityType, EntityType.WARDEN, 999, true);
             }
         }
 
@@ -572,6 +569,7 @@ public class MobBindingInfluenceUtils {
             if (et.getCategory() == MobCategory.MISC) continue;
             Entity instance = et.create(level);
             if (instance instanceof Mob mob) {
+                if(!DefaultAttributes.getSupplier((EntityType<? extends LivingEntity>) et).hasAttribute(Attributes.MAX_HEALTH)) continue;
                 MakeIdol(et);
                 try {
                     mob.tick();

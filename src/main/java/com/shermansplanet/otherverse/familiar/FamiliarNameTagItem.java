@@ -1,11 +1,14 @@
 package com.shermansplanet.otherverse.familiar;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.PowerSource;
+import com.shermansplanet.otherverse.spirits.SpiritAffinityTracker;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -29,7 +32,7 @@ public class FamiliarNameTagItem extends NameTagItem {
             LOGGER.debug("Name tag has no name!");
             return InteractionResult.PASS;
         }
-        if (player.level().isClientSide) {
+        if (!(player instanceof ServerPlayer sp)) {
             return InteractionResult.SUCCESS;
         }
         if (!FamiliarManager.isEligibleFamiliar(entity)) {
@@ -37,6 +40,18 @@ public class FamiliarNameTagItem extends NameTagItem {
             LOGGER.debug(entity.getType() + " cannot be a familiar");
             return InteractionResult.PASS;
         }
+
+        if (!FamiliarManager.getFamiliarData(player).isEmpty()) {
+            if (!player.isCreative()) {
+                if (OtherverseConfig.CAN_REDO_RITUALS.get()) {
+                    SpiritAffinityTracker.decreaseAllAffinities(sp);
+                } else {
+                    return InteractionResult.PASS;
+                }
+            }
+            FamiliarManager.abandonFamiliar(sp);
+        }
+
         var sl = (ServerLevel) player.level();
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
@@ -46,7 +61,7 @@ public class FamiliarNameTagItem extends NameTagItem {
         if (blockFocus != null) diagram = blockFocus.getDiagram();
         var playerSet = new HashSet<EntityType<?>>();
         playerSet.add(EntityType.PLAYER);
-        var requiredPower = (int) (entity.getMaxHealth() / (binding.isPositive ? 4 : 2));
+        var requiredPower = Math.max(1, (int) (entity.getMaxHealth() / (binding.isPositive ? 4 : 2)));
         BlockFocus otherfocus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
         if (player.isCreative()
                 || diagram.trySpendPower(sl, binding.position, requiredPower * PowerSource.POWER_FROM_SELF, playerSet)

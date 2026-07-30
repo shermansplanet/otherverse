@@ -30,6 +30,10 @@
         },
         {
             "type": "patchouli:text",
+            "text": "If a mob attempts to drain a binding and the binding is not in a loaded chunk, it will break the binding. Fortunately, the $(l:otherverse:items/biome_brazier)biome brazier$() allows a Practitioner to keep chunks loaded."
+        },
+        {
+            "type": "patchouli:text",
             "text": "You can see the effect each item has on a mob in JEI. The numbers next to the black chain icons indicates the influence each item provides, and the total influence necessary to bind the mob. Note that some mobs can be bound by other bound mobs; e.g. creepers can be bound by bound cats, and a warden can bind any mob capable of attacking its binding.$(br2)Tamed mobs only require 1 influence to become bound."
         },
         {

@@ -73,6 +73,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
 
+import java.util.HashSet;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -238,7 +239,7 @@ public class Otherverse {
         CuriosApi.registerCurioPredicate(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "implement_predicate"),
                 (slotResult) -> ImplementManager.isImplement(slotResult.stack()));
 
-        context.registerConfig(ModConfig.Type.SERVER, OtherverseConfig.SPEC, Otherverse.MODID + "-server.toml");
+        context.registerConfig(ModConfig.Type.COMMON, OtherverseConfig.SPEC, Otherverse.MODID + ".toml");
     }
 
     public static ChunkPos chunkAt(BlockPos pos) {
@@ -264,16 +265,6 @@ public class Otherverse {
             return "entity." + ForgeRegistries.ENTITY_TYPES.getKey(IdolItem.getType(s)).toString();
         }
         return "item." + ForgeRegistries.ITEMS.getKey(s.getItem()).toString();
-    }
-
-    public static Item primeForDimension(Level level) {
-        var name = level.dimensionTypeId().location().getPath();
-        return switch (name) {
-            case "overworld" -> OtherverseItems.SALT.get();
-            case "the_nether" -> OtherverseItems.SULFUR.get();
-            case "the_end" -> OtherverseItems.QUICKSILVER.get();
-            default -> OtherverseItems.CINNABAR.get();
-        };
     }
 
     public static ItemStack toItem(String s) {

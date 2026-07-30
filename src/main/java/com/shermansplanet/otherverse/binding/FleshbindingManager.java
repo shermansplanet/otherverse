@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.binding;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.SightManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
@@ -77,7 +78,7 @@ public class FleshbindingManager {
         ChalkCircle circleWithMaterial = null;
         String material = "";
         Diagram diagram = focus.getDiagram();
-        Item prime = Otherverse.primeForDimension(level);
+        var primes = OtherverseConfig.getPrimesForDimension(level);
         for (var influence : diagram.influences.entrySet()) {
             if (!influence.getValue().equals(focus.getPos())
                     || !(level.getBlockEntity(influence.getKey()) instanceof ChalkCircle cc)
@@ -85,7 +86,7 @@ public class FleshbindingManager {
             if (canItemFleshbindEntity(cc.item.getItem(), mob.getType())) {
                 circleWithDrop = cc;
             }
-            if (cc.item.is(prime)) {
+            if (primes.contains(cc.item.getItem())) {
                 circleWithPrime = cc;
             }
             var path = ForgeRegistries.ITEMS.getKey(cc.item.getItem()).toString();

@@ -17,8 +17,11 @@ import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySelector;
@@ -43,6 +46,7 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.VanillaGameEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.BlockEvent.BreakEvent;
 import net.minecraftforge.event.level.LevelEvent;
@@ -391,19 +395,35 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void onBlockBroken(BreakEvent event) {
-        if (event.getLevel() instanceof ServerLevel sl) {
-            BlockState bs = sl.getBlockState(event.getPos());
-            if (bs.is(OtherverseBlocks.CHALK_LINE.get()) && bs.getValue(ChalkLineBlock.hasScaffolding)) {
-                event.setCanceled(true);
-                BlockState newState = bs.setValue(ChalkLineBlock.hasScaffolding, false);
+        BlockState bs = event.getLevel().getBlockState(event.getPos());
+        if (bs.is(OtherverseBlocks.CHALK_LINE.get()) && bs.getValue(ChalkLineBlock.hasScaffolding)) {
+            event.setCanceled(true);
+            LOGGER.debug("PREVENTING BREAK");
+            BlockState newState = bs.setValue(ChalkLineBlock.hasScaffolding, false);
+            if (event.getLevel() instanceof ServerLevel sl) {
                 sl.setBlockAndUpdate(event.getPos(), newState);
+            }
+            if (event.getLevel().getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
+                cc.enqueueUpdate();
+            }
+//            if (event.getPlayer() instanceof ServerPlayer sp && event.getLevel().getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
+//                cc.markUpdated();
+//                Packet<?> pkt = cc.getUpdatePacket();
+//                if (pkt != null) {
+//                    sp.connection.send(pkt);
+//                    LOGGER.debug("SENT PACKET");
+//                    if (pkt instanceof ClientboundBlockEntityDataPacket bep) {
+//                        LOGGER.debug("{}, {}, {}", bep.getPos(), bep.getType(), bep.getTag().get("CircleItem"));
+//                    }
+//                }
+//            }
+            if (!event.getPlayer().getAbilities().instabuild) {
                 ItemStack drop = OtherverseItems.SLATE_SCAFFOLDING.get().getDefaultInstance();
                 if (!event.getPlayer().addItem(drop)) {
                     event.getPlayer().drop(drop, false);
                 }
-                if (sl.getBlockEntity(event.getPos()) instanceof ChalkCircle cc) cc.markUpdated();
-                return;
             }
+            return;
         }
         Level level = event.getPlayer().level();
         BlockBreak(level, event.getPos());

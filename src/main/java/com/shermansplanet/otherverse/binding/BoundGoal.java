@@ -211,19 +211,14 @@ public class BoundGoal extends Goal {
         }
         mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
         if (FamiliarManager.isFamiliar(mob) || isTamed || mob instanceof TamableAnimal ta && ta.isTame()) return;
-        if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType()) || mob.getMaxHealth() <= 20) {
-            return;
-        }
-        //if (currentDecider == null) return;
         if (mob.level().getGameTime() % (20L * bindingWearInterval) != 0) {
             return;
         }
         var level = binding.getLocalLevel();
         var demesne = DemesnesManager.getData(level, binding.position);
         if (demesne != null && demesne.getPerkLevel(DemesnesManager.DemesnePerk.CAGE) > 0) return;
-        LOGGER.debug("BINDING WEAR");
         if (!level.isLoaded(binding.position)) {
-            LOGGER.info("BREAKING BINDING BECAUSE {} : {} IS NOT LOADED", level.dimension(), binding.position);
+            LOGGER.info("BREAKING BINDING BECAUSE {}:{} IS NOT LOADED", level.dimension(), binding.position);
             BindingManager.breakBinding(binding);
             return;
         }
@@ -232,6 +227,10 @@ public class BoundGoal extends Goal {
         if (bindingFocus == null) {
             LOGGER.info("FOCUS NOT FOUND");
             BindingManager.breakBinding(binding);
+            return;
+        }
+
+        if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType())) {
             return;
         }
 
@@ -415,13 +414,14 @@ public class BoundGoal extends Goal {
         var wait = (isPiglin) ? 20 : 60 * 5;
         data.putInt(FISH_KEY, 10 + mob.getRandom().nextInt(wait));
 
-        List<ItemStack> list;
+        List<ItemStack> list = List.of();
+        if (practitioner == null) getPractitioner();
 
         if (isPiglin) {
             LootTable loottable = sl.getServer().getLootData().getLootTable(BuiltInLootTables.PIGLIN_BARTERING);
             list = loottable.getRandomItems(new LootParams.Builder(sl).withParameter(LootContextParams.THIS_ENTITY, mob).create(LootContextParamSets.PIGLIN_BARTER));
-        } else {
-            var tempFishingHook = new FishingHook(null, mob.level(), 0, 0);
+        } else if (practitioner != null) {
+            var tempFishingHook = new FishingHook(practitioner, mob.level(), 0, 0);
             LootParams.Builder lootcontext$builder = (new LootParams.Builder(sl)).withParameter(LootContextParams.ORIGIN, mob.position()).withParameter(LootContextParams.TOOL, Items.FISHING_ROD.getDefaultInstance())
                     .withParameter(LootContextParams.THIS_ENTITY, tempFishingHook).withLuck(0f);
             lootcontext$builder.withParameter(LootContextParams.KILLER_ENTITY, mob).withParameter(LootContextParams.THIS_ENTITY, tempFishingHook);
@@ -792,7 +792,7 @@ public class BoundGoal extends Goal {
 
     public ContractDecider makeDecider(CompoundTag tag) {
         ContractDecider decider = new ContractDecider();
-        for (String key : tag.getAllKeys()) {
+        for (String key : tag.getAllKeys().stream().sorted().toList()) {
             if (key.equals("range")) continue;
             if (key.equals("fallback")) {
                 decider.fallback = makeDecider(tag.getCompound(key));
