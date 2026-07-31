@@ -54,7 +54,7 @@ versionRange = "[1.0,)"
 
 [[dependencies.otherverse]]
 modId = "jei"
-mandatory = true
+mandatory = false
 side = "CLIENT"
 versionRange = "[1.0,)"
 
