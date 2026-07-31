@@ -47,9 +47,13 @@ public class DiagramProcess {
             abandon();
             return;
         }
-        if (!(source.getItem().getItem() == sourceStack.getItem())
-                || !(sink.getItem().getItem() == sinkStack.getItem())) {
-            LOGGER.debug("abandoning - item mismatch");
+        if (!(source.getItem().getItem() == sourceStack.getItem())) {
+            LOGGER.debug("abandoning - source mismatch {} {}", source.getItem().getItem(), sourceStack.getItem());
+            abandon();
+            return;
+        }
+        if (!(sink.getItem().getItem() == sinkStack.getItem())) {
+            LOGGER.debug("abandoning - sink mismatch {} {}", sink.getItem().getItem(), sinkStack.getItem());
             abandon();
         }
     }

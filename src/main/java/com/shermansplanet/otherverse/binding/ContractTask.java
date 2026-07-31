@@ -489,6 +489,13 @@ public class ContractTask {
                     if (takeTarget instanceof ChalkCircle cc) {
                         cc.overrideLock = false;
                     }
+                    if (itemFilters.isEmpty()) {
+                        for (var total : runningTotals.values()) {
+                            if (total >= countMin && (taskType == TaskType.TAKE || total <= countMax)) {
+                                return true;
+                            }
+                        }
+                    }
                     for (var itemFilter : itemFilters) {
                         var total = runningTotals.getOrDefault(itemFilter, 0);
                         if (total >= countMin && (taskType == TaskType.TAKE || total <= countMax)) {

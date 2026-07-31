@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.artifacts.WitchHatRenderer;
+import com.shermansplanet.otherverse.binding.IdolRenderer;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.demesnes.DemesnesClaimScreen;
 import com.shermansplanet.otherverse.demesnes.DemesnesScreen;
@@ -21,6 +22,7 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.DyeColor;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -114,9 +116,12 @@ public class ClientEvents {
                 }
         );
 
-        HALLOW_TEXTURE_MANAGER = new HallowTextureManager(Minecraft.getInstance().getTextureManager());
-        ((ReloadableResourceManager) (Minecraft.getInstance().getResourceManager())).registerReloadListener(HALLOW_TEXTURE_MANAGER);
-
         CuriosRendererRegistry.register(OtherverseItems.WITCH_HAT.get(), WitchHatRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterReloadListener(RegisterClientReloadListenersEvent event) {
+        HALLOW_TEXTURE_MANAGER = new HallowTextureManager(Minecraft.getInstance().getTextureManager());
+        event.registerReloadListener(HALLOW_TEXTURE_MANAGER);
     }
 }

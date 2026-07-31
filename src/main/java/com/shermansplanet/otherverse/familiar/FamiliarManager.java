@@ -1641,18 +1641,20 @@ public class FamiliarManager {
             if (!player.getOffhandItem().isEmpty()) {
                 taskTag.putInt("filter_0", Item.getId(player.getOffhandItem().getItem()));
             }
-            taskTag.putIntArray("position_0", new int[]{pos.getX(), pos.getY(), pos.getZ()});
+            taskTag.put("position_0", new ContractManager.PositionOrSpindle(pos).toTag());
 
-            contractTag.put("task_0", taskTag);
+            contractTag.put("Task_0", taskTag);
         } else if (player.getMainHandItem().is(OtherverseItems.CONTRACT.get())) {
             contractTag = player.getMainHandItem().getTag().getCompound("contract");
             taskTag.putString("type", "put");
             if (!player.getOffhandItem().isEmpty()) {
                 taskTag.putInt("filter_0", Item.getId(player.getOffhandItem().getItem()));
             }
-            taskTag.putIntArray("position_0", new int[]{pos.getX(), pos.getY(), pos.getZ()});
+            taskTag.put("position_0", new ContractManager.PositionOrSpindle(pos).toTag());
 
-            contractTag.put("task_1", taskTag);
+            contractTag.put("Task_1", taskTag);
+        }else{
+            return false;
         }
 
         ItemStack contract = OtherverseItems.CONTRACT.get().getDefaultInstance();

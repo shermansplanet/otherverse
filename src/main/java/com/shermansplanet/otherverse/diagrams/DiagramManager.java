@@ -398,7 +398,6 @@ public class DiagramManager {
         BlockState bs = event.getLevel().getBlockState(event.getPos());
         if (bs.is(OtherverseBlocks.CHALK_LINE.get()) && bs.getValue(ChalkLineBlock.hasScaffolding)) {
             event.setCanceled(true);
-            LOGGER.debug("PREVENTING BREAK");
             BlockState newState = bs.setValue(ChalkLineBlock.hasScaffolding, false);
             if (event.getLevel() instanceof ServerLevel sl) {
                 sl.setBlockAndUpdate(event.getPos(), newState);
@@ -406,17 +405,6 @@ public class DiagramManager {
             if (event.getLevel().getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
                 cc.enqueueUpdate();
             }
-//            if (event.getPlayer() instanceof ServerPlayer sp && event.getLevel().getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
-//                cc.markUpdated();
-//                Packet<?> pkt = cc.getUpdatePacket();
-//                if (pkt != null) {
-//                    sp.connection.send(pkt);
-//                    LOGGER.debug("SENT PACKET");
-//                    if (pkt instanceof ClientboundBlockEntityDataPacket bep) {
-//                        LOGGER.debug("{}, {}, {}", bep.getPos(), bep.getType(), bep.getTag().get("CircleItem"));
-//                    }
-//                }
-//            }
             if (!event.getPlayer().getAbilities().instabuild) {
                 ItemStack drop = OtherverseItems.SLATE_SCAFFOLDING.get().getDefaultInstance();
                 if (!event.getPlayer().addItem(drop)) {

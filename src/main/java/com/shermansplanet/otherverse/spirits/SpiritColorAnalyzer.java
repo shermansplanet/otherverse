@@ -48,8 +48,8 @@ public class SpiritColorAnalyzer {
         try {
             BufferedReader streamReader = new BufferedReader(new InputStreamReader(resource, "UTF-8"));
             return GSON.fromJson(streamReader, JsonElement.class);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+        } catch (Exception ignored) {
+            return null;
         }
     }
 

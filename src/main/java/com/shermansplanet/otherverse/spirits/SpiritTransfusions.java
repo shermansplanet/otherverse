@@ -317,6 +317,7 @@ public class SpiritTransfusions {
         }
 
         ItemStack inputItem = targetFocus.getItem();
+        if (inputItem.hasTag() && inputItem.getTag().contains("hallow")) return;
         var spiritTransfusions = ALL_SPIRIT_TRANSFUSIONS.data;
         var transfusions = spiritTransfusions.get(inputItem.getItem());
         if (transfusions == null) {

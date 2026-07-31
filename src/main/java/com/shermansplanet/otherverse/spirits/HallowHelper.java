@@ -650,6 +650,7 @@ public class HallowHelper {
             if (willOverflow && sourceItem.hasTag() && sourceItem.getTag().contains("hallow")
                     && sourceItem.getTag().getCompound("hallow").getInt("spirit_count") <= 0) continue;
             if (sourceFocus.getItem().is(Items.BEDROCK) && !OtherverseConfig.BEDROCK_REMOVAL.get()) continue;
+
             new SpiritTransfer(focus, sourceFocus, SpiritAffinityTracker.getTransferDuration(focus.getDiagram().getOwnerName(), spiritType));
         }
     }

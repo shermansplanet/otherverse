@@ -425,7 +425,6 @@ public class BindingManager {
             boundGoal.applyContract();
         }
         if (mob.level() instanceof ServerLevel sl) {
-            LOGGER.debug("SENDING BINDING PACKET");
             TransientDiagramData.updateClientBinding(binding);
 
             var focus = binding.getFocus();
@@ -535,11 +534,9 @@ public class BindingManager {
             bg.stop();
             mob.goalSelector.removeGoal(bg);
         }
-        LOGGER.debug("BINDING BROKEN");
         mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 200));
         mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 200));
         if (mob.level() instanceof ServerLevel sl) {
-            LOGGER.error("SENDING BROKEN BINDING PACKET");
             OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new BindingUpdateMessage(mob, BindingUpdateMessage.BindingUpdateType.BREAK, BindingUpdateMessage.BindingType.UNBOUND, false));
         } else {
