@@ -749,7 +749,7 @@ public class ContractTask {
 
                 if (transferredItems.isEmpty()) return fail();
 
-                BindingManager.setHeldItem(mob, new ItemStack(transferredItems.getItem(),
+                BindingManager.setHeldItem(mob, transferredItems.copyWithCount(
                         BindingManager.getHeldItem(mob).getCount() + transferredItems.getCount()));
 
             } else {
@@ -758,12 +758,10 @@ public class ContractTask {
                 int transferAmount = Math.min(maxStack - BindingManager.getHeldItem(mob).getCount(), item.getCount());
                 transferAmount = Math.min(transferAmount, countMax);
                 if (transferAmount < countMin) return fail();
-                Item itemType = item.getItem();
                 var newItemStack = item.copyWithCount(BindingManager.getHeldItem(mob).getCount() + transferAmount);
                 BindingManager.setHeldItem(mob, newItemStack);
                 if (targetItem instanceof ItemEntity ie) {
-                    ie.setItem(
-                            new ItemStack(itemType, ie.getItem().getCount() - transferAmount));
+                    ie.setItem(item.copyWithCount(ie.getItem().getCount() - transferAmount));
                     if (ie.getItem().isEmpty()) {
                         targetItem.discard();
                     }

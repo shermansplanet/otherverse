@@ -57,7 +57,7 @@ public class SpiritColorAnalyzer {
         for (PackResources pack : packs) {
             try {
                 var resource = pack.getResource(PackType.CLIENT_RESOURCES, resourceLocation);
-                if(resource == null) continue;
+                if (resource == null) continue;
                 return resource.get();
             } catch (IOException ignored) {
             }
@@ -72,7 +72,7 @@ public class SpiritColorAnalyzer {
 
     public static void AnalyzeAllColors() {
         colorCutoffs.clear();
-        colorCutoffs.put(6, v -> 14 / 360f);
+        colorCutoffs.put(6, v -> 10 / 360f);
         colorCutoffs.put(7, v -> 42 / 360f);
         colorCutoffs.put(8, v -> 68 / 360f);
         colorCutoffs.put(9, v -> 110 / 360f);
@@ -81,8 +81,8 @@ public class SpiritColorAnalyzer {
         colorCutoffs.put(12, v -> 205 / 360f);
         colorCutoffs.put(13, v -> 253 / 360f);
         colorCutoffs.put(14, v -> 284 / 360f);
-        colorCutoffs.put(15, v -> (326 + (1 - v) * 14) / 360f);
-        colorCutoffs.put(5, v -> (354 - (1 - v) * 14) / 360f);
+        colorCutoffs.put(15, v -> 333/ 360f);
+        colorCutoffs.put(5, v -> 340 / 360f);
 
         HashMap<Item, SpiritLabeler.SpiritAmount[]> allColorSpirits = new HashMap<>();
         for (var item : ForgeRegistries.ITEMS) {
@@ -235,7 +235,7 @@ public class SpiritColorAnalyzer {
                     s = hsb[1];
                     v = hsb[2];
                     var amount = 1;
-                    if (v * s < 0.1f) {
+                    if (v * s < 0.15f) {
                         closestColor = Math.min(3, (int) ((1 - v) * 4));
                     } else if (v * s < 0.5f && 0.02f + v * 0.03f < h && h < 0.12) {
                         closestColor = 4;
@@ -248,7 +248,9 @@ public class SpiritColorAnalyzer {
                         amount = 2;
                     }
 
-                    if (closestColor == 3) {
+                    if ((closestColor == 14 || closestColor == 5) && s < 0.4f && v > 0.55f) {
+                        closestColor = 15;
+                    } else if (closestColor == 3) {
                         if (x == tex.getWidth() - 1 || x == 0 || y == tex.getHeight() - 1 || y == 0
                                 || ((tex.getPixelRGBA(x + 1, y) >> 24) & 255) < 0.5
                                 || ((tex.getPixelRGBA(x - 1, y) >> 24) & 255) < 0.5

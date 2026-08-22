@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.implement.ImplementManager;
@@ -162,14 +163,14 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
         graphics.drawString(mc.font, heartstring, 28, 12, 0x333333, false);
         int x = 30 + heartstring.length() * 6;
         chainIcon.draw(graphics, x, 12);
-        int coeff = 3;
+        float coeff = OtherverseConfig.BINDING_COST.get();
         int color = 0x333333;
         var implementData = ImplementManager.getImplementData(Minecraft.getInstance().player);
         if (!implementData.isEmpty() && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.CHAIN) {
             coeff = 2;
             color = ImplementManager.IMPLEMENT_UI_COLOR;
         }
-        var s = Integer.toString(hp * coeff).replace(".0", "");
+        var s = Integer.toString(Math.round(hp * coeff)).replace(".0", "");
         graphics.drawString(mc.font, s, x + 6, 12, color, false);
         if (BindingManager.drainsBindings(recipe.entityType)) {
             x += (s.length() + 1) * 6 + 2;

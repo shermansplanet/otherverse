@@ -1,7 +1,7 @@
 {
     "name": "Hallows",
     "sortnum": 1,
-    "icon": "minecraft:ender_pearl{hallow:{spirit_type:'end'}}",
+    "icon": "otherverse:spirit_tablet",
     "category": "otherverse:spirits",
     "pages": [
         {

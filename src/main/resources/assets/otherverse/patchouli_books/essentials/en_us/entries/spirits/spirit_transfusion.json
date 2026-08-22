@@ -1,7 +1,7 @@
 {
     "name": "Spirit Transfusion",
     "sortnum": 3,
-    "icon": "minecraft:rotten_flesh{hallow:{spirit_type:'flesh'}}",
+    "icon": "otherverse:spirit_tablet",
     "category": "otherverse:spirits",
     "pages": [
         {

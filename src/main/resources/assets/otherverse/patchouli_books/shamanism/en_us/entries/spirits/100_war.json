@@ -9,11 +9,11 @@
             "item": {
                 "item": "otherverse:spirit_war"
             },
-            "text": "When a player or bound/tamed mob deals damage in range of a war shrine, the shrine will try to spend spirits equal to thrice the damage. This will double the damage taken. The effects of multiple shrines stack."
+            "text": "Conflict and harm, weapons of violence. The bloodied banner of victory at any cost. Cycles of victimization and vengeance.$(br2)Every point of damage dealt by a war-hallowed weapon will put a War spirit in that weapon."
         },
         {
             "type": "patchouli:text",
-            "text": "Remember, every point of damage dealt by a war-hallowed weapon will put a War spirit in that weapon.$(br2)War spirits are also the fuel for Spawn Altars."
+            "text": "When a player or bound/tamed mob deals damage in range of a war shrine, the shrine will try to spend spirits equal to thrice the damage. This will double the damage taken. The effects of multiple shrines stack.$(br2)War spirits are also the fuel for Spawn Altars."
         }
     ]
 }

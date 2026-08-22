@@ -20,7 +20,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
@@ -47,6 +49,13 @@ public class ClientEvents {
                 if (item.get() instanceof SpiritItem) continue;
                 if (item == OtherverseItems.IDOL || item == OtherverseItems.SELF) continue;
                 event.accept(item);
+                if (item == OtherverseItems.CHALK) {
+                    for (var i = 1; i < 16; i++) {
+                        var stack = new ItemStack(OtherverseItems.CHALK.get());
+                        stack.getOrCreateTag().putInt("dye_color", i);
+                        event.accept(stack);
+                    }
+                }
             }
         } else if (event.getTabKey() == Otherverse.TAB_SPIRITS.getKey()) {
             for (var item : OtherverseItems.ITEMS.getEntries()) {
@@ -59,10 +68,12 @@ public class ClientEvents {
             denyList.add("big_reaching_hand");
             denyList.add("whirlpool");
             denyList.add("baal_whirlpool");
-            for (var item : MobBindingInfluenceUtils.typesByIdol.entrySet()) {
-                if (denyList.contains(ForgeRegistries.ENTITY_TYPES.getKey(item.getValue()).getPath())) continue;
-                if (encounteredTypes.add(item.getValue())) {
-                    event.accept(item.getKey());
+            for (var et : ForgeRegistries.ENTITY_TYPES.getValues()) {
+                if (et.getCategory() == MobCategory.MISC) continue;
+                if (denyList.contains(ForgeRegistries.ENTITY_TYPES.getKey(et).getPath())) continue;
+                if (encounteredTypes.add(et)) {
+                    var item = MobBindingInfluenceUtils.getIdol(et);
+                    event.accept(item);
                 }
             }
         }

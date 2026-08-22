@@ -99,7 +99,7 @@ public class OtherverseClientPacketHandler {
     }
 
     public static void ensureRunOnClient(Runnable func) {
-        if (Minecraft.getInstance().isSameThread()) {
+        if (Minecraft.getInstance().isSameThread() || !Thread.currentThread().getName().startsWith("Server")) {
             func.run();
         }
     }

@@ -53,6 +53,10 @@ public class OtherverseBlocks {
                     (p_50763_) -> (p_50763_.getValue(BlockStateProperties.LIT) || p_50763_.getValue(BiomeBrazierBlock.SCRY)) ? 15 : 0)));
     public static final RegistryObject<Block> CINNABAR_BLOCK = BLOCKS.register("cinnabar_block",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.AMETHYST_BLOCK)));
+    public static final RegistryObject<Block> SULFUR_BLOCK = BLOCKS.register("sulfur_block",
+            () -> new Block(BlockBehaviour.Properties.of().strength(0.3f)));
+    public static final RegistryObject<Block> SALT_BLOCK = BLOCKS.register("salt_block",
+            () -> new Block(BlockBehaviour.Properties.of().strength(0.3f)));
     public static final RegistryObject<Block> DEMESNE_BEACON = BLOCKS.register("demesne_beacon",
             () -> new DemesnesBeaconBlock(BlockBehaviour.Properties.copy(Blocks.BEACON)));
     public static final RegistryObject<Block> DEMESNE_PORTAL = BLOCKS.register("demesne_portal",

@@ -1,12 +1,18 @@
 {
-    "name": "Ender Dragon",
+    "name": "Binding Bosses",
     "sortnum": 70,
     "icon": "minecraft:dragon_egg",
     "category": "otherverse:binding",
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "The Ender Dragon is prohibitively difficult to get into a binding diagram. However, you can put its egg in a diagram that could bind the dragon, and additionally influence the egg with 8 end crystals in block foci. The egg will then hatch into a bound dragon. Remember to draw this diagram on dragon-proof blocks!"
+            "title": "The Wither",
+            "text": "The Wither is too powerful to be bound at the height of its vitality. You must wait until it starts getting desperate (has less than half its health) before you will be able to bind it. This almost always requires Claim Arrows (see the Ruins book)."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "The Ender Dragon",
+            "text": "You can force the Ender Dragon's egg to hatch by influencing it with 8 end crystals in block foci. If the egg is in a valid dragon binding, it will hatch into a bound dragon."
         }
     ]
 }

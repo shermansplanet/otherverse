@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "###",
+        "###",
+        "###"
+    ],
+    "key": {
+        "#": {
+            "item": "otherverse:salt"
+        }
+    },
+    "result": {
+        "item": "otherverse:salt_block",
+        "count" : 1
+    }
+}

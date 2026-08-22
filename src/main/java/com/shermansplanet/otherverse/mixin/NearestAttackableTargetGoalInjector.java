@@ -21,9 +21,9 @@ public abstract class NearestAttackableTargetGoalInjector<T extends LivingEntity
         super(p_26140_, p_26141_);
     }
 
-    @Inject(method = "findTarget", at = @At(value = "RETURN"))
-    protected void onFindTarget(CallbackInfo ci) {
-        if(this.mob.getLastHurtByMob() == this.target) return;
-        if(ConnectionBlockManager.isBlocked(this.target)) this.target = null;
-    }
+//    @Inject(method = "findTarget", at = @At(value = "RETURN"))
+//    protected void onFindTarget(CallbackInfo ci) {
+//        if(this.mob.getLastHurtByMob() == this.target) return;
+//        if(ConnectionBlockManager.isBlocked(this.mob, this.target)) this.target = null;
+//    }
 }

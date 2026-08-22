@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.artifacts;
 
+import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.Diagram;
@@ -36,7 +37,7 @@ public class ConnectionBlockManager {
         var powerSpent = diagram.getPowerSpent(level, targetPos, -1, new HashSet<>());
         if (powerSpent == 0) return false;
         circle.item = new ItemStack(OtherverseItems.CONNECTION_BLOCKER.get(), 1);
-        var total = powerSpent * 20;
+        var total = powerSpent;
         circle.item.getOrCreateTag().putInt("connection_blocker_total", total);
         circle.item.getOrCreateTag().putInt("connection_blocker_remaining", total);
         return true;
@@ -68,7 +69,7 @@ public class ConnectionBlockManager {
         }
     }
 
-    public static boolean isBlocked(LivingEntity target) {
+    public static boolean isBlocked(LivingEntity beholder, LivingEntity target) {
         if (target == null) return false;
         if (target.hasEffect(OtherversePotions.REBOUND_EFFECT.get())) return false;
         var blocker = target.getMainHandItem();
@@ -79,6 +80,10 @@ public class ConnectionBlockManager {
         }
         if (!blocker.is(OtherverseItems.CONNECTION_BLOCKER.get())) return false;
         if (!blocker.hasTag() || !blocker.getTag().contains("connection_blocker_total")) return false;
+        var time = target.level().getGameTime();
+        var shouldDrain = !blocker.getTag().contains("last_blocked_time") || (time - blocker.getTag().getLong("last_blocked_time") >= 20);
+        if (!shouldDrain) return true;
+        blocker.getTag().putLong("last_blocked_time", time);
         var remaining = blocker.getTag().getInt("connection_blocker_remaining") - 1;
         if (remaining == 0) {
             target.setItemInHand(hand, ItemStack.EMPTY);

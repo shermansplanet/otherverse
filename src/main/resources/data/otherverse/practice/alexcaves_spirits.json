@@ -36,6 +36,7 @@
     "alexscaves:amber_curiosity": ["40 time"],
     "alexscaves:heavy_bone": ["17 death"],
     "alexscaves:tough_hide": ["6 protection"],
+    "alexscaves:limestone_spear": ["9 war"],
     "alexscaves:ominous_catalyst": ["44 time", "44 death"],
     "alexscaves:tectonic_shard": ["55 fire", "55 war", "33 earth", "33 time"],
 
@@ -46,6 +47,7 @@
     "alexscaves:polymer_plate": ["8 technology"],
     "alexscaves:fissile_core": ["33 technology", "44 phlogiston"],
     "alexscaves:charred_remnant": ["11 technology"],
+    "alexscaves:raygun": ["44 war","33 technology"],
     "alexscaves:nuclear_bomb": ["66 technology", "111 phlogiston", "111 war", "44 death"],
 
     "alexscaves:occult_gem": ["11 fate", "33 dark", "33 fortune"],

@@ -1,7 +1,7 @@
 {
     "name": "Spirit Affinity",
     "sortnum": 4,
-    "icon": "minecraft:amethyst_cluster{hallow:{spirit_type:'light'}}",
+    "icon": "otherverse:spirit_tablet",
     "category": "otherverse:spirits",
     "pages": [
         {

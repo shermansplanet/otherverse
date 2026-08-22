@@ -90,6 +90,7 @@ public class OtherverseJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration r) {
+        LOGGER.debug("REGISTERING RECIPES...");
         registry = r;
         if (!PracticeWorldManager.worldSetUp) {
             PracticeWorldManager.noJeiPending = true;
@@ -101,6 +102,7 @@ public class OtherverseJeiPlugin implements IModPlugin {
     public static void addPracticeRecipes() {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
         {
+            LOGGER.debug("CLIENT CHECK");
             OtherverseClientPacketHandler.ensureRunOnClient(()-> {
                 //debugPracticeRecipes();
                 LOGGER.debug("ADDING PRACTICE RECIPES...");
@@ -112,7 +114,6 @@ public class OtherverseJeiPlugin implements IModPlugin {
                 registry.addRecipes(BiomeCodeRecipeCategory.TYPE, BiomeCodeAssigner.GenerateRecipes());
                 FleshbindingManager.addWoodTextures();
                 LOGGER.debug("PRACTICE RECIPES ADDED");
-                LOGGER.debug("{} BIOME CODES", BiomeCodeAssigner.biomeCodes.size());
                 PracticeWorldManager.jeiInitialized = true;
                 LOGGER.debug("JEI SET AS INITIALIZED");
             });

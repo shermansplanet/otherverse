@@ -305,7 +305,17 @@ public class ArtifactManager {
         event.setUseItem(Event.Result.DENY);
         event.setResult(Event.Result.ALLOW);
 
-        setEntity(event.getItemStack(), et);
+        if(event.getItemStack().getCount() == 1){
+            setEntity(event.getItemStack(), et);
+        }
+
+        var newStack = event.getItemStack().copyWithCount(1);
+        event.getItemStack().shrink(1);
+        if(event.getItemStack().isEmpty()) event.getEntity().getInventory().removeItem(event.getItemStack());
+        setEntity(newStack, et);
+        if(!event.getEntity().getInventory().add(newStack)){
+            event.getEntity().drop(newStack, false);
+        }
     }
 
     public static void setEntity(ItemStack altar, EntityType et) {

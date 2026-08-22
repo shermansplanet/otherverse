@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.familiar.FamiliarBlessingEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -28,4 +29,6 @@ public class OtherversePotions {
             DeferredRegister.create(ForgeRegistries.POTIONS, Otherverse.MODID);
     public static final RegistryObject<Potion> HEAVINESS_POTION = POTIONS.register("heaviness",
             () -> new Potion(new MobEffectInstance(HEAVINESS_EFFECT.get(), 1800)));
+    public static final RegistryObject<Potion> LEVITATION_POTION = POTIONS.register("levitation",
+            () -> new Potion(new MobEffectInstance(MobEffects.LEVITATION, 20 * 13)));
 }

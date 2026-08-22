@@ -9,11 +9,11 @@
             "item": {
                 "item": "otherverse:spirit_water"
             },
-            "text": "When a water shrine is overfilled, excess water spirits will manifest as water (the same number of water spirits as a water bucket has). Likewise, overdrawing will destroy water for spirits (flowing water only yields one spirit)."
+            "text": "Ocean waves churning over unknown depths. Rushing rivers and placid lakes. Water spirits can slake your thirst or drown you."
         },
         {
             "type": "patchouli:text",
-            "text": "Unlike a fire shrine with lava, a water shrine can affect multiple blocks every time it is overfilled or overdrawn, potentially creating or destroying large amounts of water at once."
+            "text": "When a water shrine is overfilled, excess water spirits will manifest as water (the same number of water spirits as a water bucket has). Likewise, overdrawing will destroy water for spirits (flowing water only yields one spirit). Unlike a fire shrine with lava, a water shrine can affect multiple blocks every time it is overfilled or overdrawn, potentially creating or destroying large amounts of water at once."
         }
     ]
 }

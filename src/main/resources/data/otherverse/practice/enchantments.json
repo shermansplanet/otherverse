@@ -202,7 +202,7 @@
 	"spirit_transfusion" : {
 		"minecraft:efficiency" : {
 			"spirit" : "technology",
-			"price" : [18, 36, 72, 144]
+			"price" : [18, 36, 72, 144, 288]
 		},
 		"minecraft:fortune" : {
 			"spirit" : "fortune",

@@ -70,6 +70,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -139,6 +140,8 @@ public class ImplementManager {
         durabilities.put(Items.GLOWSTONE, 32);
 
         durabilities.put(Items.TNT, 16);
+
+        durabilities.put(Items.CHAIN, 8);
 
         durabilities.put(Items.WITHER_SKELETON_SKULL, 3);
 
@@ -348,11 +351,14 @@ public class ImplementManager {
         {
             practice.setImplement(getImplementData(e.getOriginal()), null);
             practice.setFamiliar(FamiliarManager.getFamiliarData(e.getOriginal()), null);
-
             e.getOriginal().invalidateCaps();
-            var implement = getImplementInstance(e.getEntity());
-            if (implement.isEmpty()) return;
-            e.getEntity().getInventory().add(implement);
+
+            if (e.getOriginal().getPersistentData().getBoolean("hadImplement")) {
+                var implement = getImplementInstance(e.getEntity());
+                if (implement.isEmpty()) return;
+                implement.setTag(e.getOriginal().getPersistentData().getCompound("implementTag"));
+                e.getEntity().getInventory().add(implement);
+            }
         });
     }
 
@@ -566,23 +572,41 @@ public class ImplementManager {
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
+        var hadImplement = false;
         var inventory = p.getInventory();
+        CompoundTag implementTag = null;
         for (var i = 0; i < inventory.getContainerSize(); i++) {
             var item = inventory.getItem(i);
             if (isImplement(item)) {
+                implementTag = item.getTag();
                 inventory.removeItem(i, item.getCount());
+                hadImplement = true;
             }
         }
-        CuriosApi.getCuriosInventory(p).ifPresent(inv -> {
-            inv.getCurios().forEach((slotId, curioInventory) -> {
+        var curioInv = CuriosApi.getCuriosInventory(p);
+        if (curioInv.isPresent()) {
+            for (Map.Entry<String, ICurioStacksHandler> entry : curioInv.resolve().get().getCurios().entrySet()) {
+                ICurioStacksHandler curioInventory = entry.getValue();
                 var stacks = curioInventory.getStacks();
                 for (var i = 0; i < stacks.getSlots(); i++) {
                     if (isImplement(stacks.getStackInSlot(i))) {
+                        implementTag = stacks.getStackInSlot(i).getTag();
                         stacks.setStackInSlot(i, ItemStack.EMPTY);
+                        hadImplement = true;
                     }
                 }
-            });
-        });
+            }
+        }
+        for (var slot : EquipmentSlot.values()) {
+            if (isImplement(p.getItemBySlot(slot))) {
+                implementTag = p.getItemBySlot(slot).getTag();
+                p.setItemSlot(slot, ItemStack.EMPTY);
+                hadImplement = true;
+            }
+        }
+        p.getPersistentData().putBoolean("hadImplement", hadImplement);
+        if (implementTag == null) implementTag = new CompoundTag();
+        p.getPersistentData().put("implementTag", implementTag);
     }
 
     public static void fetchImplement(ServerPlayer player) {
@@ -610,6 +634,13 @@ public class ImplementManager {
                 }
             }
         }
+        if (implementItem == null) {
+            for (var item : player.getAllSlots()) {
+                if (isImplement(item)) {
+                    implementItem = item;
+                }
+            }
+        }
         if (implementItem != null) {
             LOGGER.debug("already has implement: " + implementItem);
             if (implementItem.getItem() instanceof DiggerItem) {
@@ -621,13 +652,21 @@ public class ImplementManager {
             }
             return;
         }
-        if (player.getInventory().getFreeSlot() == -1) {
+        EquipmentSlot slot = null;
+        if (implement.getItem() instanceof ArmorItem armorItem) {
+            var s = armorItem.getEquipmentSlot();
+            if (player.getItemBySlot(s).isEmpty()) slot = s;
+        }
+        if (slot == null && player.getInventory().getFreeSlot() == -1) {
             player.displayClientMessage(Component.literal("No free inventory slot in which to summon your Implement!"), true);
             return;
         }
         if (!player.isCreative() && !SelfManager.changeSelf(player, -1)) return;
-        LOGGER.debug("adding implement: " + implement + " in " + player.getInventory().getFreeSlot());
-        player.getInventory().add(implement);
+        if (slot == null) {
+            player.getInventory().add(implement);
+        } else {
+            player.setItemSlot(slot, implement);
+        }
     }
 
     private static void changeImplementMode(ItemStack item, ServerPlayer player) {

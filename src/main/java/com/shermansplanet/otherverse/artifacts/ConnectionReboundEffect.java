@@ -18,7 +18,8 @@ public class ConnectionReboundEffect extends MobEffect {
         var level = entity.level();
         if(level.isClientSide() || level.getGameTime() % 20 != 10) return;
         for(var other : level.getEntities(entity, entity.getBoundingBox().inflate(32))){
-            if(!(other instanceof Mob mob)) return;
+            if(!(other instanceof Mob mob)) continue;
+            if(entity instanceof Player p && BindingManager.isAlliedWith(mob, p.getGameProfile().getName())) continue;
             BindingManager.forceAttack(mob, entity);
         }
     }

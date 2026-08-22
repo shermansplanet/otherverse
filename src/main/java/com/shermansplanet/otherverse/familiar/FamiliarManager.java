@@ -1,10 +1,7 @@
 package com.shermansplanet.otherverse.familiar;
 
 import com.mojang.logging.LogUtils;
-import com.shermansplanet.otherverse.ItemOrEntityType;
-import com.shermansplanet.otherverse.Keybindings;
-import com.shermansplanet.otherverse.Otherverse;
-import com.shermansplanet.otherverse.OtherversePacketHandler;
+import com.shermansplanet.otherverse.*;
 import com.shermansplanet.otherverse.binding.*;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
@@ -130,7 +127,7 @@ public class FamiliarManager {
         }
     }
 
-    private enum MobBenefitCondition {ANYTIME, UNDERWATER, IN_WATER, DARK, COLD}
+    private enum MobBenefitCondition {ANYTIME, UNDERWATER, IN_WATER, DARK, COLD, LIGHT}
 
     private record MobBenefit(MobBenefitCondition condition, MobEffect effect, int amplifier) {
     }
@@ -173,7 +170,8 @@ public class FamiliarManager {
                 new MobBenefit(MobBenefitCondition.COLD, MobEffects.MOVEMENT_SLOWDOWN, 0))));
         familiarEffects.put(EntityType.WARDEN, new ArrayList<>(List.of(
                 new MobBenefit(MobBenefitCondition.DARK, MobEffects.DAMAGE_BOOST, 1),
-                new MobBenefit(MobBenefitCondition.DARK, MobEffects.ABSORPTION, 2))));
+                new MobBenefit(MobBenefitCondition.LIGHT, MobEffects.DARKNESS, 0),
+                new MobBenefit(MobBenefitCondition.DARK, MobEffects.DAMAGE_RESISTANCE, 2))));
         familiarEffects.put(EntityType.WITHER, new ArrayList<>(List.of(
                 new MobBenefit(MobBenefitCondition.ANYTIME, MobEffects.WITHER, 2),
                 new MobBenefit(MobBenefitCondition.ANYTIME, MobEffects.REGENERATION, 0))));
@@ -657,7 +655,7 @@ public class FamiliarManager {
             }
         }
 
-        if (sp.isInWaterOrRain() && (type.fireImmune() || type.equals(EntityType.ENDERMAN))) {
+        if (sp.isInWaterOrRain() && ((type.fireImmune() && !type.equals(EntityType.WARDEN)) || type.equals(EntityType.ENDERMAN))) {
             if (sp.isInWater() || !sp.hasItemInSlot(EquipmentSlot.HEAD) || sp.getRandom().nextInt(20) == 0) {
                 sp.hurt(sp.serverLevel().damageSources().magic(), 1);
             }
@@ -701,6 +699,9 @@ public class FamiliarManager {
             } else if (benefit.condition == MobBenefitCondition.COLD) {
                 if (!sp.serverLevel().getBiome(sp.blockPosition()).value().coldEnoughToSnow(sp.blockPosition()))
                     continue;
+            } else if (benefit.condition == MobBenefitCondition.LIGHT) {
+                lightLevel = sp.serverLevel().getLightEngine().getRawBrightness(sp.blockPosition(), sp.serverLevel().getSkyDarken());
+                if (lightLevel < 15) continue;
             }
             var effect = sp.getEffect(benefit.effect);
             if (effect != null && effect.getDuration() > 21 * 12) continue;
@@ -1188,7 +1189,7 @@ public class FamiliarManager {
         }
 
         if (revived) {
-            SelfManager.changeSelf((LivingEntity) entity, SelfManager.SELF_TOTAL);
+            SelfManager.changeSelf((LivingEntity) entity, OtherverseConfig.TOTAL_SELF.get());
         }
 
         if (entity.getType() == Otherverse.FURY.get()) {
@@ -1265,8 +1266,7 @@ public class FamiliarManager {
             sp.serverLevel().sendParticles(ParticleTypes.SONIC_BOOM, vec33.x, vec33.y, vec33.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
 
-        player.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
-        player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 10, 1));
+        sp.serverLevel().playSound(null, sp, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3.0F, 1.0F);
         player.getCooldowns().addCooldown(stack.getItem(), 20 * 10);
         return true;
     }
@@ -1653,7 +1653,7 @@ public class FamiliarManager {
             taskTag.put("position_0", new ContractManager.PositionOrSpindle(pos).toTag());
 
             contractTag.put("Task_1", taskTag);
-        }else{
+        } else {
             return false;
         }
 

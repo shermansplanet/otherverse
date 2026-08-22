@@ -8,6 +8,7 @@ import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.binding.MobTransfusions;
 import com.shermansplanet.otherverse.diagrams.ChalkItem;
+import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.integrations.jei.SpiritExtractionRecipe;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.resources.ResourceLocation;
@@ -75,10 +76,21 @@ public class SpiritLabeler {
                             if (itemsWithoutSpirits.contains(itemAmount.getKey())) continue;
                             var table = data.computeIfAbsent(itemAmount.getKey(), x -> new Hashtable<>());
                             for (var spiritAmount : itemAmount.getValue()) {
-                                if (spiritAmount.amount() == 0) continue;
+                                if (spiritAmount.amount() <= 0) continue;
                                 var val = table.getOrDefault(spiritAmount.type(), 0);
                                 table.put(spiritAmount.type(), val + spiritAmount.amount());
                             }
+                        }
+                    }
+                    var colorSpirits = Set.of(Spirits.colorSpiritTypes);
+                    for (var item : data.keySet()) {
+                        Hashtable<SpiritType, Integer> vals = data.get(item);
+                        var limit = ImplementManager.durabilities.containsKey(item) ? 5 : 6;
+                        if (vals.size() > limit) {
+                            var spiritStream = vals.entrySet().stream().sorted(Comparator.comparingDouble(a -> a.getKey().id() * 0.01f - a.getValue() + (colorSpirits.contains(a.getKey()) ? 16 : 0))).limit(limit);
+                            var truncated = new Hashtable<SpiritType, Integer>();
+                            spiritStream.forEach(s -> truncated.put(s.getKey(), s.getValue()));
+                            data.put(item, truncated);
                         }
                     }
                     LOGGER.debug("SPIRIT LABELER: SYNTHESIZED");
@@ -106,6 +118,7 @@ public class SpiritLabeler {
         for (var spiritItem : Spirits.spiritItems.values()) {
             spiritItems.add(spiritItem.get());
         }
+        var colorSpirits = Set.of(Spirits.colorSpiritTypes);
         for (var k : new HashSet<>(SPIRIT_TYPE_OF.data.keySet())) {
             if (spiritItems.contains(k) || k instanceof SpawnEggItem) {
                 continue;
@@ -115,7 +128,7 @@ public class SpiritLabeler {
             for (var k2 : spiritsForItem.keySet()) {
                 spiritAmounts.add(new SpiritAmount(k2, spiritsForItem.get(k2)));
             }
-            spiritAmounts.sort((a, b) -> b.amount.compareTo(a.amount));
+            spiritAmounts.sort(Comparator.comparingDouble(a -> a.type.id() * 0.01f - a.amount + (colorSpirits.contains(a.type) ? 16 : 0)));
             recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.toString()),
                     spiritAmounts, k.getDefaultInstance()));
         }
@@ -236,7 +249,6 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, BlockTags.CORAL_BLOCKS, Spirits.WATER, 2);
             AddForTag(item, spiritAmounts, BlockTags.UNDERWATER_BONEMEALS, Spirits.WATER, 1);
 
-            AddForTag(item, spiritAmounts, Items.TOOLS, Spirits.OVERWORLD, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_BOWS, Spirits.AIR, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_CROSSBOWS, Spirits.AIR, tierFunc);
             AddForTag(item, spiritAmounts, Items.TOOLS_FISHING_RODS, Spirits.WATER, tierFunc);
@@ -266,6 +278,12 @@ public class SpiritLabeler {
             int burnTime = ForgeHooks.getBurnTime(item.getDefaultInstance(), null) / 100;
             if (burnTime > 0 && item != net.minecraft.world.item.Items.LAVA_BUCKET) {
                 spiritAmounts.add(new SpiritAmount(Spirits.PHLOGISTON, burnTime));
+            }
+
+            if (item instanceof ShovelItem) {
+                spiritAmounts.add(new SpiritAmount(Spirits.EARTH, tierFunc.run(item)));
+            } else if (item instanceof HoeItem) {
+                spiritAmounts.add(new SpiritAmount(Spirits.NATURE, tierFunc.run(item)));
             }
 
             if (item.isEdible()) {
@@ -301,7 +319,7 @@ public class SpiritLabeler {
                 }
 
                 if (ForgeRegistries.ITEMS.getKey(item).getPath().startsWith("infested")) {
-                    spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 13));
+                    spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 9));
                 }
 
                 var itemName = item.toString();
@@ -314,9 +332,12 @@ public class SpiritLabeler {
                     spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
                 }
 
-                if(itemName.contains("end_stone") || itemName.contains("purpur") || itemName.contains("void") || itemName.contains("chorus")) spiritAmounts.add(new SpiritAmount(Spirits.END, 3));
-                if(itemName.contains("frosted_stone") || itemName.contains("black_steel")) spiritAmounts.add(new SpiritAmount(Spirits.COLD, 3));
-                if(itemName.contains("prismarine") || itemName.contains("seastone")) spiritAmounts.add(new SpiritAmount(Spirits.WATER, 3));
+                if (itemName.contains("end_stone") || itemName.contains("purpur") || itemName.contains("void") || itemName.contains("chorus"))
+                    spiritAmounts.add(new SpiritAmount(Spirits.END, 3));
+                if (itemName.contains("frosted_stone") || itemName.contains("black_steel"))
+                    spiritAmounts.add(new SpiritAmount(Spirits.COLD, 3));
+                if (itemName.contains("prismarine") || itemName.contains("seastone"))
+                    spiritAmounts.add(new SpiritAmount(Spirits.WATER, 3));
             }
 
 

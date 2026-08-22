@@ -5,6 +5,20 @@
     "category": "otherverse:spirits",
     "pages": [
         {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_technology"
+            },
+            "text": "The ingenuity of the constructed. Mastery over nature. Progress, automation, artifice. Wires of redstone and copper."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_flesh"
+            },
+            "text": "The impossibly complex apparatus of life. Adaptation, reproduction, specialized organs linked by blood and nerve."
+        },
+        {
             "type": "patchouli:text",
             "text": "With technology or flesh shrines, you can make $(bold)golems$() and $(bold)homunculi$() respectively. If a bound mob (not an idol) is in a diagram influencing the shrine, the shrine will attempt to spend spirits equal to thrice the mob's max HP to create a copy of the bound mob, which will behave as if bound but will not require bindings. Technology and flesh shrines will not drain spirits from mobs."
         },
@@ -24,7 +38,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Golems and homunculi are tech- and flesh-aligned, instead of the spirit type of their source mob. This can be combined with the 'sacrifice' mechanic (see the 'spirits' section of Essentials) to efficiently expand the range of a technology or flesh shrine."
+            "text": "Golems and homunculi are tech- and flesh-aligned, instead of the spirit type of their source mob. This can be combined with the 'sacrifice' mechanic (see the 'spirits' section of Essentials) to efficiently expand the range of a technology or flesh shrine.$(br2)Golems and homunculi cannot be used in diagrams."
         }
     ]
 }

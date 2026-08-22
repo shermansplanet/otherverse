@@ -1,6 +1,7 @@
 package com.shermansplanet.otherverse.mixin;
 
 import com.shermansplanet.otherverse.artifacts.ConnectionBlockManager;
+import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.ISoundGetter;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import net.minecraft.core.BlockPos;
@@ -40,7 +41,9 @@ public abstract class LivingEntityInjector extends Entity implements net.minecra
     }
 
     @Shadow
-    protected SoundEvent getDeathSound() {return SoundEvents.GENERIC_DEATH;}
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.GENERIC_DEATH;
+    }
 
     public SoundEvent publicGetDeathSound() {
         return getDeathSound();
@@ -48,7 +51,7 @@ public abstract class LivingEntityInjector extends Entity implements net.minecra
 
     @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
     public void onClimbableInject(CallbackInfoReturnable<Boolean> ci) {
-        if(self().getType() != EntityType.PLAYER) return;
+        if (self().getType() != EntityType.PLAYER) return;
         var player = (Player) self();
         if (!FamiliarManager.hasFamiliarType(player, EntityType.SPIDER)) return;
         var pos = player.blockPosition().relative(player.getDirection());
@@ -58,9 +61,10 @@ public abstract class LivingEntityInjector extends Entity implements net.minecra
         ci.cancel();
     }
 
-    @Inject(method = "canBeSeenAsEnemy", at = @At("HEAD"), cancellable = true)
-    public void canBeSeenAsEnemy(CallbackInfoReturnable<Boolean> ci) {
-        if(ConnectionBlockManager.isBlocked(self())){
+    @Inject(method = "hasLineOfSight", at = @At("RETURN"), cancellable = true)
+    public void hasLineOfSight(Entity target, CallbackInfoReturnable<Boolean> ci) {
+        if (!ci.getReturnValue() || BindingManager.isBoundOrContracted(self())) return;
+        if (target instanceof LivingEntity le && ConnectionBlockManager.isBlocked(self(), le)) {
             ci.setReturnValue(false);
             ci.cancel();
         }

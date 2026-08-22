@@ -77,7 +77,7 @@ public class BoundGoal extends Goal {
 
     public BoundGoal(Mob m, BindingInfo binding) {
         mob = m;
-        currentMode = mob.getPersistentData().getInt("familiar_mode");
+        currentMode = mob.getPersistentData().contains("familiar_mode") ? mob.getPersistentData().getInt("familiar_mode") : 2;
         if (!mob.getPersistentData().contains(REMEMBERED_BLOCKS)) {
             mob.getPersistentData().put(REMEMBERED_BLOCKS, new CompoundTag());
         }
@@ -210,7 +210,7 @@ public class BoundGoal extends Goal {
             }
         }
         mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
-        if (FamiliarManager.isFamiliar(mob) || isTamed || mob instanceof TamableAnimal ta && ta.isTame()) return;
+        if (FamiliarManager.isFamiliar(mob) || isLoyaltyBound || isTamed || mob instanceof TamableAnimal ta && ta.isTame()) return;
         if (mob.level().getGameTime() % (20L * bindingWearInterval) != 0) {
             return;
         }

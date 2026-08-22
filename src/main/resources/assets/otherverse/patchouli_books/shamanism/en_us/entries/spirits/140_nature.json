@@ -9,6 +9,10 @@
             "item": {
                 "item": "otherverse:spirit_nature"
             },
+            "text": "Natural bounty, self-fueling cycles of life and decay. Interconnected ecologies. Predator and prey, compost and crop."
+        },
+        {
+            "type": "patchouli:text",
             "text": "When a nature shrine is overfilled, the excess spirits are applied to the surrounding blocks as if they were bonemeal. Thirty-three spirits will bonemeal one block. Farmland will not become trampled in the range of a nature shrine."
         }
     ]

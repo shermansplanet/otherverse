@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "A warden Familiar will give you heightened strength and health in the darkness. If a hallow has at least 13 darkness spirits, you can right-click while holding it to release those spirits as a powerful sonic attack."
+            "text": "A warden Familiar will give you heightened strength and toughness in the darkness, but direct sunlight will be blinding. If a hallow has at least 13 darkness spirits, you can right-click while holding it to release those spirits as a powerful sonic attack."
         }
     ]
 }

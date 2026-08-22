@@ -1,6 +1,6 @@
 {
     "name": "Spirits",
     "description": "Nearly everything in this world contains spirits. Some say that everything $(italic)is$() spirits. They represent concepts vague or specific, big or small. This makes spirits relevant to nearly all Practices.",
-    "icon": "otherverse:spirit_fortune",
+    "icon": "otherverse:spirit_tablet",
     "sortnum": 1
 }

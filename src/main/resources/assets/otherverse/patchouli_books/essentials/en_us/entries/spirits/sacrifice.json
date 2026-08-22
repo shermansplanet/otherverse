@@ -1,7 +1,7 @@
 {
     "name": "Sacrifice",
     "sortnum": 6,
-    "icon": "minecraft:diamond_sword{hallow:{spirit_type:'war'}}",
+    "icon": "otherverse:spirit_tablet",
     "category": "otherverse:spirits",
     "pages": [
         {

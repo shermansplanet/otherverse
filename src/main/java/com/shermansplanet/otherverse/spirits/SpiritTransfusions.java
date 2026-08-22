@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -91,6 +92,9 @@ public class SpiritTransfusions {
 
         register(Items.GLASS_BOTTLE, Spirits.EARTH, 13,
                 PotionUtils.setPotion(new ItemStack(Items.POTION), OtherversePotions.HEAVINESS_POTION.get()), null);
+
+        register(Items.GLASS_BOTTLE, Spirits.AIR, 13,
+                PotionUtils.setPotion(new ItemStack(Items.POTION), OtherversePotions.LEVITATION_POTION.get()), null);
 
         registerDyableBlocks(new Block[]{
                 Blocks.WHITE_WOOL, Blocks.LIGHT_GRAY_WOOL, Blocks.GRAY_WOOL, Blocks.BLACK_WOOL,

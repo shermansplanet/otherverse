@@ -5,6 +5,7 @@ import com.shermansplanet.otherverse.Otherverse;
 
 import java.util.UUID;
 
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.network.chat.Component;
@@ -30,7 +31,6 @@ import org.slf4j.Logger;
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class SelfManager {
 
-    public static final int SELF_TOTAL = 10;
     private static final UUID selfModifierId = UUID.fromString("4fc847e9-c431-486a-9f05-3bb7fc825fcb");
 
     private static boolean wasDay = true;
@@ -45,7 +45,8 @@ public class SelfManager {
         if (prevCoeff == 1 && selfDelta > 0) {
             return false;
         }
-        double newCoeff = (Math.round(prevCoeff * SELF_TOTAL) + selfDelta) / (float) SELF_TOTAL;
+        var selfTotal = OtherverseConfig.TOTAL_SELF.get();
+        double newCoeff = (Math.round(prevCoeff * selfTotal) + selfDelta) / (float) selfTotal;
 
         if (newCoeff <= 0) {
             return false;
@@ -82,7 +83,7 @@ public class SelfManager {
         if (player.level().isClientSide() || display == null || display.isHidden()) {
             return;
         }
-        if (changeSelf(player, SELF_TOTAL)) {
+        if (changeSelf(player, OtherverseConfig.ADVANCEMENT_SELF.get())) {
             player.displayClientMessage(Component.translatable("otherverse.self.restored_advancement"), true);
         }
     }

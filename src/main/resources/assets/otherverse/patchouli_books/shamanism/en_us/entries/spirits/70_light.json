@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_light"
             },
-            "text": "When a light shrine is overfilled, all players in its range will receive glowing and night vision for one second per extra spirit."
+            "text": "The glow of a lantern in the night, the comfort of the torch. Searing solar radiance. Knowledge, clarity, logical thought.$(br2)When a light shrine is overfilled, all players in its range will receive glowing and night vision for one second per extra spirit."
         }
     ]
 }

@@ -19,9 +19,6 @@ public class SpiritItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         var item = player.getItemInHand(hand);
-        if(FamiliarManager.trySonicBoom(player, item)){
-            return InteractionResultHolder.pass(item);
-        }
         if(!player.isCreative()){
             return InteractionResultHolder.fail(item);
         }

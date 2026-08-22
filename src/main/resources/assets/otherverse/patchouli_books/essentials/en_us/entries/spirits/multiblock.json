@@ -1,7 +1,7 @@
 {
     "name": "Multiblock Hallows",
     "sortnum": 5,
-    "icon": "minecraft:carved_pumpkin{hallow:{spirit_type:'nature'}}",
+    "icon": "otherverse:spirit_tablet",
     "category": "otherverse:spirits",
     "pages": [
         {

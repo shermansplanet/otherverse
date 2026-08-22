@@ -161,6 +161,10 @@ public class OtherverseItems {
             () -> new BrazierItem(OtherverseBlocks.BIOME_BRAZIER.get(), new Item.Properties()));
     public static final RegistryObject<Item> CINNABAR_BLOCK = ITEMS.register("cinnabar_block",
             () -> new BlockItem(OtherverseBlocks.CINNABAR_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> SULFUR_BLOCK = ITEMS.register("sulfur_block",
+            () -> new BlockItem(OtherverseBlocks.SULFUR_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> SALT_BLOCK = ITEMS.register("salt_block",
+            () -> new BlockItem(OtherverseBlocks.SALT_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> DEMESNE_BEACON = ITEMS.register("demesne_beacon",
             () -> new BlockItem(OtherverseBlocks.DEMESNE_BEACON.get(), new Item.Properties()));
     public static final RegistryObject<Item> REDSTONE_NETHER_BRICKS = ITEMS.register("redstone_nether_bricks",

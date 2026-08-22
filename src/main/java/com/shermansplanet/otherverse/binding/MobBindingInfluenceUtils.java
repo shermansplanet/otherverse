@@ -607,6 +607,7 @@ public class MobBindingInfluenceUtils {
     }
 
     public static EntityType<?> getCycleType() {
+        if(allIdolTypes.isEmpty()) return null;
         return allIdolTypes.get((int) ((System.currentTimeMillis() / 500) % allIdolTypes.size()));
     }
 

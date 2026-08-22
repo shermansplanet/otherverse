@@ -689,6 +689,9 @@ public class ShrineHelper {
             var maxx = Mth.ceil(range.center.x + range.radius + 0.5f);
             var minz = Mth.floor(range.center.z - range.radius - 0.5f);
             var maxz = Mth.ceil(range.center.z + range.radius + 0.5f);
+
+            var shouldComputeTargetPositions = overflowBehaviors.get(st).affectsIndividualBlocks();
+
             for (var x = minx; x <= maxx; x++) {
                 var dx = x + 0.5f - range.center.x;
                 for (var z = minz; z <= maxz; z++) {
@@ -696,7 +699,7 @@ public class ShrineHelper {
                     if (dx * dx + dz * dz > r2) continue;
                     for (var dy = 0; dy < range.height; dy++) {
                         var bp = new BlockPos(x, baseY - dy, z);
-                        targetPositions.add(bp);
+                        if (shouldComputeTargetPositions) targetPositions.add(bp);
                         chunkPositions.add(Otherverse.chunkAt(bp));
                     }
                 }

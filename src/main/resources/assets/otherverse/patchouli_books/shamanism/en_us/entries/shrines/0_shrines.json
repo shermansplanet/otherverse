@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Shrines are multiblock hallows that have been marked by a Practitioner. To designate a multiblock hallow as a shrine, shift-right-click it with an empty hand. This costs a bit of health, but not Self. When a hallow becomes a shrine, its particles start moving over its surface instead of drifting aimlessly. You can add new blocks to a shrine and they will become part of it."
+            "text": "Shrines are multiblock hallows that have been marked by a Practitioner. To designate a multiblock hallow as a shrine, shift-right-click it with an empty hand. This costs a bit of health, but not Self. You can add new blocks to a shrine and they will become part of it. Shift-right-clicking again will turn it back into a hallow, but you will take a temporary hit to your affinity for that spirit type."
         },
         {
             "type": "patchouli:text",

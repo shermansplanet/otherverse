@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.OtherverseClientPacketHandler;
 import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.artifacts.ArtifactManager;
+import com.shermansplanet.otherverse.artifacts.ConnectionBlockManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.warden.Warden;
@@ -121,11 +123,13 @@ public class BindingManager {
     public static boolean isBoundOrContracted(LivingEntity e) {
         var data = e.getPersistentData();
         if (data.isEmpty()) return false;
-        return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("unbound_contract") || data.contains("practitioner");
+        return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("unbound_contract") || data.contains("practitioner") || data.contains("practitioner_loyalty");
     }
 
     public static boolean isAlliedWith(LivingEntity e, String playerName) {
         if (e instanceof Player p && p.getGameProfile().getName().equals(playerName)) return true;
+        if (e instanceof TamableAnimal ta && ta.getOwner() instanceof Player p && p.getGameProfile().getName().equals(playerName))
+            return true;
         var data = e.getPersistentData();
         if (data.isEmpty()) return false;
         return ((data.hasUUID("bindingId") || data.contains("construct_type")) && data.getString("last_bound_by").equals(playerName))
@@ -207,6 +211,9 @@ public class BindingManager {
             }
         }
         if (OtherverseConfig.UNBINDABLE_MOBS.get().contains(ForgeRegistries.ENTITY_TYPES.getKey(mob.getType()).toString())) {
+            return false;
+        }
+        if (!rebinding && mob instanceof WitherBoss wither && (wither.getInvulnerableTicks() > 0 || !wither.isPowered())) {
             return false;
         }
         List<ItemStack> influenceItems = new ArrayList<>();
@@ -451,6 +458,7 @@ public class BindingManager {
 
     public static void forceAttack(Mob mob, LivingEntity targetMob) {
         if (mob == targetMob) return;
+        if (ConnectionBlockManager.isBlocked(mob, targetMob)) return;
         mob.setTarget(targetMob);
         mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, targetMob);
         mob.getBrain().setMemory(MemoryModuleType.ANGRY_AT, targetMob.getUUID());

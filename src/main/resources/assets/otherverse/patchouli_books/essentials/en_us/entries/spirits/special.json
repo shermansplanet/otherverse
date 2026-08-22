@@ -1,7 +1,7 @@
 {
     "name": "Special Cases",
     "sortnum": 2,
-    "icon": "otherverse:sulfur{hallow:{spirit_type:'nether'}}",
+    "icon": "otherverse:spirit_tablet",
     "category": "otherverse:spirits",
     "pages": [
         {

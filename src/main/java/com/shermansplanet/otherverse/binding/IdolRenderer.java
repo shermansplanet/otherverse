@@ -72,6 +72,7 @@ public class IdolRenderer extends BlockEntityWithoutLevelRenderer {
         }
         if (entityType == null) {
             entityType = MobBindingInfluenceUtils.getCycleType();
+            if(entityType == null) return;
         }
         Entity renderEntity = renderEntities.get(entityType);
         if (renderEntity == null) {
@@ -96,8 +97,7 @@ public class IdolRenderer extends BlockEntityWithoutLevelRenderer {
         if (entityType == EntityType.SQUID || entityType == EntityType.GLOW_SQUID) {
             scaleFactor *= 0.4f;
             poseStack.translate(0, 0.3, 0);
-        }
-        else if (entityType == EntityType.ENDER_DRAGON) scaleFactor *= 4;
+        } else if (entityType == EntityType.ENDER_DRAGON) scaleFactor *= 4;
 
         if (transformType == ItemDisplayContext.GUI) {
             poseStack.translate(0.5f, 0.15f, 0);

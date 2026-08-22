@@ -1,5 +1,7 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.spirits.SpiritItem;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.GrindstoneMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -16,8 +18,13 @@ public abstract class GrindstoneMenuInjector extends AbstractContainerMenu {
         super(p_38851_, p_38852_);
     }
 
-    @Inject(method = "removeNonCurses", at = @At("RETURN"))
+    @Inject(method = "removeNonCurses", at = @At("RETURN"), cancellable = true)
     private void onRemoveNonCurses(ItemStack stack, int p_39581_, int p_39582_, CallbackInfoReturnable<ItemStack> ci) {
+        if(stack.getItem() instanceof SpiritItem){
+            ci.setReturnValue(new ItemStack(OtherverseItems.SPIRIT_TABLET.get(), stack.getCount()));
+            ci.cancel();
+            return;
+        }
         stack.removeTagKey("hallow");
     }
 }

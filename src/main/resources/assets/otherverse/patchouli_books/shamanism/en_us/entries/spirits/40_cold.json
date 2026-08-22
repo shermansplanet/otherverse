@@ -9,11 +9,11 @@
             "item": {
                 "item": "otherverse:spirit_cold"
             },
-            "text": "When a cold shrine is overfilled, excess spirits will affect the environment: three spirits will freeze a block of water or lava, or put snow layers on the ground. Twenty-four spirits will turn snow into powdered snow."
+            "text": "The chilling beauty of snow and ice, the fractal bite of frost. Suspended animation, preserving, freezing."
         },
         {
             "type": "patchouli:text",
-            "text": "When a cold shrine is overdrawn, it will destroy layered snow to yield three cold spirits or turn powdered snow into snow to yield eighteen cold spirits."
+            "text": "When a cold shrine is overfilled, excess spirits will affect the environment: 3 spirits will freeze a block of water or lava, or put snow layers on the ground. 24 spirits will turn snow into powdered snow. When a cold shrine is overdrawn, it will destroy layered snow to yield 3 cold spirits or turn powdered snow into snow to yield 18 cold spirits."
         }
     ]
 }

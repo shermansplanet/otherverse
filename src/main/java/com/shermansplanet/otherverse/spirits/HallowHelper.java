@@ -8,6 +8,7 @@ import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
 import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
+import com.shermansplanet.otherverse.capabilities.PracticeCapability;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.implement.ImplementManager;
@@ -20,6 +21,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -91,6 +93,10 @@ public class HallowHelper {
     public static void onGrindstoneChange(GrindstoneEvent.OnPlaceItem event) {
         if (!event.getTopItem().hasTag() || !event.getTopItem().getTag().contains("hallow")) return;
         var newstack = event.getTopItem().copy();
+        if (newstack.getItem() instanceof SpiritItem) {
+            event.setOutput(new ItemStack(OtherverseItems.SPIRIT_TABLET.get(), newstack.getCount()));
+            return;
+        }
         newstack.removeTagKey("hallow");
         event.setOutput(newstack);
     }
@@ -314,21 +320,39 @@ public class HallowHelper {
         return false;
     }
 
+    private static long lastClick;
+
     @SubscribeEvent
     public static void makeShrine(PlayerInteractEvent.RightClickBlock event) {
-        if (!event.getItemStack().isEmpty() || !event.getEntity().isShiftKeyDown()) return;
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+        var time = event.getLevel().getGameTime();
+        if (time - lastClick < 5) return;
+        lastClick = time;
+        if (!event.getEntity().isShiftKeyDown()) return;
+        if (!event.getEntity().getMainHandItem().isEmpty() || !event.getEntity().getOffhandItem().isEmpty()) return;
         var data = DiagramManager.getOrCreateLevelData(event.getLevel());
         var tag = data.getPlacedItemTag(event.getPos());
-        if (tag == null || tag.contains("shrine")) return;
+        if (tag == null) return;
+        var isShrine = tag.contains("shrine");
         if (!event.getEntity().getAbilities().instabuild)
             event.getEntity().hurt(event.getEntity().damageSources().magic(), 3);
         for (var pos : ShrineHelper.getAllHallows(event.getPos(), tag.getString("spirit_type"), data)) {
             tag = data.getPlacedItemTag(pos);
-            tag.putBoolean("shrine", true);
+            if (isShrine) {
+                tag.remove("shrine");
+            } else {
+                tag.putBoolean("shrine", true);
+            }
             data.putPlacedItemTag(pos, tag);
             var focus = data.allBlockFoci.get(pos);
             if (focus != null && event.getLevel() instanceof ServerLevel sl)
                 DiagramManager.markDiagramActive(sl, focus.getDiagram());
+        }
+        if (isShrine) {
+            var st = Spirits.spiritsByLabel.get(tag.getString("spirit_type"));
+            for (var i = 0; i < 10; i++) {
+                SpiritAffinityTracker.decreaseAffinity(st, sp);
+            }
         }
         if (event.getLevel() instanceof ServerLevel sl) {
             ShrineHelper.getShrine(sl, event.getPos());
@@ -667,16 +691,15 @@ public class HallowHelper {
         if (spiritType != Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"))) return false;
         int count = hallowTag.getInt("spirit_count");
         if (count < spiritAmount) return false;
-
-        var newItem = item.split(1);
-        if (item.getCount() == 0) {
-            player.getInventory().removeItem(item);
+        if (item.getCount() == 1) {
+            hallowTag.putInt("spirit_count", count - spiritAmount);
+        } else {
+            var newItem = item.split(1);
+            if (!player.addItem(newItem)) {
+                player.drop(newItem, false);
+            }
+            newItem.getTag().getCompound("hallow").putInt("spirit_count", count - spiritAmount);
         }
-        if (!player.addItem(newItem)) {
-            player.drop(newItem, false);
-        }
-        hallowTag = newItem.getTag().getCompound("hallow");
-        hallowTag.putInt("spirit_count", count - spiritAmount);
         return true;
     }
 

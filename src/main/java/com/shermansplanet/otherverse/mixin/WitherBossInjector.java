@@ -26,37 +26,13 @@ public abstract class WitherBossInjector extends Monster implements PowerableMob
         super(p_33002_, p_33003_);
     }
 
-    @Shadow
-    public int getInvulnerableTicks() {
-        return 0;
-    }
-
-    @Shadow
-    public void setInvulnerableTicks(int p_31511_) {
-    }
-
     @Inject(method = "customServerAiStep", at = @At("HEAD"), cancellable = true)
     protected void onAiStep(CallbackInfo ci) {
         if (BindingManager.isBoundOrContracted(this)) {
-            if (this.getInvulnerableTicks() > 0) {
-                int k1 = this.getInvulnerableTicks() - 1;
-                this.bossEvent.setProgress(1.0F - (float) k1 / 220.0F);
-                if (k1 <= 0) {
-                    this.level().explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, Level.ExplosionInteraction.NONE);
-                    bossEvent.removeAllPlayers();
-                }
-
-                this.setInvulnerableTicks(k1);
-                if (this.tickCount % 10 == 0) {
-                    this.heal(10.0F);
-                }
-
-            } else {
-                this.bossEvent.removeAllPlayers();
-                super.customServerAiStep();
-                if (this.tickCount % 20 == 0) {
-                    this.heal(1.0F);
-                }
+            super.customServerAiStep();
+            this.bossEvent.removeAllPlayers();
+            if (this.level().getGameTime() % 20 == 0) {
+                this.heal(1.0F);
             }
             ci.cancel();
         }
