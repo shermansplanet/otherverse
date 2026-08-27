@@ -10,7 +10,7 @@
                 "item": "minecraft:crafting_table"
             },
             "title" : "Craft",
-            "text": "A crafting table item denotes the \"craft\" action.$(br2)The recipe must be laid out in chalk circles as it would be on a crafting table. At least one of the ingredients must be influencing the crafting table."
+            "text": "A crafting table item denotes the \"craft\" action.$(br2)The ingredients for the recipe must be laid out in chalk circles as it would be on a crafting table. At least one of the ingredients must be influencing the crafting table."
         },
         {
             "type": "patchouli:image",
@@ -19,7 +19,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "A mob performing this action will look for a crafting table with adjacent inventories containing all the necessary crafting ingredients. It will go to the crafting table and craft the item, picking up the result if possible."
+            "text": "A mob performing this action will look for a crafting table with adjacent inventories containing all the necessary crafting ingredients (plus whatever it's holding). It will go to the crafting table and craft the item, picking up the result if possible."
         }
     ]
 }

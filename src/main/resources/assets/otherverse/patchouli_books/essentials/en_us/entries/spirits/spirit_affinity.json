@@ -14,7 +14,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "There's a limit to the affinity you can gain by using spirits in diagrams. You can only exceed this limit by permanently committing via one of the $(l:otherverse:rituals)Big Three Rituals$(). Once you do, not only will spirits move faster, but you'll start extracting extra spirits from items. You can max out your affinity by using the same spirit type in all three rituals."
+            "text": "There's a limit to the affinity you can gain by using spirits in diagrams. You can only exceed this limit by permanently committing via one of the $(l:otherverse:rituals)Big Three Rituals$(). Once you do, not only will spirits move faster, but you'll start extracting extra spirits from items (but fewer of the opposed spirit). You can max out your affinity by using the same spirit type in all three rituals."
         }
     ]
 }

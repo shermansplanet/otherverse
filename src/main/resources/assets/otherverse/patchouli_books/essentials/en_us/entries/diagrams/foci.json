@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "There are two types of foci. $(bold)Item foci$() can be formed by using any item on a chalk mark, which will place the item into the focus. Using chalk on a chalk mark creates an empty item focus that will accept items thrown into it."
+            "text": "A $(bold)focus$() is a part of a diagram that can hold an item or block. $(bold)Item foci$() can be formed by using any item on a chalk mark, which will place the item into the focus. Using chalk on a chalk mark creates an empty item focus that will accept items thrown into it."
         },
         {
             "title": "Item Foci",
@@ -16,13 +16,14 @@
         },
         {
             "type": "patchouli:text",
-            "text": "$(bold)Block foci$() are any spaces without chalk that are entirely enclosed by chalk. In other words, a complete chalk ring of any size will turn every chalkless inner space into a block focus."
+            "text": "$(bold)Block foci$() are any spaces without chalk that are entirely enclosed by chalk (on the same Y-level as the rest of the diagram). A block placed in such a space, or a mob that enters it, is in the block focus."
         },
         {
             "title": "Block Foci",
             "type": "patchouli:image",
             "images": ["otherverse:textures/gui/entries/chalk_3.png"],
-            "border": true
+            "border": true,
+            "text": "Nine separate block foci."
         }
     ]
 }

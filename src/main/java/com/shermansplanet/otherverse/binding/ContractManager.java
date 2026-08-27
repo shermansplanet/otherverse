@@ -38,6 +38,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.network.PacketDistributor;
+import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import oshi.util.tuples.Pair;
 
@@ -364,6 +365,7 @@ public class ContractManager {
                 }
             }
 
+            var foundRecipe = false;
             for (var n = 0; n < 4; n++) {
                 for (int i = 0; i < craftingItemPositions.size(); i++) {
                     var pos = craftingItemPositions.get(i).getA();
@@ -388,11 +390,13 @@ public class ContractManager {
                 }
                 Optional<CraftingRecipe> recipe = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, level);
                 if (recipe.isPresent()) {
+                    foundRecipe = true;
                     tag.putString("recipe_id", recipe.get().getId().toString());
                     tag.putInt("recipe_result", Item.getId(recipe.get().getResultItem(level.registryAccess()).getItem()));
                     break;
                 }
             }
+            if(!foundRecipe) return new CompoundTag();
         }
         return tag;
     }

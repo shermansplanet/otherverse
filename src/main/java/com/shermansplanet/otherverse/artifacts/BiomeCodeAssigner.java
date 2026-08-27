@@ -51,6 +51,7 @@ public class BiomeCodeAssigner {
     }
 
     private static List<SpiritType> tryGetUniqueCombo(List<SpiritType> spiritPreferences, HashSet<String> takenSpiritCodes) {
+        if(spiritPreferences.isEmpty()) return null;
         var spirits = new SpiritType[SPIRIT_CODE_COUNT];
         var spiritIndices = new int[SPIRIT_CODE_COUNT];
         while (true) {

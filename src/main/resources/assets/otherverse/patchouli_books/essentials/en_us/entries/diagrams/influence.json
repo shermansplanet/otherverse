@@ -6,24 +6,40 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "A diagram's function is determined by which foci $(bold)influence$() which other foci. For instance, if a focus containing a chain is influencing a focus containing a mob, it will help bind that mob. $(br2)In your Sight, you can see the flow of influence visualized by particles. If you're looking at a focus, its influences will be highlighted bright blue, and the focus it's influencing will be highlighted bright orange."
-        },
-        {
-            "type": "patchouli:text",
-            "text": "A focus can only be influenced by other foci that are $(bold)symmetrical$() around it.$(br2)To get a feel for what 'symmetry' entails, you can shift-right-click anywhere with chalk to enter Symmetry Helper mode. In this visualization, all the blue spots must 'match' each other ($(italic)all$() or $(italic)none$() must have chalk) for $(italic)any$() of them to influence the orange spot."
-        },
-        {
-            "type": "patchouli:text",
-            "text": "When determining symmetry, item foci match with each other, or in fact $(bold)any chalk mark$(). In this diagram, the item focus in the upper right matches the other three chalk marks that are symmetrical with it around the center item focus, and so it influences the center item focus."
+            "text": "A diagram's function is determined by which foci $(bold)influence$() which other foci. For instance, if a focus containing a chain is influencing a focus containing a mob, it will help bind that mob. $(br2)In your Sight, you can see the flow of influence visualized by particles. And if you're looking at a focus, its influences will be highlighted bright blue and the focus it's influencing will be highlighted bright orange."
         },
         {
             "type": "patchouli:image",
-            "images": ["otherverse:textures/gui/entries/influence_2.png"],
-            "border": true
+            "images": ["otherverse:textures/gui/entries/influence_1.png"],
+            "border": true,
+            "text": "Possibly the simplest diagram. The inner focus is influenced by the outer focus."
         },
         {
             "type": "patchouli:text",
-            "text": "Block foci are considered symmetrical with each other, but also with $(bold)any non-chalk space adjacent to the diagram.$() In this diagram, the block focus in the upper right matches the three empty spaces that are symmetrical with it around the center item focus, and so it influences the center item focus."
+            "title": "Symmetry",
+            "text": "To determine which foci influence a focus, look for $(bold)symmetry$() around the focus, where $(italic)all$() or $(italic)none$() of the spaces have chalk. Often, this will be the four positions directly adjacent or diagonal. It could also be the four spaces that are multiple blocks away in the cardinal or diagonal directions, sometimes even eight symmetrical locations."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/influence_symmetry.png"],
+            "border": true,
+            "text": "You can shift-right-click on the ground with chalk to enter Symmetry Helper mode and see what is symmetrical around the spot you clicked."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/influence_yes.png"],
+            "border": true,
+            "text": "All four spots around the inner focus have chalk, so they can influence it..."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/influence_no.png"],
+            "border": true,
+            "text": "...but not all four spots around the outer focus have chalk, so the reverse is not true."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Item foci are symmetrical with any other chalk mark that's part of the same diagram.$(br2)Block foci are symmetrical with each other, or with any space $(bold)adjacent to$() the diagram.$(br2)In this diagram, the block focus in the upper right matches the three empty spaces that are symmetrical with it around the center item focus, and so it influences the center item focus."
         },
         {
             "type": "patchouli:image",
@@ -32,15 +48,49 @@
         },
         {
             "type": "patchouli:image",
-            "images": ["otherverse:textures/gui/entries/influence_4.png"],
+            "images": ["otherverse:textures/gui/entries/influence_6.png"],
             "border": true,
-            "text": "Influence may be based on symmetry, but diagrams need not be symmetrical."
+            "text": "This block focus is influenced by the item foci around it."
         },
         {
             "type": "patchouli:image",
-            "images": ["otherverse:textures/gui/entries/influence_5.png"],
+            "images": ["otherverse:textures/gui/entries/influence_7.png"],
             "border": true,
-            "text": "Not all chains of influence in a diagram need to connect."
+            "text": "This block focus is influenced by the block foci around it."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/influence_8.png"],
+            "border": true,
+            "text": "The block focus can't influence the item focus because a symmetrical spot has chalk."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/influence_9.png"],
+            "border": true,
+            "text": "Here, it's because the symmetrical spots are not in or adjacent to the diagram."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/influence_10.png"],
+            "border": true,
+            "text": "We can add more chalk to make the block focus influence the item focus."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/influence_11.png"],
+            "border": true,
+            "text": "This can be done many ways! We just need the spaces to be in or adjacent to the diagram."
+        },
+        {
+            "type": "patchouli:image",
+            "images": ["otherverse:textures/gui/entries/influence_4.png"],
+            "border": true,
+            "text" : "Influences can be chained together in arbitrarily complex ways."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "You now know enough about diagrams to start using them in Practice!$(br2)Most Practices can be done with simple diagrams, but things get complicated fast when setting up advanced $(l:otherverse:contracts)contracts$() or multi-step $(l:otherverse:spirits/spirit_transfusion)transfusion$() setups.$(br2)If you want to know more about the nuances of influence, read on. If not, start Practicing! Why not start by making a $(l:otherverse:spirits/hallows)hallow$()?"
         }
     ]
 }

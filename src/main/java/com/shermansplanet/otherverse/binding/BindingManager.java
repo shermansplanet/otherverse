@@ -432,8 +432,6 @@ public class BindingManager {
             boundGoal.applyContract();
         }
         if (mob.level() instanceof ServerLevel sl) {
-            TransientDiagramData.updateClientBinding(binding);
-
             var focus = binding.getFocus();
             if (focus != null) {
                 var sp = focus.getDiagram().getOwner(sl);
@@ -450,7 +448,7 @@ public class BindingManager {
                     }
                 }
             }
-
+            TransientDiagramData.updateClientBinding(binding);
         } else {
             LOGGER.debug("APPLYING BINDING ON CLIENT LEVEL");
         }

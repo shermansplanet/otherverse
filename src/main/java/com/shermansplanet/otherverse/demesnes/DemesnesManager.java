@@ -93,7 +93,7 @@ public class DemesnesManager {
         SPIRITS(126, 172, "Ultimate Shrine", "Each time you choose this perk, you declare the spirits in the hallow above this beacon as a favored type. Demesne beacons in your Demesne can now be repeatedly drained by hallows for a renewable supply of this spirit type.", MAX_CHOICES),
         TIME(172, 172, "Chronomancy", "If two Demesne beacons are aligned vertically with nothing between them, all random ticks in your Demesne will be concentrated into the range of heights between the beacons."),
         TOOL_REPAIR(85, 39, "Hearth and Hone", "Tools in your inventory will now regain durability in your Demesne."),
-        VEIN_MINE(68, 68, "Mine What's Yours", "Tools can now break multiple blocks at once in your Demesne. Shift-right-click with a tool to toggle modes. Choosing this again will increase the number of blocks broken at once from 9 to 64.", 2),
+        VEIN_MINE(68, 68, "Mine What's Yours", "Tools can now break multiple blocks at once in your Demesne. Use the Implement key to toggle modes. Choosing this again will increase the number of blocks broken at once from 9 to 64.", 2),
         WEATHER(143, 143, "Sky Painter", "Using dye on a Demesne beacon will shift the color of the sky in your Demesne (use dye repeatedly to shift more). Using a clock will shift the apparent time of day (shift-clicking will remove this effect)."),
 
         SANCTION_FIGHT(108, 66, "Sanction: Violence", "Deal damage of any sort.", true),

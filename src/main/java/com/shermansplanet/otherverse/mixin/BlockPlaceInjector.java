@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(BlockBehaviour.class)
@@ -34,8 +35,13 @@ public abstract class BlockPlaceInjector {
         diagramData.removePlacedItemTag(pos);
         Item itemToMatch = blockState.getBlock().asItem();
         List<ItemStack> drops = ci.getReturnValue();
+        var newDrops = new ArrayList<ItemStack>();
         for (ItemStack drop : drops) {
             if (drop.is(itemToMatch)) {
+                if(drop.getCount() > 1){
+                    newDrops.add(drop.copyWithCount(drop.getCount() - 1));
+                    drop.setCount(1);
+                }
                 tag.remove("shrine");
                 drop.getOrCreateTag().put("hallow", tag);
                 if(tag.contains("spawn_altar_type")) {
@@ -45,5 +51,6 @@ public abstract class BlockPlaceInjector {
                 break;
             }
         }
+        drops.addAll(newDrops);
     }
 }

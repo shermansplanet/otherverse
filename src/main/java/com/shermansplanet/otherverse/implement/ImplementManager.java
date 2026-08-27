@@ -41,6 +41,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.BucketPickup;
@@ -615,6 +616,7 @@ public class ImplementManager {
                 && demesne.getPerkLevel(DemesnesManager.DemesnePerk.VEIN_MINE) > 0
                 && player.getMainHandItem().getItem() instanceof DiggerItem) {
             changeImplementMode(player.getMainHandItem(), player);
+            return;
         }
         var implement = getImplementInstance(player);
         if (implement.isEmpty()) return;
@@ -661,7 +663,17 @@ public class ImplementManager {
             player.displayClientMessage(Component.literal("No free inventory slot in which to summon your Implement!"), true);
             return;
         }
-        if (!player.isCreative() && !SelfManager.changeSelf(player, -1)) return;
+        var shouldSpendSelf = !player.isCreative();
+        if(implement.is(Items.TRIDENT)){
+            for(var trident : player.level().getEntitiesOfClass(ThrownTrident.class, player.getBoundingBox().inflate(64))){
+                if(trident.getOwner() == player){
+                    trident.discard();
+                    shouldSpendSelf = false;
+                    break;
+                }
+            }
+        }
+        if (shouldSpendSelf && !SelfManager.changeSelf(player, -1)) return;
         if (slot == null) {
             player.getInventory().add(implement);
         } else {

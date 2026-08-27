@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "A focus can $(italic)have$() multiple influences, but may only $(italic)be$() the influence of up to one other focus. However, in some situations, a focus is a valid influence for multiple \"target\" foci. So how do the spirits choose?"
+            "text": "A focus can only influence up to one other focus. However, in some situations, a focus is a valid influence for multiple \"target\" foci. So how do the spirits choose?"
         },
         {
             "type": "patchouli:image",
@@ -18,7 +18,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "When holding chalk and looking at a focus, you may notice smaller dimmer circles. These represent potential influences (blue) and targets (orange) that $(italic)do$() have valid symmetry, but were $(italic)not$() chosen due to the principle just outlined."
+            "text": "When holding chalk and looking at a focus, you may notice smaller darker circles. These represent potential influences (blue) and targets (orange) that $(italic)do$() have valid symmetry, but were $(italic)not$() chosen due to the principle just outlined."
         }
     ]
 }

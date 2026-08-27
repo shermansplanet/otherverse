@@ -174,8 +174,8 @@ public class DiagramSightRenderer {
             poseStack.translate(
                     -camera.getPosition().x(), -camera.getPosition().y(), -camera.getPosition().z());
 
-            RenderBlock(poseStack, new Vec3(symmetryCenter.getX() + 0.5, symmetryCenter.getY() + 0.5,
-                    symmetryCenter.getZ() + 0.5), 0.75f, false, true);
+//            RenderBlock(poseStack, new Vec3(symmetryCenter.getX() + 0.5, symmetryCenter.getY() + 0.5,
+//                    symmetryCenter.getZ() + 0.5), 0.75f, false, true);
 
             for (var mirrored = 0; mirrored < (needsMirror ? 2 : 1); mirrored++) {
                 for (var i = 0; i < 4; i++) {

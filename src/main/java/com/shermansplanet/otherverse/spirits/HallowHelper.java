@@ -35,6 +35,8 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.GrindstoneEvent;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -173,11 +175,29 @@ public class HallowHelper {
     static void onDie(LivingDeathEvent event) {
         var entity = event.getEntity();
         if (!isPlayerOrTamedOrBound(entity)) return;
-        var levelData = DiagramManager.getOrCreateLevelData(entity.level());
         for (var shrine : ShrineHelper.getShrinesFor(entity, Spirits.DEATH)) {
             if (!shrine.tryDrain(444)) continue;
             entity.setHealth(entity.getMaxHealth() / 2);
             event.setCanceled(true);
+            return;
+        }
+    }
+
+    @SubscribeEvent
+    static void onTryMultipleHallow(PlayerInteractEvent.RightClickBlock event) {
+        var item = event.getItemStack();
+        if (!item.hasTag() || !item.getTag().contains("hallow")) return;
+        var pos = event.getPos();
+        for (var i = 0; i < 2; i++) {
+            if(i==1 && event.getFace() != null) pos = pos.relative(event.getFace());
+            var bs = event.getLevel().getBlockState(pos);
+            if (!item.is(bs.getBlock().asItem())) continue;
+            if (!(bs.getBlock() instanceof CandleBlock) && !(bs.getBlock() instanceof SlabBlock) && !item.is(Items.TURTLE_EGG) && !item.is(Items.SEA_PICKLE))
+                continue;
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.FAIL);
+            if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+            sp.sendSystemMessage(Component.literal("Sorry, you can't put hallows in a block that already contains something."));
             return;
         }
     }

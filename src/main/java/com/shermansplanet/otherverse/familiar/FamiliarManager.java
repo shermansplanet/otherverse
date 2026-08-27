@@ -62,7 +62,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -266,6 +268,18 @@ public class FamiliarManager {
         for (Entity e : sp.serverLevel().getEntities(sp, sp.getBoundingBox().inflate(16))) {
             if (!(e instanceof LivingEntity le)) continue;
             le.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * (8 + sp.getRandom().nextInt(24)), 1));
+        }
+        var pos = sp.blockPosition();
+        var originalState = sp.level().getBlockState(pos);
+        if(originalState.getBlock() instanceof BedBlock) {
+            var newBlockState = Blocks.BLACK_BED.defaultBlockState();
+            newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART))
+                    .setValue(BedBlock.OCCUPIED, originalState.getValue(BedBlock.OCCUPIED))
+                    .setValue(BedBlock.FACING, originalState.getValue(BedBlock.FACING));
+            sp.level().setBlock(pos, newBlockState, 26);
+            var otherPos = pos.relative(BedBlock.getConnectedDirection(originalState));
+            newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART) == BedPart.FOOT ? BedPart.HEAD : BedPart.FOOT);
+            sp.level().setBlock(otherPos, newBlockState, 26);
         }
     }
 
@@ -983,17 +997,19 @@ public class FamiliarManager {
             var forgeData = entityTag.getCompound("ForgeData");
             if (forgeData.contains("bindingId")) {
                 var binding = data.bindingsById.get(forgeData.getUUID("bindingId"));
-                for (var level : sl.getServer().getAllLevels()) {
-                    if (DiagramManager.getDimensionHash(level) != binding.dimensionHash) continue;
-                    EntityType<?> type = getEntityTypeFromTag(familiarData);
-                    var hp = entityTag.getFloat("Health");
-                    if (hp <= 0f) break;
-                    var mob = (Mob) type.create(level);
-                    mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.MOB_SUMMONED, null, entityTag);
-                    var listTag = entityTag.getList("Pos", 6);
-                    EntityType.updateCustomEntityTag(level, player, mob, mobData);
-                    addMobToLevel(mob, level);
-                    break;
+                if(binding != null) {
+                    for (var level : sl.getServer().getAllLevels()) {
+                        if (DiagramManager.getDimensionHash(level) != binding.dimensionHash) continue;
+                        EntityType<?> type = getEntityTypeFromTag(familiarData);
+                        var hp = entityTag.getFloat("Health");
+                        if (hp <= 0f) break;
+                        var mob = (Mob) type.create(level);
+                        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.MOB_SUMMONED, null, entityTag);
+                        var listTag = entityTag.getList("Pos", 6);
+                        EntityType.updateCustomEntityTag(level, player, mob, mobData);
+                        addMobToLevel(mob, level);
+                        break;
+                    }
                 }
             }
             updateAbilities(player);

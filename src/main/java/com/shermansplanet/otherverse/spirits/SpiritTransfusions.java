@@ -20,8 +20,12 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -238,7 +242,8 @@ public class SpiritTransfusions {
         if (event.getItemStack().getItem() instanceof BlockItem && !event.getEntity().isShiftKeyDown()) return;
         if (DiagramManager.getOrCreateLevelData(event.getLevel()).getPlacedItemTag(event.getPos()) != null) return;
         var spiritTransfusions = ALL_SPIRIT_TRANSFUSIONS.data;
-        Item inputItem = event.getLevel().getBlockState(event.getPos()).getBlock().asItem();
+        var originalState = event.getLevel().getBlockState(event.getPos());
+        Item inputItem = originalState.getBlock().asItem();
         CompoundTag hallowTag = event.getItemStack().getTag().getCompound("hallow");
         int spiritCount = hallowTag.getInt("spirit_count");
         SpiritType spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
@@ -264,7 +269,17 @@ public class SpiritTransfusions {
                 continue;
             }
             var newBlockState = transfusion.blockOutput.defaultBlockState();
-            event.getLevel().setBlockAndUpdate(event.getPos(), newBlockState);
+            if (newBlockState.getBlock() instanceof BedBlock) {
+                newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART))
+                        .setValue(BedBlock.OCCUPIED, originalState.getValue(BedBlock.OCCUPIED))
+                        .setValue(BedBlock.FACING, originalState.getValue(BedBlock.FACING));
+                event.getLevel().setBlock(event.getPos(), newBlockState, 26);
+                var otherPos = event.getPos().relative(BedBlock.getConnectedDirection(originalState));
+                newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART) == BedPart.FOOT ? BedPart.HEAD : BedPart.FOOT);
+                event.getLevel().setBlock(otherPos, newBlockState, 26);
+            } else {
+                event.getLevel().setBlockAndUpdate(event.getPos(), newBlockState);
+            }
             spendSpirits(event.getEntity(), hallowTag, transfusion.price, event.getItemStack());
             if (event.getLevel() instanceof ServerLevel sl) {
                 sl.playSound(null, event.getPos(), newBlockState.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1, 1);

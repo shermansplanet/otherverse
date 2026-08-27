@@ -10,11 +10,11 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Positive bindings also count all the spirits matching the mob's spirit type in every block in a 5x3x5 range centered on the binding focus. For instance, a zombie (death-aligned) can be positively bound even by an empty circle if it's surrounded with enough bone blocks and skulls, and a bee (air) wants lots of empty air blocks. Think of it as making a nice habitat."
+            "text": "Positive bindings also count all the spirits matching the mob's spirit type in every block in a 5x3x5 range centered on the binding focus (not counting spirits in hallows). For instance, a zombie (death) can be positively bound even by an empty circle if it's surrounded with enough bone blocks and skulls, and a bee (air) wants lots of empty air blocks. Think of it as making a nice habitat."
         },
         {
             "type": "patchouli:text",
-            "text": "Positively bound mobs will still 'attack' their binding influences just like negatively bound mobs; they may not be there against their will, but they still demand payment for their service and will turn against you if you can't pay. They only look at diagram foci for this, ignoring the 'habitat' portion of their binding."
+            "text": "Positively bound mobs will still 'attack' their binding influences just like negatively bound mobs; they may not be there against their will, but they still demand payment for their service and will leave if you can't pay (although they may be less aggressive about it). They only look at diagram foci for this, ignoring the 'habitat' portion of their binding."
         }
     ]
 }
