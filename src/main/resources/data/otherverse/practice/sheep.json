@@ -7,7 +7,7 @@
 	"transfusion" : [
 		{
 			"input" : "minecraft:rotten_flesh",
-			"health" : 7,
+			"health" : 6,
 			"output" : "minecraft:mutton"
 		},
 		{

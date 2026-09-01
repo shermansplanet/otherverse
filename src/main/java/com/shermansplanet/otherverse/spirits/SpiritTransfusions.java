@@ -20,10 +20,7 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
@@ -162,6 +159,61 @@ public class SpiritTransfusions {
                 Blocks.PINK_CONCRETE_POWDER
         });
 
+        registerDyableBlocks(new Block[]{
+                Blocks.WHITE_CANDLE, Blocks.LIGHT_GRAY_CANDLE,
+                Blocks.GRAY_CANDLE, Blocks.BLACK_CANDLE,
+                Blocks.BROWN_CANDLE, Blocks.RED_CANDLE,
+                Blocks.ORANGE_CANDLE, Blocks.YELLOW_CANDLE,
+                Blocks.LIME_CANDLE, Blocks.GREEN_CANDLE,
+                Blocks.CYAN_CANDLE, Blocks.LIGHT_BLUE_CANDLE,
+                Blocks.BLUE_CANDLE, Blocks.PURPLE_CANDLE,
+                Blocks.MAGENTA_CANDLE, Blocks.PINK_CANDLE
+        }, Blocks.CANDLE);
+
+        registerDyableBlocks(new Block[]{
+                Blocks.WHITE_BANNER, Blocks.LIGHT_GRAY_BANNER,
+                Blocks.GRAY_BANNER, Blocks.BLACK_BANNER,
+                Blocks.BROWN_BANNER, Blocks.RED_BANNER,
+                Blocks.ORANGE_BANNER, Blocks.YELLOW_BANNER,
+                Blocks.LIME_BANNER, Blocks.GREEN_BANNER,
+                Blocks.CYAN_BANNER, Blocks.LIGHT_BLUE_BANNER,
+                Blocks.BLUE_BANNER, Blocks.PURPLE_BANNER,
+                Blocks.MAGENTA_BANNER, Blocks.PINK_BANNER
+        });
+
+        registerDyableBlocks(new Block[]{
+                Blocks.WHITE_WALL_BANNER, Blocks.LIGHT_GRAY_WALL_BANNER,
+                Blocks.GRAY_WALL_BANNER, Blocks.BLACK_WALL_BANNER,
+                Blocks.BROWN_WALL_BANNER, Blocks.RED_WALL_BANNER,
+                Blocks.ORANGE_WALL_BANNER, Blocks.YELLOW_WALL_BANNER,
+                Blocks.LIME_WALL_BANNER, Blocks.GREEN_WALL_BANNER,
+                Blocks.CYAN_WALL_BANNER, Blocks.LIGHT_BLUE_WALL_BANNER,
+                Blocks.BLUE_WALL_BANNER, Blocks.PURPLE_WALL_BANNER,
+                Blocks.MAGENTA_WALL_BANNER, Blocks.PINK_WALL_BANNER
+        });
+
+        registerDyableBlocks(new Block[]{
+                Blocks.WHITE_STAINED_GLASS_PANE, Blocks.LIGHT_GRAY_STAINED_GLASS_PANE,
+                Blocks.GRAY_STAINED_GLASS_PANE, Blocks.BLACK_STAINED_GLASS_PANE,
+                Blocks.BROWN_STAINED_GLASS_PANE, Blocks.RED_STAINED_GLASS_PANE,
+                Blocks.ORANGE_STAINED_GLASS_PANE, Blocks.YELLOW_STAINED_GLASS_PANE,
+                Blocks.LIME_STAINED_GLASS_PANE, Blocks.GREEN_STAINED_GLASS_PANE,
+                Blocks.CYAN_STAINED_GLASS_PANE, Blocks.LIGHT_BLUE_STAINED_GLASS_PANE,
+                Blocks.BLUE_STAINED_GLASS_PANE, Blocks.PURPLE_STAINED_GLASS_PANE,
+                Blocks.MAGENTA_STAINED_GLASS_PANE, Blocks.PINK_STAINED_GLASS_PANE
+        }, Blocks.GLASS_PANE);
+
+        registerDyableBlocks(new Block[]{
+                Blocks.WHITE_STAINED_GLASS, Blocks.LIGHT_GRAY_STAINED_GLASS,
+                Blocks.GRAY_STAINED_GLASS, Blocks.BLACK_STAINED_GLASS,
+                Blocks.BROWN_STAINED_GLASS, Blocks.RED_STAINED_GLASS,
+                Blocks.ORANGE_STAINED_GLASS, Blocks.YELLOW_STAINED_GLASS,
+                Blocks.LIME_STAINED_GLASS, Blocks.GREEN_STAINED_GLASS,
+                Blocks.CYAN_STAINED_GLASS, Blocks.LIGHT_BLUE_STAINED_GLASS,
+                Blocks.BLUE_STAINED_GLASS, Blocks.PURPLE_STAINED_GLASS,
+                Blocks.MAGENTA_STAINED_GLASS, Blocks.PINK_STAINED_GLASS
+        }, Blocks.GLASS);
+
         registerDyableItems(new Item[]{
                 Items.WHITE_DYE, Items.LIGHT_GRAY_DYE, Items.GRAY_DYE, Items.BLACK_DYE, Items.BROWN_DYE, Items.RED_DYE,
                 Items.ORANGE_DYE, Items.YELLOW_DYE, Items.LIME_DYE, Items.GREEN_DYE, Items.CYAN_DYE, Items.LIGHT_BLUE_DYE,
@@ -187,6 +239,13 @@ public class SpiritTransfusions {
         var items = ingredients.get(0).getItems();
         if (items.length == 0) return;
         register(items[0].getItem(), Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem(sl.registryAccess()).getItem(), true);
+    }
+
+    private static void registerDyableBlocks(Block[] blocks, Block universal) {
+        registerDyableBlocks(blocks);
+        for (int ii = 0; ii < 16; ii++) {
+            register(universal.asItem(), Spirits.colorSpiritTypes[ii], 3, blocks[ii]);
+        }
     }
 
     private static void registerDyableBlocks(Block[] blocks) {
@@ -269,6 +328,11 @@ public class SpiritTransfusions {
                 continue;
             }
             var newBlockState = transfusion.blockOutput.defaultBlockState();
+            if (originalState.getBlock() instanceof BannerBlock && transfusion.blockOutput instanceof BannerBlock) {
+                newBlockState = newBlockState.setValue(BannerBlock.ROTATION, originalState.getValue(BannerBlock.ROTATION));
+            } else if (originalState.getBlock() instanceof WallBannerBlock && transfusion.blockOutput instanceof WallBannerBlock) {
+                newBlockState = newBlockState.setValue(WallBannerBlock.FACING, originalState.getValue(WallBannerBlock.FACING));
+            }
             if (newBlockState.getBlock() instanceof BedBlock) {
                 newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART))
                         .setValue(BedBlock.OCCUPIED, originalState.getValue(BedBlock.OCCUPIED))

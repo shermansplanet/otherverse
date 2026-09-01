@@ -46,6 +46,32 @@ public class SpiritLabeler {
     };
     private final static PracticeWorldManager.WorldTraitComponent<HashMap<Item, SpiritLabeler.SpiritAmount[]>> SPIRITS_FROM_JSON = new PracticeWorldManager.WorldTraitComponent<>() {
     };
+    public final static HashMap<String, SpiritType> SPIRIT_KEYWORDS = new HashMap<>();
+
+    static {
+        var spiritKeywords = new HashMap<SpiritType, String[]>();
+        spiritKeywords.put(Spirits.EARTH, new String[]{"earth", "stone", "rock", "dirt", "terra", "mud", "soil", "cobblestone", "sandstone"});
+        spiritKeywords.put(Spirits.AIR, new String[]{"air", "breeze", "wind", "squall", "storm", "lightning"});
+        spiritKeywords.put(Spirits.FIRE, new String[]{"fire", "flame", "heat", "hot", "blaze", "ember", "cinder", "inferno", "magma", "lava"});
+        spiritKeywords.put(Spirits.COLD, new String[]{"cold", "chill", "chilled", "frost", "snow", "ice", "snowy", "icy", "frozen", "freezing"});
+        spiritKeywords.put(Spirits.WATER, new String[]{"water", "prismarine", "seastone", "coral", "ocean", "sea", "aqua", "aquatic", "fish", "rain"});
+        spiritKeywords.put(Spirits.DARK, new String[]{"dark", "darkness"});
+        spiritKeywords.put(Spirits.TIME, new String[]{"time", "clock", "ancient", "rusty", "glass", "sand"});
+        spiritKeywords.put(Spirits.FATE, new String[]{"fate", "magic", "destiny", "sorcerer", "witch", "warlock", "magical", "spellbook", "grimoire", "sacred", "divine", "web", "totem"});
+        spiritKeywords.put(Spirits.WAR, new String[]{"war", "battle", "captain", "guard", "soldier", "warrior", "fighter", "arrow", "bow"});
+        spiritKeywords.put(Spirits.PROTECTION, new String[]{"protection", "shield", "armor", "aegis"});
+        spiritKeywords.put(Spirits.FLESH, new String[]{"flesh", "blood", "fleshy", "gore", "gory", "meat", "bloody", "technoflesh", "heart", "sanguine", "sanguinite"});
+        spiritKeywords.put(Spirits.TECH, new String[]{"tech", "technology", "techno", "redstone", "circuit", "computer", "wire", "cable", "golem", "technoflesh", "diode", "electronic", "electronics", "tank", "pipe"});
+        spiritKeywords.put(Spirits.FORTUNE, new String[]{"fortune", "gold", "golden", "coin", "coins", "precious", "gilded"});
+        spiritKeywords.put(Spirits.DEATH, new String[]{"death", "bone", "skill", "mortem", "plague", "bones", "dead", "necrotic", "skeleton"});
+        spiritKeywords.put(Spirits.NETHER, new String[]{"nether", "netherrack", "netherite", "blackstone"});
+        spiritKeywords.put(Spirits.END, new String[]{"end", "purpur", "void", "chorus"});
+        for (var entry : spiritKeywords.entrySet()) {
+            for (var str : entry.getValue()) {
+                SPIRIT_KEYWORDS.put(str, entry.getKey());
+            }
+        }
+    }
 
     public final static PracticeWorldManager.WorldTrait<HashMap<Item, Hashtable<SpiritType, Integer>>> SPIRIT_TYPE_OF =
             new PracticeWorldManager.WorldTrait<>(new PracticeWorldManager.WorldTraitComponent[]{
@@ -126,8 +152,11 @@ public class SpiritLabeler {
                 spiritAmounts.add(new SpiritAmount(k2, spiritsForItem.get(k2)));
             }
             spiritAmounts.sort(Comparator.comparingDouble(a -> a.type.id() * 0.01f - a.amount + (colorSpirits.contains(a.type) ? 16 : 0)));
-            recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.toString()),
-                    spiritAmounts, k.getDefaultInstance()));
+            try {
+                recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.getDescriptionId()),
+                        spiritAmounts, k.getDefaultInstance()));
+            } catch (Exception ignored) {
+            }
         }
         for (var k : MobBindingInfluenceUtils.mobSpirits.entrySet()) {
             var item = MobBindingInfluenceUtils.getIdol(k.getKey());
@@ -315,11 +344,10 @@ public class SpiritLabeler {
                     spiritAmounts.add(new SpiritAmount(Spirits.LIGHT, lightEmission * 3));
                 }
 
-                if (ForgeRegistries.ITEMS.getKey(item).getPath().startsWith("infested")) {
-                    spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 9));
+                var itemName = ForgeRegistries.ITEMS.getKey(item).getPath();
+                if (itemName.startsWith("infested")) {
+                    spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 7));
                 }
-
-                var itemName = item.toString();
                 var time = itemName.contains("oxidized") ? 9
                         : itemName.contains("weathered") ? 6
                         : itemName.contains("exposed") ? 3 : 0;
@@ -329,12 +357,15 @@ public class SpiritLabeler {
                     spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
                 }
 
-                if (itemName.contains("end_stone") || itemName.contains("purpur") || itemName.contains("void") || itemName.contains("chorus"))
-                    spiritAmounts.add(new SpiritAmount(Spirits.END, 3));
                 if (itemName.contains("frosted_stone") || itemName.contains("black_steel"))
                     spiritAmounts.add(new SpiritAmount(Spirits.COLD, 3));
-                if (itemName.contains("prismarine") || itemName.contains("seastone"))
-                    spiritAmounts.add(new SpiritAmount(Spirits.WATER, 3));
+
+                for (var namepart : itemName.split("_")) {
+                    var spiritType = SPIRIT_KEYWORDS.get(namepart);
+                    if (spiritType == null) continue;
+                    if (spiritAmounts.stream().anyMatch(s -> s.type == spiritType)) continue;
+                    spiritAmounts.add(new SpiritAmount(spiritType, 3));
+                }
             }
 
 

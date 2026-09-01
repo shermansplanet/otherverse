@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.demesnes;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.client.Minecraft;
@@ -68,7 +69,7 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
                     } else {
                         tooltip.append(Component.literal("Click to claim. This will cost " + cost + " levels.").withStyle(Style.EMPTY.withColor(0x888888)));
                     }
-                    tooltip.append(Component.literal("\nYou have claimed " + claimedPerkCount + " out of " + DemesnesManager.MAX_CHOICES + " perks.").withStyle(Style.EMPTY.withColor(0x888888)));
+                    tooltip.append(Component.literal("\nYou have claimed " + claimedPerkCount + " out of " + OtherverseConfig.DEMESNES_PERK_COUNT.get() + " perks.").withStyle(Style.EMPTY.withColor(0x888888)));
                 }
             }
 
@@ -125,7 +126,7 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
                 if (!perk.isSanction && perkVal == perk.maxValue) {
                     isClickable = false;
                 }
-                isClickable = isClickable && (claimedPerkCount < DemesnesManager.MAX_CHOICES || perk.isSanction);
+                isClickable = isClickable && (claimedPerkCount < OtherverseConfig.DEMESNES_PERK_COUNT.get() || perk.isSanction);
             }
             var button = new PerkButton(perk, isUnlocked, perk.isSanction, isClickable, perkVal, isSkipped);
             children.add(button);
@@ -155,7 +156,7 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
                 delta = -1;
             }
         } else if (!perk.isSanction) {
-            if (claimedPerkCount >= DemesnesManager.MAX_CHOICES) return;
+            if (claimedPerkCount >= OtherverseConfig.DEMESNES_PERK_COUNT.get()) return;
             if (DemesnesManager.getLevelCost(claimedPerkCount) > player.experienceLevel) return;
         }
         var newVal = 0;
@@ -165,7 +166,7 @@ public class DemesnesScreen extends AbstractContainerScreen<DemesnesMenu> {
             return;
         }
         if (!perk.isSanction || oldVal != 1) {
-            if (oldVal + delta > perk.maxValue) return;
+            if (perk.maxValue > -1 && oldVal + delta > perk.maxValue) return;
             newVal = oldVal + delta;
         }
         perkSlot.set(newVal);

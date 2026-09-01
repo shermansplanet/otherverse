@@ -850,11 +850,19 @@ public class ContractTask {
                     } else {
                         Block.dropResources(blockstate, mob.level(), targetPos, mob.level().getBlockEntity(targetPos), mob, tool);
                     }
+                    if (!tool.isEmpty()) {
+                        tool.hurtAndBreak(1, mob, m -> {
+                            BindingManager.setHeldItem(m, ItemStack.EMPTY);
+                            mob.level().playSound(null, mob, SoundEvents.ITEM_BREAK, SoundSource.NEUTRAL, 1f, 1f);
+                        });
+                    }
                     return succeed();
                 }
-                mob.level().playSound(null, targetPos, blockstate.getSoundType().getHitSound(), SoundSource.BLOCKS, 1f, 1f);
                 blockDamage = newBlockDamage;
                 mob.level().destroyBlockProgress(this.mob.getId(), targetPos, blockDamage);
+            }
+            if (doActionTicks % 5 == 1) {
+                mob.level().playSound(null, targetPos, blockstate.getSoundType().getHitSound(), SoundSource.BLOCKS, 1f, 1f);
             }
             return false;
         } else if (taskType == TaskType.CRAFT) {

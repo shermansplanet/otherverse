@@ -67,7 +67,6 @@ import java.util.*;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DemesnesManager {
-    public static final int MAX_CHOICES = 10;
     public static final int SPIRITS_FROM_DEMESNE = 3;
 
     public static int getLevelCost(int claimedPerkCount) {
@@ -77,8 +76,8 @@ public class DemesnesManager {
     public enum DemesnePerk {
         BASE_TELEPORT(172, 85, "Omnipresence", "When using your Sight, warp between any Demesne beacons you have named in an anvil by looking towards them and right-clicking. This works even through walls."),
         BEACON_HIDE(89, 89, "Beam Hiding", "Ordinary beacons will still function even if their beams are blocked."),
-        BINDING(39, 172, "Mandatory Hospitality", "Bindings within the Demesne will only require 2/3 the influence. Choosing this perk again continues to reduce it by 2/3.", MAX_CHOICES),
-        BLOCK_GEN(39, 39, "Material Ad Infinitum", "Each time you choose this perk, you declare the stone or log block above this beacon as a favored material. An unlimited supply of all these materials can then be extracted from any Demesne beacon in your Demesne via hopper, bound mob, or other means.", MAX_CHOICES),
+        BINDING(39, 172, "Mandatory Hospitality", "Bindings within the Demesne will only require 2/3 the influence. Choosing this perk again continues to reduce it by 2/3.", -1),
+        BLOCK_GEN(39, 39, "Material Ad Infinitum", "Each time you choose this perk, you declare the stone or log block above this beacon as a favored material. An unlimited supply of all these materials can then be extracted from any Demesne beacon in your Demesne via hopper, bound mob, or other means.", -1),
         CAGE(68, 143, "Reinforced Bindings", "Powerful hostile mobs no longer drain their bindings in your Demesne."),
         COLLAR(85, 172, "Positive Bindings", "You can give contracts to mobs you've tamed (such as wolves or horses) in your Demesne even if they're not bound."),
         FLIGHT(126, 39, "Flight", "You gain creative flight in your Demesne."),
@@ -90,7 +89,7 @@ public class DemesnesManager {
         RECOVERY(122, 122, "Recovery", "Your health and hunger replenish within your Demesne."),
         SCHEMATIC(39, 85, "Living Architecture", "You can create diagrams that magically place blocks they are given, quickly copying and pasting large areas. Read more about these diagrams in your Demesnes book."),
         SPAWN_SET(122, 89, "Sanctuary", "Spawns can be set in your Demesne, even if a bed would normally explode in this dimension."),
-        SPIRITS(126, 172, "Ultimate Shrine", "Each time you choose this perk, you declare the spirits in the hallow above this beacon as a favored type. Demesne beacons in your Demesne can now be repeatedly drained by hallows for a renewable supply of this spirit type.", MAX_CHOICES),
+        SPIRITS(126, 172, "Ultimate Shrine", "Each time you choose this perk, you declare the spirits in the hallow above this beacon as a favored type. Demesne beacons in your Demesne can now be repeatedly drained by hallows for a renewable supply of this spirit type.", -1),
         TIME(172, 172, "Chronomancy", "If two Demesne beacons are aligned vertically with nothing between them, all random ticks in your Demesne will be concentrated into the range of heights between the beacons."),
         TOOL_REPAIR(85, 39, "Hearth and Hone", "Tools in your inventory will now regain durability in your Demesne."),
         VEIN_MINE(68, 68, "Mine What's Yours", "Tools can now break multiple blocks at once in your Demesne. Use the Implement key to toggle modes. Choosing this again will increase the number of blocks broken at once from 9 to 64.", 2),
@@ -242,8 +241,10 @@ public class DemesnesManager {
         }
         var perksClaimed = 0;
         for (var perkVal : DemesnePerk.values()) {
+            if(perkVal.isSanction) continue;
             perksClaimed += demesne.getPerkLevel(perkVal);
         }
+        if(perksClaimed >= OtherverseConfig.DEMESNES_PERK_COUNT.get() && demesne.getPerkLevel(perk) < msg.newValue()) return;
         player.giveExperienceLevels(-getLevelCost(perksClaimed));
         demesne.setPerkValue(perk, msg.newValue());
         DiagramManager.getOrCreateLevelData(player.level().getServer().overworld()).savedData.setDirty();

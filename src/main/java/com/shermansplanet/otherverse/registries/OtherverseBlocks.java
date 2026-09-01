@@ -11,11 +11,15 @@ import com.shermansplanet.otherverse.ruins.MemorySnareBlock;
 import com.shermansplanet.otherverse.ruins.RedstoneNetherBricksBlock;
 import com.shermansplanet.otherverse.sympathy.FateWebBlock;
 import com.shermansplanet.otherverse.sympathy.SelectorBlock;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
@@ -36,7 +40,7 @@ public class OtherverseBlocks {
             () -> new CrownBlock(BlockBehaviour.Properties.copy(Blocks.AIR)));
     public static final RegistryObject<Block> SLATE_SCAFFOLDING = BLOCKS
             .register("slate_scaffolding", () -> new SlateScaffoldingBlock(
-                    BlockBehaviour.Properties.copy(Blocks.STONE).noCollission().instabreak()));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).noOcclusion().sound(SoundType.DEEPSLATE_TILES).dynamicShape().isValidSpawn(OtherverseBlocks::never).pushReaction(PushReaction.DESTROY).isRedstoneConductor(OtherverseBlocks::never)));
     public static final RegistryObject<Block> SALT_CRYSTALS = BLOCKS.register("salt_crystals",
             () -> new AmethystClusterBlock(7, 3,
                     BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).forceSolidOn().noOcclusion()
@@ -107,4 +111,12 @@ public class OtherverseBlocks {
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.GILDED_BLACKSTONE)));
     public static final RegistryObject<Block> CANDYCANE = BLOCKS.register("candycane",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)));
+
+    private static Boolean never(BlockState p_50779_, BlockGetter p_50780_, BlockPos p_50781_, EntityType<?> p_50782_) {
+        return false;
+    }
+
+    private static boolean never(BlockState p_50806_, BlockGetter p_50807_, BlockPos p_50808_) {
+        return false;
+    }
 }

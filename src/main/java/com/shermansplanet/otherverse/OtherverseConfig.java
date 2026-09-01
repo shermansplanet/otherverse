@@ -14,6 +14,7 @@ public class OtherverseConfig {
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> DEMESNES_MOB_GRIEFING;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> UNBINDABLE_MOBS;
+    public static final ForgeConfigSpec.ConfigValue<Integer> DEMESNES_PERK_COUNT;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SKIPPED_PERKS;
     public static final ForgeConfigSpec.ConfigValue<Float> BINDING_COST;
     public static final ForgeConfigSpec.ConfigValue<Float> BINDING_ATTACK_CUTOFF;
@@ -50,6 +51,7 @@ public class OtherverseConfig {
         BUILDER.push("Pact Magic Settings");
         UNBINDABLE_MOBS = BUILDER.comment("A list of mob IDs that cannot be bound.").defineListAllowEmpty("unbindable_mobs", new ArrayList<>(), e -> e instanceof String);
         DEMESNES_MOB_GRIEFING = BUILDER.comment("If enabled, ghasts and creepers may spawn during the demesnes ritual.").define("demesnes_mob_griefing", true);
+        DEMESNES_PERK_COUNT = BUILDER.comment("Maximum number of Demesne perks that can be chosen.").define("demesnes_perk_count", 10);
         SKIPPED_PERKS = BUILDER.comment("Demesne perks in this list will be disabled (but will not block progress in the perk tree). Format them as they appear in the perk tree, e.g. \"Mandatory Hospitality\".").defineListAllowEmpty("skipped_perks", new ArrayList<>(), e -> e instanceof String);
         CAN_REDO_RITUALS = BUILDER.comment("Can the player re-do the three big rituals? If enabled, re-doing a ritual will cost 1/3 of your Self and severely lower your spiritual affinity across the board, slowing down your diagrams until you recover.").define("can_redo_rituals", false);
         BINDING_COST = BUILDER.comment("Base multiplier of a mob's max health required to bind it.").define("binding_cost", 3f);

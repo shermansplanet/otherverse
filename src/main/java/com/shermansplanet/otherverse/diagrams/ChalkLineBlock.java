@@ -16,6 +16,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -34,6 +35,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -194,11 +196,35 @@ public class ChalkLineBlock extends Block implements EntityBlock {
         }
     }
 
+    public ItemStack getCloneItemStack(BlockGetter p_57256_, BlockPos p_57257_, BlockState p_57258_) {
+        return new ItemStack(OtherverseItems.CHALK.get());
+    }
+
     private void updateAllNeighbors(BlockPos pos, Level level,
                                     DiagramManager.BlockUpdateType updateType) {
         level.updateNeighborsAt(pos, this);
         if (level instanceof ServerLevel sl) {
             DiagramManager.OnDiagramBlockChanged(sl, pos, updateType);
+        }
+    }
+
+    @Override
+    public boolean isScaffolding(BlockState state, LevelReader level, BlockPos pos, LivingEntity entity)
+    {
+        return state.getValue(hasScaffolding);
+    }
+
+    @Override
+    public boolean isLadder(BlockState state, LevelReader level, BlockPos pos, LivingEntity entity)
+    {
+        return state.getValue(hasScaffolding);
+    }
+
+    public VoxelShape getCollisionShape(BlockState p_56068_, BlockGetter p_56069_, BlockPos p_56070_, CollisionContext p_56071_) {
+        if (p_56068_.getValue(hasScaffolding) && p_56071_.isAbove(Shapes.block(), p_56070_, true) && !p_56071_.isDescending()) {
+            return SlateScaffoldingBlock.STABLE_SHAPE;
+        } else {
+            return Shapes.empty();
         }
     }
 
@@ -364,11 +390,6 @@ public class ChalkLineBlock extends Block implements EntityBlock {
         super.onRemove(state1, level, pos, state2, p_55728_);
         refreshNeighborLines(level, pos);
         updateAllNeighbors(pos, level, DiagramManager.BlockUpdateType.REMOVED);
-    }
-
-    @Override
-    public boolean isLadder(BlockState state, LevelReader level, BlockPos pos, LivingEntity entity) {
-        return state.getValue(hasScaffolding);
     }
 
     public static void refreshNeighborLines(Level level, BlockPos pos) {

@@ -72,7 +72,7 @@ public class IdolRenderer extends BlockEntityWithoutLevelRenderer {
         }
         if (entityType == null) {
             entityType = MobBindingInfluenceUtils.getCycleType();
-            if(entityType == null) return;
+            if (entityType == null) return;
         }
         Entity renderEntity = renderEntities.get(entityType);
         if (renderEntity == null) {
@@ -119,7 +119,8 @@ public class IdolRenderer extends BlockEntityWithoutLevelRenderer {
             ResourceLocation texLoc = FleshbindingManager.texturesByLabel.get(itemStack.getTag().getString("material"));
             if (texLoc != null) {
                 bufferSub = renderType -> {
-                    if (renderType == RenderType.entityShadow(ResourceLocation.parse("textures/misc/shadow.png"))) {
+                    if (renderType == RenderType.entityShadow(ResourceLocation.parse("textures/misc/shadow.png"))
+                            || renderType == RenderType.LINES) {
                         return bufferIn.getBuffer(renderType);
                     }
                     RenderType.CompositeState compState = RenderType.CompositeState.builder()

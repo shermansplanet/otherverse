@@ -59,6 +59,22 @@ public class EscapeRopeItem extends Item {
             return InteractionResultHolder.success(itemstack);
         }
 
+        var playerLevelId = DiagramManager.getDimensionHash(level);
+        if (demesne != null && DemesnesManager.getData(sl, BlockPos.containing(pos)) == demesne) {
+            var tag = itemstack.getOrCreateTag();
+            tag.putFloat("escape_rope_x", (float) pos.x);
+            tag.putFloat("escape_rope_y", (float) pos.y);
+            tag.putFloat("escape_rope_z", (float) pos.z);
+            tag.putInt("level_id", playerLevelId);
+            for (var i = 0; i < 8; i++) {
+                sl.sendParticles(ParticleTypes.GLOW, pos.x, pos.y, pos.z, 1, 0, 0.1f, 0, 0.02D);
+            }
+            player.displayClientMessage((Component.literal(fromBlock
+                    ? "Destination is set to clicked position."
+                    : "Destination is set to your current position.")), true);
+            return InteractionResultHolder.consume(itemstack);
+        }
+
         if (!itemstack.hasTag() || !itemstack.getTag().contains("escape_rope_x")) {
             if (player instanceof ServerPlayer sp && sp.level().dimension().location().getPath().equals("ruins")) {
                 if (!player.getAbilities().instabuild) {
@@ -72,22 +88,6 @@ public class EscapeRopeItem extends Item {
 
         if (demesne == null) {
             return InteractionResultHolder.success(itemstack);
-        }
-
-        var playerLevelId = DiagramManager.getDimensionHash(level);
-        if (DemesnesManager.getData(sl, BlockPos.containing(pos)) == demesne) {
-            var tag = itemstack.getOrCreateTag();
-            tag.putFloat("escape_rope_x", (float) pos.x);
-            tag.putFloat("escape_rope_y", (float) pos.y);
-            tag.putFloat("escape_rope_z", (float) pos.z);
-            tag.putInt("level_id", playerLevelId);
-            for (var i = 0; i < 8; i++) {
-                sl.sendParticles(ParticleTypes.GLOW, pos.x, pos.y, pos.z, 1, 0, 0.1f, 0, 0.02D);
-            }
-            player.displayClientMessage((Component.literal(fromBlock
-                    ? "Destination is set to clicked position."
-                    : "Destination is set to your current position.")), true);
-            return InteractionResultHolder.consume(itemstack);
         }
 
         if (demesne.getPerkLevel(DemesnesManager.DemesnePerk.HOME) == 0)

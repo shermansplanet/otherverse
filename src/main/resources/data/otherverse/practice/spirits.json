@@ -182,7 +182,9 @@
 
 		"otherverse:homunculus_heart" : ["33 flesh"],
 		"otherverse:salt" : ["11 overworld"],
-		"otherverse:sulfur" : ["33 nether"],
+		"otherverse:salt_block" : ["99 overworld"],
+		"otherverse:sulfur" : ["11 nether"],
+		"otherverse:sulfur_block" : ["99 nether"],
 		"otherverse:quicksilver" : ["33 end"],
 		"otherverse:spawn_altar" : ["9 war"],
 

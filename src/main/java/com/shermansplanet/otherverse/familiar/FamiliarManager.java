@@ -622,7 +622,8 @@ public class FamiliarManager {
         } else if (type.equals(EntityType.PHANTOM)) {
             if (!sp.serverLevel().isDay()) {
                 var attr = sp.getAttribute(CaelusApi.getInstance().getFlightAttribute());
-                attr.setBaseValue(1);
+                attr.removeModifier(FAMILIAR_MODIFIER);
+                attr.addPermanentModifier(new AttributeModifier(FAMILIAR_MODIFIER, "Familiar", 1, AttributeModifier.Operation.ADDITION));
             }
         } else if (type.equals(EntityType.SNOW_GOLEM)) {
             if (sp.getRandom().nextInt(20) == 0
@@ -872,7 +873,7 @@ public class FamiliarManager {
             if (ruinsMobs.contains(type) && !RuinsManager.isInRuins(player)) {
                 if (type.equals(Otherverse.BANSHEE.get())) {
                     var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
-                    attr.setBaseValue(0);
+                    attr.removeModifier(FAMILIAR_MODIFIER);
                 } else {
                     abilities.mayfly = false;
                     abilities.flying = false;
@@ -881,12 +882,15 @@ public class FamiliarManager {
             } else {
                 if (type.equals(EntityType.ENDER_DRAGON) || type.equals(EntityType.PHANTOM) || type.equals(EntityType.PARROT) || type.equals(Otherverse.BANSHEE.get())) {
                     var attr = player.getAttribute(CaelusApi.getInstance().getFlightAttribute());
+                    attr.removeModifier(FAMILIAR_MODIFIER);
                     if (type.equals(EntityType.PHANTOM)) {
                         ServerStatsCounter serverstatscounter = player.getStats();
                         int j = Mth.clamp(serverstatscounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
-                        attr.setBaseValue(j > 20 * 60 * 10 ? 1 : 0);
+                        if(j > 20 * 60 * 10){
+                            attr.addPermanentModifier(new AttributeModifier(FAMILIAR_MODIFIER, "Familiar", 1, AttributeModifier.Operation.ADDITION));
+                        }
                     } else {
-                        attr.setBaseValue(1);
+                        attr.addPermanentModifier(new AttributeModifier(FAMILIAR_MODIFIER, "Familiar", 1, AttributeModifier.Operation.ADDITION));
                     }
                 } else {
                     abilities.mayfly = true;

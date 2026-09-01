@@ -1,7 +1,7 @@
 {
 "practice" : "spirit_transfusion",
-"input" : "alexscaves:sulfur",
+"input" : "alexscaves:sulfur_dust",
 "spirit" : "nether",
-"count" : 33,
+"count" : 8,
 "item" : "otherverse:sulfur"
 }

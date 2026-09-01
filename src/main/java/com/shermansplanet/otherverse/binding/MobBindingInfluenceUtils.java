@@ -569,7 +569,8 @@ public class MobBindingInfluenceUtils {
             if (et.getCategory() == MobCategory.MISC) continue;
             Entity instance = et.create(level);
             if (instance instanceof Mob mob) {
-                if(!DefaultAttributes.getSupplier((EntityType<? extends LivingEntity>) et).hasAttribute(Attributes.MAX_HEALTH)) continue;
+                if (!DefaultAttributes.getSupplier((EntityType<? extends LivingEntity>) et).hasAttribute(Attributes.MAX_HEALTH))
+                    continue;
                 MakeIdol(et);
                 try {
                     mob.tick();
@@ -577,17 +578,32 @@ public class MobBindingInfluenceUtils {
                 }
                 var le = (EntityType<? extends LivingEntity>) et;
                 if (!mobSpirits.containsKey(et)) {
-                    if (ForgeRegistries.ENTITY_TYPES.getKey(et).getNamespace().equals("macabre")) {
-                        registerMobSpirit(le, Spirits.FLESH);
-                    } else if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
-                        registerMobSpirit(le, Spirits.WATER);
-                    } else if (mob instanceof FlyingMob || mob instanceof FlyingAnimal || mob.isNoGravity()
-                            || mob.getNavigation() instanceof FlyingPathNavigation) {
-                        registerMobSpirit(le, Spirits.AIR);
-                    } else if (mob.getMobType() == MobType.UNDEAD) {
-                        registerMobSpirit(le, Spirits.DEATH);
-                    } else if (mob instanceof Animal && !(mob instanceof TamableAnimal)) {
-                        registerMobSpirit(le, Spirits.NATURE);
+                    var key = ForgeRegistries.ENTITY_TYPES.getKey(et);
+                    var mobname = key.getPath();
+                    var registered = false;
+                    for (var namepart : mobname.split("_")) {
+                        var spiritType = SpiritLabeler.SPIRIT_KEYWORDS.get(namepart);
+                        if (spiritType == null) continue;
+                        registerMobSpirit(le, spiritType);
+                        registered = true;
+                        break;
+                    }
+                    if (!registered) {
+                        var modname = key.getNamespace();
+                        if (modname.equals("macabre") || modname.equals("sons_of_sins") || modname.equals("clanginghowl") || modname.equals("bloodyhell")) {
+                            registerMobSpirit(le, Spirits.FLESH);
+                        } else if (modname.equals("netherman")) {
+                            registerMobSpirit(le, Spirits.NETHER);
+                        } else if (mob instanceof WaterAnimal || mob.getMobType() == MobType.WATER) {
+                            registerMobSpirit(le, Spirits.WATER);
+                        } else if (mob instanceof FlyingMob || mob instanceof FlyingAnimal || mob.isNoGravity()
+                                || mob.getNavigation() instanceof FlyingPathNavigation) {
+                            registerMobSpirit(le, Spirits.AIR);
+                        } else if (mob.getMobType() == MobType.UNDEAD) {
+                            registerMobSpirit(le, Spirits.DEATH);
+                        } else if (mob instanceof Animal && !(mob instanceof TamableAnimal)) {
+                            registerMobSpirit(le, Spirits.NATURE);
+                        }
                     }
                 }
                 try {
@@ -607,7 +623,7 @@ public class MobBindingInfluenceUtils {
     }
 
     public static EntityType<?> getCycleType() {
-        if(allIdolTypes.isEmpty()) return null;
+        if (allIdolTypes.isEmpty()) return null;
         return allIdolTypes.get((int) ((System.currentTimeMillis() / 500) % allIdolTypes.size()));
     }
 
