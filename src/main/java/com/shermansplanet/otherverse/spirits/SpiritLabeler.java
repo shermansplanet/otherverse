@@ -343,29 +343,29 @@ public class SpiritLabeler {
                 if (lightEmission > 0) {
                     spiritAmounts.add(new SpiritAmount(Spirits.LIGHT, lightEmission * 3));
                 }
+            }
 
-                var itemName = ForgeRegistries.ITEMS.getKey(item).getPath();
-                if (itemName.startsWith("infested")) {
-                    spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 7));
-                }
-                var time = itemName.contains("oxidized") ? 9
-                        : itemName.contains("weathered") ? 6
-                        : itemName.contains("exposed") ? 3 : 0;
-                if (time > 0) spiritAmounts.add(new SpiritAmount(Spirits.TIME, time));
-                if (itemName.contains("copper")) {
-                    if (time < 9) spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18 - time * 2));
-                    spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
-                }
+            var itemName = ForgeRegistries.ITEMS.getKey(item).getPath();
+            if (itemName.startsWith("infested")) {
+                spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 7));
+            }
+            var time = itemName.contains("oxidized") ? 9
+                    : itemName.contains("weathered") ? 6
+                    : itemName.contains("exposed") ? 3 : 0;
+            if (time > 0) spiritAmounts.add(new SpiritAmount(Spirits.TIME, time));
+            if (itemName.contains("copper")) {
+                if (time < 9) spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18 - time * 2));
+                spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
+            }
 
-                if (itemName.contains("frosted_stone") || itemName.contains("black_steel"))
-                    spiritAmounts.add(new SpiritAmount(Spirits.COLD, 3));
+            if (itemName.contains("frosted_stone") || itemName.contains("black_steel"))
+                spiritAmounts.add(new SpiritAmount(Spirits.COLD, 3));
 
-                for (var namepart : itemName.split("_")) {
-                    var spiritType = SPIRIT_KEYWORDS.get(namepart);
-                    if (spiritType == null) continue;
-                    if (spiritAmounts.stream().anyMatch(s -> s.type == spiritType)) continue;
-                    spiritAmounts.add(new SpiritAmount(spiritType, 3));
-                }
+            for (var namepart : itemName.split("_")) {
+                var spiritType = SPIRIT_KEYWORDS.get(namepart);
+                if (spiritType == null) continue;
+                if (spiritAmounts.stream().anyMatch(s -> s.type == spiritType)) continue;
+                spiritAmounts.add(new SpiritAmount(spiritType, 3));
             }
 
 
