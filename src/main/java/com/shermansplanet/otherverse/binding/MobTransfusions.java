@@ -105,12 +105,22 @@ public class MobTransfusions {
     public static List<TransfusionRecipe> GenerateRecipes() {
         List<TransfusionRecipe> recipes = new ArrayList<>();
         var i = 0;
+        var smeltingRecipe = new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "mob_transfusion_smelting"),
+                new HashSet<>(List.of(MobBindingInfluenceUtils.getIdol(EntityType.BLAZE))),
+                new ArrayList<>(), new ArrayList<>(),
+                1);
+        recipes.add(smeltingRecipe);
         for (var transfusionSet : ALL_MOB_TRANSFUSIONS.data.entrySet()) {
             for (var transfusionData : transfusionSet.getValue()) {
+                if (transfusionData.entityTypes.size() == 1 && transfusionData.entityTypes.contains(EntityType.BLAZE) && transfusionData.price == 1) {
+                    smeltingRecipe.itemFrom.add(transfusionSet.getKey().getItemStack());
+                    smeltingRecipe.itemTo.add(transfusionData.destItem);
+                    continue;
+                }
                 recipes.add(
                         new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "mob_transfusion_" + i++),
                                 MobBindingInfluenceUtils.getIdols(transfusionData.entityTypes),
-                                transfusionSet.getKey().getItemStack(), transfusionData.destItem,
+                                List.of(transfusionSet.getKey().getItemStack()), List.of(transfusionData.destItem),
                                 transfusionData.price));
             }
         }
@@ -120,10 +130,12 @@ public class MobTransfusions {
     public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
         var ingredients = recipe.getIngredients();
         if (ingredients.isEmpty()) return;
-        var items = ingredients.get(0).getItems();
-        if (items.length == 0) return;
-        register(EntityType.BLAZE, items[0].getItem(),
-                recipe.getResultItem(sl.registryAccess()), 1, true);
+        for (var ingredient : ingredients) {
+            for (var item : ingredient.getItems()) {
+                register(EntityType.BLAZE, item.getItem(),
+                        recipe.getResultItem(sl.registryAccess()), 1, true);
+            }
+        }
     }
 
     public static boolean tryLightningTransform(ServerLevel level, BlockFocus focus, Diagram diagram) {
@@ -152,14 +164,14 @@ public class MobTransfusions {
         if (s.startsWith("entity.")) {
             var parts = s.split("\\.");
             var rl = ResourceLocation.fromNamespaceAndPath(parts[1], parts[2]);
-            if(!ForgeRegistries.ENTITY_TYPES.containsKey(rl)) return List.of();
+            if (!ForgeRegistries.ENTITY_TYPES.containsKey(rl)) return List.of();
             return List.of(new ItemOrEntityType(ForgeRegistries.ENTITY_TYPES.getValue(rl)));
         }
         if (transfusionShortcuts.containsKey(s)) {
             return transfusionShortcuts.get(s);
         }
         var key = ResourceLocation.parse(s);
-        if(!ForgeRegistries.ITEMS.containsKey(key)) return List.of();
+        if (!ForgeRegistries.ITEMS.containsKey(key)) return List.of();
         return List.of(new ItemOrEntityType(ForgeRegistries.ITEMS.getValue(key)));
     }
 

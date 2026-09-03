@@ -1,7 +1,9 @@
 package com.shermansplanet.otherverse.spirits;
 
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -11,15 +13,21 @@ import net.minecraft.world.level.Level;
 
 public class SpiritItem extends Item {
     public final SpiritType spiritType;
+
     public SpiritItem(SpiritType st, Properties p_41383_) {
         super(p_41383_);
         spiritType = st;
     }
 
     @Override
+    public String getDescriptionId(ItemStack stack) {
+        return stack.hasTag() && stack.getTag().contains("linked_position_x") ? OtherverseItems.SPIRIT_TABLET.get().getDescriptionId() : this.getDescriptionId();
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         var item = player.getItemInHand(hand);
-        if(!player.isCreative()){
+        if (!player.isCreative()) {
             return InteractionResultHolder.fail(item);
         }
         var tag = item.getOrCreateTag();

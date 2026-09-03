@@ -8,6 +8,7 @@ import com.shermansplanet.otherverse.binding.BindingInfo;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
+import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
@@ -41,15 +42,20 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.TickEvent.LevelTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.VanillaGameEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.BlockEvent.BreakEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -90,6 +96,16 @@ public class DiagramManager {
 
     public static int getDimensionHash(ResourceKey<Level> dimension) {
         return dimension.toString().hashCode();
+    }
+
+    @SubscribeEvent
+    public static void serverStopped(ServerStoppedEvent event) {
+        serverDiagramDataByLevel.clear();
+    }
+
+    @SubscribeEvent
+    public static void onLeave(ClientPlayerNetworkEvent.LoggingOut event) {
+        clientDiagramDataByLevel.clear();
     }
 
     public static TransientDiagramData getOrCreateLevelData(Level level) {
@@ -460,13 +476,6 @@ public class DiagramManager {
     }
 
     @SubscribeEvent
-    public static void levelLoad(LevelEvent.Unload event) {
-        if (!(event.getLevel() instanceof Level level)) return;
-        var diagramDataByLevel = event.getLevel().isClientSide() ? clientDiagramDataByLevel : serverDiagramDataByLevel;
-        diagramDataByLevel.remove(DiagramManager.getDimensionHash(level));
-    }
-
-    @SubscribeEvent
     public static void entityUpdates(LivingEvent.LivingTickEvent event) {
         Level level = event.getEntity().level();
         if (!(level instanceof ServerLevel sl) || !(event.getEntity() instanceof Mob mob)) {
@@ -569,6 +578,12 @@ public class DiagramManager {
                 return true;
         }
         return false;
+    }
+
+    public static void updatePlayer(ServerPlayer player) {
+        for(var serverData : serverDiagramDataByLevel.values()){
+            serverData.retryUpdateClient(player);
+        }
     }
 
     public enum BlockUpdateType {ADDED, REMOVED, CHANGED}

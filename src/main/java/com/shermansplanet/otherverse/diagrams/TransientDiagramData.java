@@ -17,6 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -70,20 +71,20 @@ public class TransientDiagramData {
         }
     }
 
-    public void retryUpdateClient() {
+    public void retryUpdateClient(ServerPlayer player) {
+        LOGGER.debug("RETRYING UPDATE CLIENT");
+        var dist = PacketDistributor.PLAYER.with(()->player);
         for (var tag : placedItemTags.entrySet()) {
-            OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new HallowUpdateMessage(tag.getKey(), tag.getValue(), levelId));
+            OtherversePacketHandler.INSTANCE.send(dist, new HallowUpdateMessage(tag.getKey(), tag.getValue(), levelId));
         }
         for (var binding : bindingsById.values()) {
             updateClientBinding(binding);
         }
         for (var tag : sympathyPositions.entrySet()) {
-            OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new SympathyUpdateMessage(tag.getKey(), tag.getValue(), levelId));
+            OtherversePacketHandler.INSTANCE.send(dist, new SympathyUpdateMessage(tag.getKey(), tag.getValue(), levelId));
         }
-        for(var cachedMessage : cachedMessages){
-            OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), cachedMessage);
+        for (var cachedMessage : cachedMessages) {
+            OtherversePacketHandler.INSTANCE.send(dist, cachedMessage);
         }
     }
 

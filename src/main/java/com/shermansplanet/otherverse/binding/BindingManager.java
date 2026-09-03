@@ -398,8 +398,8 @@ public class BindingManager {
         return (int) Math.ceil(maxHealth / 10);
     }
 
-    public static int getBindingWearInterval(float maxHealth) {
-        return 6561 / Math.max((int) Math.ceil(maxHealth), 20);
+    public static int getBindingWearInterval(float maxHealth, boolean isPositive) {
+        return (isPositive ? 13122 : 6561) / Math.max((int) Math.ceil(maxHealth), 20);
     }
 
     public static void applyBinding(BindingInfo binding, Mob mob, boolean silent) {
@@ -640,13 +640,13 @@ public class BindingManager {
         event.setResult(Event.Result.ALLOW);
     }
 
-    public static boolean drainsBindings(EntityType<? extends LivingEntity> type) {
+    public static boolean drainsBindings(EntityType<? extends LivingEntity> type, boolean isPositive) {
         if (DefaultAttributes.getSupplier(type) == null) return false;
         if (!DefaultAttributes.getSupplier(type).hasAttribute(Attributes.MAX_HEALTH)) return false;
         var maxHp = DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH);
         if (maxHp <= OtherverseConfig.BINDING_ATTACK_CUTOFF.get()) return false;
         if (maxHp > OtherverseConfig.BINDING_ATTACK_CUTOFF_ANY.get()) return true;
-        if (type.getCategory() == MobCategory.MONSTER) return true;
+        if (isPositive || type.getCategory() == MobCategory.MONSTER) return true;
         if (DefaultAttributes.getSupplier(type).hasAttribute(Attributes.ATTACK_DAMAGE)) return true;
         return false;
     }

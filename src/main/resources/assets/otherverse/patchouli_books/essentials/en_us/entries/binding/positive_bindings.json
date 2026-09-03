@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Binding a mob with things that oppose its nature (a 'negative' binding) is the most efficient way, but there is another.$(br2)A 'positive' binding works the same way as a negative binding, but uses influences that would heal the mob, and requires $(bold)thrice the influence$() (9x the mob's health)."
+            "text": "Binding a mob with things that oppose its nature (a 'negative' binding) is the most efficient way, but there is another.$(br2)A 'positive' binding works the same way as a negative binding, but uses influences that would heal the mob, and requires $(bold)twice the influence$() (6x the mob's health)."
         },
         {
             "type": "patchouli:text",
@@ -14,7 +14,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Positively bound mobs will still 'attack' their binding influences just like negatively bound mobs; they may not be there against their will, but they still demand payment for their service and will leave if you can't pay (although they may be less aggressive about it). They only look at diagram foci for this, ignoring the 'habitat' portion of their binding."
+            "text": "Positively bound mobs with more than 20 HP will drain their binding influences; they may not be there against their will, but they still demand payment for their service and will leave if you can't pay. Unlike negative bindings, this is not limited to mobs that can attack, but they drain bindings less often. They only look at diagram foci for this, ignoring the 'habitat' portion of their binding."
         }
     ]
 }

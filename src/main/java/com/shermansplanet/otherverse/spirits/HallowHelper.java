@@ -8,7 +8,6 @@ import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BindingOrFleshbinding;
 import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
-import com.shermansplanet.otherverse.capabilities.PracticeCapability;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.implement.ImplementManager;
@@ -19,12 +18,12 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
@@ -39,8 +38,6 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.GrindstoneEvent;
-import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -93,12 +90,12 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void onGrindstoneChange(GrindstoneEvent.OnPlaceItem event) {
-        if (!event.getTopItem().hasTag() || !event.getTopItem().getTag().contains("hallow")) return;
         var newstack = event.getTopItem().copy();
         if (newstack.getItem() instanceof SpiritItem) {
             event.setOutput(new ItemStack(OtherverseItems.SPIRIT_TABLET.get(), newstack.getCount()));
             return;
         }
+        if (!event.getTopItem().hasTag() || !event.getTopItem().getTag().contains("hallow")) return;
         newstack.removeTagKey("hallow");
         event.setOutput(newstack);
     }
@@ -117,18 +114,18 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void onPlayerLogin(PlayerLoggedInEvent event) {
-        if (event.getEntity().level() instanceof ServerLevel sl) {
-            DiagramManager.getOrCreateLevelData(sl).retryUpdateClient();
-            for (var pos : DiagramManager.getOrCreateLevelData(sl).getAllPlacedItemPositions()) {
-                ShrineHelper.getShrine(sl, pos);
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            DiagramManager.updatePlayer(sp);
+            for (var pos : DiagramManager.getOrCreateLevelData(sp.serverLevel()).getAllPlacedItemPositions()) {
+                ShrineHelper.getShrine(sp.serverLevel(), pos);
             }
         }
     }
 
     @SubscribeEvent
     public static void onChangeDimension(PlayerChangedDimensionEvent event) {
-        if (event.getEntity().level() instanceof ServerLevel sl) {
-            DiagramManager.getOrCreateLevelData(sl).retryUpdateClient();
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            DiagramManager.updatePlayer(sp);
         }
     }
 
@@ -189,7 +186,7 @@ public class HallowHelper {
         if (!item.hasTag() || !item.getTag().contains("hallow")) return;
         var pos = event.getPos();
         for (var i = 0; i < 2; i++) {
-            if(i==1 && event.getFace() != null) pos = pos.relative(event.getFace());
+            if (i == 1 && event.getFace() != null) pos = pos.relative(event.getFace());
             var bs = event.getLevel().getBlockState(pos);
             if (!item.is(bs.getBlock().asItem())) continue;
             if (!(bs.getBlock() instanceof CandleBlock) && !(bs.getBlock() instanceof SlabBlock) && !item.is(Items.TURTLE_EGG) && !item.is(Items.SEA_PICKLE))
@@ -277,12 +274,37 @@ public class HallowHelper {
         hallowTag.putInt("spirit_count", Math.min(capacity, count + hpDelta));
     }
 
+    private static final float SpiritTabletCutoff = 16f;
+    private static final float SpiritTabletHalfway = 555f;
+    private static final float SpiritTabletMinEfficiency = 0.1f;
+    private static final float SpiritTabletCoeff = SpiritTabletCutoff / (SpiritTabletHalfway - SpiritTabletCutoff);
+
+    public static float getEfficiency(BlockPos tabletPos, BlockPos shrinePos, boolean sameDimension) {
+        if (!sameDimension) return SpiritTabletMinEfficiency;
+        var dist = tabletPos.getCenter().distanceTo(shrinePos.getCenter());
+        dist = (dist - SpiritTabletCutoff) * SpiritTabletCoeff + SpiritTabletCutoff;
+        return (float) Math.max(SpiritTabletMinEfficiency, Math.min(1f, SpiritTabletCutoff / dist));
+    }
+
+    public static ShrineHelper.Shrine shrineFromTablet(ItemStack stack, SpiritType spiritType) {
+        var tag = stack.getTag();
+        var pos = new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z"));
+        var linkedDimension = tag.getInt("linked_dimension");
+        var data = DiagramManager.getOrCreateLevelData(linkedDimension, false);
+        return ShrineHelper.getShrine(data.level, pos);
+    }
+
     @SubscribeEvent
     public static void onTooltip(ItemTooltipEvent event) {
         if (!event.getItemStack().hasTag()) {
             return;
         }
         CompoundTag tag = event.getItemStack().getTag();
+
+        if (event.getEntity() != null && tag.contains("linked_position_x")) {
+            addTabletInfo(event.getToolTip(), event.getEntity().blockPosition(), tag, event.getEntity().level());
+            return;
+        }
 
         var entityData = BlockItem.getBlockEntityData(event.getItemStack());
         if (entityData != null && entityData.contains("spawn_altar_type")) {
@@ -299,6 +321,29 @@ public class HallowHelper {
         int count = hallowTag.getInt("spirit_count");
         event.getToolTip().add(Component.literal(count + "/" + capacity + " "
                 + hallowTag.getString("spirit_type").replace("_", " ")));
+    }
+
+    public static void addTabletInfo(List<Component> toolTip, BlockPos referencePos, CompoundTag tag, Level level) {
+        var pos = new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z"));
+        var linkedDimension = tag.getInt("linked_dimension");
+        var data = DiagramManager.getOrCreateLevelData(linkedDimension, true);
+        if (data.getPlacedItemTag(pos) == null) {
+            toolTip.add(Component.literal("Shrine not found!").withStyle(Style.EMPTY.withColor(0xaa4444)));
+            return;
+        }
+        var spiritLabel = tag.getString("spirit_type");
+        var cc = getShrineSpiritCountAndCapacity(data, pos, Spirits.spiritsByLabel.get(spiritLabel));
+        var inThisDimension = DiagramManager.getDimensionHash(level) == linkedDimension;
+        toolTip.add(Component.literal("Linked to a shrine at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + (inThisDimension ? " in this dimension" : " in another dimension")));
+        var spiritCount = Component.literal(String.valueOf(cc.getFirst()));
+        var efficiency = getEfficiency(referencePos, pos, inThisDimension);
+        var defaultStyle = Style.EMPTY.withStrikethrough(false).withColor(0xffffff);
+        if (efficiency < 1) {
+            spiritCount = spiritCount.withStyle(Style.EMPTY.withStrikethrough(true).withColor(0xaa4444))
+                    .append(Component.literal(String.valueOf(Math.round(efficiency * cc.getFirst()))).withStyle(defaultStyle));
+        }
+        toolTip.add(spiritCount.append(Component.literal("/" + cc.getSecond() + " " + spiritLabel + " spirits").withStyle(defaultStyle)));
+        toolTip.add(Component.literal(Math.round(efficiency * 100) + "% efficiency"));
     }
 
     public static boolean tryHallow(ServerLevel level, ChalkCircle circle, Diagram diagram) {
@@ -397,11 +442,27 @@ public class HallowHelper {
         var practiceData = DiagramManager.getOrCreateLevelData(sl);
         var blockTag = practiceData.getPlacedItemTag(event.getPos());
         if (blockTag == null || !blockTag.contains("spirit_type")) return;
-        var itemSpiritType = HallowHelper.getSpiritType(stack);
-        var isBucketImplement = stack.is(Items.BUCKET) && ImplementManager.isImplement(stack);
-        var isSpiritTablet = stack.is(OtherverseItems.SPIRIT_TABLET.get()) && blockTag.contains("shrine");
-        if (itemSpiritType == null && !isBucketImplement && !isSpiritTablet) return;
         var blockSpiritType = Spirits.spiritsByLabel.get(blockTag.getString("spirit_type"));
+        var isBucketImplement = stack.is(Items.BUCKET) && ImplementManager.isImplement(stack);
+        if (stack.is(OtherverseItems.SPIRIT_TABLET.get()) && blockTag.contains("shrine")) {
+            stack.shrink(1);
+            var newstack = new ItemStack(Spirits.spiritItems.get(blockSpiritType).get(), 1);
+            newstack.getOrCreateTag().putInt("linked_position_x", event.getPos().getX());
+            newstack.getOrCreateTag().putInt("linked_position_y", event.getPos().getY());
+            newstack.getOrCreateTag().putInt("linked_position_z", event.getPos().getZ());
+            newstack.getOrCreateTag().putInt("linked_dimension", DiagramManager.getDimensionHash(event.getLevel()));
+            newstack.getOrCreateTag().putString("spirit_type", blockSpiritType.label());
+            var player = event.getEntity();
+            if (stack.getCount() == 0) {
+                player.getInventory().removeItem(stack);
+            }
+            if (!player.addItem(newstack)) {
+                player.drop(newstack, false);
+            }
+            return;
+        }
+        var itemSpiritType = HallowHelper.getSpiritType(stack);
+        if (itemSpiritType == null && !isBucketImplement) return;
         var itemTag = stack.getTag();
         if (itemSpiritType == null && blockSpiritType != null) {
             itemSpiritType = blockSpiritType;
@@ -410,22 +471,6 @@ public class HallowHelper {
             hallowTag.putInt("capacity", ImplementManager.BUCKET_CAPACITY);
             hallowTag.putInt("spirit_count", 0);
             hallowTag.putString("spirit_type", blockSpiritType.label());
-            if (isSpiritTablet) {
-                var drained = drainBlockHallow(sl, event.getPos(), itemSpiritType, Integer.MAX_VALUE, false, false);
-                if (drained == 0) return;
-                hallowTag.putInt("capacity", drained);
-                stack.shrink(1);
-                var newstack = new ItemStack(Spirits.spiritItems.get(itemSpiritType).get(), 1);
-                newstack.getOrCreateTag().put("hallow", hallowTag);
-                var player = event.getEntity();
-                if (stack.getCount() == 0) {
-                    player.getInventory().removeItem(stack);
-                }
-                if (!player.addItem(newstack)) {
-                    player.drop(newstack, false);
-                }
-                return;
-            }
             itemTag.put("hallow", hallowTag);
         }
         if (itemSpiritType == blockSpiritType) {
@@ -577,7 +622,14 @@ public class HallowHelper {
             return false;
         }
 
-        var hallowTag = sink.getItem().getTag().getCompound("hallow");
+        var sinkIsTablet = sink.getItem().getItem() instanceof SpiritItem && sink.getItem().getTag().contains("linked_position_x");
+        var sourceIsTablet = sourceItem.getItem() instanceof SpiritItem && sourceItem.hasTag() && sourceItem.getTag().contains("linked_position_x");
+
+        var hallowTag = sinkIsTablet
+                ? tabletToHallow(sink.getItem().getTag())
+                : sink.getItem().getTag().getCompound("hallow");
+
+        if (hallowTag == null) return false;
 
         if (!isOverflowable && sink.getHallowCapacity(spiritType) <= 0) {
             return false;
@@ -590,12 +642,13 @@ public class HallowHelper {
             }
         }
 
-        if (sourceIsHallow) {
-            var sourceTag = sourceItem.getTag().getCompound("hallow");
+        if (sourceIsHallow || sourceIsTablet) {
+            var sourceTag = sourceIsTablet ? tabletToHallow(sourceItem.getTag()) : sourceItem.getTag().getCompound("hallow");
+            if(sourceTag == null) return false;
             if (!sourceTag.getString("spirit_type").equals(spiritType.label()))
                 return false;
-            if (source.isBlock()) {
-                return isOverflowable || getShrineSpiritCount(source, spiritType) > 0;
+            if (sourceIsTablet || source.isBlock()) {
+                return isOverflowable || getShrineSpiritCount(source, spiritType, sourceIsTablet) > 0;
             } else {
                 return sourceTag.getInt("spirit_count") > 0;
             }
@@ -625,11 +678,18 @@ public class HallowHelper {
         return spirits != null && spirits.containsKey(spiritType);
     }
 
-    public static int getShrineSpiritCount(IFocus source, SpiritType spiritType) {
-        var level = source.getFocusLevel();
-        var data = DiagramManager.getOrCreateLevelData(level);
+    public static CompoundTag tabletToHallow(CompoundTag tag) {
+        return DiagramManager.getOrCreateLevelData(tag.getInt("linked_dimension"), false)
+                .getPlacedItemTag(new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z")));
+    }
+
+    public static int getShrineSpiritCount(IFocus source, SpiritType spiritType, boolean sourceIsTablet) {
+        var tag = source.getItem().getTag();
+        var data = sourceIsTablet ? DiagramManager.getOrCreateLevelData(tag.getInt("linked_dimension"), false) : DiagramManager.getOrCreateLevelData(source.getFocusLevel());
         var total = 0;
-        for (BlockPos sourcePos : ShrineHelper.getAllHallows(source.getPos(), spiritType, data)) {
+        for (BlockPos sourcePos : ShrineHelper.getAllHallows(sourceIsTablet
+                ? new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z"))
+                : source.getPos(), spiritType, data)) {
             var ht = data.getPlacedItemTag(sourcePos);
             total += ht.getInt("spirit_count");
         }
@@ -637,7 +697,10 @@ public class HallowHelper {
     }
 
     public static Pair<Integer, Integer> getShrineSpiritCountAndCapacity(Level level, BlockPos pos, SpiritType spiritType) {
-        var data = DiagramManager.getOrCreateLevelData(level);
+        return getShrineSpiritCountAndCapacity(DiagramManager.getOrCreateLevelData(level), pos, spiritType);
+    }
+
+    public static Pair<Integer, Integer> getShrineSpiritCountAndCapacity(TransientDiagramData data, BlockPos pos, SpiritType spiritType) {
         var count = 0;
         var cap = 0;
         for (BlockPos sourcePos : ShrineHelper.getAllHallows(pos, spiritType, data)) {
@@ -650,11 +713,11 @@ public class HallowHelper {
 
     public static void tryFillHallow(ServerLevel level, IFocus focus, Diagram diagram) {
         ItemStack item = focus.getItem();
-        if (!item.hasTag() || !item.getTag().contains("hallow")) {
-            return;
-        }
-        CompoundTag hallowTag = item.getTag().getCompound("hallow");
-
+        if (!item.hasTag()) return;
+        var isTablet = item.getItem() instanceof SpiritItem && item.getTag().contains("linked_position_x");
+        SpiritType spiritType;
+        int spiritCount;
+        int capacity;
         List<IFocus> influences = new ArrayList<>();
         BlockPos targetPos = focus.getPos();
         for (BlockPos pos : diagram.itemFocusPositions) {
@@ -668,19 +731,36 @@ public class HallowHelper {
                 influences.add(DiagramManager.getOrCreateLevelData(level).allBlockFoci.get(pos));
             }
         }
-
-        if (!hallowTag.contains("spirit_type")) {
-            applySpiritType(level, focus, diagram, hallowTag, influences);
+        if (!isTablet) {
+            if (!item.getTag().contains("hallow")) {
+                return;
+            }
+            CompoundTag hallowTag = item.getTag().getCompound("hallow");
+            if (!hallowTag.contains("spirit_type")) {
+                applySpiritType(level, focus, diagram, hallowTag, influences);
+            }
+            var spiritTypeString = hallowTag.getString("spirit_type");
+            spiritType = Spirits.spiritsByLabel.get(spiritTypeString);
+            spiritCount = hallowTag.getInt("spirit_count");
+            capacity = hallowTag.getInt("capacity");
+        } else {
+            var tag = item.getTag();
+            spiritType = Spirits.spiritsByLabel.get(tag.getString("spirit_type"));
+            var pos = new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z"));
+            var linkedDimension = tag.getInt("linked_dimension");
+            var data = DiagramManager.getOrCreateLevelData(linkedDimension, true);
+            if (data.getPlacedItemTag(pos) == null) {
+                return;
+            }
+            var spiritLabel = tag.getString("spirit_type");
+            var cc = getShrineSpiritCountAndCapacity(data, pos, Spirits.spiritsByLabel.get(spiritLabel));
+            spiritCount = cc.getFirst();
+            capacity = cc.getSecond();
         }
 
-        var spiritTypeString = hallowTag.getString("spirit_type");
-        SpiritType spiritType = Spirits.spiritsByLabel.get(spiritTypeString);
-
         var willOverflow = false;
-        int spiritCount = hallowTag.getInt("spirit_count");
-        int capacity = hallowTag.getInt("capacity");
         if (spiritCount >= capacity) {
-            if (ShrineHelper.isOverflowable(spiritType) && focus.isBlock()) {
+            if (ShrineHelper.isOverflowable(spiritType) && (isTablet || focus.isBlock())) {
                 willOverflow = true;
             } else {
                 return;
@@ -691,8 +771,13 @@ public class HallowHelper {
             if (sourceFocus.getProcess() != null) continue;
             if (!canFill(focus, sourceFocus, spiritType)) continue;
             var sourceItem = sourceFocus.getItem();
-            if (willOverflow && sourceItem.hasTag() && sourceItem.getTag().contains("hallow")
-                    && sourceItem.getTag().getCompound("hallow").getInt("spirit_count") <= 0) continue;
+            var sourceIsTablet = sourceItem.getItem() instanceof SpiritItem && sourceItem.hasTag() && sourceItem.getTag().contains("linked_position_x");
+            if (willOverflow && sourceItem.hasTag() && (sourceIsTablet || sourceItem.getTag().contains("hallow"))) {
+                var hallowTag = sourceIsTablet ? tabletToHallow(sourceItem.getTag()) : sourceItem.getTag().getCompound("hallow");
+                if (hallowTag.getInt("spirit_count") <= 0) {
+                    continue;
+                }
+            }
             if (sourceFocus.getItem().is(Items.BEDROCK) && !OtherverseConfig.BEDROCK_REMOVAL.get()) continue;
 
             new SpiritTransfer(focus, sourceFocus, SpiritAffinityTracker.getTransferDuration(focus.getDiagram().getOwnerName(), spiritType));

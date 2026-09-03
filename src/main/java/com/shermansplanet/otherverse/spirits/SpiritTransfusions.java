@@ -4,16 +4,19 @@ import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.PracticeWorldManager;
+import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.binding.MobTransfusions;
 import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.integrations.jei.TransfusionRecipe;
 import com.shermansplanet.otherverse.potions.OtherversePotions;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -22,7 +25,7 @@ import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.block.state.properties.*;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -235,10 +238,11 @@ public class SpiritTransfusions {
 
     public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
         var ingredients = recipe.getIngredients();
-        if (ingredients.isEmpty()) return;
-        var items = ingredients.get(0).getItems();
-        if (items.length == 0) return;
-        register(items[0].getItem(), Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem(sl.registryAccess()).getItem(), true);
+        for (var ingredient : ingredients) {
+            for (var item : ingredient.getItems()) {
+                register(item.getItem(), Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem(sl.registryAccess()).getItem(), true);
+            }
+        }
     }
 
     private static void registerDyableBlocks(Block[] blocks, Block universal) {
@@ -327,29 +331,39 @@ public class SpiritTransfusions {
             if (transfusion.spiritType != spiritType || transfusion.price > spiritCount) {
                 continue;
             }
-            var newBlockState = transfusion.blockOutput.defaultBlockState();
-            if (originalState.getBlock() instanceof BannerBlock && transfusion.blockOutput instanceof BannerBlock) {
-                newBlockState = newBlockState.setValue(BannerBlock.ROTATION, originalState.getValue(BannerBlock.ROTATION));
-            } else if (originalState.getBlock() instanceof WallBannerBlock && transfusion.blockOutput instanceof WallBannerBlock) {
-                newBlockState = newBlockState.setValue(WallBannerBlock.FACING, originalState.getValue(WallBannerBlock.FACING));
-            }
-            if (newBlockState.getBlock() instanceof BedBlock) {
-                newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART))
-                        .setValue(BedBlock.OCCUPIED, originalState.getValue(BedBlock.OCCUPIED))
-                        .setValue(BedBlock.FACING, originalState.getValue(BedBlock.FACING));
-                event.getLevel().setBlock(event.getPos(), newBlockState, 26);
-                var otherPos = event.getPos().relative(BedBlock.getConnectedDirection(originalState));
-                newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART) == BedPart.FOOT ? BedPart.HEAD : BedPart.FOOT);
-                event.getLevel().setBlock(otherPos, newBlockState, 26);
-            } else {
-                event.getLevel().setBlockAndUpdate(event.getPos(), newBlockState);
-            }
+            replaceBlock(event.getLevel(), event.getPos(), transfusion.blockOutput);
             spendSpirits(event.getEntity(), hallowTag, transfusion.price, event.getItemStack());
-            if (event.getLevel() instanceof ServerLevel sl) {
-                sl.playSound(null, event.getPos(), newBlockState.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1, 1);
-            }
             event.setCanceled(true);
             return;
+        }
+    }
+
+    public static void replaceBlock(Level level, BlockPos pos, Block block) {
+        var newBlockState = block.defaultBlockState();
+        var originalState = level.getBlockState(pos);
+        for (var k : originalState.getValues().keySet()) {
+            var val = originalState.getValue(k);
+            if (k instanceof BooleanProperty prop) {
+                newBlockState = newBlockState.trySetValue(prop, (Boolean) val);
+            } else if (k instanceof EnumProperty prop) {
+                newBlockState = newBlockState.trySetValue(prop, (Enum) val);
+            } else if (k instanceof IntegerProperty prop) {
+                newBlockState = newBlockState.trySetValue(prop, (Integer) val);
+            }
+        }
+        if (block instanceof BedBlock) {
+            newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART))
+                    .setValue(BedBlock.OCCUPIED, originalState.getValue(BedBlock.OCCUPIED))
+                    .setValue(BedBlock.FACING, originalState.getValue(BedBlock.FACING));
+            level.setBlock(pos, newBlockState, 26);
+            var otherPos = pos.relative(BedBlock.getConnectedDirection(originalState));
+            newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART) == BedPart.FOOT ? BedPart.HEAD : BedPart.FOOT);
+            level.setBlock(otherPos, newBlockState, 26);
+        } else {
+            level.setBlockAndUpdate(pos, newBlockState);
+        }
+        if (level instanceof ServerLevel sl) {
+            sl.playSound(null, pos, newBlockState.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1, 1);
         }
     }
 
@@ -378,17 +392,29 @@ public class SpiritTransfusions {
         }
 
         ItemStack sourceItem = sourceFocus.getItemNotMob();
-        if (sourceItem == null || !sourceItem.hasTag() || !sourceItem.getTag().contains("hallow")) {
-            return;
-        }
 
-        if (!diagram.allFocusPositions.contains(targetFocusPos)) {
-            return;
-        }
+        if (sourceItem == null || !sourceItem.hasTag()) return;
+        var isTablet = sourceItem.getItem() instanceof SpiritItem && sourceItem.getTag().contains("linked_position_x");
+        if (!isTablet && !sourceItem.getTag().contains("hallow")) return;
+        if (!diagram.allFocusPositions.contains(targetFocusPos)) return;
 
-        CompoundTag hallowTag = sourceItem.getTag().getCompound("hallow");
-        SpiritType spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
-        int spiritCount = hallowTag.getInt("spirit_count");
+        SpiritType spiritType;
+        int spiritCount;
+        if (isTablet) {
+            var tag = sourceItem.getTag();
+            var spiritLabel = tag.getString("spirit_type");
+            spiritType = Spirits.spiritsByLabel.get(spiritLabel);
+            var shrine = HallowHelper.shrineFromTablet(sourceItem, spiritType);
+            if (shrine == null) return;
+            var efficiency = HallowHelper.getEfficiency(sourceFocus.getPos(),
+                    new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z")),
+                    shrine.level == sourceFocus.getFocusLevel());
+            spiritCount = Math.round(shrine.getSpiritCount() * efficiency);
+        } else {
+            CompoundTag hallowTag = sourceItem.getTag().getCompound("hallow");
+            spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
+            spiritCount = hallowTag.getInt("spirit_count");
+        }
 
         TransientDiagramData data = DiagramManager.getOrCreateLevelData(level);
         IFocus targetFocus = data.allBlockFoci.get(targetFocusPos);
@@ -430,14 +456,29 @@ public class SpiritTransfusions {
     public static List<TransfusionRecipe> GenerateRecipes() {
         List<TransfusionRecipe> recipes = new ArrayList<>();
         var i = 0;
+        var smeltingByPrice = new HashMap<Integer, TransfusionRecipe>();
         for (var transfusionSet : ALL_SPIRIT_TRANSFUSIONS.data.entrySet()) {
             for (var transfusionData : transfusionSet.getValue()) {
+                if (transfusionData.spiritType == Spirits.PHLOGISTON) {
+                    if (!smeltingByPrice.containsKey(transfusionData.price)) {
+                        var newRecipe = new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "spirit_transfusion_smelting_" + transfusionData.price),
+                                new HashSet<>(List.of(Spirits.spiritItems.get(Spirits.PHLOGISTON).get().getDefaultInstance())),
+                                new ArrayList<>(), new ArrayList<>(),
+                                transfusionData.price);
+                        recipes.add(newRecipe);
+                        smeltingByPrice.put(transfusionData.price, newRecipe);
+                    }
+                    var recipe = smeltingByPrice.get(transfusionData.price);
+                    recipe.itemFrom.add(transfusionSet.getKey().getDefaultInstance());
+                    recipe.itemTo.add(transfusionData.output);
+                    continue;
+                }
                 var set = new HashSet<ItemStack>();
                 set.add(Spirits.spiritItems.get(transfusionData.spiritType).get().getDefaultInstance());
                 recipes.add(
                         new TransfusionRecipe(
                                 ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "spirit_transfusion_" + i++), set,
-                                transfusionSet.getKey().getDefaultInstance(), transfusionData.output,
+                                List.of(transfusionSet.getKey().getDefaultInstance()), List.of(transfusionData.output),
                                 transfusionData.price));
             }
         }

@@ -60,8 +60,10 @@ public class OtherverseClientPacketHandler {
     public static void handleHallowPacket(HallowUpdateMessage hallowUpdateMessage, Supplier<Context> ctx) {
         TransientDiagramData data = DiagramManager.getOrCreateLevelData(hallowUpdateMessage.levelValue, true);
         if (hallowUpdateMessage.tag == null) {
+            LOGGER.debug("REMOVING HALLOW FROM PACKET");
             data.removePlacedItemTag(hallowUpdateMessage.position);
         } else {
+            LOGGER.debug("PUTTING HALLOW FROM PACKET");
             data.putPlacedItemTag(hallowUpdateMessage.position, hallowUpdateMessage.tag);
         }
     }

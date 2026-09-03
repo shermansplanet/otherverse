@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:spotlight",
-            "item": {"tag" : "forge:tools/swords"},
+            "item": {"tag" : "minecraft:swords"},
             "title" : "Attack",
             "text": "A sword item denotes the \"attack\" action. Item influences limit potential targets to mobs that drop any of those items.$(br2)Block influences are more general filters: hay bale for passive mobs, target block for hostile mobs, and crafting table for players."
         },

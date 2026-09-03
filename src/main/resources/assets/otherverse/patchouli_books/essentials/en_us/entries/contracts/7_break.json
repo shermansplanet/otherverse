@@ -6,9 +6,9 @@
     "pages": [
         {
             "type": "patchouli:spotlight",
-            "item": {"tag" : "forge:tools/pickaxes"},
+            "item": {"tag" : "minecraft:pickaxes"},
             "title" : "Break",
-            "text": "A pickaxe item denotes the \"break\" action.$(br2)Item filters denote which items to break. If any block filters are present, the mob will only break blocks on top of those block types. Otherwise, the mob will only break blocks at its height or higher."
+            "text": "A pickaxe item denotes the \"break\" action.$(br2)Item filters denote which items to break. If any block filters are present, the mob will only break blocks on top of those block types. If there are no block or position filters, the mob will only break blocks at its height or higher."
         },
         {
             "type": "patchouli:text",        

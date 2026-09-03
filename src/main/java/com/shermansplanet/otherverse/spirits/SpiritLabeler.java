@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -63,7 +64,7 @@ public class SpiritLabeler {
         spiritKeywords.put(Spirits.FLESH, new String[]{"flesh", "blood", "fleshy", "gore", "gory", "meat", "bloody", "technoflesh", "heart", "sanguine", "sanguinite"});
         spiritKeywords.put(Spirits.TECH, new String[]{"tech", "technology", "techno", "redstone", "circuit", "computer", "wire", "cable", "golem", "technoflesh", "diode", "electronic", "electronics", "tank", "pipe"});
         spiritKeywords.put(Spirits.FORTUNE, new String[]{"fortune", "gold", "golden", "coin", "coins", "precious", "gilded"});
-        spiritKeywords.put(Spirits.DEATH, new String[]{"death", "bone", "skill", "mortem", "plague", "bones", "dead", "necrotic", "skeleton"});
+        spiritKeywords.put(Spirits.DEATH, new String[]{"death", "bone", "skull", "mortem", "plague", "bones", "dead", "necrotic", "skeleton", "mold", "moldy", "decaying", "rot"});
         spiritKeywords.put(Spirits.NETHER, new String[]{"nether", "netherrack", "netherite", "blackstone"});
         spiritKeywords.put(Spirits.END, new String[]{"end", "purpur", "void", "chorus"});
         for (var entry : spiritKeywords.entrySet()) {
@@ -301,7 +302,7 @@ public class SpiritLabeler {
                 }
             }
 
-            int burnTime = ForgeHooks.getBurnTime(item.getDefaultInstance(), null) / 100;
+            int burnTime = ForgeHooks.getBurnTime(item.getDefaultInstance(), RecipeType.SMELTING) / 100;
             if (burnTime > 0 && item != net.minecraft.world.item.Items.LAVA_BUCKET) {
                 spiritAmounts.add(new SpiritAmount(Spirits.PHLOGISTON, burnTime));
             }
@@ -367,7 +368,6 @@ public class SpiritLabeler {
                 if (spiritAmounts.stream().anyMatch(s -> s.type == spiritType)) continue;
                 spiritAmounts.add(new SpiritAmount(spiritType, 3));
             }
-
 
             if (spiritAmounts.isEmpty()) {
                 continue;

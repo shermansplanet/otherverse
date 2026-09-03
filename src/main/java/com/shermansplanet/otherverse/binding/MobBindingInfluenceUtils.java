@@ -395,7 +395,7 @@ public class MobBindingInfluenceUtils {
             for (var binding : defaultBindings.entrySet()) {
                 register(entityType, binding.getKey(), binding.getValue(), true);
             }
-            if (BindingManager.drainsBindings(entityType)) {
+            if (BindingManager.drainsBindings(entityType, false)) {
                 register(entityType, EntityType.WARDEN, 999, true);
             }
         }

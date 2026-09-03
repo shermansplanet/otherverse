@@ -1,7 +1,7 @@
 {
     "name": "Shrines",
     "sortnum": 0,
-    "icon": "minecraft:jack_o_lantern{hallow:{spirit_type:'light'}}",
+    "icon": "minecraft:jack_o_lantern",
     "category": "otherverse:shrines",
     "pages": [
         {
@@ -19,13 +19,6 @@
         {
             "type": "patchouli:text",
             "text": "Some shrine abilities affect players or bound/tamed mobs in the shrine's radius. These abilities also affect any player with Self influenced by the shrine, or any bound/tamed mob with a bloody spindle influenced by the shrine."
-        },
-        {
-            "type": "patchouli:spotlight",
-            "item": {
-                "item": "otherverse:spirit_tablet"
-            },
-            "text": "If you use a spirit tablet on a shrine, every spirit in that shrine will be spent to turn the tablet into a hallow.$(br2)The new hallow will be empty, but its capacity will be equal to the number of spent spirits.$(br2)There is no limit to the potential capacity of these hallows."
         }
     ]
 }

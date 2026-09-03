@@ -896,6 +896,16 @@ public class ShrineHelper {
             }
         }
 
+        public int getSpiritCount(){
+            var count = 0;
+            var data = DiagramManager.getOrCreateLevelData(level);
+            for (BlockPos sourcePos : hallowPositions) {
+                var ht = data.getPlacedItemTag(sourcePos);
+                count += ht.getInt("spirit_count");
+            }
+            return count;
+        }
+
         public boolean tryDrain(int price) {
             var data = DiagramManager.getOrCreateLevelData(level);
 

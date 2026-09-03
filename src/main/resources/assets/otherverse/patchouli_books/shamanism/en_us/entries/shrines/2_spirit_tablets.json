@@ -1,0 +1,19 @@
+{
+    "name": "Spirit Tablets",
+    "sortnum": 1,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:shrines",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_tablet"
+            },
+            "text": "If you use a spirit tablet on a shrine, it will become linked to that shrine. If then placed in a diagram, it will allow the diagram to interface with the linked shrine for bindings and transfusions.$(br2)As the tablet becomes further than 16 blocks from the shrine, its efficiency falters, with 50% at 555 blocks."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "If the tablet is very far or in another dimension, efficiency gets as low as 10%.$(br2)This multiplier affects the number of spirits transferred in either direction, as well as binding influence.$(br2)Spirit tablets can be un-linked in a grindstone."
+        }
+    ]
+}

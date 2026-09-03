@@ -70,7 +70,7 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, TransfusionRecipe recipe, IFocusGroup foci) {
-        builder.addSlot(RecipeIngredientRole.INPUT, 2, 8).addItemStack(recipe.itemFrom);
+        builder.addSlot(RecipeIngredientRole.INPUT, 2, 8).addItemStacks(recipe.itemFrom);
         var i = 0;
         var offset = ((recipe.transfusionSources.size() - 1) / 2f);
         for (var source : recipe.transfusionSources) {
@@ -80,7 +80,7 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
             OtherverseJeiPlugin.tryAddEgg(builder, source);
             i++;
         }
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 82, 10).addItemStack(recipe.itemTo);
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 82, 10).addItemStacks(recipe.itemTo);
     }
 
     @Override
@@ -91,6 +91,11 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
         overlay.draw(graphics, 18, 8);
         RenderSystem.disableBlend();
         String s = recipe.cost + (recipe.isMob ? (recipe.transfusionSources.size() > 1 ? " total HP" : " HP") : "");
-        graphics.drawString(mc.font, s, 50 - s.length() * 3, 20, 0x333333, false);
+        if (recipe.getId().getPath().contains("smelting")){
+            graphics.drawString(mc.font, s, 62 - s.length() * 6, 16, 0x333333, false);
+            graphics.drawString(mc.font, "any smelting recipe", 2, 25, 0x888888, false);
+        }else{
+            graphics.drawString(mc.font, s, 50 - s.length() * 3, 20, 0x333333, false);
+        }
     }
 }

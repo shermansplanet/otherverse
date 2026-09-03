@@ -84,6 +84,11 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
 
     public BiomeBrazierBlockEntity(BlockPos pos, BlockState state) {
         super(Otherverse.BIOME_BRAZIER_ENTITY.get(), pos, state);
+        var isLit = state.getValue(BlockStateProperties.LIT);
+        var isScrying = state.getValue(BiomeBrazierBlock.SCRY);
+        if (isLit && isScrying && level instanceof ServerLevel sl) {
+            DiagramManager.getOrCreateLevelData(sl).addChunkloader(pos);
+        }
     }
 
     private static BiomeResolver makeResolver(MutableInt biomeCounter, ChunkAccess chunkAccess, BoundingBox boundingBox, int widthSqr, Holder<Biome> biomeHolder, Vec3i pos) {

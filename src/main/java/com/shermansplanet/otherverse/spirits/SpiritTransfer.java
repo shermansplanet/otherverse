@@ -56,7 +56,7 @@ public class SpiritTransfer extends DiagramProcess {
         oppositeSpirits.put(Spirits.NETHER.label(), Spirits.END.label());
         oppositeSpirits.put(Spirits.END.label(), Spirits.OVERWORLD.label());
 
-        for(var opposites : oppositeSpirits.entrySet()){
+        for (var opposites : oppositeSpirits.entrySet()) {
             antiOppositeSpirits.put(opposites.getValue(), opposites.getKey());
         }
     }
@@ -88,18 +88,26 @@ public class SpiritTransfer extends DiagramProcess {
             return;
         }
 
-        var sinkTag = tag.getCompound("hallow");
+        var sinkIsTablet = tag.contains("linked_position_x");
+        var sinkTag = sinkIsTablet ? HallowHelper.tabletToHallow(tag) : tag.getCompound("hallow");
+        if (sinkTag == null) {
+            abandon();
+            return;
+        }
         SpiritType spiritType = Spirits.spiritsByLabel.get(sinkTag.getString("spirit_type"));
         makeSpiritParticles(spiritType);
 
         var firstFrameCheck = firstFrame;
         firstFrame = false;
 
+        var sinkLevel = sinkIsTablet ? DiagramManager.getOrCreateLevelData(tag.getInt("linked_dimension"), false).level : sink.getFocusLevel();
+        var sinkPosition = sinkIsTablet ? new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z")) : sink.getPos();
+
         if (spawnParticlesOverTime) {
             var ticksPerParticle = Math.max(Math.round(spawnRatio), 1);
             var particlesPerTick = Math.max(Math.round(1f / spawnRatio), 1);
-            if (sink.getFocusLevel().getGameTime() % ticksPerParticle == 0) {
-                ShrineHelper.onOverdrawOrOverflow(sink.getFocusLevel(), sink.getPos(), spiritType,
+            if (sinkLevel.getGameTime() % ticksPerParticle == 0) {
+                ShrineHelper.onOverdrawOrOverflow(sinkLevel, sinkPosition, spiritType,
                         particlesPerTick, false, false);
             }
         }
@@ -114,10 +122,11 @@ public class SpiritTransfer extends DiagramProcess {
 
         ItemStack sourceItem = source.getItem();
         boolean sourceIsHallow = sourceItem.hasTag() && sourceItem.getTag().contains("hallow");
+        var sourceIsTablet = sourceItem.hasTag() && sourceItem.getTag().contains("linked_position_x");
 
         var remainingCapacity = sink.getHallowCapacity(spiritType);
 
-        var sinkCanOverflow = sink.isBlock() && sinkTag.contains("shrine") && ShrineHelper.isOverflowable(spiritType);
+        var sinkCanOverflow = (sinkIsTablet || sink.isBlock()) && sinkTag.contains("shrine") && ShrineHelper.isOverflowable(spiritType);
         if (remainingCapacity <= 0 && !sinkCanOverflow) {
             if (firstFrameCheck) {
                 abandon();
@@ -156,7 +165,7 @@ public class SpiritTransfer extends DiagramProcess {
         };
 
         if (!isDemesne) {
-            if (sourceIsHallow) {
+            if (sourceIsHallow || sourceIsTablet) {
                 transferAmount = source.drainHallow(spiritType, effectiveCapacity, false, true);
                 onTransfer = x -> source.drainHallow(spiritType, x, false, false);
             } else {
@@ -200,9 +209,13 @@ public class SpiritTransfer extends DiagramProcess {
 
         if (transferredAmount < transferAmount) {
             if (sinkCanOverflow) {
-                var overflowAmount = ShrineHelper.onOverdrawOrOverflow(sink.getFocusLevel(), sink.getPos(), spiritType,
-                        transferAmount - transferredAmount, false, firstFrameCheck || spawnParticlesOverTime);
-                transferredAmount += overflowAmount;
+                var efficiency = 1f;
+                if (sinkIsTablet) {
+                    efficiency = HallowHelper.getEfficiency(sink.getPos(), sinkPosition, sink.getFocusLevel().equals(sinkLevel));
+                }
+                var overflowAmount = ShrineHelper.onOverdrawOrOverflow(sinkLevel, sinkPosition, spiritType,
+                        Math.round((transferAmount - transferredAmount) * efficiency), false, firstFrameCheck || spawnParticlesOverTime);
+                transferredAmount += Math.round(overflowAmount / efficiency);
             } else {
                 LOGGER.error("HALLOW OVERFILL FOR ILLEGAL SPIRIT TYPE");
             }

@@ -4,6 +4,7 @@ import com.shermansplanet.otherverse.Otherverse;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.RegistryAccess;
@@ -23,14 +24,14 @@ public class TransfusionRecipe implements Recipe<Container> {
 
     private ResourceLocation id;
 
-    public final ItemStack itemFrom;
-    public final ItemStack itemTo;
+    public final List<ItemStack> itemFrom;
+    public final List<ItemStack> itemTo;
     public final HashSet<ItemStack> transfusionSources;
     public final int cost;
     public boolean isMob;
 
-    public TransfusionRecipe(ResourceLocation id, HashSet<ItemStack> transfusionSources, ItemStack itemFrom,
-                             ItemStack itemTo, int cost) {
+    public TransfusionRecipe(ResourceLocation id, HashSet<ItemStack> transfusionSources, List<ItemStack> itemFrom,
+                             List<ItemStack> itemTo, int cost) {
         this.id = id;
         this.itemFrom = itemFrom;
         this.itemTo = itemTo;

@@ -42,11 +42,6 @@ public abstract class AllayInjector extends PathfinderMob implements InventoryCa
         }
     }
 
-    @Override
-    protected InteractionResult mobInteract(Player p_218361_, InteractionHand p_218362_) {
-        return InteractionResult.PASS;
-    }
-
     @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
     protected void onMobInteract(Player p_218361_, InteractionHand p_218362_, CallbackInfoReturnable<InteractionResult> ci) {
         if (BindingManager.isBoundOrContracted(this)) {

@@ -21,6 +21,7 @@ import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -127,6 +128,15 @@ public class FamiliarManager {
                 }
             }
         }
+        for (var attrtype : ForgeRegistries.ATTRIBUTES) {
+            var attr = sp.getAttribute(attrtype);
+            if (attr == null) continue;
+            attr.removePermanentModifier(FAMILIAR_MODIFIER);
+            attr.removeModifier(FAMILIAR_MODIFIER);
+        }
+        var abilities = sp.getAbilities();
+        abilities.flying = false;
+        abilities.mayfly = false;
     }
 
     private enum MobBenefitCondition {ANYTIME, UNDERWATER, IN_WATER, DARK, COLD, LIGHT}
@@ -271,7 +281,7 @@ public class FamiliarManager {
         }
         var pos = sp.blockPosition();
         var originalState = sp.level().getBlockState(pos);
-        if(originalState.getBlock() instanceof BedBlock) {
+        if (originalState.getBlock() instanceof BedBlock) {
             var newBlockState = Blocks.BLACK_BED.defaultBlockState();
             newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART))
                     .setValue(BedBlock.OCCUPIED, originalState.getValue(BedBlock.OCCUPIED))
@@ -886,7 +896,7 @@ public class FamiliarManager {
                     if (type.equals(EntityType.PHANTOM)) {
                         ServerStatsCounter serverstatscounter = player.getStats();
                         int j = Mth.clamp(serverstatscounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
-                        if(j > 20 * 60 * 10){
+                        if (j > 20 * 60 * 10) {
                             attr.addPermanentModifier(new AttributeModifier(FAMILIAR_MODIFIER, "Familiar", 1, AttributeModifier.Operation.ADDITION));
                         }
                     } else {
@@ -1001,7 +1011,7 @@ public class FamiliarManager {
             var forgeData = entityTag.getCompound("ForgeData");
             if (forgeData.contains("bindingId")) {
                 var binding = data.bindingsById.get(forgeData.getUUID("bindingId"));
-                if(binding != null) {
+                if (binding != null) {
                     for (var level : sl.getServer().getAllLevels()) {
                         if (DiagramManager.getDimensionHash(level) != binding.dimensionHash) continue;
                         EntityType<?> type = getEntityTypeFromTag(familiarData);

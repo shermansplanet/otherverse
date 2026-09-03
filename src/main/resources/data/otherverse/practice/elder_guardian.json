@@ -1,0 +1,11 @@
+{
+	"other" : "minecraft:elder_guardian",
+	"spirit" : "water",
+	"transfusion" : [
+		{
+			"input" : "minecraft:amethyst_shard",
+			"health" : 3,
+			"output" : "minecraft:prismarine_crystals"
+		}
+	]
+}

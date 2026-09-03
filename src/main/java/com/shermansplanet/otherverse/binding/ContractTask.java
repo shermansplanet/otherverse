@@ -383,7 +383,9 @@ public class ContractTask {
     private boolean isBlockAcceptableTarget(BlockPos pos, boolean inPositionFilter) {
         switch (taskType) {
             case BREAK:
-                if (!blockFilters.isEmpty()) {
+                if (blockFilters.isEmpty()) {
+                    if (!inPositionFilter && Math.round(mob.position().y) > pos.getY()) return false;
+                } else {
                     var anyMatches = false;
                     for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
                         Block block = mob.level().getBlockState(pos.subtract(processOffset(offsetIndex))).getBlock();

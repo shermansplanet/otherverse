@@ -392,13 +392,8 @@ public class ImplementManager {
     public static void wakeUp(PlayerWakeUpEvent e) {
         var player = e.getEntity();
         if (!(player instanceof ServerPlayer sp)) return;
-        if (!getImplementData(player).isEmpty() && !player.isCreative()) {
-            if (OtherverseConfig.CAN_REDO_RITUALS.get()) {
-                SpiritAffinityTracker.decreaseAllAffinities(sp);
-            } else {
-                return;
-            }
-        }
+        if (!getImplementData(player).isEmpty() && !player.isCreative() && !OtherverseConfig.CAN_REDO_RITUALS.get())
+            return;
         var positionsToCheck = new ArrayList<BlockPos>();
         positionsToCheck.add(player.blockPosition());
         positionsToCheck.add(player.blockPosition().north());
@@ -413,6 +408,9 @@ public class ImplementManager {
                 if (!influence.getValue().equals(focus.getPos())) continue;
                 if (!(player.level().getBlockEntity(influence.getKey()) instanceof ChalkCircle cc)) continue;
                 if (!canBeImplement(cc.getItem())) continue;
+                if (!getImplementData(player).isEmpty()) {
+                    SpiritAffinityTracker.decreaseAllAffinities(sp);
+                }
                 new ImplementumProcess(cc, 200, sp);
                 return;
             }
@@ -664,9 +662,9 @@ public class ImplementManager {
             return;
         }
         var shouldSpendSelf = !player.isCreative();
-        if(implement.is(Items.TRIDENT)){
-            for(var trident : player.level().getEntitiesOfClass(ThrownTrident.class, player.getBoundingBox().inflate(64))){
-                if(trident.getOwner() == player){
+        if (implement.is(Items.TRIDENT)) {
+            for (var trident : player.level().getEntitiesOfClass(ThrownTrident.class, player.getBoundingBox().inflate(64))) {
+                if (trident.getOwner() == player) {
                     trident.discard();
                     shouldSpendSelf = false;
                     break;

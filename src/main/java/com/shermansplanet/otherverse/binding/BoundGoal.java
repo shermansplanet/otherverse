@@ -83,7 +83,7 @@ public class BoundGoal extends Goal {
         }
         this.binding = binding;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.TARGET));
-        bindingWearInterval = BindingManager.getBindingWearInterval(mob.getMaxHealth());
+        bindingWearInterval = BindingManager.getBindingWearInterval(mob.getMaxHealth(), binding.isPositive);
     }
 
     @Override
@@ -230,7 +230,7 @@ public class BoundGoal extends Goal {
             return;
         }
 
-        if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType())) {
+        if (!BindingManager.drainsBindings((EntityType<? extends LivingEntity>) mob.getType(), binding.isPositive)) {
             return;
         }
 

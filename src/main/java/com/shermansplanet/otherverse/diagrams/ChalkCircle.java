@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.binding.IdolItem;
 import com.shermansplanet.otherverse.diagrams.DiagramManager.BlockUpdateType;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -341,7 +342,16 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     @Override
     public int drainHallow(SpiritType spiritType, int price, boolean mustMeetFullPrice, boolean simulate) {
         if (isEmpty()) return 0;
-        if (!getItem().hasTag() || !getItem().getTag().contains("hallow")) return 0;
+        if (!getItem().hasTag()) return 0;
+        var tag = getItem().getTag();
+        if (tag.contains("linked_position_x") && tag.getString("spirit_type").equals(spiritType.label())) {
+            var pos = new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z"));
+            var linkedDimension = tag.getInt("linked_dimension");
+            var data = DiagramManager.getOrCreateLevelData(linkedDimension, false);
+            var efficiency = HallowHelper.getEfficiency(getBlockPos(), pos, linkedDimension == DiagramManager.getDimensionHash(level));
+            return Math.round(HallowHelper.drainBlockHallow(data.level, pos, spiritType, Math.round(price / efficiency), mustMeetFullPrice, simulate) * efficiency);
+        }
+        if (!getItem().getTag().contains("hallow")) return 0;
         var hallowTag = getItem().getTag().getCompound("hallow");
         if (!hallowTag.getString("spirit_type").equals(spiritType.label())) return 0;
         var spiritCount = hallowTag.getInt("spirit_count");
@@ -358,7 +368,16 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     @Override
     public int fillHallow(SpiritType spiritType, int amount, boolean mustAcceptAll, boolean simulate) {
         if (isEmpty()) return 0;
-        if (!getItem().hasTag() || !getItem().getTag().contains("hallow")) return 0;
+        if (!getItem().hasTag()) return 0;
+        var tag = getItem().getTag();
+        if (tag.contains("linked_position_x") && tag.getString("spirit_type").equals(spiritType.label())) {
+            var pos = new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z"));
+            var linkedDimension = tag.getInt("linked_dimension");
+            var data = DiagramManager.getOrCreateLevelData(linkedDimension, false);
+            var efficiency = HallowHelper.getEfficiency(getBlockPos(), pos, linkedDimension == DiagramManager.getDimensionHash(level));
+            return Math.round(HallowHelper.fillBlockHallow(data.level, pos, spiritType, Math.round(amount * efficiency), mustAcceptAll, simulate) / efficiency);
+        }
+        if (!getItem().getTag().contains("hallow")) return 0;
         var hallowTag = getItem().getTag().getCompound("hallow");
         if (!hallowTag.getString("spirit_type").equals(spiritType.label())) return 0;
         var spiritCount = hallowTag.getInt("spirit_count");
@@ -374,7 +393,16 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
     @Override
     public int getHallowCapacity(SpiritType spiritType) {
         if (isEmpty()) return 0;
-        if (!getItem().hasTag() || !getItem().getTag().contains("hallow")) return 0;
+        if (!getItem().hasTag()) return 0;
+        var tag = getItem().getTag();
+        if (tag.contains("linked_position_x") && tag.getString("spirit_type").equals(spiritType.label())) {
+            var pos = new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z"));
+            var linkedDimension = tag.getInt("linked_dimension");
+            var data = DiagramManager.getOrCreateLevelData(linkedDimension, false);
+            var efficiency = HallowHelper.getEfficiency(getBlockPos(), pos, linkedDimension == DiagramManager.getDimensionHash(level));
+            return Math.round(HallowHelper.getShrineSpiritCountAndCapacity(data, pos, spiritType).getSecond() / efficiency);
+        }
+        if (!getItem().getTag().contains("hallow")) return 0;
         var hallowTag = getItem().getTag().getCompound("hallow");
         if (!hallowTag.getString("spirit_type").equals(spiritType.label())) return 0;
         var spiritCount = hallowTag.getInt("spirit_count");

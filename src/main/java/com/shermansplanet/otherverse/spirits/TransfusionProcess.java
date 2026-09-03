@@ -33,8 +33,10 @@ public class TransfusionProcess extends DiagramProcess {
             abandon();
             return;
         }
-        CompoundTag hallowTag = tag.getCompound("hallow");
-        SpiritType spiritType = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
+
+        var isTablet = tag.contains("linked_position_x");
+
+        SpiritType spiritType = Spirits.spiritsByLabel.get(isTablet ? tag.getString("spirit_type") : tag.getCompound("hallow").getString("spirit_type"));
 
         if (spiritType != transfusion.spiritType()) {
             LOGGER.debug("abandoning - can't fulfill");
@@ -62,7 +64,7 @@ public class TransfusionProcess extends DiagramProcess {
 
         var level = sink.getFocusLevel();
         if (sink.isBlock()) {
-            level.setBlockAndUpdate(sink.getPos(), transfusion.blockOutput().defaultBlockState());
+            SpiritTransfusions.replaceBlock(level, sink.getPos(), transfusion.blockOutput());
         } else {
             ChalkCircle targetCircle = (ChalkCircle) sink;
             targetCircle.item = transfusion.output().copy();

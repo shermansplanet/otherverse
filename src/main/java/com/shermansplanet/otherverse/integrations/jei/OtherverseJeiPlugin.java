@@ -69,6 +69,7 @@ public class OtherverseJeiPlugin implements IModPlugin {
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
         registration.useNbtForSubtypes(OtherverseItems.IDOL.get());
+        registration.useNbtForSubtypes(OtherverseItems.CHALK.get());
     }
 
     @Override

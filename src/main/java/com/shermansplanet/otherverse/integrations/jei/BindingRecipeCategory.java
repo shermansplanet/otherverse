@@ -37,24 +37,25 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
     public static final RecipeType<BindingRecipe> TYPE =
             RecipeType.create(Otherverse.MODID, "binding", BindingRecipe.class);
 
-    private final IDrawable background;
     private final Component localizedName;
     private final IDrawable icon;
-    private final IDrawable heartIcon, chainIcon, bindingBreakIcon;
+    private final IDrawable heartIcon, chainIcon, bindingBreakIcon, breakingHeartIcon;
     private final IGuiHelper guiHelper;
 
     public BindingRecipeCategory(IGuiHelper guiHelper) {
-        background = guiHelper.createBlankDrawable(120, 80);
         localizedName = Component.translatable("otherverse.jei.binding");
         heartIcon = guiHelper.createDrawable(
                 ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
-                0, 11, 5, 5);
+                0, 11, 5, 6);
         chainIcon = guiHelper.createDrawable(
                 ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 15, 11, 5, 7);
         bindingBreakIcon = guiHelper.createDrawable(
                 ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 22, 11, 7, 7);
+        breakingHeartIcon = guiHelper.createDrawable(
+                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
+                31, 11, 7, 7);
         icon = guiHelper.createDrawable(
                 ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 63, 0, 16, 16);
@@ -68,7 +69,7 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
 
     @Override
     public int getHeight() {
-        return 80;
+        return 106;
     }
 
     @Override
@@ -129,7 +130,7 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
         int column = 0;
         HashSet<Integer> takenAmounts = new HashSet<>();
         var uniqueInfluences = recipe.influences.values().stream().distinct().count();
-        var columns = Math.ceil(uniqueInfluences / 5F);
+        var columns = (int)Math.ceil(uniqueInfluences / 5F);
         var spiritType = MobBindingInfluenceUtils.mobSpirits.get(recipe.entityType);
         for (var influence : recipe.influences.entrySet()) {
             if (takenAmounts.contains(influence.getValue())) continue;
@@ -161,23 +162,42 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
         String heartstring = Float.toString(hp).replace(".0", "");
         heartIcon.draw(graphics, 22, 13);
         graphics.drawString(mc.font, heartstring, 28, 12, 0x333333, false);
-        int x = 30 + heartstring.length() * 6;
-        chainIcon.draw(graphics, x, 12);
-        float coeff = OtherverseConfig.BINDING_COST.get();
+
         int color = 0x333333;
-        var implementData = ImplementManager.getImplementData(Minecraft.getInstance().player);
-        if (!implementData.isEmpty() && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.CHAIN) {
-            coeff = 2;
-            color = ImplementManager.IMPLEMENT_UI_COLOR;
+        var startstring = "Negative:";
+        int x = 47;
+        var h = columns * 30 + 25;
+        var isPositive = false;
+        var icon1 = chainIcon;
+        var icon2 = bindingBreakIcon;
+        float coeff = OtherverseConfig.BINDING_COST.get();
+
+        for(var i=0; i<2; i++) {
+            graphics.drawString(mc.font, startstring, 4, h, color, false);
+            icon1.draw(graphics, x, h);
+            var implementData = ImplementManager.getImplementData(Minecraft.getInstance().player);
+            if (!implementData.isEmpty() && ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(implementData.getString("item"))) == Items.CHAIN) {
+                coeff = 2;
+                color = ImplementManager.IMPLEMENT_UI_COLOR;
+            }
+            var s = Integer.toString(Math.round(hp * coeff)).replace(".0", "");
+            graphics.drawString(mc.font, s, x + 6, h, color, false);
+            if (BindingManager.drainsBindings(recipe.entityType, isPositive)) {
+                x += (s.length() + 1) * 6 + 2;
+                icon2.draw(graphics, x, h);
+                s = BindingManager.getSpiritDrain(hp) + "/" + BindingManager.getBindingWearInterval(hp, isPositive) + "s";
+                graphics.drawString(mc.font, s, x + 8, h, color, false);
+            }
+
+            h += 12;
+            startstring = "Positive:";
+            x = 47;
+            isPositive = true;
+            icon1 = heartIcon;
+            icon2 = breakingHeartIcon;
+            coeff *= 2;
         }
-        var s = Integer.toString(Math.round(hp * coeff)).replace(".0", "");
-        graphics.drawString(mc.font, s, x + 6, 12, color, false);
-        if (BindingManager.drainsBindings(recipe.entityType)) {
-            x += (s.length() + 1) * 6 + 2;
-            bindingBreakIcon.draw(graphics, x, 12);
-            s = BindingManager.getSpiritDrain(hp) + "/" + BindingManager.getBindingWearInterval(hp) + "s";
-            graphics.drawString(mc.font, s, x + 8, 12, color, false);
-        }
+
         RenderSystem.disableBlend();
     }
 }

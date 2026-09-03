@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:spotlight",
-            "item": {"tag" : "forge:tools/axes"},
+            "item": {"tag" : "minecraft:axes"},
             "title" : "Fell",
             "text": "An axe item denotes the \"fell\" action.$(br2)This works exactly like \"break,\" except when targeting a log, it will break all attached logs one by one. Without a filter, it targets any log."
         }

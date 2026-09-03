@@ -33,7 +33,8 @@
     "BaseSpawnerInjector",
     "MonsterInjector",
     "PhantomInjector",
-    "WardenInjector"
+    "WardenInjector",
+    "FallingBlockEntityInjector"
   ],
   "client":[
     "ModelBakeryInjector",

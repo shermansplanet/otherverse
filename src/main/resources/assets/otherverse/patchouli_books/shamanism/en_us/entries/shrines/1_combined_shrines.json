@@ -1,7 +1,7 @@
 {
     "name": "Combining Ranges",
     "sortnum": 1,
-    "icon": "minecraft:netherite_block{hallow:{spirit_type:'protection'}}",
+    "icon": "minecraft:netherite_block",
     "category": "otherverse:shrines",
     "pages": [
         {

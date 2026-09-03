@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:spotlight",
-            "item": {"tag" : "forge:tools/hoes"},
+            "item": {"tag" : "minecraft:hoes"},
             "title" : "Harvest",
             "text": "A hoe item denotes the \"harvest\" action.$(br2)This works exactly like \"break,\" except it only targets fully grown crops and automatically re-plants them after. Without a filter, it targets any crop."
         }
