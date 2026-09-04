@@ -1140,7 +1140,6 @@ public class FamiliarManager {
         var entityTag = familiarData.getCompound("mob_data").getCompound("EntityTag");
         var id = entityTag.getUUID("UUID");
         var entity = player.serverLevel().getEntity(id);
-        LOGGER.debug("FOUND ENTITY: {}", entity != null);
         var spawnPos = player.getEyePosition().add(player.getLookAngle());
         EntityType<LivingEntity> type = (EntityType<LivingEntity>) getEntityTypeFromTag(familiarData);
         if (hitResult != null) {
@@ -1179,6 +1178,12 @@ public class FamiliarManager {
                         vex.setLimitedLife(20 * (30 + player.getRandom().nextInt(90)));
                         player.level().addFreshEntity(vex);
                         BindingManager.enforceLoyalty(player, vex, false);
+                    }
+                }
+                var bloodStats = entityTag.getCompound("ForgeCaps").getCompound("vampirism:iextendedcreature");
+                if (!bloodStats.isEmpty()) {
+                    if (bloodStats.contains("bloodLevel") && bloodStats.getInt("bloodLevel") <= 0) {
+                        bloodStats.putInt("bloodLevel", 1);
                     }
                 }
             }

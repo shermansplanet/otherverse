@@ -100,7 +100,6 @@ public class SpiritLabeler {
                             if (itemsWithoutSpirits.contains(itemAmount.getKey())) continue;
                             var table = data.computeIfAbsent(itemAmount.getKey(), x -> new Hashtable<>());
                             for (var spiritAmount : itemAmount.getValue()) {
-                                if (spiritAmount.amount() <= 0) continue;
                                 var val = table.getOrDefault(spiritAmount.type(), 0);
                                 table.put(spiritAmount.type(), val + spiritAmount.amount());
                             }
@@ -110,6 +109,9 @@ public class SpiritLabeler {
                     for (var item : data.keySet()) {
                         Hashtable<SpiritType, Integer> vals = data.get(item);
                         var limit = ImplementManager.durabilities.containsKey(item) ? 5 : 6;
+                        for (var spiritAmount : new ArrayList<>(vals.entrySet())) {
+                            if (spiritAmount.getValue() <= 0) vals.remove(spiritAmount.getKey());
+                        }
                         if (vals.size() > limit) {
                             var spiritStream = vals.entrySet().stream().sorted(Comparator.comparingDouble(a -> a.getKey().id() * 0.01f - a.getValue() + (colorSpirits.contains(a.getKey()) ? 16 : 0))).limit(limit);
                             var truncated = new Hashtable<SpiritType, Integer>();

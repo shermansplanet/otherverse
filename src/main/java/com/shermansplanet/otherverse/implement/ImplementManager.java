@@ -422,7 +422,7 @@ public class ImplementManager {
         if (allowedImplements.contains(ForgeRegistries.ITEMS.getKey(item.getItem()).toString())) return true;
         return item.is(Tags.Items.TOOLS) || item.is(Tags.Items.ARMORS) || item.is(Tags.Items.DYES) || item.getItem() instanceof ArmorItem
                 || durabilities.containsKey(item.getItem()) || item.isEdible() || item.is(Items.SCULK_SHRIEKER)
-                || item.is(Items.CHAIN) || item.is(Items.BUCKET) || item.is(Items.FLINT_AND_STEEL)
+                || item.is(Items.CHAIN) || item.is(Items.BUCKET) || item.is(Items.WATER_BUCKET) || item.is(Items.FLINT_AND_STEEL)
                 || item.is(Items.CLOCK) || item.is(OtherverseItems.HOMUNCULUS_HEART.get());
     }
 
@@ -523,6 +523,7 @@ public class ImplementManager {
 
     public static void makeImplement(ServerPlayer player, ItemStack item) {
         var playerImplementTag = new CompoundTag();
+        if (item.is(Items.WATER_BUCKET)) item = new ItemStack(Items.BUCKET);
         playerImplementTag.putString("item", ForgeRegistries.ITEMS.getKey(item.getItem()).toString());
         for (var s : preservedTags) {
             if (item.hasTag() && item.getTag().contains(s)) {

@@ -4,11 +4,16 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramProcess;
 import com.shermansplanet.otherverse.diagrams.IFocus;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 
 public class TransfusionProcess extends DiagramProcess {
@@ -64,7 +69,13 @@ public class TransfusionProcess extends DiagramProcess {
 
         var level = sink.getFocusLevel();
         if (sink.isBlock()) {
-            SpiritTransfusions.replaceBlock(level, sink.getPos(), transfusion.blockOutput());
+            var pos = sink.getPos();
+            if (!SpiritTransfusions.tryReplaceBlock(level, pos, transfusion.blockOutput())) {
+                level.destroyBlock(pos, false);
+                ItemEntity itementity = new ItemEntity(level, pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, transfusion.output());
+                itementity.setDefaultPickUpDelay();
+                level.addFreshEntity(itementity);
+            }
         } else {
             ChalkCircle targetCircle = (ChalkCircle) sink;
             targetCircle.item = transfusion.output().copy();

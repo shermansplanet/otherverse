@@ -331,14 +331,14 @@ public class SpiritTransfusions {
             if (transfusion.spiritType != spiritType || transfusion.price > spiritCount) {
                 continue;
             }
-            replaceBlock(event.getLevel(), event.getPos(), transfusion.blockOutput);
+            if (!tryReplaceBlock(event.getLevel(), event.getPos(), transfusion.blockOutput)) return;
             spendSpirits(event.getEntity(), hallowTag, transfusion.price, event.getItemStack());
             event.setCanceled(true);
             return;
         }
     }
 
-    public static void replaceBlock(Level level, BlockPos pos, Block block) {
+    public static boolean tryReplaceBlock(Level level, BlockPos pos, Block block) {
         var newBlockState = block.defaultBlockState();
         var originalState = level.getBlockState(pos);
         for (var k : originalState.getValues().keySet()) {
@@ -352,12 +352,25 @@ public class SpiritTransfusions {
             }
         }
         if (block instanceof BedBlock) {
-            newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART))
-                    .setValue(BedBlock.OCCUPIED, originalState.getValue(BedBlock.OCCUPIED))
-                    .setValue(BedBlock.FACING, originalState.getValue(BedBlock.FACING));
             level.setBlock(pos, newBlockState, 26);
             var otherPos = pos.relative(BedBlock.getConnectedDirection(originalState));
             newBlockState = newBlockState.setValue(BedBlock.PART, originalState.getValue(BedBlock.PART) == BedPart.FOOT ? BedPart.HEAD : BedPart.FOOT);
+            level.setBlock(otherPos, newBlockState, 26);
+        } else if (block.getClass().getSimpleName().equals("RuneSlabBlock")) {
+            level.setBlock(pos, newBlockState, 26);
+            BooleanProperty topProp = null;
+            for (var val : newBlockState.getValues().keySet()) {
+                if (val instanceof BooleanProperty bp && bp.getName().equals("is_top")) {
+                    topProp = bp;
+                    break;
+                }
+            }
+            if (topProp == null) return false;
+            var isTop = newBlockState.getValue(topProp);
+            var otherPos = isTop ? pos.below() : pos.above();
+            var otherState = level.getBlockState(otherPos);
+            if (!otherState.isAir() && !otherState.getBlock().equals(originalState.getBlock())) return false;
+            newBlockState = newBlockState.setValue(topProp, !isTop);
             level.setBlock(otherPos, newBlockState, 26);
         } else {
             level.setBlockAndUpdate(pos, newBlockState);
@@ -365,6 +378,7 @@ public class SpiritTransfusions {
         if (level instanceof ServerLevel sl) {
             sl.playSound(null, pos, newBlockState.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1, 1);
         }
+        return true;
     }
 
     private static void spendSpirits(Player p, CompoundTag tag, int spentSpirits, ItemStack stack) {
