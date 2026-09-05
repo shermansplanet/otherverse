@@ -450,6 +450,19 @@ public class MobBindingInfluenceUtils {
             return 0;
         }
 
+        if(item.hasTag() && item.getTag().contains("linked_position_x")) {
+            CompoundTag tabletTag = item.getTag();
+            var st = Spirits.spiritsByLabel.get(tabletTag.getString("spirit_type"));
+            ItemOrEntityType spiritItem = new ItemOrEntityType(Spirits.spiritItems.get(st).get());
+            if (influenceMap.containsKey(spiritItem)) {
+                return influenceMap.get(spiritItem) * HallowHelper.getShrineSpiritCountFromTablet(tabletTag, st);
+            }
+            var mobSpiritType = mobSpirits.get(mob.getType());
+            if (mobSpiritType == st) {
+                return -HallowHelper.getShrineSpiritCountFromTablet(tabletTag, st);
+            }
+        }
+
         if (item.hasTag() && item.getTag().contains("hallow")) {
             CompoundTag hallowTag = item.getTag().getCompound("hallow");
             var st = Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type"));
@@ -523,7 +536,7 @@ public class MobBindingInfluenceUtils {
             demesneCoeff = (float) Math.pow(2f / 3f, demesne.getPerkLevel(DemesnesManager.DemesnePerk.BINDING));
         }
         var configCoeff = OtherverseConfig.BINDING_COST.get();
-        return new Pair<>(totalInfluence >= ((int) (mob.getMaxHealth() * demesneCoeff)) * (hasChain ? configCoeff * 2 / 3 : configCoeff) * (isPositive ? 3 : 1), isPositive);
+        return new Pair<>(totalInfluence >= ((int) (mob.getMaxHealth() * demesneCoeff)) * (hasChain ? configCoeff * 2 / 3 : configCoeff) * (isPositive ? 2 : 1), isPositive);
     }
 
     public static List<BindingRecipe> GenerateRecipes() {

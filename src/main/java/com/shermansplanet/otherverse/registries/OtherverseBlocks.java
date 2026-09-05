@@ -111,6 +111,8 @@ public class OtherverseBlocks {
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.GILDED_BLACKSTONE)));
     public static final RegistryObject<Block> CANDYCANE = BLOCKS.register("candycane",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)));
+    public static final RegistryObject<Block> ROTTEN_FLESH_BLOCK = BLOCKS.register("rotten_flesh_block",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.MUD)));
 
     private static Boolean never(BlockState p_50779_, BlockGetter p_50780_, BlockPos p_50781_, EntityType<?> p_50782_) {
         return false;

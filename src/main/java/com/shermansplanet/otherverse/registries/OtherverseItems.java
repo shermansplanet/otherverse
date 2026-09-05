@@ -243,6 +243,8 @@ public class OtherverseItems {
 
     public static final RegistryObject<Item> INTESTINES = ITEMS.register("intestines",
             () -> new BlockItem(OtherverseBlocks.INTESTINES.get(), new Item.Properties()));
+    public static final RegistryObject<Item> ROTTEN_FLESH_BLOCK = ITEMS.register("rotten_flesh_block",
+            () -> new BlockItem(OtherverseBlocks.ROTTEN_FLESH_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> TRUCHET = ITEMS.register("truchet",
             () -> new BlockItem(OtherverseBlocks.TRUCHET.get(), new Item.Properties()));
     public static final RegistryObject<Item> GILDED_TRUCHET = ITEMS.register("gilded_truchet",

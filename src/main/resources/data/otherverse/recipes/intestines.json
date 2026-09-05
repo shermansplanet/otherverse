@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": [{"item": "minecraft:porkchop"}, {"item": "minecraft:beef"}, {"item": "minecraft:mutton"}, {"item": "minecraft:chicken"}]
+  },
+  "result": {
+    "item": "otherverse:intestines",
+    "count": 1
+  }
+}

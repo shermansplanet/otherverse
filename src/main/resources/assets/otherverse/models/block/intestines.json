@@ -1,7 +1,7 @@
 {
   "parent": "otherverse:block/truchet",
   "textures": {
-    "particle": "otherverse:block/intestines",
-    "all": "otherverse:block/intestines"
+    "particle": "otherverse:block/intestines_2",
+    "all": "otherverse:block/intestines_2"
   }
 }

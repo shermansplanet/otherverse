@@ -644,7 +644,7 @@ public class HallowHelper {
 
         if (sourceIsHallow || sourceIsTablet) {
             var sourceTag = sourceIsTablet ? tabletToHallow(sourceItem.getTag()) : sourceItem.getTag().getCompound("hallow");
-            if(sourceTag == null) return false;
+            if (sourceTag == null) return false;
             if (!sourceTag.getString("spirit_type").equals(spiritType.label()))
                 return false;
             if (sourceIsTablet || source.isBlock()) {
@@ -690,6 +690,18 @@ public class HallowHelper {
         for (BlockPos sourcePos : ShrineHelper.getAllHallows(sourceIsTablet
                 ? new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z"))
                 : source.getPos(), spiritType, data)) {
+            var ht = data.getPlacedItemTag(sourcePos);
+            total += ht.getInt("spirit_count");
+        }
+        return total;
+    }
+
+    public static int getShrineSpiritCountFromTablet(CompoundTag tag, SpiritType spiritType) {
+        var data = DiagramManager.getOrCreateLevelData(tag.getInt("linked_dimension"), false);
+        var total = 0;
+        for (BlockPos sourcePos : ShrineHelper.getAllHallows(
+                new BlockPos(tag.getInt("linked_position_x"), tag.getInt("linked_position_y"), tag.getInt("linked_position_z")),
+                spiritType, data)) {
             var ht = data.getPlacedItemTag(sourcePos);
             total += ht.getInt("spirit_count");
         }
@@ -772,10 +784,16 @@ public class HallowHelper {
             if (!canFill(focus, sourceFocus, spiritType)) continue;
             var sourceItem = sourceFocus.getItem();
             var sourceIsTablet = sourceItem.getItem() instanceof SpiritItem && sourceItem.hasTag() && sourceItem.getTag().contains("linked_position_x");
-            if (willOverflow && sourceItem.hasTag() && (sourceIsTablet || sourceItem.getTag().contains("hallow"))) {
-                var hallowTag = sourceIsTablet ? tabletToHallow(sourceItem.getTag()) : sourceItem.getTag().getCompound("hallow");
-                if (hallowTag.getInt("spirit_count") <= 0) {
-                    continue;
+            if (willOverflow && sourceItem.hasTag()) {
+                if (sourceIsTablet) {
+                    if (getShrineSpiritCount(sourceFocus, spiritType, true) <= 0) {
+                        continue;
+                    }
+                } else if (sourceItem.getTag().contains("hallow")) {
+                    var hallowTag = sourceItem.getTag().getCompound("hallow");
+                    if (hallowTag.getInt("spirit_count") <= 0) {
+                        continue;
+                    }
                 }
             }
             if (sourceFocus.getItem().is(Items.BEDROCK) && !OtherverseConfig.BEDROCK_REMOVAL.get()) continue;
