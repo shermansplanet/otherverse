@@ -3,7 +3,6 @@ package com.shermansplanet.otherverse.spirits;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
-import com.shermansplanet.otherverse.OtherverseConfig;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.binding.MobTransfusions;

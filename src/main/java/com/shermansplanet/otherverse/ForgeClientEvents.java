@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse;
 
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BindingRenderer;
+import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.others.Buzzed;
 import com.shermansplanet.otherverse.others.BuzzedSoundInstance;
@@ -11,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.ViewportEvent;
@@ -39,6 +41,11 @@ public class ForgeClientEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPress(ScreenEvent.MouseButtonPressed.Pre event) {
         onMouseEvent(event);
+    }
+
+    @SubscribeEvent
+    public static void onLeave(ClientPlayerNetworkEvent.LoggingOut event) {
+        DiagramManager.clearClientData();
     }
 
     private static void onMouseEvent(ScreenEvent event) {

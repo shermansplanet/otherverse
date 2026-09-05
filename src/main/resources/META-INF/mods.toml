@@ -7,7 +7,7 @@ loaderVersion = "[41,)"
 # Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
 license = "MIT"
 # A URL to refer people to when problems occur with this mod
-issueTrackerURL = "https://github.com/MinecraftForge/MinecraftForge/issues"
+issueTrackerURL = "https://docs.google.com/forms/d/e/1FAIpQLSeV4zLsIdI2NieANylerVFjOCRoEuPN72IN7Ehl9i4ot70Psw/viewform"
 # If the mods defined in this file should show as separate resource packs
 showAsResourcePack = false
 

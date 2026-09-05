@@ -103,11 +103,6 @@ public class DiagramManager {
         serverDiagramDataByLevel.clear();
     }
 
-    @SubscribeEvent
-    public static void onLeave(ClientPlayerNetworkEvent.LoggingOut event) {
-        clientDiagramDataByLevel.clear();
-    }
-
     public static TransientDiagramData getOrCreateLevelData(Level level) {
         TransientDiagramData data = getOrCreateLevelData(DiagramManager.getDimensionHash(level),
                 level.isClientSide());
@@ -581,9 +576,13 @@ public class DiagramManager {
     }
 
     public static void updatePlayer(ServerPlayer player) {
-        for(var serverData : serverDiagramDataByLevel.values()){
+        for (var serverData : serverDiagramDataByLevel.values()) {
             serverData.retryUpdateClient(player);
         }
+    }
+
+    public static void clearClientData() {
+        clientDiagramDataByLevel.clear();
     }
 
     public enum BlockUpdateType {ADDED, REMOVED, CHANGED}
