@@ -3,6 +3,7 @@ package com.shermansplanet.otherverse.familiar;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.*;
 import com.shermansplanet.otherverse.binding.*;
+import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.SelfManager;
@@ -680,7 +681,10 @@ public class FamiliarManager {
 
         if (sp.isInWaterOrRain() && ((type.fireImmune() && !type.equals(EntityType.WARDEN)) || type.equals(EntityType.ENDERMAN))) {
             if (sp.isInWater() || !sp.hasItemInSlot(EquipmentSlot.HEAD) || sp.getRandom().nextInt(20) == 0) {
-                sp.hurt(sp.serverLevel().damageSources().magic(), 1);
+                var demesne = DemesnesManager.getData(sp.serverLevel(), sp.blockPosition());
+                if (demesne == null || demesne.getPerkLevel(DemesnesManager.DemesnePerk.PROTECTION) == 0 || !demesne.hasSanction(DemesnesManager.DemesnePerk.SANCTION_BUILD, sp)) {
+                    sp.hurt(sp.serverLevel().damageSources().magic(), 1);
+                }
             }
         }
 

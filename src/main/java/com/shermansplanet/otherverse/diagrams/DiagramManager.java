@@ -28,6 +28,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
@@ -35,6 +36,8 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -373,6 +376,7 @@ public class DiagramManager {
         if (diagramData.getSympathyPosition(pos.toString()) != null) {
             diagramData.putSympathyPosition(pos.toString(), null);
         }
+        diagramData.removePlacedItemTag(pos);
         if (level instanceof ServerLevel sl) {
             blockChanged(pos, sl);
             var state = sl.getBlockState(pos);
@@ -426,9 +430,6 @@ public class DiagramManager {
         }
         Level level = event.getPlayer().level();
         BlockBreak(level, event.getPos());
-        if (event.getPlayer().isCreative()) {
-            getOrCreateLevelData(level).removePlacedItemTag(event.getPos());
-        }
     }
 
     @SubscribeEvent
@@ -438,25 +439,28 @@ public class DiagramManager {
 
     @SubscribeEvent
     public static void onBlockPlaced(VanillaGameEvent event) {
-        if (event.getVanillaEvent() != GameEvent.BLOCK_PLACE
+        if (!(event.getLevel() instanceof ServerLevel sl)
                 || event.getContext().affectedState() == null
                 || event.getCause() == null) {
             return;
         }
-        if (event.getLevel() instanceof ServerLevel sl) {
-            Block block = event.getContext().affectedState().getBlock();
-            ItemStack item = null;
+        if (event.getVanillaEvent() == GameEvent.BLOCK_DESTROY) {
+            if (event.getContext().affectedState().isAir())
+                BlockBreak(sl, BlockPos.containing(event.getEventPosition()));
+        } else if (event.getVanillaEvent() == GameEvent.BLOCK_PLACE) {
             BlockPos pos = BlockPos.containing(event.getEventPosition());
+            var bs = event.getContext().affectedState();
+            if (!(bs.getBlock() instanceof CandleBlock) && !(bs.getBlock() instanceof SlabBlock) && !bs.is(Blocks.TURTLE_EGG) && !bs.is(Blocks.SEA_PICKLE)) {
+                DiagramManager.getOrCreateLevelData(event.getLevel()).removePlacedItemTag(pos);
+            }
+            Block block = bs.getBlock();
+            ItemStack item = null;
             if (event.getContext().sourceEntity() instanceof Player player) {
                 ItemStack mainHandItem = player.getItemInHand(InteractionHand.MAIN_HAND);
                 ItemStack offHandItem = player.getItemInHand(InteractionHand.OFF_HAND);
-                if (mainHandItem.is(offHandItem.getItem())) {
-                    blockChanged(pos, sl);
-                    return;
-                }
                 if (mainHandItem.is(block.asItem())) {
                     item = mainHandItem;
-                } else if (offHandItem.is(block.asItem())) {
+                } else if (!(mainHandItem.getItem() instanceof BlockItem) && offHandItem.is(block.asItem())) {
                     item = offHandItem;
                 }
             }

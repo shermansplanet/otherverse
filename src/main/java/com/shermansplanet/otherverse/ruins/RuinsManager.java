@@ -389,14 +389,14 @@ public class RuinsManager {
 
     @SubscribeEvent
     public static void onDamage(LivingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         var e = event.getSource().getEntity();
+        if (e instanceof Guest || e instanceof Fury || e instanceof Banshee) {
+            SelfManager.changeSelf(event.getEntity(), -(int) (event.getAmount() * SelfManager.getSelfCoeff(event.getEntity())));
+        }
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         var claim = claimAmounts.get(sp);
         if (claim != null && event.getSource().getEntity() instanceof Mob mob) {
             claim.remove(mob);
-        }
-        if (e instanceof Guest || e instanceof Fury || e instanceof Banshee) {
-            SelfManager.changeSelf(sp, -(int) (event.getAmount() * SelfManager.getSelfCoeff(sp)));
         }
         if (!event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD) || sp.level().dimension() != ModDimensions.RUINS_KEY) {
             return;

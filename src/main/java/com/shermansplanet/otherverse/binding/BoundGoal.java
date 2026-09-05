@@ -83,7 +83,7 @@ public class BoundGoal extends Goal {
         }
         this.binding = binding;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.TARGET));
-        bindingWearInterval = BindingManager.getBindingWearInterval(mob.getMaxHealth(), binding.isPositive);
+        bindingWearInterval = BindingManager.getBindingWearInterval(mob.getMaxHealth(), binding == null || binding.isPositive);
     }
 
     @Override
@@ -210,7 +210,8 @@ public class BoundGoal extends Goal {
             }
         }
         mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
-        if (FamiliarManager.isFamiliar(mob) || isLoyaltyBound || isTamed || mob instanceof TamableAnimal ta && ta.isTame()) return;
+        if (FamiliarManager.isFamiliar(mob) || isLoyaltyBound || isTamed || mob instanceof TamableAnimal ta && ta.isTame())
+            return;
         if (mob.level().getGameTime() % (20L * bindingWearInterval) != 0) {
             return;
         }

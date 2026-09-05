@@ -272,9 +272,6 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Tags.Blocks.ORE_BEARING_GROUND_NETHERRACK, Spirits.NETHER, 3);
             AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_NETHERRACK, Spirits.OVERWORLD, 3);
 
-//            AddForTag(item, spiritAmounts, Items.END_STONES, Spirits.END, 3);
-
-            AddForTag(item, spiritAmounts, BlockTags.CORAL_BLOCKS, Spirits.WATER, 2);
             AddForTag(item, spiritAmounts, BlockTags.UNDERWATER_BONEMEALS, Spirits.WATER, 1);
 
             AddForTag(item, spiritAmounts, Items.TOOLS_BOWS, Spirits.AIR, tierFunc);
@@ -358,6 +355,10 @@ public class SpiritLabeler {
             if (itemName.contains("copper")) {
                 if (time < 9) spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18 - time * 2));
                 spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
+            }
+
+            if(itemName.contains("coral") && !itemName.contains("dead")){
+                spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 1));
             }
 
             if (itemName.contains("frosted_stone") || itemName.contains("black_steel"))

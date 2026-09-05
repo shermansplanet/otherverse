@@ -38,6 +38,8 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.GrindstoneEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -75,6 +77,11 @@ public class HallowHelper {
 
     public static SavedPracticeData createPracticeData(Level level) {
         return new SavedPracticeData(level);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        HallowCommand.register(event.getDispatcher());
     }
 
     public static SavedPracticeData loadPracticeData(CompoundTag tag, Level level) {

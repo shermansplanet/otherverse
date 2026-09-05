@@ -188,8 +188,8 @@
 		"otherverse:sulfur_block" : ["99 nether"],
 		"otherverse:quicksilver" : ["33 end"],
 		"otherverse:spawn_altar" : ["9 war"],
-		"otherverse:rotten_flesh_block" : ["16 flesh"],
-		"otherverse:intestines" : ["12 flesh"],
+		"otherverse:rotten_flesh_block" : ["16 flesh", "16 food"],
+		"otherverse:intestines" : ["12 flesh", "12 food"],
 
 		"biomesoplenty:flesh" : ["9 flesh"],
 		"biomesoplenty:porous_flesh" : ["9 flesh"],

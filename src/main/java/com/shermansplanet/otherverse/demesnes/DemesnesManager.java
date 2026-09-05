@@ -85,7 +85,7 @@ public class DemesnesManager {
         IDOLS(39, 126, "Idol Hands", "All wooden or lapis idols in this Demesne now act as if they were diamond."),
         MOB_REPOSITION(172, 126, "Spawn Consolidation", "If you put a spawn altar on top of a Demesne beacon, it will redirect all natural mob spawns in the bounds of your Demesne to spawn there instead. If there are multiple altars, a random one will be chosen."),
         PORTAL(172, 39, "Portals", "You can create permanent portals that anyone can use to travel to and from your Demesne, even across dimensions. Read more about how to create these portals in your Demesnes book."),
-        PROTECTION(89, 122, "Protection", "You are immune to damage from falling, heat, cold, and drowning while within your Demesne."),
+        PROTECTION(89, 122, "Protection", "You are immune to damage from falling, heat, cold, explosions, and water while within your Demesne. This also applies to anyone who can place blocks in your Demesne."),
         RECOVERY(122, 122, "Recovery", "Your health and hunger replenish within your Demesne."),
         SCHEMATIC(39, 85, "Living Architecture", "You can create diagrams that magically place blocks they are given, quickly copying and pasting large areas. Read more about these diagrams in your Demesnes book."),
         SPAWN_SET(122, 89, "Sanctuary", "Spawns can be set in your Demesne, even if a bed would normally explode in this dimension."),
@@ -704,15 +704,15 @@ public class DemesnesManager {
     public static void onGetHurt(LivingAttackEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         var demesne = getData(sp.serverLevel(), sp.blockPosition());
-        if (demesne == null
-                || !Objects.equals(demesne.practitioner, sp.getGameProfile().getName())
-                || demesne.getPerkLevel(DemesnePerk.PROTECTION) == 0) return;
+        if (demesne == null || demesne.getPerkLevel(DemesnePerk.PROTECTION) == 0 || !demesne.hasSanction(DemesnePerk.SANCTION_BUILD, sp)) return;
         if (event.getSource().is(DamageTypes.FALL)
                 || event.getSource().is(DamageTypes.ON_FIRE)
                 || event.getSource().is(DamageTypes.IN_FIRE)
                 || event.getSource().is(DamageTypes.LAVA)
                 || event.getSource().is(DamageTypes.FREEZE)
                 || event.getSource().is(DamageTypes.DROWN)
+                || event.getSource().is(DamageTypes.EXPLOSION)
+                || event.getSource().is(DamageTypes.PLAYER_EXPLOSION)
                 || event.getSource().is(DamageTypes.HOT_FLOOR)) {
             event.setCanceled(true);
         }

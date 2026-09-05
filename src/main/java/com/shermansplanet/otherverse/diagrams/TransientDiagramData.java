@@ -249,7 +249,6 @@ public class TransientDiagramData {
                 sl.setChunkForced(chunkPos.x, chunkPos.z, false);
             }
         }
-
     }
 
     public void removeChunkloader(BlockPos blockPos) {
