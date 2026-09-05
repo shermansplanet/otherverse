@@ -189,8 +189,8 @@ dependencies {
     // Use the full Curios API jar at runtime
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.14.1+1.20.1")
 
-    implementation fg.deobf("flat.dir:abyssal_decor_1.20.1:0.11.0")
-    implementation fg.deobf("flat.dir:CTM-1.20.1:1.1.10")
+//    implementation fg.deobf("flat.dir:abyssal_decor_1.20.1:0.11.0")
+//    implementation fg.deobf("flat.dir:CTM-1.20.1:1.1.10")
 //    implementation fg.deobf("flat.dir:paganbless:0.1.2")
 //    implementation fg.deobf("flat.dir:modonomicon-1.20.1-forge:1.79.3")
 //    implementation fg.deobf("flat.dir:Vampirism-1.20.1:1.10.16")

@@ -379,8 +379,9 @@ public class ContractTask {
     private boolean isBlockAcceptableTarget(BlockPos pos, boolean inPositionFilter) {
         switch (taskType) {
             case BREAK:
-                if (blockFilters.isEmpty() && itemFilters.isEmpty()) {
-                    if (!inPositionFilter && Math.round(mob.position().y) > pos.getY()) return false;
+                if (blockFilters.isEmpty()) {
+                    if (itemFilters.isEmpty() && !felling && !harvesting && !inPositionFilter && Math.round(mob.position().y) > pos.getY())
+                        return false;
                 } else {
                     var anyMatches = false;
                     for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
@@ -453,7 +454,7 @@ public class ContractTask {
                 }
                 return tryPlaceBlock(pos, heldItem, false, false);
             case OBSERVE:
-                if (countMin <= 1 && itemFilters.contains(mob.level().getBlockState(pos).getBlock().asItem())) {
+                if (countMin <= 1 && isValidBlock(mob.level().getBlockState(pos))) {
                     return true;
                 }
             case TAKE:
