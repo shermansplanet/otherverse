@@ -385,7 +385,6 @@ public class HallowHelper {
                 tryFillHallow(level, circle, diagram);
                 circle.markUpdated();
                 Otherverse.ADVANCEMENTS.trigger(diagram.getOwner(level), "hallow");
-                LOGGER.debug("DIAGRAM SUCCESS: HALLOWING");
                 return true;
             }
         }
