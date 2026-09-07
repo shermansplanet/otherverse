@@ -9,6 +9,8 @@ import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.spirits.ShrineHelper;
+import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -201,15 +203,10 @@ public class SympathyManager {
         if (diagram == null) return delta;
         var hallowPos = diagram.influences.get(focus.getPos());
         if (hallowPos == null) return delta;
-        var spindlePos = diagram.influences.get(hallowPos);
-        if (spindlePos == null) return delta;
         var level = focus.getFocusLevel();
         if (!(level instanceof ServerLevel sl)) return delta;
-        if (!(level.getBlockEntity(spindlePos) instanceof ChalkCircle spindleCircle)) return delta;
-        var isSpindle = spindleCircle.getItem().is(OtherverseItems.SPINDLE_BLOODY.get());
-        var isSelf = spindleCircle.getItem().is(OtherverseItems.SELF.get());
-        if (!isSelf && !isSpindle) return delta;
-        IFocus hallowFocus = DiagramManager.getOrCreateLevelData(level).allBlockFoci.get(hallowPos);
+        var data = DiagramManager.getOrCreateLevelData(level);
+        IFocus hallowFocus = data.allBlockFoci.get(hallowPos);
         if (hallowFocus == null) {
             if (level.getBlockEntity(hallowPos) instanceof ChalkCircle hallowCircle) {
                 hallowFocus = hallowCircle;
@@ -217,6 +214,20 @@ public class SympathyManager {
                 return delta;
             }
         }
+        BlockPos spindlePos = null;
+        if (hallowFocus.isBlock()) {
+            for (var otherHallowPos : ShrineHelper.getAllHallows(hallowPos, Spirits.FATE, data)) {
+                var blockFocus = data.allBlockFoci.get(otherHallowPos);
+                if(blockFocus == null || blockFocus.getDiagram() == null) continue;
+                spindlePos = blockFocus.getDiagram().influences.get(otherHallowPos);
+                if (spindlePos != null) break;
+            }
+        }
+        if (spindlePos == null) return delta;
+        if (!(level.getBlockEntity(spindlePos) instanceof ChalkCircle spindleCircle)) return delta;
+        var isSpindle = spindleCircle.getItem().is(OtherverseItems.SPINDLE_BLOODY.get());
+        var isSelf = spindleCircle.getItem().is(OtherverseItems.SELF.get());
+        if (!isSelf && !isSpindle) return delta;
 
         var price = Math.abs(delta) / 2;
         if (Math.abs(delta) % 2 == 1 && focus.getFocusLevel().getRandom().nextBoolean()) {
@@ -295,7 +306,7 @@ public class SympathyManager {
         var entity = getEntityByUniqueId(item.getOrCreateTag().getString("sympathy_target"), sl);
         if (!(entity instanceof Mob mob)) return;
         BlockFocus focus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), bb);
-        if(focus == null) return;
+        if (focus == null) return;
         DiagramManager.onMobInFocus(mob, focus, sl);
     }
 

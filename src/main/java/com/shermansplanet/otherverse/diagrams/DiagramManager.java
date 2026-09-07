@@ -376,10 +376,9 @@ public class DiagramManager {
         if (diagramData.getSympathyPosition(pos.toString()) != null) {
             diagramData.putSympathyPosition(pos.toString(), null);
         }
-        diagramData.removePlacedItemTag(pos);
         if (level instanceof ServerLevel sl) {
-            blockChanged(pos, sl);
             var state = sl.getBlockState(pos);
+            blockChanged(pos, sl);
             if (state.is(OtherverseBlocks.DEMESNE_BEACON.get())) {
                 DemesnesManager.onBeaconBroken(sl, pos);
             }
@@ -430,6 +429,9 @@ public class DiagramManager {
         }
         Level level = event.getPlayer().level();
         BlockBreak(level, event.getPos());
+        if (event.getPlayer().isCreative()) {
+            getOrCreateLevelData(level).removePlacedItemTag(event.getPos());
+        }
     }
 
     @SubscribeEvent
@@ -445,8 +447,11 @@ public class DiagramManager {
             return;
         }
         if (event.getVanillaEvent() == GameEvent.BLOCK_DESTROY) {
-            if (event.getContext().affectedState().isAir())
-                BlockBreak(sl, BlockPos.containing(event.getEventPosition()));
+            if (event.getContext().affectedState().isAir()) {
+                var pos = BlockPos.containing(event.getEventPosition());
+                getOrCreateLevelData(sl).removePlacedItemTag(pos);
+                BlockBreak(sl, pos);
+            }
         } else if (event.getVanillaEvent() == GameEvent.BLOCK_PLACE) {
             BlockPos pos = BlockPos.containing(event.getEventPosition());
             var bs = event.getContext().affectedState();

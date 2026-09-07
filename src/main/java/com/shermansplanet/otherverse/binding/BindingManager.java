@@ -362,6 +362,7 @@ public class BindingManager {
                     ItemEntity itementity = new ItemEntity(sl, pos.x, pos.y, pos.z, getHeldItem(mob));
                     itementity.setDefaultPickUpDelay();
                     sl.addFreshEntity(itementity);
+                    setHeldItem(mob, ItemStack.EMPTY);
                 }
             }
         }

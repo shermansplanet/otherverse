@@ -30,6 +30,7 @@ import com.shermansplanet.otherverse.ruins.MemorySnareBlockEntity;
 import com.shermansplanet.otherverse.spirits.*;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.core.BlockPos;

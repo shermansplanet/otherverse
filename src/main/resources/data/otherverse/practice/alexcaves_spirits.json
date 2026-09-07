@@ -70,6 +70,7 @@
     "alexscaves:frostmint": ["33 cold"],
     "alexscaves:frostmint_spwar": ["55 cold"],
     "alexscaves:radiant_essence": ["111 light"],
+    "alexscaves:sharpened_candy_cane": ["-70 war"],
 
     "alexscaves:bioluminesscence": ["9 light"],
     "alexscaves:depth_charge": ["5 water", "30 phlogiston", "10 war"],

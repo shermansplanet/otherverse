@@ -5,5 +5,17 @@
 	},
 	"healing" : {
 		"otherverse:spirit_flesh" : 1
-	}
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:stone",
+			"health" : 33,
+			"output" : "minecraft:copper_ore"
+		},
+		{
+			"input" : "minecraft:deepslate",
+			"health" : 33,
+			"output" : "minecraft:deepslate_copper_ore"
+		}
+	]
 }

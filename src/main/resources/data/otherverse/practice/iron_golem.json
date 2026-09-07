@@ -9,9 +9,13 @@
 	"transfusion" : [
 		{
 			"input" : "minecraft:stone",
-			"mob" : "minecraft:iron_golem",
 			"health" : 42,
 			"output" : "minecraft:iron_ore"
+		},
+		{
+			"input" : "minecraft:deepslate",
+			"health" : 42,
+			"output" : "minecraft:deepslate_iron_ore"
 		}
 	]
 }

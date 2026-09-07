@@ -156,6 +156,7 @@ public class PlacedHallowRenderer {
 
         var renderShrineBounds = SightManager.shouldRenderSight();
         if (renderShrineBounds) shrinesToRender.clear();
+        var shrinesToMake = new ArrayList<Pair<BlockPos, SpiritType>>();
 
         for (BlockPos pos : levelData.getAllPlacedItemPositions()) {
             if (player.position().distanceToSqr(new Vec3(pos.getX(), pos.getY(), pos.getZ())) > renderDist) continue;
@@ -169,8 +170,13 @@ public class PlacedHallowRenderer {
             if (!tag.contains("shrine") || !renderShrineBounds) continue;
             var shrine = ShrineHelper.shrinesByPosition.computeIfAbsent(player.level(), x -> new HashMap<>()).get(pos);
             if (shrine == null) {
-                shrine = ShrineHelper.getShrine(player.level(), pos, Spirits.spiritsByLabel.get(st));
+                shrinesToMake.add(Pair.of(pos, Spirits.spiritsByLabel.get(st)));
+                continue;
             }
+            shrinesToRender.add(shrine.parentShrine == null ? shrine : shrine.parentShrine);
+        }
+        for (var shrineToMake : shrinesToMake) {
+            var shrine = ShrineHelper.getShrine(player.level(), shrineToMake.getFirst(), shrineToMake.getSecond());
             shrinesToRender.add(shrine.parentShrine == null ? shrine : shrine.parentShrine);
         }
 

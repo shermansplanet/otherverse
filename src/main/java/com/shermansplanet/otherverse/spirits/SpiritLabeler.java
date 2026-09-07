@@ -288,11 +288,13 @@ public class SpiritLabeler {
                     .get(Attributes.ATTACK_SPEED).isEmpty()) {
                 float damage = 1;
                 for (AttributeModifier mod : modifiers.get(Attributes.ATTACK_DAMAGE)) {
-                    damage += mod.getAmount();
+                    if (mod.getOperation() == AttributeModifier.Operation.ADDITION)
+                        damage += mod.getAmount();
                 }
                 float speed = 4;
                 for (AttributeModifier mod : modifiers.get(Attributes.ATTACK_SPEED)) {
-                    speed += mod.getAmount();
+                    if (mod.getOperation() == AttributeModifier.Operation.ADDITION && mod.getAmount() < 0)
+                        speed += mod.getAmount();
                 }
                 int war = Math.round(damage * 10f * speed);
                 if (war >= 64) {
@@ -357,7 +359,7 @@ public class SpiritLabeler {
                 spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
             }
 
-            if(itemName.contains("coral") && !itemName.contains("dead")){
+            if (itemName.contains("coral") && !itemName.contains("dead")) {
                 spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 1));
             }
 

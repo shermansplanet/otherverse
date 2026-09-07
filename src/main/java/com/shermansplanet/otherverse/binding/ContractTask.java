@@ -840,7 +840,6 @@ public class ContractTask {
                         targetPos = tryGetBranch(targetPos);
                     }
                     mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
-                    this.mob.level().destroyBlock(targetPos, false, mob);
                     if (tool.isEmpty() && mob.getType() == EntityType.ENDERMAN) {
                         var tag = DiagramManager.getOrCreateLevelData(mob.level()).getPlacedItemTag(targetPos);
                         var item = blockstate.getBlock().asItem().getDefaultInstance();
@@ -849,6 +848,7 @@ public class ContractTask {
                     } else {
                         Block.dropResources(blockstate, mob.level(), targetPos, mob.level().getBlockEntity(targetPos), mob, tool);
                     }
+                    this.mob.level().destroyBlock(targetPos, false, mob);
                     if (!tool.isEmpty()) {
                         tool.hurtAndBreak(1, mob, m -> {
                             BindingManager.setHeldItem(m, ItemStack.EMPTY);

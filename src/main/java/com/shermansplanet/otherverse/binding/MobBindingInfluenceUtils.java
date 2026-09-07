@@ -584,10 +584,7 @@ public class MobBindingInfluenceUtils {
                 if (!DefaultAttributes.getSupplier((EntityType<? extends LivingEntity>) et).hasAttribute(Attributes.MAX_HEALTH))
                     continue;
                 MakeIdol(et);
-                try {
-                    mob.tick();
-                } catch (Exception ignored) {
-                }
+                // do NOT tick the temporary mobs. this is how we get giant trees
                 var le = (EntityType<? extends LivingEntity>) et;
                 if (!mobSpirits.containsKey(et)) {
                     var key = ForgeRegistries.ENTITY_TYPES.getKey(et);
