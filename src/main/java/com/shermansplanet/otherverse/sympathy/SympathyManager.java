@@ -147,8 +147,9 @@ public class SympathyManager {
 
     private static float onHpChange(LivingEntity entity, float amount, DamageSource damageSource) {
         if (!(entity.level() instanceof ServerLevel sl)) return amount;
-        var inFocus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
-        if (inFocus != null) amount = distributeHpChange(inFocus, (int) amount, damageSource);
+        for (var inFocus : DiagramManager.getFociInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox())) {
+            amount = distributeHpChange(inFocus, (int) amount, damageSource);
+        }
         if (entity.getPersistentData().contains("bindingId")) {
             var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
             var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
@@ -218,7 +219,7 @@ public class SympathyManager {
         if (hallowFocus.isBlock()) {
             for (var otherHallowPos : ShrineHelper.getAllHallows(hallowPos, Spirits.FATE, data)) {
                 var blockFocus = data.allBlockFoci.get(otherHallowPos);
-                if(blockFocus == null || blockFocus.getDiagram() == null) continue;
+                if (blockFocus == null || blockFocus.getDiagram() == null) continue;
                 spindlePos = blockFocus.getDiagram().influences.get(otherHallowPos);
                 if (spindlePos != null) break;
             }
@@ -305,9 +306,9 @@ public class SympathyManager {
     public static void tryBindFromSpindleItem(ItemStack item, ServerLevel sl, AABB bb) {
         var entity = getEntityByUniqueId(item.getOrCreateTag().getString("sympathy_target"), sl);
         if (!(entity instanceof Mob mob)) return;
-        BlockFocus focus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), bb);
-        if (focus == null) return;
-        DiagramManager.onMobInFocus(mob, focus, sl);
+        for (var focus : DiagramManager.getFociInBoundingBox(DiagramManager.getOrCreateLevelData(sl), bb)) {
+            DiagramManager.onMobInFocus(mob, focus, sl);
+        }
     }
 
     public static void setEntityUUID(Entity e, UUID id) {

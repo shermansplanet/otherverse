@@ -1,0 +1,20 @@
+{
+	"other" : "macabre:veintree_mid",
+	"transfusion" : [
+		{
+			"input" : "minecraft:nether_wart",
+			"health" : 22,
+			"output" : "macabre:raw_plasma"
+		},
+		{
+			"input" : "minecraft:glow_berries",
+			"health" : 33,
+			"output" : "macabre:raw_plasma"
+		},
+		{
+			"input" : "minecraft:sweet_berries",
+			"health" : 44,
+			"output" : "macabre:raw_plasma"
+		}
+	]
+}

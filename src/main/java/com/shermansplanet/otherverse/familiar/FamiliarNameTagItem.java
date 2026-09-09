@@ -56,22 +56,21 @@ public class FamiliarNameTagItem extends NameTagItem {
         var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
         var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
         if (binding == null || binding.mob != entity) return InteractionResult.PASS;
-        var diagram = binding.getFocus().getDiagram();
-        var blockFocus = data.allBlockFoci.get(entity.blockPosition());
-        if (blockFocus != null) diagram = blockFocus.getDiagram();
         var playerSet = new HashSet<EntityType<?>>();
         playerSet.add(EntityType.PLAYER);
         var requiredPower = Math.max(1, (int) (entity.getMaxHealth() / (binding.isPositive ? 4 : 2)));
-        BlockFocus otherfocus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
-        if (player.isCreative()
-                || diagram.trySpendPower(sl, binding.position, requiredPower * PowerSource.POWER_FROM_SELF, playerSet)
-                || (otherfocus != null && otherfocus.getDiagram() != null &&
-                otherfocus.getDiagram().trySpendPower(sl, otherfocus.getPos(), requiredPower * PowerSource.POWER_FROM_SELF, playerSet))) {
-            entity.setCustomName(stack.getHoverName());
-            FamiliarManager.makeFamiliar(entity, player);
-        } else {
-            player.sendSystemMessage(Component.literal("This mob needs to be influenced by " + requiredPower + " Self to complete this ritual."));
+        var otherfoci = DiagramManager.getFociInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
+        var bindingFocus = data.allBlockFoci.get(binding.position);
+        if(bindingFocus != null) otherfoci.add(bindingFocus);
+        for (var otherfocus : otherfoci) {
+            if (player.isCreative() || (otherfocus.getDiagram() != null &&
+                    otherfocus.getDiagram().trySpendPower(sl, otherfocus.getPos(), requiredPower * PowerSource.POWER_FROM_SELF, playerSet))) {
+                entity.setCustomName(stack.getHoverName());
+                FamiliarManager.makeFamiliar(entity, player);
+                return InteractionResult.CONSUME;
+            }
         }
+        player.sendSystemMessage(Component.literal("This mob needs to be influenced by " + requiredPower + " Self to complete this ritual."));
         return InteractionResult.CONSUME;
     }
 }

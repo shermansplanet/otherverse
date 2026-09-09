@@ -1,0 +1,10 @@
+{
+	"other" : "macabre:desert_worm",
+	"transfusion" : [
+		{
+			"input" : "minecraft:acacia_log",
+			"health" : 3,
+			"output" : "macabre:dried_log"
+		}
+	]
+}

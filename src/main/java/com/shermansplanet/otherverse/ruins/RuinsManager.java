@@ -485,37 +485,37 @@ public class RuinsManager {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onDeath(LivingDeathEvent event) {
         if (!(event.getEntity().level() instanceof ServerLevel sl) || !(event.getEntity() instanceof ServerPlayer player))
             return;
         var data = DiagramManager.getOrCreateLevelData(sl);
-        var focus = DiagramManager.getFocusInBoundingBox(data, player.getBoundingBox());
-        if (focus == null) return;
-        var blockBelow = sl.getBlockState(focus.getPos().below());
-        if (!blockBelow.is(Blocks.SCULK) && !blockBelow.is(Blocks.REINFORCED_DEEPSLATE)) return;
-        var xpCost = 0;
-        for (var influence : focus.getDiagram().influences.entrySet()) {
-            if (!influence.getValue().equals(focus.getPos())) continue;
-            var influenceState = sl.getBlockState(influence.getKey());
-            if (influenceState.is(Blocks.SOUL_FIRE)) xpCost += 10; // 1 minute
-            if (influenceState.is(Blocks.SOUL_TORCH)) xpCost += 100; // 10 minutes
-            if (influenceState.is(Blocks.SOUL_LANTERN)) xpCost += 600; // 1 hour
+        for(var focus : DiagramManager.getFociInBoundingBox(data, player.getBoundingBox())) {
+            var blockBelow = sl.getBlockState(focus.getPos().below());
+            if (!blockBelow.is(Blocks.SCULK) && !blockBelow.is(Blocks.REINFORCED_DEEPSLATE)) return;
+            var xpCost = 0;
+            for (var influence : focus.getDiagram().influences.entrySet()) {
+                if (!influence.getValue().equals(focus.getPos())) continue;
+                var influenceState = sl.getBlockState(influence.getKey());
+                if (influenceState.is(Blocks.SOUL_FIRE)) xpCost += 10; // 1 minute
+                if (influenceState.is(Blocks.SOUL_TORCH)) xpCost += 100; // 10 minutes
+                if (influenceState.is(Blocks.SOUL_LANTERN)) xpCost += 600; // 1 hour
+            }
+            if (blockBelow.is(Blocks.REINFORCED_DEEPSLATE)) {
+                if (xpCost <= 0) return;
+            } else {
+                xpCost = Math.min(xpCost, player.totalExperience);
+                if (xpCost <= 0) return;
+                player.giveExperiencePoints(-xpCost);
+                var seconds = xpCost * 6;
+                var effect = new MobEffectInstance(OtherversePotions.RUINS_BOUND.get(), seconds * 20, 0, false, false, true);
+                effect.setCurativeItems(List.of(OtherverseItems.ESCAPE_ROPE.get().getDefaultInstance()));
+                player.addEffect(effect);
+            }
+            event.setCanceled(true);
+            player.setHealth(player.getMaxHealth());
+            sendToRuins(player);
         }
-        if (blockBelow.is(Blocks.REINFORCED_DEEPSLATE)) {
-            if (xpCost <= 0) return;
-        } else {
-            xpCost = Math.min(xpCost, player.totalExperience);
-            if (xpCost <= 0) return;
-            player.giveExperiencePoints(-xpCost);
-            var seconds = xpCost * 6;
-            var effect = new MobEffectInstance(OtherversePotions.RUINS_BOUND.get(), seconds * 20, 0, false, false, true);
-            effect.setCurativeItems(List.of(OtherverseItems.ESCAPE_ROPE.get().getDefaultInstance()));
-            player.addEffect(effect);
-        }
-        event.setCanceled(true);
-        player.setHealth(player.getMaxHealth());
-        sendToRuins(player);
     }
 
     @SubscribeEvent

@@ -1,0 +1,10 @@
+{
+	"other" : "macabre:fernrot",
+	"transfusion" : [
+		{
+			"input" : "minecraft:oak_log",
+			"health" : 3,
+			"output" : "macabre:soaked_log"
+		}
+	]
+}

@@ -1,0 +1,15 @@
+{
+	"other" : "macabre:eyetree",
+	"transfusion" : [
+		{
+			"input" : "macabre:empty_watcher",
+			"health" : 55,
+			"output" : "macabre:watcher"
+		},
+		{
+			"input" : "macabre:empty_eyevein",
+			"health" : 55,
+			"output" : "macabre:eyevein"
+		}
+	]
+}

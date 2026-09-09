@@ -141,14 +141,14 @@ public class MobRetexturer {
         var resource = SpiritColorAnalyzer.getStreamFor(texLoc, SpiritColorAnalyzer.getPacks());
         if (resource == null) {
             System.out.println("COULD NOT LOCATE RESOURCE AT " + texLoc);
-            return null;
+            return MissingTextureAtlasSprite.getTexture().getPixels();
         }
         NativeImage texture;
         try {
             texture = NativeImage.read(resource);
         } catch (IOException e) {
             System.out.println("COULD NOT READ IMAGE AT " + texLoc);
-            return null;
+            return MissingTextureAtlasSprite.getTexture().getPixels();
         }
         return texture;
     }

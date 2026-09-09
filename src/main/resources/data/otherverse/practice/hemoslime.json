@@ -1,0 +1,10 @@
+{
+	"other" : "macabre:hemoslime",
+	"transfusion" : [
+		{
+			"input" : "macabre:bloodfungus",
+			"health" : 13,
+			"output" : "macabre:raw_blood_clot"
+		}
+	]
+}

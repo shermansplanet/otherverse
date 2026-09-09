@@ -98,6 +98,7 @@ public class SpiritExtractionRecipeCategory implements IRecipeCategory<SpiritExt
             SpiritAmount spiritAmount = recipe.spirits.get(i);
             //var coeff = SpiritAffinityTracker.getCoeff(Minecraft.getInstance().player.getGameProfile().getName(), spiritAmount.type());
             //var newAmount = (int) (spiritAmount.amount() * coeff);
+            if(spiritAmount.type() == Spirits.EMPTY) continue;
             var newAmount = spiritAmount.amount();
             if (recipe.input.is(OtherverseItems.IDOL.get())) {
                 var et = (EntityType<? extends LivingEntity>) IdolItem.getType(recipe.input);

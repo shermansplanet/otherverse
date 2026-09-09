@@ -319,7 +319,7 @@ public class MobTransfusions {
         if (sourceFocus.getItem().hasTag() && sourceFocus.getItem().getTag().contains("hallow")) {
             CompoundTag ht = sourceFocus.getItem().getTag().getCompound("hallow");
             spiritType = Spirits.spiritsByLabel.get(ht.getString("spirit_type"));
-            if (spiritType == null) {
+            if (spiritType == null || spiritType == Spirits.EMPTY) {
                 LOGGER.error("HALLOW WITHOUT SPIRIT TYPE");
                 return false;
             }

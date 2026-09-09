@@ -64,6 +64,8 @@ Spirits {
   public static final SpiritType COLOR_MAGENTA = register("magenta");
   public static final SpiritType COLOR_PINK = register("pink");
 
+  public static final SpiritType EMPTY = register("empty");
+
   public static SpiritType[] colorSpiritTypes = new SpiritType[]{
           COLOR_WHITE, COLOR_LIGHT_GRAY, COLOR_GRAY, COLOR_BLACK,
           COLOR_BROWN, COLOR_RED, COLOR_ORANGE, COLOR_YELLOW,

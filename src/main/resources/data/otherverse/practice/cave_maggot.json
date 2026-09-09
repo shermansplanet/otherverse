@@ -1,0 +1,20 @@
+{
+	"other" : "macabre:cave_maggot",
+	"transfusion" : [
+		{
+			"input" : "minecraft:raw_iron",
+			"health" : 17,
+			"output" : "macabre:raw_ferrum"
+		},
+		{
+			"input" : "minecraft:iron_ore",
+			"health" : 22,
+			"output" : "macabre:ferrum_ore"
+		},
+		{
+			"input" : "minecraft:deepslate_iron_ore",
+			"health" : 22,
+			"output" : "macabre:ferrum_ore"
+		}
+	]
+}

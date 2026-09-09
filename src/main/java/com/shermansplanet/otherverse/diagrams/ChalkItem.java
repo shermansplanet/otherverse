@@ -1,7 +1,9 @@
 package com.shermansplanet.otherverse.diagrams;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.MacabreCompat;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
@@ -103,6 +105,11 @@ public class ChalkItem extends Item implements DyeableLeatherItem {
         }
         if (player instanceof ServerPlayer sp) {
             Otherverse.ADVANCEMENTS.trigger(sp, "diagram");
+            sp.getCapability(ImplementManager.PRACTICE_HANDLER).ifPresent(practice ->
+            {
+                if (practice.getQuestStage() == MacabreCompat.QuestStage.UNAWAKENED)
+                    practice.setQuestStage(MacabreCompat.QuestStage.AWAKENED, sp);
+            });
         }
 
         if (player != null && !player.getAbilities().instabuild) {

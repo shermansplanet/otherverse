@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.capabilities;
 
+import com.shermansplanet.otherverse.MacabreCompat;
 import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.implement.SyncPracticeDataMessage;
 import com.shermansplanet.otherverse.spirits.SpiritType;
@@ -14,6 +15,7 @@ public class PracticeCapabilityImplementation implements IPracticeCapability {
 
     private CompoundTag implementTag = new CompoundTag();
     private CompoundTag familiarTag = new CompoundTag();
+    private MacabreCompat.QuestStage stage = MacabreCompat.QuestStage.UNAWAKENED;
 
     @Override
     public CompoundTag getImplement() {
@@ -47,10 +49,24 @@ public class PracticeCapabilityImplementation implements IPracticeCapability {
     }
 
     @Override
+    public MacabreCompat.QuestStage getQuestStage() {
+        return stage;
+    }
+
+    @Override
+    public void setQuestStage(MacabreCompat.QuestStage stage, ServerPlayer player) {
+        this.stage = stage;
+        if (player != null) {
+            sync(player);
+        }
+    }
+
+    @Override
     public CompoundTag serializeNBT() {
         final CompoundTag tag = new CompoundTag();
         tag.put("implement", implementTag);
         tag.put("familiar", familiarTag);
+        tag.putInt("macabreQuestStage", stage.ordinal());
         return tag;
     }
 
@@ -58,5 +74,6 @@ public class PracticeCapabilityImplementation implements IPracticeCapability {
     public void deserializeNBT(CompoundTag nbt) {
         this.implementTag = nbt.getCompound("implement");
         this.familiarTag = nbt.getCompound("familiar");
+        this.stage = MacabreCompat.QuestStage.values()[nbt.getInt("macabreQuestStage")];
     }
 }

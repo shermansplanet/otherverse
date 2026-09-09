@@ -1,0 +1,10 @@
+{
+	"other" : "macabre:fatty",
+	"transfusion" : [
+		{
+			"input" : "macabre:hard_stone",
+			"health" : 7,
+			"output" : "macabre:fat_ore"
+		}
+	]
+}

@@ -1,0 +1,21 @@
+{
+  "parent":"otherverse:diagram",
+  "display":{
+    "icon":{
+      "item": "minecraft:grass_block"
+    },
+    "title": "Fresh Air in Hollow Lungs",
+    "description": "Rescue one part of The Hollow Man from purgatory, earning its loyalty.",
+    "frame": "challenge",
+    "hidden": true
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "fresh_air"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

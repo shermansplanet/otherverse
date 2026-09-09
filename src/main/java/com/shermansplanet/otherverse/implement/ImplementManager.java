@@ -62,6 +62,7 @@ import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.*;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -173,6 +174,7 @@ public class ImplementManager {
         allowedImplements.add("cataclysm:astrape");
         allowedImplements.add("cataclysm:ceraunus");
         allowedImplements.add("cataclysm:brontes");
+        allowedImplements.add("macabre:sacrificial_dirk");
     }
 
     public static final AttributeModifier singleRangeAttributeModifier =
@@ -565,8 +567,9 @@ public class ImplementManager {
         event.getPlayer().addItem(event.getEntity().getItem());
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDeath(LivingDeathEvent event) {
+        if(event.isCanceled()) return;
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
         var hadImplement = false;
         var inventory = p.getInventory();

@@ -65,6 +65,13 @@ public class PracticeJsonManager extends SimpleJsonResourceReloadListener {
                 EntityType<? extends LivingEntity> other = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(other_name);
                 MobTransfusions.processOther(other, practice);
                 MobBindingInfluenceUtils.processOther(other, practice);
+                if(other_name.getNamespace().equals("macabre")){
+                    other_name = ResourceLocation.fromNamespaceAndPath(other_name.getNamespace(), other_name.getPath() + "_night");
+                    if(!ForgeRegistries.ENTITY_TYPES.containsKey(other_name)) continue;
+                    other = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(other_name);
+                    MobTransfusions.processOther(other, practice);
+                    MobBindingInfluenceUtils.processOther(other, practice);
+                }
             }
         }
         SpiritLabeler.onDoneLoadingJson();

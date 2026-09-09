@@ -1,0 +1,10 @@
+{
+	"other" : "macabre:gorehound",
+	"transfusion" : [
+		{
+			"input" : "macabre:big_sack",
+			"health" : 300,
+			"output" : "macabre:bag_of_gore"
+		}
+	]
+}

@@ -317,7 +317,6 @@ public class MobBindingInfluenceUtils {
         ALL_BINDING_INFLUENCES.data = fai;
         allFoods.clear();
         allBindingInfluences.clear();
-        LOGGER.debug("RECEIVING FOODS");
         for (var entry : fai.entrySet()) {
             var foods = new HashMap<ItemOrEntityType, Integer>();
             var bindingInfluences = new HashMap<ItemOrEntityType, Integer>();
@@ -449,7 +448,7 @@ public class MobBindingInfluenceUtils {
             return 0;
         }
 
-        if(item.hasTag() && item.getTag().contains("linked_position_x")) {
+        if (item.hasTag() && item.getTag().contains("linked_position_x")) {
             CompoundTag tabletTag = item.getTag();
             var st = Spirits.spiritsByLabel.get(tabletTag.getString("spirit_type"));
             ItemOrEntityType spiritItem = new ItemOrEntityType(Spirits.spiritItems.get(st).get());
@@ -459,6 +458,8 @@ public class MobBindingInfluenceUtils {
             var mobSpiritType = mobSpirits.get(mob.getType());
             if (mobSpiritType == st) {
                 return -HallowHelper.getShrineSpiritCountFromTablet(tabletTag, st);
+            } else if (mobSpiritType == SpiritTransfer.getOppositeSpiritType(st)) {
+                return HallowHelper.getShrineSpiritCountFromTablet(tabletTag, SpiritTransfer.getOppositeSpiritType(st));
             }
         }
 
@@ -472,6 +473,8 @@ public class MobBindingInfluenceUtils {
             var mobSpiritType = mobSpirits.get(mob.getType());
             if (mobSpiritType == st) {
                 return -hallowTag.getInt("spirit_count");
+            } else if (mobSpiritType == SpiritTransfer.getOppositeSpiritType(st)) {
+                return hallowTag.getInt("spirit_count");
             }
         }
         var ioe = new ItemOrEntityType(item.getItem());

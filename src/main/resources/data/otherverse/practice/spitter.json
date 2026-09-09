@@ -1,0 +1,13 @@
+{
+	"other" : "macabre:spitter",
+	"healing" : {
+		"macabre:scorching_acid" : 10
+	},
+	"transfusion" : [
+		{
+			"input" : "otherverse:rancid_flesh",
+			"health" : 700,
+			"output" : "macabre:sigil_of_disgust"
+		}
+	]
+}

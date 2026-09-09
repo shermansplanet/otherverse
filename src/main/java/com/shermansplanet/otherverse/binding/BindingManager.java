@@ -126,6 +126,12 @@ public class BindingManager {
         return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("unbound_contract") || data.contains("practitioner") || data.contains("practitioner_loyalty");
     }
 
+    public static boolean canBeCinnabarIdol(LivingEntity e) {
+        var data = e.getPersistentData();
+        if (data.isEmpty()) return false;
+        return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("practitioner");
+    }
+
     public static boolean isAlliedWith(LivingEntity e, String playerName) {
         if (e instanceof Player p && p.getGameProfile().getName().equals(playerName)) return true;
         if (e instanceof TamableAnimal ta && ta.getOwner() instanceof Player p && p.getGameProfile().getName().equals(playerName))
@@ -469,7 +475,10 @@ public class BindingManager {
             banshee.tryAnvilDrop();
             return;
         }
-        if (!isBoundOrContracted(mob)) return;
+        if (isBoundOrContracted(mob)) tickOtherGoals(mob);
+    }
+
+    public static void tickOtherGoals(Mob mob) {
         var usedFlags = new HashSet<>();
         for (var goal : mob.goalSelector.getAvailableGoals().stream().sorted(Comparator.comparingInt(WrappedGoal::getPriority)).toList()) {
             if (goal.getGoal() instanceof BoundGoal) continue;
@@ -489,9 +498,9 @@ public class BindingManager {
         }
     }
 
-    public static void stopAttacking(Mob mob) {
+    public static void stopAttacking(Mob mob, boolean stopAll) {
         for (var goal : mob.goalSelector.getAvailableGoals()) {
-            if (BoundGoal.isAttackGoal(goal.getGoal())) {
+            if ((stopAll && !(goal.getGoal() instanceof BoundGoal)) || BoundGoal.isAttackGoal(goal.getGoal())) {
                 if (goal.isRunning()) {
                     goal.stop();
                 }
@@ -500,6 +509,7 @@ public class BindingManager {
         if (mob.getTarget() != null && mob instanceof Warden w) w.clearAnger(mob.getTarget());
         mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, (LivingEntity) null);
         mob.setAggressive(false);
+        mob.setTarget(null);
     }
 
     public static void breakBinding(BindingInfo binding) {
@@ -619,6 +629,8 @@ public class BindingManager {
                 }
             }
         }
+
+        if (!canBeCinnabarIdol(mob)) return;
 
         if (item.is(OtherverseItems.CINNABAR_BLOCK.get())) {
             FleshbindingManager.fleshbindMob(mob, "otherverse:cinnabar_block", (ServerLevel) event.getLevel());

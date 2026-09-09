@@ -1,0 +1,10 @@
+{
+	"other" : "macabre:molar",
+	"transfusion" : [
+		{
+			"input" : "minecraft:birch_log",
+			"health" : 3,
+			"output" : "macabre:teething_log"
+		}
+	]
+}

@@ -25,6 +25,11 @@ public class SpiritItem extends Item {
     }
 
     @Override
+    public boolean canGrindstoneRepair(ItemStack stack) {
+        return true;
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         var item = player.getItemInHand(hand);
         if (!player.isCreative()) {

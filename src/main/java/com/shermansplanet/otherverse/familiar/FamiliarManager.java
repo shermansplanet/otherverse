@@ -988,12 +988,13 @@ public class FamiliarManager {
                     }
                 }
             }
-            BlockFocus focus = DiagramManager.getFocusInBoundingBox(DiagramManager.getOrCreateLevelData(level), mob.getBoundingBox());
-            if (focus != null && (binding == null || !focus.getPos().equals(binding.position))) {
-                if (BindingManager.tryBindMob(mob, focus, level, true) && binding != null) {
-                    var localData = DiagramManager.getOrCreateLevelData(binding.dimensionHash, false);
-                    localData.bindingsByPosition.remove(binding.position);
-                    localData.setDirty();
+            for (var focus : DiagramManager.getFociInBoundingBox(DiagramManager.getOrCreateLevelData(level), mob.getBoundingBox())) {
+                if (binding == null || !focus.getPos().equals(binding.position)) {
+                    if (BindingManager.tryBindMob(mob, focus, level, true) && binding != null) {
+                        var localData = DiagramManager.getOrCreateLevelData(binding.dimensionHash, false);
+                        localData.bindingsByPosition.remove(binding.position);
+                        localData.setDirty();
+                    }
                 }
             }
         }

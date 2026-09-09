@@ -55,26 +55,6 @@ public abstract class MobInjector extends LivingEntity {
         }
     }
 
-//    @Inject(method = "serverAiStep", at = @At(value = "INVOKE_STRING",
-//            target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
-//            args = "ldc=mob tick"), cancellable = true)
-//    protected final void onServerAiStepWither(CallbackInfo ci) {
-//        if (!getPersistentData().contains("bindingId")) return;
-//        var activity = getBrain().getActiveNonCoreActivity();
-//        if (activity.isPresent() && activity.get() == Activity.FIGHT) return;
-//        ci.cancel();
-//        this.level().getProfiler().push("controls");
-//        this.level().getProfiler().push("move");
-//        this.moveControl.tick();
-//        this.level().getProfiler().popPush("look");
-//        this.lookControl.tick();
-//        this.level().getProfiler().popPush("jump");
-//        this.jumpControl.tick();
-//        this.level().getProfiler().pop();
-//        this.level().getProfiler().pop();
-//        this.sendDebugPackets();
-//    }
-
     @Inject(method = "serverAiStep", at = @At(value = "HEAD"), cancellable = true)
     protected final void onServerAiStep(CallbackInfo ci) {
         if (!getPersistentData().contains("panicTicks")) {

@@ -213,6 +213,7 @@ public class Otherverse {
         ENTITIES.register(modEventBus);
         OtherverseBlocks.BLOCKS.register(modEventBus);
         for (SpiritType st : Spirits.allSpiritTypes) {
+            if(st == Spirits.EMPTY) continue;
             RegistryObject<Item> item = OtherverseItems.ITEMS.register(st.GetResourceLocation(),
                     () -> new SpiritItem(st, new Item.Properties()));
             Spirits.spiritItems.put(st, item);

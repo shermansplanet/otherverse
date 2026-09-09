@@ -1,0 +1,16 @@
+{
+	"other" : "macabre:fly",
+	"healing" : {
+		"macabre:necrosis_veins" : 5,
+		"minecraft:necrosis_muscle" : 5,
+		"minecraft:necrosis_skin" : 5,
+		"minecraft:necrosis_flesh" : 5
+	},
+	"transfusion" : [
+		{
+			"input" : "macabre:crystalized_blood",
+			"health" : 72,
+			"output" : "macabre:abhorrent"
+		}
+	]
+}

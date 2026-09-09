@@ -6,13 +6,13 @@ import com.shermansplanet.otherverse.OtherversePacketHandler;
 import com.shermansplanet.otherverse.PracticeWorldManager;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
 import com.shermansplanet.otherverse.diagrams.BlockFocus;
-import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.familiar.FaceSetter;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.others.TyphloticJellyfish;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.spirits.Spirits;
 import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -128,6 +128,7 @@ public class BoundGoal extends Goal {
         } else {
             currentMode = (currentMode + 1) % 3;
         }
+        if(currentMode == 2) BindingManager.stopAttacking(mob, true);
         mob.getPersistentData().putInt("familiar_mode", currentMode);
         displayFamiliarMode();
     }
@@ -237,7 +238,7 @@ public class BoundGoal extends Goal {
 
         List<IFocus> foci = new ArrayList<>();
 
-        int SPIRIT_DRAIN = (int) Math.ceil(mob.getMaxHealth() / 10);
+        int SPIRIT_DRAIN = BindingManager.getSpiritDrain(mob.getMaxHealth());
 
         for (var influence : bindingFocus.getDiagram().influences.entrySet()) {
             LOGGER.debug("{} -> {}", influence.getKey(), influence.getValue());
@@ -253,9 +254,10 @@ public class BoundGoal extends Goal {
             if (MobBindingInfluenceUtils.GetInfluence(mob, itemStack) * (binding.isPositive ? 1 : -1) >= 0) {
                 continue;
             }
-            if (itemStack.hasTag() && itemStack.getTag().contains("hallow") &&
-                    itemStack.getTag().getCompound("hallow").getInt("spirit_count") < SPIRIT_DRAIN) {
-                continue;
+            if (itemStack.hasTag() && itemStack.getTag().contains("hallow")) {
+                CompoundTag hallowTag = itemStack.getTag().getCompound("hallow");
+                var spent = focus.drainHallow(Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type")), SPIRIT_DRAIN, true, true);
+                if (spent < SPIRIT_DRAIN) continue;
             }
             foci.add(focus);
         }
@@ -270,13 +272,7 @@ public class BoundGoal extends Goal {
         ItemStack mostUniqueItem = mostUniqueFocus.getItem();
         if (mostUniqueItem.hasTag() && mostUniqueItem.getTag().contains("hallow")) {
             CompoundTag hallowTag = mostUniqueItem.getTag().getCompound("hallow");
-            hallowTag.putInt("spirit_count", hallowTag.getInt("spirit_count") - SPIRIT_DRAIN);
-            if (mostUniqueFocus.isBlock()) {
-                DiagramManager.getOrCreateLevelData(level)
-                        .putPlacedItemTag(mostUniqueFocus.getPos(), hallowTag);
-            } else if (mostUniqueFocus instanceof ChalkCircle cc) {
-                cc.markUpdated();
-            }
+            mostUniqueFocus.drainHallow(Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type")), SPIRIT_DRAIN, true, false);
         } else if (mostUniqueItem.getItem() instanceof IdolItem) {
             BindingInfo bindingInfo = DiagramManager.getOrCreateLevelData(level).bindingsByPosition.get(mostUniqueFocus.getPos());
             if (bindingInfo == null || bindingInfo.mob == null) {
@@ -319,7 +315,7 @@ public class BoundGoal extends Goal {
             return;
         }
         if (isAttacking) {
-            BindingManager.stopAttacking(mob);
+            BindingManager.stopAttacking(mob, false);
             isAttacking = false;
         }
         if (!mob.getBoundingBox().inflate(1).intersects(targetMob.getBoundingBox().inflate(1))) {
@@ -327,7 +323,7 @@ public class BoundGoal extends Goal {
             return;
         }
         targetMob.getNavigation().stop();
-        BindingManager.stopAttacking(targetMob);
+        BindingManager.stopAttacking(targetMob, false);
         if (practitioner == null) {
             getPractitioner();
             if (practitioner == null) return;
@@ -509,10 +505,9 @@ public class BoundGoal extends Goal {
         var shouldAttack = !(targetMob == null || !targetMob.isAttackable() || targetMob.isDeadOrDying());
 
         if (!shouldAttack) {
-            if (isAttacking) {
-                BindingManager.stopAttacking(mob);
-                isAttacking = false;
-            }
+            BindingManager.tickOtherGoals(mob);
+            BindingManager.stopAttacking(mob, false);
+            isAttacking = false;
             return;
         }
 

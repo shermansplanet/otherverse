@@ -509,11 +509,9 @@ public class DiagramManager {
             }
         }
 
-        BlockFocus focus = getFocusInBoundingBox(getOrCreateLevelData(sl), event.getEntity().getBoundingBox());
-        if (focus == null) {
-            return;
+        for (var focus : getFociInBoundingBox(getOrCreateLevelData(sl), event.getEntity().getBoundingBox())) {
+            onMobInFocus(mob, focus, sl);
         }
-        onMobInFocus(mob, focus, sl);
     }
 
     public static void onMobInFocus(Mob mob, BlockFocus focus, ServerLevel sl) {
@@ -531,16 +529,17 @@ public class DiagramManager {
         if (mob.getPersistentData().contains("bindingId")) DiagramManager.markDiagramActive(sl, focus.getDiagram());
     }
 
-    public static BlockFocus getFocusInBoundingBox(TransientDiagramData data, AABB bb) {
+    public static List<BlockFocus> getFociInBoundingBox(TransientDiagramData data, AABB bb) {
+        var foci = new ArrayList<BlockFocus>();
         for (var y = Mth.floor(bb.minY); y <= Mth.floor(bb.maxY); y++) {
             for (var x = Mth.floor(bb.minX); x <= Mth.floor(bb.maxX); x++) {
                 for (var z = Mth.floor(bb.minZ); z <= Mth.floor(bb.maxZ); z++) {
                     var focus = data.allBlockFoci.get(new BlockPos(x, y, z));
-                    if (focus != null) return focus;
+                    if (focus != null) foci.add(focus);
                 }
             }
         }
-        return null;
+        return foci;
     }
 
 

@@ -1,0 +1,13 @@
+{
+	"other" : "macabre:gorebat",
+	"healing" : {
+		"macabre:scorching_acid" : 10
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:sugar",
+			"health" : 5,
+			"output" : "macabre:solid_acid"
+		}
+	]
+}

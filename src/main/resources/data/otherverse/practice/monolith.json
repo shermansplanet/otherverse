@@ -1,0 +1,11 @@
+{
+	"other" : "macabre:monolith",
+	"spirit" : "death",
+	"transfusion" : [
+		{
+			"input" : "minecraft:ender_pearl",
+			"health" : 44,
+			"output" : "macabre:mortis_essence"
+		}
+	]
+}

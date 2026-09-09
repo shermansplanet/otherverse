@@ -1,0 +1,10 @@
+{
+	"other" : "macabre:gargantuan_molar",
+	"transfusion" : [
+		{
+			"input" : "otherverse:intestines",
+			"health" : 500,
+			"output" : "macabre:cubeomeat"
+		}
+	]
+}

@@ -65,7 +65,7 @@ public class FleshTechManager {
         event.setAmount(newAmount);
     }
 
-    private static Pair<Player, ItemStack> getClosestHeart(LivingEntity le) {
+    public static Pair<Player, ItemStack> getClosestHeart(LivingEntity le) {
         for (var p : le.level().getEntities(EntityType.PLAYER, le.getBoundingBox().inflate(16), (Player p) -> true)) {
             for (var hand : InteractionHand.values()) {
                 var item = p.getItemInHand(hand);
@@ -119,7 +119,7 @@ public class FleshTechManager {
         if (diagram.getOwnerName() != null) {
             mobData.putString("last_bound_by", diagram.getOwnerName());
         }
-        if(tag.contains("Items")){
+        if (tag.contains("Items")) {
             tag.remove("Items");
         }
 
@@ -136,17 +136,21 @@ public class FleshTechManager {
         for (var slot : EquipmentSlot.values()) {
             e.setItemSlot(slot, ItemStack.EMPTY);
         }
-        if(e instanceof AbstractChestedHorse ach){
+        if (e instanceof AbstractChestedHorse ach) {
             ach.setChest(false);
         }
         if (shrine.st == Spirits.FLESH) {
             var attr = e.getAttribute(Attributes.ATTACK_DAMAGE);
-            if (attr != null) attr.addPermanentModifier(
-                    new AttributeModifier(constructModifier, "homunculus", -0.5f, AttributeModifier.Operation.MULTIPLY_BASE));
+            if (attr != null) {
+                attr.removePermanentModifier(constructModifier);
+                attr.addPermanentModifier(new AttributeModifier(constructModifier, "homunculus", -0.5f, AttributeModifier.Operation.MULTIPLY_BASE));
+            }
         } else {
             var attr = e.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (attr != null) attr.addPermanentModifier(
-                    new AttributeModifier(constructModifier, "golem", -0.5f, AttributeModifier.Operation.MULTIPLY_BASE));
+            if (attr != null) {
+                attr.removePermanentModifier(constructModifier);
+                attr.addPermanentModifier(new AttributeModifier(constructModifier, "golem", -0.5f, AttributeModifier.Operation.MULTIPLY_BASE));
+            }
         }
 
         BindingManager.applyUnboundContract((Mob) e, false);

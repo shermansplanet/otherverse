@@ -1,0 +1,24 @@
+{
+	"other" : "macabre:cave_dweller",
+	"spirit" : "earth",
+	"healing" : {
+		"otherverse:spirit_death" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:cobblestone",
+			"health" : 7,
+			"output" : "macabre:weak_stone"
+		},
+		{
+			"input" : "minecraft:stone",
+			"health" : 7,
+			"output" : "macabre:hard_stone"
+		},
+		{
+			"input" : "minecraft:deepslate",
+			"health" : 7,
+			"output" : "macabre:solid_rock"
+		}
+	]
+}

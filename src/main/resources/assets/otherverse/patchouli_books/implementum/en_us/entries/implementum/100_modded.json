@@ -1,0 +1,11 @@
+{
+    "name": "Modded Implements",
+    "sortnum": 100,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "text": "Many modded tools, weapons, and armors can be taken as Implements; see those categories for details. The sacrificial dirk (the entry point to the macabre mod) can also be taken as an Implement to facilitate travel to that dimension."
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+	"other" : "macabre:worm",
+	"transfusion" : [
+		{
+			"input" : "minecraft:spruce_log",
+			"health" : 3,
+			"output" : "macabre:wasted_log"
+		}
+	]
+}

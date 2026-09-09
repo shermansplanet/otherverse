@@ -153,7 +153,7 @@ public class SpiritLabeler {
             for (var k2 : spiritsForItem.keySet()) {
                 spiritAmounts.add(new SpiritAmount(k2, spiritsForItem.get(k2)));
             }
-            spiritAmounts.sort(Comparator.comparingDouble(a -> a.type.id() * 0.01f - a.amount + (colorSpirits.contains(a.type) ? 16 : 0)));
+            spiritAmounts.sort(Comparator.comparingDouble(a -> a.type.id() * 0.01f - a.amount + (colorSpirits.contains(a.type) ? 16 : a.type == Spirits.EMPTY ? 999999 : 0)));
             try {
                 recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.getDescriptionId()),
                         spiritAmounts, k.getDefaultInstance()));
@@ -182,7 +182,9 @@ public class SpiritLabeler {
             SpiritAmount[] amounts = new SpiritAmount[spiritcounts.size()];
             for (var i = 0; i < spiritcounts.size(); i++) {
                 var parts = spiritcounts.get(i).getAsString().split(" ");
-                amounts[i] = new SpiritAmount(Spirits.spiritsByLabel.get(parts[1]), Integer.parseInt(parts[0]));
+                var st = parts[1].equals("empty") ? Spirits.EMPTY : Spirits.spiritsByLabel.get(parts[1]);
+                if (st == null) continue;
+                amounts[i] = new SpiritAmount(st, Integer.parseInt(parts[0]));
             }
             SPIRITS_FROM_JSON.data.put(item, amounts);
         }
@@ -370,6 +372,9 @@ public class SpiritLabeler {
                 var spiritType = SPIRIT_KEYWORDS.get(namepart);
                 if (spiritType == null) continue;
                 if (spiritAmounts.stream().anyMatch(s -> s.type == spiritType)) continue;
+                if (SPIRITS_FROM_JSON.data != null && SPIRITS_FROM_JSON.data.containsKey(item) &&
+                        Arrays.stream(SPIRITS_FROM_JSON.data.get(item)).anyMatch(s -> s.type == spiritType))
+                    continue;
                 spiritAmounts.add(new SpiritAmount(spiritType, 3));
             }
 

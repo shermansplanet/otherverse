@@ -6,6 +6,7 @@ import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.familiar.TreeStripper;
+import com.shermansplanet.otherverse.spirits.FleshTechManager;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -328,6 +329,14 @@ public class ContractTask {
                                 || (!isMonster && !blockFilters.contains(Items.HAY_BLOCK))) {
                             continue;
                         }
+                    }
+                }
+                if (mob.getPersistentData().contains("construct_type")) {
+                    var pos = le.blockPosition();
+                    if (mob.getPersistentData().getString("construct_type").equals(Spirits.FLESH.label())) {
+                        if (ShrineHelper.getShrinesFor(mob, pos, Spirits.FLESH).isEmpty() && FleshTechManager.getClosestHeart(le) != null) continue;
+                    } else {
+                        if (ShrineHelper.getShrinesFor(mob, pos, Spirits.TECH).isEmpty()) continue;
                     }
                 }
                 float dist = (float) le.position().distanceTo(mob.position());
@@ -1081,7 +1090,7 @@ public class ContractTask {
         directPath = null;
         ticksInSameBlock = 0;
         lastPos = null;
-        BindingManager.stopAttacking(mob);
+        BindingManager.stopAttacking(mob, true);
         boundGoal.isAttacking = false;
         decider = decider != null ? decider : onEither != null ? onEither : boundGoal.rootDecider;
         boundGoal.switchToDecider(decider);
