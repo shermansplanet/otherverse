@@ -33,23 +33,20 @@ public abstract class BlockPlaceInjector {
             return;
         }
         diagramData.removePlacedItemTag(pos);
-        Item itemToMatch = blockState.getBlock().asItem();
         List<ItemStack> drops = ci.getReturnValue();
         var newDrops = new ArrayList<ItemStack>();
         for (ItemStack drop : drops) {
-            if (drop.is(itemToMatch)) {
-                if(drop.getCount() > 1){
-                    newDrops.add(drop.copyWithCount(drop.getCount() - 1));
-                    drop.setCount(1);
-                }
-                tag.remove("shrine");
-                drop.getOrCreateTag().put("hallow", tag);
-                if(tag.contains("spawn_altar_type")) {
-                    drop.getOrCreateTagElement("BlockEntityTag").putString("spawn_altar_type", tag.getString("spawn_altar_type"));
-                }
-                HallowHelper.addFakeEnchantment(drop.getTag());
-                break;
+            if (drop.getCount() > 1) {
+                newDrops.add(drop.copyWithCount(drop.getCount() - 1));
+                drop.setCount(1);
             }
+            tag.remove("shrine");
+            drop.getOrCreateTag().put("hallow", tag);
+            if (tag.contains("spawn_altar_type")) {
+                drop.getOrCreateTagElement("BlockEntityTag").putString("spawn_altar_type", tag.getString("spawn_altar_type"));
+            }
+            HallowHelper.addFakeEnchantment(drop.getTag());
+            break;
         }
         drops.addAll(newDrops);
     }

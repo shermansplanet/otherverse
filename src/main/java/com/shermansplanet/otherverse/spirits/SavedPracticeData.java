@@ -109,6 +109,7 @@ public class SavedPracticeData extends SavedData {
             i++;
         }
         if (i > 0) tag.put("hitlist", hitlist);
+        LOGGER.debug("SAVED PRACTICE DATA");
         return tag;
     }
 }

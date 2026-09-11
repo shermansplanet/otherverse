@@ -3,6 +3,8 @@ package com.shermansplanet.otherverse.diagrams;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.binding.BindingInfo;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
+import com.shermansplanet.otherverse.registries.OtherverseBlocks;
+import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
 import com.shermansplanet.otherverse.spirits.SpiritType;
@@ -70,6 +72,7 @@ public class BlockFocus implements IFocus {
     public ItemStack getItemNotMob() {
         var levelData = DiagramManager.getOrCreateLevelData(level);
         BlockState blockstate = level.getBlockState(blockPos);
+        if(blockstate.is(OtherverseBlocks.CHALK_LINE.get())) return OtherverseItems.CHALK.get().getDefaultInstance();
         Item item = blockReplacements.getOrDefault(blockstate.getBlock(), blockstate.getBlock().asItem());
         ItemStack stack = new ItemStack(item);
         if (blockstate.is(Blocks.NETHER_PORTAL)) {

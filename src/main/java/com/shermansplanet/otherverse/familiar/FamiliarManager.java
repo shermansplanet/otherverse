@@ -72,6 +72,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.ITeleporter;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
@@ -84,6 +85,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import top.theillusivec4.caelus.api.CaelusApi;
 import virtuoel.pehkui.api.ScaleRegistries;
@@ -1193,23 +1195,23 @@ public class FamiliarManager {
         }
 
         var data = DiagramManager.getOrCreateLevelData(player.getServer().overworld());
-        var binding = data.bindingsById.get(entityTag.getCompound("ForgeData").getUUID("bindingId"));
-        var oldDimensionHash = binding.dimensionHash;
-        LOGGER.debug("OLD DIMENSION: {}", oldDimensionHash);
+        var bindingId = entityTag.getCompound("ForgeData").getUUID("bindingId");
+        var binding = data.bindingsById.get(bindingId);
         var level = player.serverLevel();
-        var playerDimensionHash = DiagramManager.getDimensionHash(level);
-        LOGGER.debug("PLAYER DIMENSION: {}", oldDimensionHash);
-        if (oldDimensionHash != playerDimensionHash) {
-            var oldDimension = binding.getLocalLevel();
-            if (oldDimension != null) {
-                var oldEntity = oldDimension.getEntity(id);
-                if (oldEntity != null) {
-                    LOGGER.debug("DISCARDING OTHER DIMENSION ENTITY");
-                    oldEntity.discard();
+        if (binding != null) {
+            var oldDimensionHash = binding.dimensionHash;
+            var playerDimensionHash = DiagramManager.getDimensionHash(level);
+            if (oldDimensionHash != playerDimensionHash) {
+                var oldDimension = binding.getLocalLevel();
+                if (oldDimension != null) {
+                    var oldEntity = oldDimension.getEntity(id);
+                    if (oldEntity != null) {
+                        oldEntity.discard();
+                    }
                 }
+                binding.dimensionHash = DiagramManager.getDimensionHash(level);
+                data.setDirty();
             }
-            binding.dimensionHash = DiagramManager.getDimensionHash(level);
-            data.setDirty();
         }
 
         if (entity == null) {
@@ -1224,6 +1226,12 @@ public class FamiliarManager {
             entity = makeMobFromTag(type, familiarData, spawnPos, level);
         } else {
             entity.moveTo(spawnPos);
+        }
+
+        if (binding == null) {
+            binding = new BindingInfo(bindingId, BlockPos.containing(spawnPos), (Mob) entity, level, new CompoundTag(), DiagramManager.getDimensionHash(level), false, true);
+            data.bindingsById.put(bindingId, binding);
+            data.savedData.setDirty();
         }
 
         if (revived) {
@@ -1713,7 +1721,7 @@ public class FamiliarManager {
 
     public static void onInteract(PlayerInteractEvent.EntityInteractSpecific event) {
         var target = event.getTarget();
-        if (target instanceof EnderDragonPart ep) target = ep.parentMob;
+        if (target instanceof PartEntity<?> ep) target = ep.getParent();
         var name = event.getEntity().getGameProfile().getName();
         if (FamiliarManager.isFamiliar(target)) {
             if (!getPractitionerForFamiliar(target).equals(name)) return;

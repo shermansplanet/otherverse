@@ -458,7 +458,7 @@ public class MobBindingInfluenceUtils {
             var mobSpiritType = mobSpirits.get(mob.getType());
             if (mobSpiritType == st) {
                 return -HallowHelper.getShrineSpiritCountFromTablet(tabletTag, st);
-            } else if (mobSpiritType == SpiritTransfer.getOppositeSpiritType(st)) {
+            } else if (SpiritTransfer.getOppositeSpiritType(mobSpiritType) == st) {
                 return HallowHelper.getShrineSpiritCountFromTablet(tabletTag, SpiritTransfer.getOppositeSpiritType(st));
             }
         }
@@ -473,7 +473,7 @@ public class MobBindingInfluenceUtils {
             var mobSpiritType = mobSpirits.get(mob.getType());
             if (mobSpiritType == st) {
                 return -hallowTag.getInt("spirit_count");
-            } else if (mobSpiritType == SpiritTransfer.getOppositeSpiritType(st)) {
+            } else if (SpiritTransfer.getOppositeSpiritType(mobSpiritType) == st) {
                 return hallowTag.getInt("spirit_count");
             }
         }

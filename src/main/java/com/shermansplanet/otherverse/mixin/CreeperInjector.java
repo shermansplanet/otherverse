@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Creeper.class)
-public class CreeperInjector extends Monster implements PowerableMob {
+public abstract class CreeperInjector extends Monster implements PowerableMob {
 
     private static int effectDuration = 20 * 30;
 
@@ -45,10 +45,6 @@ public class CreeperInjector extends Monster implements PowerableMob {
                 16.0F, 1.0D, 1.2D,
                 (entity) -> entity instanceof Player player && (FamiliarManager.hasFamiliarType(player, EntityType.CAT) || FamiliarManager.hasFamiliarType(player, EntityType.OCELOT)));
         goalSelector.addGoal(3, avoidGoal);
-    }
-
-    public boolean isPowered() {
-        return false;
     }
 
     @Inject(method = "explodeCreeper", at = @At("HEAD"), cancellable = true)

@@ -37,7 +37,7 @@
         {
             "title": "Placed Hallows",
             "type": "patchouli:text",
-            "text": "Many hallows can be placed in the world as blocks. You can use a held hallow on a placed hallow to extract spirits from it (hold shift to insert spirits instead).$(br2)When breaking a placed hallow, it will only remain a hallow if the block drops itself.$(br2)You can also use the /hallow command in creative to hallow what you're holding."
+            "text": "Many hallows can be placed in the world as blocks. You can use a held hallow on a placed hallow to extract spirits from it (hold shift to insert spirits instead).$(br2)You can also use the /hallow command in creative to hallow what you're holding."
         },
         {
             "type": "patchouli:image",

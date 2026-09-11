@@ -144,7 +144,10 @@ public class MobTransfusions {
         }
         BlockPos target = diagram.influences.get(focus.getPos());
         BindingInfo binding = DiagramManager.getBindingOrBoundMobAt(level, target);
-        if (binding == null || binding.mob == null || !level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, focus.getPos()).equals(focus.getPos())) {
+        if (binding == null || binding.mob == null) {
+            return false;
+        }
+        if(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, focus.getPos()).getY() > focus.getPos().getY()){
             return false;
         }
         if (!diagram.trySpendPower(level, focus.getPos(), 33, new HashSet<>())) {

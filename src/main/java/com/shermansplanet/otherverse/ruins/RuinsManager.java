@@ -51,6 +51,7 @@ import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.ITeleporter;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.*;
@@ -401,6 +402,8 @@ public class RuinsManager {
         if (!event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD) || sp.level().dimension() != ModDimensions.RUINS_KEY) {
             return;
         }
+        event.setCanceled(true);
+        sp.resetFallDistance();
         returnFromRuins(sp);
     }
 

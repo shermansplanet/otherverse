@@ -90,11 +90,13 @@ public class MobRetexturer {
 
     private static Palette paletteFromSpirit(String s) {
         var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
+        if(image == null) image = MissingTextureAtlasSprite.getTexture().getPixels();
         return new Palette(Collections.singleton(image), true);
     }
 
     private static Palette paletteFromSpiritSplit(String s) {
         var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
+        if(image == null) image = MissingTextureAtlasSprite.getTexture().getPixels();
         return new Palette(Collections.singleton(image), false);
     }
 
@@ -141,14 +143,14 @@ public class MobRetexturer {
         var resource = SpiritColorAnalyzer.getStreamFor(texLoc, SpiritColorAnalyzer.getPacks());
         if (resource == null) {
             System.out.println("COULD NOT LOCATE RESOURCE AT " + texLoc);
-            return MissingTextureAtlasSprite.getTexture().getPixels();
+            return null;
         }
         NativeImage texture;
         try {
             texture = NativeImage.read(resource);
         } catch (IOException e) {
             System.out.println("COULD NOT READ IMAGE AT " + texLoc);
-            return MissingTextureAtlasSprite.getTexture().getPixels();
+            return null;
         }
         return texture;
     }

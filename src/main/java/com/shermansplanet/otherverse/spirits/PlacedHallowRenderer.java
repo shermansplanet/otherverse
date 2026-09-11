@@ -94,6 +94,7 @@ public class PlacedHallowRenderer {
     public static void renderTick(RenderLevelStageEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
+        if(event.getProjectionMatrix().get(3,3) > 0.5f) return;
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             renderHallows(player, event);
         }

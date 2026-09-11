@@ -494,7 +494,16 @@ public class HallowHelper {
                 spiritCount += drainBlockHallow(sl, event.getPos(), itemSpiritType,
                         Math.min(spiritCapacity - spiritCount, otherAmount), false, false);
             }
-            hallowTag.putInt("spirit_count", spiritCount);
+            if(stack.getCount() > 1){
+                stack.shrink(1);
+                var newStack = stack.copyWithCount(1);
+                newStack.getOrCreateTag().getCompound("hallow").putInt("spirit_count", spiritCount);
+                if(!event.getEntity().getInventory().add(newStack)){
+                    event.getEntity().drop(newStack, false);
+                }
+            }else {
+                hallowTag.putInt("spirit_count", spiritCount);
+            }
             if (spiritCount == 0 && isBucketImplement) {
                 itemTag.remove("hallow");
                 ListTag listtag = itemTag.getList("Enchantments", 10);
@@ -802,6 +811,7 @@ public class HallowHelper {
                 }
             }
             if (sourceFocus.getItem().is(Items.BEDROCK) && !OtherverseConfig.BEDROCK_REMOVAL.get()) continue;
+            if (sourceFocus.getItem().is(OtherverseItems.CHALK.get())) continue;
 
             new SpiritTransfer(focus, sourceFocus, SpiritAffinityTracker.getTransferDuration(focus.getDiagram().getOwnerName(), spiritType));
         }

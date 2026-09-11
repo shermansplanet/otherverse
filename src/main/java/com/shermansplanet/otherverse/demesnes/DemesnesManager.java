@@ -812,6 +812,10 @@ public class DemesnesManager {
             return;
         var arr = demesne.spawnDestinations.toArray(new BlockPos[0]);
         var pos = arr[sl.getRandom().nextInt(arr.length)];
+        if(!sl.getBlockState(pos).is(OtherverseBlocks.SPAWN_ALTAR.get()) || !sl.getBlockState(pos).is(OtherverseBlocks.DEMESNE_BEACON.get())){
+            demesne.removeSpawnDestination(pos);
+            return;
+        }
         mob.setPos(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f);
     }
 

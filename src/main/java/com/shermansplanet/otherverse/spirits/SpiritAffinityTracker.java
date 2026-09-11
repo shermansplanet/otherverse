@@ -27,6 +27,7 @@ public class SpiritAffinityTracker {
             if (demesneType != null) tag.putInt("demesneType", demesneType.id());
             var baseAffinityTag = new CompoundTag();
             for (var ba : baseAffinities.entrySet()) {
+                if(ba == null || ba.getKey() == null || ba.getValue() == null) continue;
                 baseAffinityTag.putFloat(ba.getKey().label(), ba.getValue());
             }
             tag.put("baseAffinities", baseAffinityTag);
@@ -82,6 +83,7 @@ public class SpiritAffinityTracker {
     public static CompoundTag save() {
         var tag = new CompoundTag();
         for (var playerName : playerAffinities.keySet()) {
+            if(playerName == null) continue;
             tag.put(playerName, playerAffinities.get(playerName).save());
         }
         return tag;

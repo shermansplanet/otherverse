@@ -131,7 +131,9 @@ public class TransientDiagramData {
     public void save(CompoundTag tag) {
         CompoundTag placedTags = new CompoundTag();
         CompoundTag placedTagPositions = new CompoundTag();
+        LOGGER.debug("SAVING...");
         for (BlockPos pos : placedItemTags.keySet()) {
+            if(pos == null || placedItemTags.get(pos) == null) continue;
             placedTags.put(pos.toString(), placedItemTags.get(pos));
             placedTagPositions.putInt(pos + "_x", pos.getX());
             placedTagPositions.putInt(pos + "_y", pos.getY());
@@ -142,12 +144,14 @@ public class TransientDiagramData {
 
         CompoundTag bindings = new CompoundTag();
         for (UUID id : bindingsById.keySet()) {
+            if(id == null || bindingsById.get(id) == null) continue;
             bindings.put(id.toString(), bindingsById.get(id).encode());
         }
         tag.put("bindings", bindings);
 
         CompoundTag sympathyPositionsTag = new CompoundTag();
         for (var sympathyPos : sympathyPositions.entrySet()) {
+            if(sympathyPos == null || sympathyPos.getKey() == null || sympathyPos.getValue() == null) continue;
             var pos = sympathyPos.getValue();
             sympathyPositionsTag.putIntArray(sympathyPos.getKey(), new int[]{
                     pos.getX(), pos.getY(), pos.getZ()
@@ -157,6 +161,7 @@ public class TransientDiagramData {
 
         CompoundTag demesnesTag = new CompoundTag();
         for (var demesne : claimedDemesnes.entrySet()) {
+            if(demesne == null || demesne.getKey() == null || demesne.getValue() == null) continue;
             LOGGER.debug("SAVING DEMESNE: " + demesne.getKey());
             demesnesTag.put(demesne.getKey(), demesne.getValue().getTag());
         }
@@ -168,6 +173,7 @@ public class TransientDiagramData {
 
         var selfPositionsTag = new CompoundTag();
         for (var sp : selfPositions.entrySet()) {
+            if(sp == null || sp.getKey() == null || sp.getValue() == null) continue;
             var ints = new ArrayList<Integer>();
             for (var pos : sp.getValue()) {
                 ints.add(pos.getX());
@@ -178,6 +184,7 @@ public class TransientDiagramData {
             selfPositionsTag.put(sp.getKey(), positions);
         }
         tag.put("selfPositions", selfPositionsTag);
+        LOGGER.debug("SAVED");
     }
 
     public Set<BlockPos> getAllPlacedItemPositions() {

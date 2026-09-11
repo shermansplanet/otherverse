@@ -79,7 +79,7 @@
     "alexscaves:glow_ink_bomb": ["9 light", "9 war"],
     "alexscaves:magic_conch": ["33 fate", "22 war", "22 water"],
     "alexscaves:sea_staff": ["33 fate", "22 war", "22 water"],
-    "alexscaves:marine_snow": ["3 water"],
+    "alexscaves:marine_snow": ["3 water", "-3 cold"],
     "alexscaves:ortholance": ["24 water"],
     "alexscaves:pearl": ["11 fortune", "3 water"],
     "alexscaves:sea_glass_shards": ["4 water", "2 technology"],

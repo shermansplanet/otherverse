@@ -51,21 +51,21 @@ public class SpiritLabeler {
     static {
         var spiritKeywords = new HashMap<SpiritType, String[]>();
         spiritKeywords.put(Spirits.EARTH, new String[]{"earth", "stone", "rock", "dirt", "terra", "mud", "soil", "cobblestone", "sandstone"});
-        spiritKeywords.put(Spirits.AIR, new String[]{"air", "breeze", "wind", "squall", "storm", "lightning"});
+        spiritKeywords.put(Spirits.AIR, new String[]{"air", "breeze", "wind", "squall", "storm", "lightning", "lungs"});
         spiritKeywords.put(Spirits.FIRE, new String[]{"fire", "flame", "heat", "hot", "blaze", "ember", "cinder", "inferno", "magma", "lava"});
         spiritKeywords.put(Spirits.COLD, new String[]{"cold", "chill", "chilled", "frost", "snow", "ice", "snowy", "icy", "frozen", "freezing"});
         spiritKeywords.put(Spirits.WATER, new String[]{"water", "prismarine", "seastone", "coral", "ocean", "sea", "aqua", "aquatic", "fish", "rain"});
-        spiritKeywords.put(Spirits.DARK, new String[]{"dark", "darkness"});
-        spiritKeywords.put(Spirits.TIME, new String[]{"time", "clock", "ancient", "rusty", "glass", "sand"});
-        spiritKeywords.put(Spirits.FATE, new String[]{"fate", "magic", "destiny", "sorcerer", "witch", "warlock", "magical", "spellbook", "grimoire", "sacred", "divine", "web", "totem"});
+        spiritKeywords.put(Spirits.DARK, new String[]{"dark", "darkness", "stygian", "blind", "sculk"});
+        spiritKeywords.put(Spirits.TIME, new String[]{"time", "clock", "ancient", "rusty", "rust", "old", "glass", "sand"});
+        spiritKeywords.put(Spirits.FATE, new String[]{"fate", "magic", "destiny", "sorcerer", "witch", "warlock", "magical", "spellbook", "grimoire", "sacred", "divine", "web", "totem", "chain", "enchanting", "enchanted"});
         spiritKeywords.put(Spirits.WAR, new String[]{"war", "battle", "captain", "guard", "soldier", "warrior", "fighter", "arrow", "bow"});
-        spiritKeywords.put(Spirits.PROTECTION, new String[]{"protection", "shield", "armor", "aegis"});
+        spiritKeywords.put(Spirits.PROTECTION, new String[]{"protection", "shield", "armor", "aegis", "tough", "defense", "defensive"});
         spiritKeywords.put(Spirits.FLESH, new String[]{"flesh", "blood", "fleshy", "gore", "gory", "meat", "bloody", "technoflesh", "heart", "sanguine", "sanguinite"});
         spiritKeywords.put(Spirits.TECH, new String[]{"tech", "technology", "techno", "redstone", "circuit", "computer", "wire", "cable", "golem", "technoflesh", "diode", "electronic", "electronics", "tank", "pipe"});
         spiritKeywords.put(Spirits.FORTUNE, new String[]{"fortune", "gold", "golden", "coin", "coins", "precious", "gilded"});
         spiritKeywords.put(Spirits.DEATH, new String[]{"death", "bone", "skull", "mortem", "plague", "bones", "dead", "necrotic", "skeleton", "mold", "moldy", "decaying", "rot"});
         spiritKeywords.put(Spirits.NETHER, new String[]{"nether", "netherrack", "netherite", "blackstone"});
-        spiritKeywords.put(Spirits.END, new String[]{"end", "purpur", "void", "chorus"});
+        spiritKeywords.put(Spirits.END, new String[]{"end", "purpur", "void", "chorus", "eldritch"});
         for (var entry : spiritKeywords.entrySet()) {
             for (var str : entry.getValue()) {
                 SPIRIT_KEYWORDS.put(str, entry.getKey());
@@ -368,6 +368,8 @@ public class SpiritLabeler {
             if (itemName.contains("frosted_stone") || itemName.contains("black_steel"))
                 spiritAmounts.add(new SpiritAmount(Spirits.COLD, 3));
 
+            if (itemName.contains("pressure_plate")) spiritAmounts.add(new SpiritAmount(Spirits.TECH, 1));
+
             for (var namepart : itemName.split("_")) {
                 var spiritType = SPIRIT_KEYWORDS.get(namepart);
                 if (spiritType == null) continue;
@@ -375,6 +377,7 @@ public class SpiritLabeler {
                 if (SPIRITS_FROM_JSON.data != null && SPIRITS_FROM_JSON.data.containsKey(item) &&
                         Arrays.stream(SPIRITS_FROM_JSON.data.get(item)).anyMatch(s -> s.type == spiritType))
                     continue;
+                if (spiritType == Spirits.FIRE && itemName.contains("coral")) continue;
                 spiritAmounts.add(new SpiritAmount(spiritType, 3));
             }
 

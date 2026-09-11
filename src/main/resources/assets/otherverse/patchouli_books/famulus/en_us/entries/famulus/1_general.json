@@ -10,7 +10,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "You can give your Familiar contracts as if it were a bound mob. You can also right-click it with an empty hand to switch between simpler behaviors as though it were a tamed mob.$(br2)Aquatic Familiars will not suffocate on land, and sunlight-sensitive Familiars will not burn in sun. Familiars are immune to zombification."
+            "text": "You can give your Familiar contracts as if it were a bound mob.$(br2)Aquatic Familiars will not suffocate on land, and sunlight-sensitive Familiars will not burn in sun. Familiars are immune to zombification.$(br2)If your Familiar is in a loaded chunk, its colors will affect how you appear in the Sight."
         },
         {
             "type": "patchouli:text",

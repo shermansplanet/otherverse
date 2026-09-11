@@ -45,6 +45,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent.EnderEntity;
@@ -580,8 +581,8 @@ public class BindingManager {
         var item = event.getItemStack();
 
         var target = event.getTarget();
-        if (target instanceof EnderDragonPart ep) {
-            target = ep.parentMob;
+        if (target instanceof PartEntity<?> ep) {
+            target = ep.getParent();
         }
 
         if (item.isEmpty() && event.getTarget() instanceof LivingEntity le && getHeldItem(le).isEmpty()) {
