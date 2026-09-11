@@ -258,7 +258,7 @@ public class Otherverse {
     }
 
     public static boolean isDay(ServerLevel overworld) {
-        return overworld.dayTime() < 13000;
+        return overworld.getDayTime() % 24000 < 12000;
     }
 
     public void addReloadListeners(AddReloadListenerEvent event) {

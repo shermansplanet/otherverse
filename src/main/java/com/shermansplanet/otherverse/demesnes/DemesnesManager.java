@@ -628,7 +628,7 @@ public class DemesnesManager {
                 if (sp.isShiftKeyDown()) {
                     demesne.fixedTime = -1;
                 } else if (demesne.fixedTime == -1) {
-                    demesne.fixedTime = sp.serverLevel().getDayTime();
+                    demesne.fixedTime = sp.serverLevel().getDayTime() % 24000;
                 } else {
                     demesne.fixedTime += 1000;
                 }
