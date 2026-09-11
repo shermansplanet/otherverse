@@ -631,7 +631,7 @@ public class FamiliarManager {
                 sp.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 21 * 13, 0, false, false, false));
             }
         } else if (type.equals(EntityType.PHANTOM)) {
-            if (!sp.serverLevel().isDay()) {
+            if (!Otherverse.isDay(sp.server.overworld())) {
                 var attr = sp.getAttribute(CaelusApi.getInstance().getFlightAttribute());
                 attr.removeModifier(FAMILIAR_MODIFIER);
                 attr.addPermanentModifier(new AttributeModifier(FAMILIAR_MODIFIER, "Familiar", 1, AttributeModifier.Operation.ADDITION));

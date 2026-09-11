@@ -39,6 +39,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -254,6 +255,10 @@ public class Otherverse {
                 source.accept((t, rl) -> event.register(registry, rl, () -> t));
             }
         });
+    }
+
+    public static boolean isDay(ServerLevel overworld) {
+        return overworld.dayTime() < 13000;
     }
 
     public void addReloadListeners(AddReloadListenerEvent event) {

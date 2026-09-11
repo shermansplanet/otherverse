@@ -160,11 +160,22 @@ public class SpiritLabeler {
             } catch (Exception ignored) {
             }
         }
+
         for (var k : MobBindingInfluenceUtils.mobSpirits.entrySet()) {
             var item = MobBindingInfluenceUtils.getIdol(k.getKey());
             recipes.add(new SpiritExtractionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, k.getKey().toString()),
                     List.of(new SpiritAmount(k.getValue(), 1)), item));
         }
+
+        recipes.sort(Comparator.comparingInt(r -> {
+            var sum = 0;
+            for (var count : r.spirits) {
+                sum += count.amount;
+            }
+            sum += r.input.getItem() == OtherverseItems.IDOL.get() ? 0 : 9999999;
+            return -sum;
+        }));
+
         return recipes;
     }
 

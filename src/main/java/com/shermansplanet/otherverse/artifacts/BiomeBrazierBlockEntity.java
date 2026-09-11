@@ -454,7 +454,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
         var isScrying = state.getValue(BiomeBrazierBlock.SCRY);
         if (isLit && isScrying) {
             DiagramManager.getOrCreateLevelData(sl).addChunkloader(pos);
-            boolean isNowDay = sl.getServer().overworld().isDay();
+            boolean isNowDay = Otherverse.isDay(sl.getServer().overworld());
             if (isNowDay == wasDay) return;
             if (isNowDay && t instanceof BiomeBrazierBlockEntity brazier) {
                 brazier.refreshChunkloading(sl, null);

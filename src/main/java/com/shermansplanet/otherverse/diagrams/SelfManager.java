@@ -94,7 +94,7 @@ public class SelfManager {
             return;
         }
 
-        boolean isNowDay = event.getServer().overworld().isDay();
+        boolean isNowDay = Otherverse.isDay(event.getServer().overworld());
         if (isNowDay == wasDay) return;
         for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
             FamiliarManager.updateAbilities(player);
