@@ -1010,9 +1010,11 @@ public class ContractTask {
         var block = blockstate.getBlock();
         if (!(mob.level() instanceof ServerLevel sl) || !isValidCropBlock(mob.level(), block, blockstate))
             return fail();
-        MutableBoolean hasTaken = new MutableBoolean(false);
         Item blockItem = blockstate.getBlock().asItem();
-        if(blockItem != Items.CHORUS_FLOWER) {
+        if(blockItem == Items.CHORUS_FLOWER) {
+            this.mob.level().destroyBlock(targetPos, true, mob);
+        }else{
+            MutableBoolean hasTaken = new MutableBoolean(false);
             var id = ForgeRegistries.BLOCKS.getKey(block);
             if (id != null && id.getPath().endsWith("_colony")) {
                 blockItem = ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath("minecraft", id.getPath().replace("_colony", "")));
@@ -1028,13 +1030,13 @@ public class ContractTask {
                         if (!stack.isEmpty())
                             Block.popResource(sl, targetPos, stack);
                     });
+            if (hasTaken.isFalse()) {
+                this.mob.level().destroyBlock(targetPos, false, mob);
+            } else {
+                mob.level().setBlockAndUpdate(targetPos, block.defaultBlockState());
+            }
         }
         mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
-        if (hasTaken.isFalse()) {
-            this.mob.level().destroyBlock(targetPos, false, mob);
-        } else {
-            mob.level().setBlockAndUpdate(targetPos, block.defaultBlockState());
-        }
         return succeed();
     }
 

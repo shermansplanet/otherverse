@@ -80,8 +80,6 @@ public class SympathyManager {
 
     @SubscribeEvent
     public static void onUse(PlayerInteractEvent.RightClickItem event) {
-        if (event.getItemStack().is(OtherverseItems.SPINDLE_BLOODY.get()))
-            trySpindleSummon(event.getEntity(), event.getItemStack(), event.getEntity().getEyePosition().add(event.getEntity().getLookAngle().scale(2)));
         if (!(event.getItemStack().getItem() instanceof SpindleItem)) {
             return;
         }
@@ -92,20 +90,8 @@ public class SympathyManager {
         data.putSympathyPosition(key, null);
     }
 
-    private static void trySpindleSummon(Player player, ItemStack itemStack, Vec3 position) {
-        var tag = itemStack.getOrCreateTag();
-        if (!(player instanceof ServerPlayer sp) || !tag.getBoolean("can_summon")) return;
-        var entity = getEntityByUniqueId(tag.getString("sympathy_target"), sp.serverLevel());
-        if (entity == null) return;
-        entity.moveTo(position);
-        itemStack.shrink(1);
-        if (itemStack.isEmpty()) player.getInventory().removeItem(itemStack);
-    }
-
     @SubscribeEvent
     public static void onUse(PlayerInteractEvent.RightClickBlock event) {
-        if (event.getItemStack().is(OtherverseItems.SPINDLE_BLOODY.get()))
-            trySpindleSummon(event.getEntity(), event.getItemStack(), event.getHitVec().getLocation());
         if (!(event.getItemStack().getItem() instanceof SpindleItem)) {
             return;
         }

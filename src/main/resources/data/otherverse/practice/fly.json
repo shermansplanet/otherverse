@@ -9,7 +9,7 @@
 	"transfusion" : [
 		{
 			"input" : "macabre:crystalized_blood",
-			"health" : 72,
+			"health" : 144,
 			"output" : "macabre:abhorrent"
 		}
 	]

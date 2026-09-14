@@ -612,6 +612,7 @@ public class HallowHelper {
                                        CompoundTag hallowTag, List<IFocus> influences) {
         List<SpiritType> possibleSpirits = new ArrayList<>(
                 SpiritLabeler.getSpiritsFor(focus.getItem().getItem()).keySet());
+        possibleSpirits.remove(Spirits.EMPTY);
         Set<SpiritType> originalSpirits = new HashSet<>(possibleSpirits);
         for (IFocus sourceFocus : influences) {
             Item item = sourceFocus.getItem().getItem();

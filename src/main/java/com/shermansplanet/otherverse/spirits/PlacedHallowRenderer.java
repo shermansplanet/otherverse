@@ -35,8 +35,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -165,11 +169,19 @@ public class PlacedHallowRenderer {
             if (player.position().distanceToSqr(new Vec3(pos.getX(), pos.getY(), pos.getZ())) > renderDist) continue;
             var tag = levelData.getPlacedItemTag(pos);
             var bs = player.level().getBlockState(pos);
+            var st = tag.getString("spirit_type");
             poseStack.pushPose();
             poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-            var st = tag.getString("spirit_type");
             renderSingleBlock(player.level(), bs, pos, poseStack, multiBufferSource, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, st);
             poseStack.popPose();
+            if (bs.getBlock().getClass().getSimpleName().equals("StuffedHoglinBlock")) {
+                var otherPos = pos.relative(bs.getValue(HorizontalDirectionalBlock.FACING));
+                var otherBs = player.level().getBlockState(otherPos);
+                poseStack.pushPose();
+                poseStack.translate(otherPos.getX(), otherPos.getY(), otherPos.getZ());
+                renderSingleBlock(player.level(), otherBs, otherPos, poseStack, multiBufferSource, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, st);
+                poseStack.popPose();
+            }
             if (!tag.contains("shrine") || !renderShrineBounds) continue;
             var shrine = ShrineHelper.shrinesByPosition.computeIfAbsent(player.level(), x -> new HashMap<>()).get(pos);
             if (shrine == null) {
@@ -188,18 +200,19 @@ public class PlacedHallowRenderer {
 
     private static void renderSingleBlock(Level level, BlockState blockState, BlockPos pos, PoseStack poseStack, MultiBufferSource buffers, int overlay, ModelData modelData, String spiritName) {
         RenderShape rendershape = blockState.getRenderShape();
-        if (rendershape != RenderShape.INVISIBLE) {
-            switch (rendershape) {
-                case MODEL:
-                    var modelAndRender = getBlockModel(blockState, spiritName);
-                    if (modelAndRender.getFirst() == null) return;
-                    for (RenderType rt : modelAndRender.getFirst().getRenderTypes(blockState, RandomSource.create(blockState.getSeed(pos)), modelData))
-                        Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateBlock(level, modelAndRender.getFirst(), blockState, pos, poseStack, buffers.getBuffer(modelAndRender.getSecond()), true, RandomSource.create(), blockState.getSeed(pos), overlay, modelData, rt);
-                    break;
-                case ENTITYBLOCK_ANIMATED:
-                    ItemStack stack = new ItemStack(blockState.getBlock());
-                    IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.NONE, poseStack, buffers, 255, overlay);
-            }
+        switch (rendershape) {
+            case MODEL:
+                var modelAndRender = getBlockModel(blockState, spiritName);
+                if (modelAndRender.getFirst() == null) return;
+                for (RenderType rt : modelAndRender.getFirst().getRenderTypes(blockState, RandomSource.create(blockState.getSeed(pos)), modelData))
+                    Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateBlock(level, modelAndRender.getFirst(), blockState, pos, poseStack, buffers.getBuffer(modelAndRender.getSecond()), true, RandomSource.create(), blockState.getSeed(pos), overlay, modelData, rt);
+                break;
+            case ENTITYBLOCK_ANIMATED:
+                ItemStack stack = new ItemStack(blockState.getBlock());
+                IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.NONE, poseStack, buffers, 255, overlay);
+                break;
+            case INVISIBLE:
+                break;
         }
     }
 
@@ -231,7 +244,6 @@ public class PlacedHallowRenderer {
                 var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
                         "textures/" + material.texture().getPath() + ".png");
                 if (locations.contains(rl)) continue;
-                LOGGER.debug(rl.toString());
                 locations.add(rl);
             }
         }
@@ -242,7 +254,6 @@ public class PlacedHallowRenderer {
         var primaryTex = MobRetexturer.makeSpiritVariant(locations, spiritType);
 
         if (primaryTex == null) {
-            LOGGER.debug("NO PRIMARY TEX");
             return null;
         }
 
@@ -250,12 +261,12 @@ public class PlacedHallowRenderer {
             var loc = locations.get(i);
             loc = ResourceLocation.fromNamespaceAndPath(loc.getNamespace(),
                     loc.getPath().substring(9, loc.getPath().length() - 4));
-            HallowTextureManager.offsetsByMaterial.put(loc, Pair.of(locations.size(), i));
+            HallowTextureManager.offsetsByMaterial.put(loc, primaryTex.getSecond().get(i));
         }
 
         ClientEvents.HALLOW_TEXTURE_MANAGER.quietReload();
 
-        Function<Material, TextureAtlasSprite> func = x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex, x, new HashMap<>());
+        Function<Material, TextureAtlasSprite> func = x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex.getFirst(), x, new HashMap<>());
 
         var newLoc = new ModelResourceLocation(Otherverse.MODID,
                 modelLocation.getNamespace() + "_" + modelLocation.getPath() + "_hallow_" + spiritType, modelLocation.getVariant());
@@ -270,14 +281,13 @@ public class PlacedHallowRenderer {
         var shader = RenderType.CompositeState.builder()
                 .setLightmapState(LIGHTMAP)
                 .setShaderState(RENDERTYPE_SHADER)
-                .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
+                .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst().loc(), false, false))
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                 .setOutputState(TRANSLUCENT_TARGET)
                 .createCompositeState(true);
         RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, shader);
 
         var pair = Pair.of(m, rt);
-        LOGGER.debug("MADE MODEL");
         return pair;
 
     }

@@ -29,9 +29,15 @@ import java.util.stream.Stream;
 @OnlyIn(Dist.CLIENT)
 public class HallowTextureManager extends TextureAtlasHolder {
 
+    public record TextureSetData(ResourceLocation loc, AbstractTexture texture, int width, int height) {
+    }
+
+    public record TextureFrameData(int width, int height, int yOffset) {
+    }
+
     public static final ResourceLocation ATLAS_LOCATION = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/atlas/hallows.png");
     public static ArrayList<ResourceLocation> hallowResourceLocations = new ArrayList<>();
-    public static final HashMap<ResourceLocation, Pair<Integer, Integer>> offsetsByMaterial = new HashMap<>();
+    public static final HashMap<ResourceLocation, TextureFrameData> offsetsByMaterial = new HashMap<>();
 
     public HallowTextureManager(TextureManager p_118802_) {
         super(p_118802_, ATLAS_LOCATION, ResourceLocation.parse("hallow"));
@@ -55,35 +61,35 @@ public class HallowTextureManager extends TextureAtlasHolder {
         p_250624_.endTick();
     }
 
-    public TextureAtlasSprite getSpritePublic(Pair<ResourceLocation, AbstractTexture> tex, Material material, HashMap<ResourceLocation, DynamicSprite> spriteCache) {
+    public TextureAtlasSprite getSpritePublic(TextureSetData tex, Material material, HashMap<ResourceLocation, DynamicSprite> spriteCache) {
         if (spriteCache.containsKey(material.texture())) return spriteCache.get(material.texture());
-        var p = offsetsByMaterial.getOrDefault(material.texture(), Pair.of(1, 0));
-        var sprite = makeSprite(tex.getFirst(), (DynamicTexture) tex.getSecond(),
-                16, 16, p.getFirst(), p.getSecond());
+        var frameData = offsetsByMaterial.getOrDefault(material.texture(), new TextureFrameData(16, 16, 0));
+        var sprite = makeSprite(tex.loc, (DynamicTexture) tex.texture,
+                frameData.width, frameData.height, tex.width, tex.height, frameData.yOffset);
         spriteCache.put(material.texture(), sprite);
         return sprite;
     }
 
-    private static DynamicSprite makeSprite(ResourceLocation newTexLoc, DynamicTexture newTex, int WIDTH, int HEIGHT, int textureHeight, int offset) {
-        var anim = new AnimationMetadataSection(ImmutableList.of(new AnimationFrame(0, -1)), WIDTH, HEIGHT, 1, false);
+    private static DynamicSprite makeSprite(ResourceLocation newTexLoc, DynamicTexture newTex, int frameWidth, int frameHeight, int wholeTextureWidth, int wholeTextureHeight, int yOffset) {
+        var anim = new AnimationMetadataSection(ImmutableList.of(new AnimationFrame(0, -1)), frameWidth, frameHeight, 1, false);
         return new DynamicSprite(
-                ATLAS_LOCATION, new SpriteContents(newTexLoc, new FrameSize(WIDTH, HEIGHT), newTex.getPixels(), anim, ForgeTextureMetadata.EMPTY),
-                WIDTH, HEIGHT * textureHeight, 0, offset * HEIGHT
+                ATLAS_LOCATION, new SpriteContents(newTexLoc, new FrameSize(frameWidth, frameHeight), newTex.getPixels(), anim, ForgeTextureMetadata.EMPTY),
+                wholeTextureWidth, wholeTextureHeight, 0, yOffset
         );
     }
 
-    public static void GetBlockModels(UnbakedModel unbakedModel, Set<BlockModel> blockModels){
+    public static void GetBlockModels(UnbakedModel unbakedModel, Set<BlockModel> blockModels) {
         var bakery = Minecraft.getInstance().getModelManager().getModelBakery();
-        if(unbakedModel instanceof BlockModel bm){
+        if (unbakedModel instanceof BlockModel bm) {
             blockModels.add(bm);
-            if(bm.parent != null) GetBlockModels(bm.parent, blockModels);
+            if (bm.parent != null) GetBlockModels(bm.parent, blockModels);
         } else if (unbakedModel instanceof MultiVariant mv) {
-            for(var variant : mv.getVariants()){
+            for (var variant : mv.getVariants()) {
                 var model = bakery.getModel(variant.getModelLocation());
                 GetBlockModels(model, blockModels);
             }
-        }else if (unbakedModel instanceof MultiPart mp){
-            for(var part : mp.getMultiVariants()){
+        } else if (unbakedModel instanceof MultiPart mp) {
+            for (var part : mp.getMultiVariants()) {
                 GetBlockModels(part, blockModels);
             }
         }

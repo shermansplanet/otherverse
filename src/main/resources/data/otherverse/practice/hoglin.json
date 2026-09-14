@@ -2,5 +2,17 @@
 	"other" : "minecraft:hoglin",
 	"binding" : {
 		"minecraft:warped_fungus" : 15
-	}
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:rotten_flesh",
+			"health" : 13,
+			"output" : "mynethersdelight:hoglin_loin"
+		},
+		{
+			"input" : "minecraft:porkchop",
+			"health" : 1,
+			"output" : "mynethersdelight:hoglin_loin"
+		}
+	]
 }

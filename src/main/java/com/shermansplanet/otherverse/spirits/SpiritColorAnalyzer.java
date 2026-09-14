@@ -81,7 +81,7 @@ public class SpiritColorAnalyzer {
         colorCutoffs.put(12, v -> 205 / 360f);
         colorCutoffs.put(13, v -> 253 / 360f);
         colorCutoffs.put(14, v -> 284 / 360f);
-        colorCutoffs.put(15, v -> 333/ 360f);
+        colorCutoffs.put(15, v -> 333 / 360f);
         colorCutoffs.put(5, v -> 340 / 360f);
 
         HashMap<Item, SpiritLabeler.SpiritAmount[]> allColorSpirits = new HashMap<>();
@@ -132,12 +132,13 @@ public class SpiritColorAnalyzer {
         }
     }
 
-    private static void getTexturesRecursive(Item item, JsonElement el, ArrayList<NativeImage> textures, ArrayList<PackResources> packs) {
+    private static void getTexturesRecursive(Item item, JsonElement el, ArrayList<NativeImage> textures, ArrayList<PackResources> packs, HashSet<String> visitedElements) {
         JsonObject obj = el.getAsJsonObject();
+        visitedElements.add(el.toString());
         if (obj.has("parent")) {
             JsonElement subElement = getJsonFor(getLocationFor(obj.get("parent").getAsString(), "models/", ".json"), packs);
-            if (subElement != null && !subElement.equals(el)) {
-                getTexturesRecursive(item, subElement, textures, packs);
+            if (subElement != null && !visitedElements.contains(subElement.toString())) {
+                getTexturesRecursive(item, subElement, textures, packs, visitedElements);
             }
         }
         if (obj.has("textures")) {
@@ -207,7 +208,7 @@ public class SpiritColorAnalyzer {
             return null;
         }
         ArrayList<NativeImage> textures = new ArrayList<>();
-        getTexturesRecursive(item, el, textures, packs);
+        getTexturesRecursive(item, el, textures, packs, new HashSet<>());
         return textures;
     }
 

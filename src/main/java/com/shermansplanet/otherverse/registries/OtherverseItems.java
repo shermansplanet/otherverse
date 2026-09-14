@@ -14,6 +14,7 @@ import com.shermansplanet.otherverse.familiar.FamiliarNameTagItem;
 import com.shermansplanet.otherverse.ruins.ClaimArrowItem;
 import com.shermansplanet.otherverse.ruins.EyelessEyeItem;
 import com.shermansplanet.otherverse.spirits.Spirits;
+import com.shermansplanet.otherverse.sympathy.BloodySpindleItem;
 import com.shermansplanet.otherverse.sympathy.SpindleItem;
 import net.minecraft.Util;
 import net.minecraft.sounds.SoundEvent;
@@ -179,7 +180,7 @@ public class OtherverseItems {
     public static final RegistryObject<Item> ESCAPE_ROPE = ITEMS.register("escape_rope",
             () -> new EscapeRopeItem(new Item.Properties()));
     public static final RegistryObject<Item> SPINDLE_BLOODY = ITEMS.register("spindle_bloody",
-            () -> new Item(new Item.Properties()));
+            () -> new BloodySpindleItem(new Item.Properties()));
     public static final RegistryObject<Item> SPIRIT_TABLET = ITEMS.register("spirit_tablet",
             () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> REALM_WRACKED_COAL = ITEMS.register("realm_wracked_coal",

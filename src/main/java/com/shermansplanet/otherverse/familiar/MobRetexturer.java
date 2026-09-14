@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.spirits.HallowTextureManager;
 import com.shermansplanet.otherverse.spirits.SpiritColorAnalyzer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -22,12 +23,12 @@ public class MobRetexturer {
     private static HashMap<String, Palette> spiritPaletteCache = new HashMap<>();
     private static HashMap<String, Palette> spiritPaletteCacheSplit = new HashMap<>();
 
-    public static Pair<ResourceLocation, AbstractTexture> makeSpiritVariant(List<ResourceLocation> textureSet, String spiritType) {
-        var SIZE = 16;
-        NativeImage tex = new NativeImage(SIZE, SIZE * textureSet.size(), true);
+    public static Pair<HallowTextureManager.TextureSetData,List<HallowTextureManager.TextureFrameData>> makeSpiritVariant(List<ResourceLocation> textureSet, String spiritType) {
 
-        var shouldAdjustBrightness = !Objects.equals(spiritType, "end");
-
+        var nativeImages = new ArrayList<NativeImage>();
+        var maxWidth = 0;
+        var height = 0;
+        var offsets = new ArrayList<HallowTextureManager.TextureFrameData>();
         for (int imageIndex = 0; imageIndex < textureSet.size(); imageIndex++) {
             var oldTexture = textureSet.get(imageIndex);
             var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(oldTexture.getNamespace(), oldTexture.getPath()));
@@ -35,6 +36,18 @@ public class MobRetexturer {
                 System.out.println("COULDN'T LOAD TEXTURE " + oldTexture.getPath());
                 return null;
             }
+            maxWidth = Math.max(maxWidth, image.getWidth());
+            offsets.add(new HallowTextureManager.TextureFrameData(image.getWidth(), image.getHeight(), height));
+            height += image.getHeight();
+            nativeImages.add(image);
+        }
+
+        NativeImage tex = new NativeImage(maxWidth, height, true);
+
+        var shouldAdjustBrightness = !Objects.equals(spiritType, "end");
+
+        for (int imageIndex = 0; imageIndex < textureSet.size(); imageIndex++) {
+            var image = nativeImages.get(imageIndex);
 
             var spiritPalettes = spiritPaletteCacheSplit.computeIfAbsent(spiritType, MobRetexturer::paletteFromSpirit);
             var itemPalettes = new Palette(Collections.singleton(image), true);
@@ -55,7 +68,7 @@ public class MobRetexturer {
                     var mixel = shouldAdjustBrightness ? getPixelBlend(itemPixel, spiritPixel) : spiritPixel;
                     var pixelInt = (mixel.r) | ((mixel.g << 8) & 0xff00) | ((mixel.b << 16) & 0xff0000);
                     var x = itemPixel.x % tex.getWidth();
-                    var y = (itemPixel.y + imageIndex * SIZE) % tex.getHeight();
+                    var y = (itemPixel.y + offsets.get(imageIndex).yOffset()) % tex.getHeight();
                     pixelInt = pixelInt | (image.getPixelRGBA(itemPixel.x, itemPixel.y) & 0xff000000);
                     tex.setPixelRGBA(x, y, pixelInt);
                 }
@@ -66,7 +79,7 @@ public class MobRetexturer {
         var nameTex = textureSet.get(0);
         var newTexLoc = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "hallow_" + nameTex.getNamespace() + "_" + nameTex.getPath() + "_" + spiritType);
         textureManager.register(newTexLoc, newTex);
-        return Pair.of(newTexLoc, newTex);
+        return Pair.of(new HallowTextureManager.TextureSetData(newTexLoc, newTex, maxWidth, height), offsets);
     }
 
     private static Palette.Pixel getPixelBlend(Palette.Pixel itemPixel, Palette.Pixel spiritPixel) {
@@ -90,19 +103,20 @@ public class MobRetexturer {
 
     private static Palette paletteFromSpirit(String s) {
         var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
-        if(image == null) image = MissingTextureAtlasSprite.getTexture().getPixels();
+        if (image == null) image = MissingTextureAtlasSprite.getTexture().getPixels();
         return new Palette(Collections.singleton(image), true);
     }
 
     private static Palette paletteFromSpiritSplit(String s) {
         var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
-        if(image == null) image = MissingTextureAtlasSprite.getTexture().getPixels();
+        if (image == null) image = MissingTextureAtlasSprite.getTexture().getPixels();
         return new Palette(Collections.singleton(image), false);
     }
 
-    public static ResourceLocation retextureMob(ResourceLocation originalTextureLoc, String spiritType) {
+    public static ResourceLocation retextureMob(ResourceLocation originalTextureLoc, String spiritType) throws NullPointerException {
         var spiritPalettes = spiritPaletteCache.computeIfAbsent(spiritType, MobRetexturer::paletteFromSpiritSplit);
         var originalTexture = getNativeImage(originalTextureLoc);
+        if(originalTexture == null) throw new NullPointerException();
         var originalPalettes = new Palette(Collections.singleton(originalTexture));
         var rawTex = MakeTexture(originalTexture, originalPalettes, spiritPalettes);
         var newTexLoc = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID,

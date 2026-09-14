@@ -52,6 +52,7 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.monster.Vex;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.LargeFireball;
@@ -91,6 +92,7 @@ import top.theillusivec4.caelus.api.CaelusApi;
 import virtuoel.pehkui.api.ScaleRegistries;
 import virtuoel.pehkui.api.ScaleTypes;
 
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -996,6 +998,22 @@ public class FamiliarManager {
                         var localData = DiagramManager.getOrCreateLevelData(binding.dimensionHash, false);
                         localData.bindingsByPosition.remove(binding.position);
                         localData.setDirty();
+                    }
+                }
+            }
+            if (mob instanceof Zombie) {
+                for (var atype : ForgeRegistries.ATTRIBUTES.getValues()) {
+                    if (!mob.getAttributes().hasAttribute(atype)) continue;
+                    var attr = mob.getAttribute(atype);
+                    if (attr == null) continue;
+                    var toRemove = new ArrayList<AttributeModifier>();
+                    for (var mod : attr.getModifiers()) {
+                        if (mod.getName().equals("Random spawn bonus") || mod.getName().equals("Random zombie-spawn bonus") || mod.getName().equals("Leader zombie bonus")) {
+                            toRemove.add(mod);
+                        }
+                    }
+                    for (var mod : toRemove) {
+                        attr.removeModifier(mod);
                     }
                 }
             }

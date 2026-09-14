@@ -295,7 +295,7 @@ public class BindingRenderer {
             case CONTRACT -> {
                 if (update.data.contains("construct_type")) {
                     var ct = update.data.getString("construct_type");
-                    ReskinManager.reskinMob(le, ct);
+                    var reskinSuccess = ReskinManager.reskinMob(le, ct);
                     le.getPersistentData().putString("construct_type", ct);
                 }
                 if (update.data.contains("practitioner_loyalty")) {

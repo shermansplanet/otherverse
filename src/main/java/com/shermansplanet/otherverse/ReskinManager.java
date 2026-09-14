@@ -89,12 +89,17 @@ public class ReskinManager {
         }
     }
 
-    public static void reskinMob(LivingEntity le, String spiritType) {
+    public static boolean reskinMob(LivingEntity le, String spiritType) {
         var originalTexture = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(le).getTextureLocation(le);
         //ResourceLocation actualPath = new ResourceLocation(originalTexture.getNamespace(), "textures/" + originalTexture.getPath() + ".png");
-        var newTexture = mobSkinCache.computeIfAbsent(originalTexture, x -> new HashMap<>())
-                .computeIfAbsent(spiritType, x -> MobRetexturer.retextureMob(originalTexture, spiritType));
-        reskinnedMobs.put(le, newTexture);
+        try {
+            var newTexture = mobSkinCache.computeIfAbsent(originalTexture, x -> new HashMap<>())
+                    .computeIfAbsent(spiritType, x -> MobRetexturer.retextureMob(originalTexture, spiritType));
+            reskinnedMobs.put(le, newTexture);
+            return true;
+        } catch (NullPointerException e) {
+            return false;
+        }
     }
 
     public static boolean shouldReskin(LivingEntity le) {

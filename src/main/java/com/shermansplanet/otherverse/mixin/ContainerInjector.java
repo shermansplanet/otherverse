@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
 
@@ -33,6 +34,18 @@ public abstract class ContainerInjector {
 
     protected ContainerInjector(int containerId) {
         this.containerId = containerId;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @Inject(method = "moveItemStackTo", at = @At("HEAD"), cancellable = true)
+    protected void moveStack(ItemStack stack, int p_38905_, int p_38906_, boolean p_38907_, CallbackInfoReturnable<Boolean> ci) {
+        if (Minecraft.getInstance().player == null || Minecraft.getInstance().player.inventoryMenu.containerId == containerId) {
+            return;
+        }
+        if (ImplementManager.isImplement(stack)) {
+            ci.setReturnValue(false);
+            ci.cancel();
+        }
     }
 
     @OnlyIn(Dist.CLIENT)

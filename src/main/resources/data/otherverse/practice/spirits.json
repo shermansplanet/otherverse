@@ -189,6 +189,7 @@
 		"minecraft:honey_block" : ["28 food"],
 		"minecraft:chorus_fruit" : ["9 end"],
 		"minecraft:popped_chorus_fruit" : ["11 end"],
+		"minecraft:dragon_breath" : ["11 end"],
 
 		"otherverse:homunculus_heart" : ["33 flesh"],
 		"otherverse:salt" : ["11 overworld"],
@@ -226,6 +227,15 @@
 		"farmersdelight:stuffed_pumpkin_block" : ["14 food"],
 		"farmersdelight:rich_soil" : ["66 nature"],
 		"farmersdelight:stove" : ["66 food", "9 technology"],
+
+		"mynethersdelight.nether_stove" : ["66 food", "9 technology", "9 nether"],
+		"mynethersdelight:bullet_pepper_crate" : ["36 food"],
+		"mynethersdelight:stuffed_hoglin" : ["235 food"],
+		"mynethersdelight:raw_stuffed_hoglin" : ["33 flesh"],
+		"mynethersdelight:blazier" : ["99 fire"],
+
+		"endersdelight:endstone_stove" : ["66 food", "9 technology", "27 end"],
+		"endersdelight:chorus_crate" : ["54 food"],
 
 		"macabre:baal_heart" : ["444 flesh", "333 time", "-5 brown", "-4 red", "-3 white", "-2 magenta", "-2 pink"],
 		"macabre:gomoria_heart" : ["444 flesh", "333 fate", "-5 gray", "-4 magenta", "-3 purple", "-2 pink", "-1 light_gray", "-1 black"],

@@ -260,15 +260,15 @@ public class ItemRendererInjector {
             var loc = locations.get(i);
             loc = ResourceLocation.fromNamespaceAndPath(loc.getNamespace(),
                     loc.getPath().substring(9, loc.getPath().length() - 4));
-            HallowTextureManager.offsetsByMaterial.put(loc, Pair.of(locations.size(), i));
+            HallowTextureManager.offsetsByMaterial.put(loc, primaryTex.getSecond().get(i));
         }
 
         ClientEvents.HALLOW_TEXTURE_MANAGER.quietReload();
-        BakedModel m = model.bake(DUMMY_BAKER, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex, x, new HashMap<>()), BlockModelRotation.X0_Y0, modelLocation);
+        BakedModel m = model.bake(DUMMY_BAKER, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex.getFirst(), x, new HashMap<>()), BlockModelRotation.X0_Y0, modelLocation);
 
         var compState = RenderType.CompositeState.builder()
                 .setShaderState(RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER)
-                .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
+                .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst().loc(), false, false))
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                 .setOutputState(ITEM_ENTITY_TARGET)
                 .setLightmapState(LIGHTMAP)
