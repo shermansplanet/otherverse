@@ -23,6 +23,8 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.block.model.multipart.MultiPart;
+import net.minecraft.client.renderer.block.model.multipart.Selector;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -94,7 +96,7 @@ public class PlacedHallowRenderer {
     public static void renderTick(RenderLevelStageEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
-        if(event.getProjectionMatrix().get(3,3) > 0.5f) return;
+        if (event.getProjectionMatrix().get(3, 3) > 0.5f) return;
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             renderHallows(player, event);
         }
@@ -229,6 +231,7 @@ public class PlacedHallowRenderer {
                 var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
                         "textures/" + material.texture().getPath() + ".png");
                 if (locations.contains(rl)) continue;
+                LOGGER.debug(rl.toString());
                 locations.add(rl);
             }
         }
@@ -239,6 +242,7 @@ public class PlacedHallowRenderer {
         var primaryTex = MobRetexturer.makeSpiritVariant(locations, spiritType);
 
         if (primaryTex == null) {
+            LOGGER.debug("NO PRIMARY TEX");
             return null;
         }
 
@@ -256,41 +260,55 @@ public class PlacedHallowRenderer {
         var newLoc = new ModelResourceLocation(Otherverse.MODID,
                 modelLocation.getNamespace() + "_" + modelLocation.getPath() + "_hallow_" + spiritType, modelLocation.getVariant());
 
-        try {
-            BakedModel m = model instanceof MultiVariant mv ? bakeMultiVariant(mv, bakery, func) :
-                    model.bake(DUMMY_BAKER, func, BlockModelRotation.X0_Y0, newLoc);
 
-            var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
+        BakedModel m = model instanceof MultiVariant mv ? bakeMultiVariant(mv, bakery, func) :
+                model instanceof MultiPart mp ? bakeMultiPart(mp, bakery, func) :
+                        model.bake(DUMMY_BAKER, func, BlockModelRotation.X0_Y0, newLoc);
 
-            var shader = RenderType.CompositeState.builder()
-                    .setLightmapState(LIGHTMAP)
-                    .setShaderState(RENDERTYPE_SHADER)
-                    .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
-                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                    .setOutputState(TRANSLUCENT_TARGET)
-                    .createCompositeState(true);
-            RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, shader);
+        var key = "hallow_" + blockKey.getNamespace() + "_" + blockKey.getPath() + "_" + spiritType;
 
-            var pair = Pair.of(m, rt);
-            return pair;
-        } catch (Exception ignored) {
+        var shader = RenderType.CompositeState.builder()
+                .setLightmapState(LIGHTMAP)
+                .setShaderState(RENDERTYPE_SHADER)
+                .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst(), false, false))
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setOutputState(TRANSLUCENT_TARGET)
+                .createCompositeState(true);
+        RenderType rt = RenderType.create(key, DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, shader);
+
+        var pair = Pair.of(m, rt);
+        LOGGER.debug("MADE MODEL");
+        return pair;
+
+    }
+
+    private static BakedModel bakeMultiPart(MultiPart mp, ModelBakery bakery, Function<Material, TextureAtlasSprite> func) {
+        if (mp.getMultiVariants().isEmpty()) {
             return null;
         }
+        var builder = new MultiPartBakedModel.Builder();
+        for (Selector selector : mp.getSelectors()) {
+            var baked = bakeMultiVariant(selector.getVariant(), bakery, func);
+            if (baked != null) {
+                IMultiPartExposer exposed = (IMultiPartExposer) mp;
+                builder.add(selector.getPredicate(exposed.getDefinition()), baked);
+            }
+        }
+        return builder.build();
     }
 
     private static BakedModel bakeMultiVariant(MultiVariant mv, ModelBakery bakery, Function<Material, TextureAtlasSprite> p_111851_) {
         if (mv.getVariants().isEmpty()) {
             return null;
-        } else {
-            WeightedBakedModel.Builder weightedbakedmodel$builder = new WeightedBakedModel.Builder();
-
-            for (Variant variant : mv.getVariants()) {
-                BakedModel bakedmodel = forceBake(bakery, variant.getModelLocation(), variant, p_111851_);
-                weightedbakedmodel$builder.add(bakedmodel, variant.getWeight());
-            }
-
-            return weightedbakedmodel$builder.build();
         }
+        WeightedBakedModel.Builder weightedbakedmodel$builder = new WeightedBakedModel.Builder();
+
+        for (Variant variant : mv.getVariants()) {
+            BakedModel bakedmodel = forceBake(bakery, variant.getModelLocation(), variant, p_111851_);
+            weightedbakedmodel$builder.add(bakedmodel, variant.getWeight());
+        }
+
+        return weightedbakedmodel$builder.build();
     }
 
     private static BakedModel forceBake(ModelBakery bakery, ResourceLocation p_119350_, ModelState p_119351_, Function<Material, TextureAtlasSprite> sprites) {

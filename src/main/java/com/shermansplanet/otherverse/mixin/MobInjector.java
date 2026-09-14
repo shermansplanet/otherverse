@@ -59,14 +59,15 @@ public abstract class MobInjector extends LivingEntity {
     protected final void onServerAiStep(CallbackInfo ci) {
         if (!getPersistentData().contains("panicTicks")) {
             return;
-        } else {
-            var panicTicks = getPersistentData().getInt("panicTicks");
-            if (panicTicks == 0) {
-                getPersistentData().remove("panicTicks");
-                return;
-            }
-            getPersistentData().putInt("panicTicks", panicTicks - 1);
         }
+
+        var panicTicks = getPersistentData().getInt("panicTicks");
+        if (panicTicks == 0) {
+            getPersistentData().remove("panicTicks");
+            return;
+        }
+        getPersistentData().putInt("panicTicks", panicTicks - 1);
+
         ci.cancel();
         ++this.noActionTime;
         this.level().getProfiler().push("sensing");

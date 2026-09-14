@@ -9,11 +9,11 @@
             "item": {
                 "item": "otherverse:spirit_phlogiston"
             },
-            "text": "Stored energy, the potential for combustion. Kindling, fuel, explosives. Tension. A temporarily stable arrangement."
+            "text": "Stored energy, the potential for combustion. Kindling, fuel, explosives. Tension. A temporarily stable arrangement.$(br2)When a phlogiston shrine is overfilled, excess spirits manifest as an explosion.$(br2)Shrine range extends $(bold)down.$()"
         },
         {
             "type": "patchouli:text",
-            "text": "When a phlogiston shrine is overfilled, excess spirits manifest as an explosion. An explosion requires 33 spirits, and will increase in power for every additional 33 spirits. It will not destroy chalk, any blocks below chalk, or any hallow blocks."
+            "text": "An explosion requires 33 spirits, and will increase in power for every additional 33 spirits. It will not destroy chalk, any blocks below chalk, or any hallow blocks. The shrine summons explosions on blocks in its range, near to far, skipping air blocks. It will continue to the next block even if the block that explodes is too resistant to break."
         }
     ]
 }

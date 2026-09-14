@@ -246,6 +246,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
     }
 
     private Block getBlockStone(Holder<Biome> biome) {
+        if (biome.is(Biomes.DEEP_DARK)) return Blocks.SCULK;
         var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(biome, level);
         var biomeMod = biomeKeys.getNamespace();
         var biomeName = biomeKeys.getPath();
@@ -291,6 +292,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
 
     private Block getBlockDirt(Holder<Biome> biome) {
         if (biome.is(Biomes.SOUL_SAND_VALLEY)) return Blocks.SOUL_SOIL;
+        if (biome.is(Biomes.DEEP_DARK)) return Blocks.SCULK;
 
         var biomeKeys = MobBindingInfluenceUtils.getBiomeKeys(biome, level);
         var biomeMod = biomeKeys.getNamespace();

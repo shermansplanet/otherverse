@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_fate"
             },
-            "text": "Storybook logic, magic, maps and legends. Events foretold that must come to pass, rivers of destiny converging on a point."
+            "text": "Storybook logic, magic, maps and legends. Events foretold that must come to pass, rivers of destiny converging on a point.$(br2)There are no special shrine effects for Fate shrines."
         },
         {
             "type": "patchouli:spotlight",

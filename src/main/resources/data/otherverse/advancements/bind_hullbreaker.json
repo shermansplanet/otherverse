@@ -1,0 +1,21 @@
+{
+  "parent":"otherverse:diagram",
+  "display":{
+    "icon":{
+      "item": "otherverse:spirit_water"
+    },
+    "title": "Hullbreaker-Breaker",
+    "description": "Bind a hullbreaker.",
+    "frame": "challenge",
+    "hidden": true
+  },
+  "criteria":{
+    "c":{
+      "trigger": "otherverse:perform_practice",
+      "conditions": {
+        "practice": "bind_hullbreaker"
+      }
+    }
+  },
+  "requirements":[["c"]]
+}

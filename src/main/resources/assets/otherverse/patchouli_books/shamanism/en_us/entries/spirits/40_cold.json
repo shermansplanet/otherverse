@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_cold"
             },
-            "text": "The chilling beauty of snow and ice, the fractal bite of frost. Suspended animation, preserving, freezing."
+            "text": "The chilling beauty of snow and ice, the fractal bite of frost. Suspended animation, preserving, freezing.$(br2)Shrine range is $(bold)centered.$()"
         },
         {
             "type": "patchouli:text",

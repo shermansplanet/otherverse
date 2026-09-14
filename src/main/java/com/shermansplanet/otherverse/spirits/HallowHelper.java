@@ -440,12 +440,19 @@ public class HallowHelper {
         event.setUseBlock(Event.Result.DENY);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void spiritTransferClick(PlayerInteractEvent.RightClickBlock event) {
         var stack = event.getItemStack();
-        if (!(event.getLevel() instanceof ServerLevel sl) || stack.getItem() instanceof BlockItem) return;
+        if (!(event.getLevel() instanceof ServerLevel sl)) return;
         var practiceData = DiagramManager.getOrCreateLevelData(sl);
         var blockTag = practiceData.getPlacedItemTag(event.getPos());
+        var isBlock = true;
+        if (blockTag == null && sl.getBlockEntity(event.getPos()) instanceof ChalkCircle cc) {
+            isBlock = false;
+            if (cc.getItem().hasTag() && cc.getItem().getTag().contains("hallow"))
+                blockTag = cc.getItem().getTag().getCompound("hallow");
+        }
+        if (isBlock && stack.getItem() instanceof BlockItem) return;
         if (blockTag == null || !blockTag.contains("spirit_type")) return;
         var blockSpiritType = Spirits.spiritsByLabel.get(blockTag.getString("spirit_type"));
         var isBucketImplement = stack.is(Items.BUCKET) && ImplementManager.isImplement(stack);
@@ -478,43 +485,60 @@ public class HallowHelper {
             hallowTag.putString("spirit_type", blockSpiritType.label());
             itemTag.put("hallow", hallowTag);
         }
-        if (itemSpiritType == blockSpiritType) {
-            var hallowTag = itemTag.getCompound("hallow");
-            var spiritCount = hallowTag.getInt("spirit_count");
-            var spiritCapacity = hallowTag.getInt("capacity");
+        if (itemSpiritType != blockSpiritType) return;
+        var hallowTag = itemTag.getCompound("hallow");
+        var spiritCount = hallowTag.getInt("spirit_count");
+        var spiritCapacity = hallowTag.getInt("capacity");
 
-            var amountAndCapacity = getShrineSpiritCountAndCapacity(sl, event.getPos(), blockSpiritType);
-            var otherAmount = amountAndCapacity.getFirst();
-            var otherCapacity = amountAndCapacity.getSecond();
-            var depositing = otherAmount == 0 || spiritCount == spiritCapacity || event.getEntity().isShiftKeyDown();
-            if (depositing) {
+        var amountAndCapacity = isBlock ? getShrineSpiritCountAndCapacity(sl, event.getPos(), blockSpiritType)
+                : Pair.of(blockTag.getInt("spirit_count"), blockTag.getInt("capacity"));
+        var otherAmount = amountAndCapacity.getFirst();
+        var otherCapacity = amountAndCapacity.getSecond();
+        var depositing = otherAmount == 0 || spiritCount == spiritCapacity || event.getEntity().isShiftKeyDown();
+        if (depositing) {
+            if (isBlock) {
                 spiritCount -= fillBlockHallow(sl, event.getPos(), itemSpiritType,
                         Math.min(otherCapacity, spiritCount), false, false);
             } else {
+                var transfer = Math.min(otherCapacity, spiritCount);
+                spiritCount -= transfer;
+                blockTag.putInt("spirit_count", otherAmount + transfer);
+            }
+        } else {
+            if (isBlock) {
                 spiritCount += drainBlockHallow(sl, event.getPos(), itemSpiritType,
                         Math.min(spiritCapacity - spiritCount, otherAmount), false, false);
+            } else {
+                var transfer = Math.min(spiritCapacity - spiritCount, otherAmount);
+                spiritCount += transfer;
+                blockTag.putInt("spirit_count", otherAmount - transfer);
             }
-            if(stack.getCount() > 1){
-                stack.shrink(1);
-                var newStack = stack.copyWithCount(1);
-                newStack.getOrCreateTag().getCompound("hallow").putInt("spirit_count", spiritCount);
-                if(!event.getEntity().getInventory().add(newStack)){
-                    event.getEntity().drop(newStack, false);
-                }
-            }else {
-                hallowTag.putInt("spirit_count", spiritCount);
-            }
-            if (spiritCount == 0 && isBucketImplement) {
-                itemTag.remove("hallow");
-                ListTag listtag = itemTag.getList("Enchantments", 10);
-                listtag.removeIf(tag -> {
-                    if (!(tag instanceof CompoundTag ct)) return false;
-                    return ct.getString("id").equals("Hallow");
-                });
-            }
-            practiceData.putPlacedItemTag(event.getPos(), blockTag);
-            event.setCancellationResult(InteractionResult.CONSUME);
         }
+        if (stack.getCount() > 1) {
+            stack.shrink(1);
+            var newStack = stack.copyWithCount(1);
+            newStack.getOrCreateTag().getCompound("hallow").putInt("spirit_count", spiritCount);
+            if (!event.getEntity().getInventory().add(newStack)) {
+                event.getEntity().drop(newStack, false);
+            }
+        } else {
+            hallowTag.putInt("spirit_count", spiritCount);
+        }
+        if (spiritCount == 0 && isBucketImplement) {
+            itemTag.remove("hallow");
+            ListTag listtag = itemTag.getList("Enchantments", 10);
+            listtag.removeIf(tag -> {
+                if (!(tag instanceof CompoundTag ct)) return false;
+                return ct.getString("id").equals("Hallow");
+            });
+        }
+        if (isBlock) {
+            practiceData.putPlacedItemTag(event.getPos(), blockTag);
+        } else {
+            ((ChalkCircle) sl.getBlockEntity(event.getPos())).markUpdated();
+        }
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.CONSUME);
     }
 
     /*@SubscribeEvent

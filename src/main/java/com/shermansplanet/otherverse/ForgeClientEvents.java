@@ -48,6 +48,10 @@ public class ForgeClientEvents {
     @SubscribeEvent
     public static void onLeave(ClientPlayerNetworkEvent.LoggingOut event) {
         DiagramManager.clearClientData();
+        PracticeWorldManager.noJeiPending = false;
+        PracticeWorldManager.worldSetUp = false;
+        BindingRenderer.resetData();
+        ReskinManager.resetData();
     }
 
     private static void onMouseEvent(ScreenEvent event) {

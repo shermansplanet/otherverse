@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_war"
             },
-            "text": "Conflict and harm, weapons of violence. The bloodied banner of victory at any cost. Cycles of victimization and vengeance.$(br2)Every point of damage dealt by a war-hallowed weapon will put a War spirit in that weapon."
+            "text": "Conflict and harm, weapons of violence. The bloodied banner of victory at any cost. Cycles of victimization and vengeance.$(br2)Every point of damage dealt by a war-hallowed weapon will put a War spirit in that weapon.$(br2)Shrine range is $(bold)centered.$()"
         },
         {
             "type": "patchouli:text",

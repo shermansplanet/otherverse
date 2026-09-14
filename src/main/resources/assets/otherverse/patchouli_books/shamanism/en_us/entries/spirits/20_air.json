@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_air"
             },
-            "text": "The free expanse of the sky, the speed of a whirlwind, the light touch of the breeze. Fast and agile, but fickle."
+            "text": "The free expanse of the sky, the speed of a whirlwind, the light touch of the breeze. Fast and agile, but fickle.$(br2)Shrine range is $(bold)centered.$()"
         },
         {
             "type": "patchouli:text",

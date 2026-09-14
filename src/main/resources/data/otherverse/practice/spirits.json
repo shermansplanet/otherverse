@@ -31,6 +31,7 @@
 		"minecraft:smooth_quartz_slab" : ["18 fortune"],
 		"minecraft:crimson_stem" : ["3 nether"],
 		"minecraft:seagrass" : ["3 water"],
+		"minecraft:grass_block" : ["3 nature"],
 		"minecraft:nether_brick" : ["3 nether"],
 		"minecraft:quartz_stairs" : ["36 fortune"],
 		"minecraft:raw_iron" : ["9 fortune"],
@@ -186,6 +187,8 @@
 		"minecraft:prismarine_shard" : ["3 water"],
 		"minecraft:prismarine_crystals" : ["7 water"],
 		"minecraft:honey_block" : ["28 food"],
+		"minecraft:chorus_fruit" : ["9 end"],
+		"minecraft:popped_chorus_fruit" : ["11 end"],
 
 		"otherverse:homunculus_heart" : ["33 flesh"],
 		"otherverse:salt" : ["11 overworld"],

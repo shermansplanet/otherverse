@@ -14,6 +14,7 @@ import com.shermansplanet.otherverse.spirits.HallowHelper;
 import com.shermansplanet.otherverse.spirits.SpiritLabeler;
 import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -334,11 +335,11 @@ public class ArtifactManager {
         altar.getOrCreateTagElement("BlockEntityTag").putString("spawn_altar_type", typeString);
     }
 
-    public static boolean trySpawn(ServerLevel level, BlockFocus focus, Diagram diagram) {
-        if (!(level.getBlockEntity(focus.getPos()) instanceof SpawnAltarBlockEntity altar) || altar.spawnType == null) {
+    public static boolean trySpawn(ServerLevel level, BlockPos pos) {
+        if (!(level.getBlockEntity(pos) instanceof SpawnAltarBlockEntity altar) || altar.spawnType == null) {
             return false;
         }
-        var hallowTag = DiagramManager.getOrCreateLevelData(level).getPlacedItemTag(focus.getPos());
+        var hallowTag = DiagramManager.getOrCreateLevelData(level).getPlacedItemTag(pos);
         int hp = (int) DefaultAttributes.getSupplier(altar.spawnType).getValue(Attributes.MAX_HEALTH);
         var count = hallowTag.getInt("spirit_count");
         var mobCount = count / hp;
@@ -346,17 +347,15 @@ public class ArtifactManager {
             return false;
         }
         hallowTag.putInt("spirit_count", count - hp * mobCount);
-        DiagramManager.getOrCreateLevelData(level).putPlacedItemTag(focus.getPos(), hallowTag);
-
-        var spawnPos = focus.getPos();
+        DiagramManager.getOrCreateLevelData(level).putPlacedItemTag(pos, hallowTag);
 
         for (var i = 0; i < mobCount; i++) {
-            var e = altar.spawnType.create(level, null, null, spawnPos,
+            var e = altar.spawnType.create(level, null, null, pos,
                     MobSpawnType.SPAWN_EGG, false, false);
             e.setPos(new Vec3(
-                    spawnPos.getX() + 0.4f + level.random.nextFloat() * 0.2f,
-                    spawnPos.getY() + 0.25f,
-                    spawnPos.getZ() + 0.4f + level.random.nextFloat() * 0.2f));
+                    pos.getX() + 0.4f + level.random.nextFloat() * 0.2f,
+                    pos.getY() + 0.25f,
+                    pos.getZ() + 0.4f + level.random.nextFloat() * 0.2f));
             level.addFreshEntityWithPassengers(e);
         }
 

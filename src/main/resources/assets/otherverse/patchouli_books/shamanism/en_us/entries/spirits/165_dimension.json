@@ -13,7 +13,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "This costs 9 spirits from the shrine upon lighting and 9 more each sunrise.$(br2)For modded dimensions, use an overworld shrine and cinnabar."
+            "text": "This costs 9 spirits from the shrine upon lighting and 9 more each sunrise.$(br2)For modded dimensions, use an overworld shrine and cinnabar.$(br2)Shrine ranges are $(bold)centered.$()"
         }
     ]
 }

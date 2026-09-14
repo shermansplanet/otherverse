@@ -13,7 +13,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "If an entity enters a block focus influenced by a time hallow, it will become \"paused\" - arrows will freeze midair, TNT will stop counting down, mobs will stop moving, and so on. Keeping an entity paused consumes one time spirit per second. Time- and Fate-aligned mobs are immune to this effect."
+      "text": "If an entity enters a block focus influenced by a time hallow, it will become \"paused\" - arrows will freeze midair, TNT will stop counting down, mobs will stop moving, and so on. Keeping an entity paused consumes one time spirit per second. Time- and Fate-aligned mobs are immune to this effect.$(br2)There are no special shrine effects for Time shrines."
     }
   ]
 }

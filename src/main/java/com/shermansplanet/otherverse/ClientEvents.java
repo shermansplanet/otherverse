@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.artifacts.WitchHatRenderer;
+import com.shermansplanet.otherverse.binding.BindingRenderer;
 import com.shermansplanet.otherverse.binding.IdolRenderer;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.demesnes.DemesnesClaimScreen;
@@ -115,9 +116,6 @@ public class ClientEvents {
     public static void onFMLClientSetupEvent(final FMLClientSetupEvent event) {
         LOGGER.error("ACCESS_TOKEN " + Minecraft.getInstance().getUser().getAccessToken());
         LOGGER.error("UUID " + Minecraft.getInstance().getUser().getUuid());
-
-        PracticeWorldManager.noJeiPending = false;
-        PracticeWorldManager.worldSetUp = false;
 
         event.enqueueWork(
                 () -> {

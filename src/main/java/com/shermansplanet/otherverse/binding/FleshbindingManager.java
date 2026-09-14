@@ -70,7 +70,7 @@ public class FleshbindingManager {
     }
 
     public static boolean tryFleshbindMob(Mob mob, BlockFocus focus, ServerLevel level) {
-        if (mob.getHealth() > 10) {
+        if (mob.getHealth() >= 10.5f) {
             return false;
         }
         ChalkCircle circleWithDrop = null;

@@ -40,9 +40,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -96,6 +94,16 @@ public class ContractTask {
     private Path directPath;
     private int ticksInSameBlock = 0;
     private BlockPos lastPos = null;
+
+    private static HashMap<ResourceLocation, ResourceLocation> harvestItemRemaps = new HashMap<>();
+
+    static {
+        harvestItemRemaps.put(ResourceLocation.fromNamespaceAndPath("minecraft", "wheat"), ResourceLocation.fromNamespaceAndPath("minecraft", "wheat_seeds"));
+        harvestItemRemaps.put(ResourceLocation.fromNamespaceAndPath("minecraft", "brown_mushroom"), ResourceLocation.fromNamespaceAndPath("farmersdelight", "brown_mushroom_colony"));
+        harvestItemRemaps.put(ResourceLocation.fromNamespaceAndPath("minecraft", "red_mushroom"), ResourceLocation.fromNamespaceAndPath("farmersdelight", "red_mushroom_colony"));
+        harvestItemRemaps.put(ResourceLocation.fromNamespaceAndPath("minecraft", "crimson_fungus"), ResourceLocation.fromNamespaceAndPath("mynethersdelight", "crimson_fungus_colony"));
+        harvestItemRemaps.put(ResourceLocation.fromNamespaceAndPath("minecraft", "warped_fungus"), ResourceLocation.fromNamespaceAndPath("mynethersdelight", "warped_fungus_colony"));
+    }
 
     private static final Pair<IItemHandler, Integer> HELD_ITEM = new Pair<>(null, null);
 
@@ -187,6 +195,13 @@ public class ContractTask {
                     }
                 } else {
                     var item = Item.byId(tag.getInt(key));
+                    if (harvesting) {
+                        var loc = ForgeRegistries.ITEMS.getKey(item);
+                        var mapping = harvestItemRemaps.get(loc);
+                        if (mapping != null && ForgeRegistries.ITEMS.containsKey(mapping)) {
+                            item = ForgeRegistries.ITEMS.getValue(mapping);
+                        }
+                    }
                     itemFilters.add(item);
                     var index = key.substring(7);
                     var tagitemkey = "tag_item_" + index;
@@ -238,9 +253,25 @@ public class ContractTask {
         return tagFilter.equals(stack.getTag().toString());
     }
 
+    private boolean isValidCropBlock(Level level, Block block, BlockState blockState) {
+        if (block instanceof CropBlock cb) return cb.isMaxAge(blockState);
+        if (block instanceof ChorusFlowerBlock) return blockState.getValue(ChorusFlowerBlock.AGE) == 5;
+        if (block instanceof BonemealableBlock bb) {
+            if (block instanceof NetherWartBlock nw && !nw.isRandomlyTicking(blockState)) return true;
+            var id = ForgeRegistries.BLOCKS.getKey(block);
+            try {
+                if (id != null && id.getPath().endsWith("_colony"))
+                    return !bb.isValidBonemealTarget(level, null, blockState, false);
+            } catch (Exception ignored) {
+
+            }
+        }
+        return false;
+    }
+
     private boolean isValidBlock(BlockState blockState) {
         var block = blockState.getBlock();
-        if (harvesting && (!(block instanceof CropBlock cb && cb.isMaxAge(blockState)))) return false;
+        if (harvesting && !isValidCropBlock(mob.level(), block, blockState)) return false;
         if (itemFilters.isEmpty()) {
             return !felling || (blockState.is(BlockTags.LOGS));
         }
@@ -334,7 +365,8 @@ public class ContractTask {
                 if (mob.getPersistentData().contains("construct_type")) {
                     var pos = le.blockPosition();
                     if (mob.getPersistentData().getString("construct_type").equals(Spirits.FLESH.label())) {
-                        if (ShrineHelper.getShrinesFor(mob, pos, Spirits.FLESH).isEmpty() && FleshTechManager.getClosestHeart(le) != null) continue;
+                        if (ShrineHelper.getShrinesFor(mob, pos, Spirits.FLESH).isEmpty() && FleshTechManager.getClosestHeart(le) != null)
+                            continue;
                     } else {
                         if (ShrineHelper.getShrinesFor(mob, pos, Spirits.TECH).isEmpty()) continue;
                     }
@@ -717,10 +749,10 @@ public class ContractTask {
             }
             var diff = targetMovePos.getCenter().subtract(0, 0.5f, 0).subtract(mob.position()).normalize();
             var adjustedPos = targetMovePos.getCenter().add(diff.scale(ticksInSameBlock / 20f));
-            mob.getNavigation().moveTo(adjustedPos.x, adjustedPos.y + (isNotor ? 1 : 0), adjustedPos.z, 1);
+            mob.getNavigation().moveTo(adjustedPos.x, adjustedPos.y + (isNotor ? 1 : 0), adjustedPos.z, boundGoal.speedModifier);
             return false;
         }
-        mob.getNavigation().moveTo(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ(), 1);
+        mob.getNavigation().moveTo(targetMovePos.getX(), targetMovePos.getY(), targetMovePos.getZ(), boundGoal.speedModifier);
 
         ticksInSameBlock = 0;
 
@@ -975,24 +1007,33 @@ public class ContractTask {
 
     private boolean harvestBlock() {
         BlockState blockstate = mob.level().getBlockState(targetPos);
-        if (!(mob.level() instanceof ServerLevel sl) || !(blockstate.getBlock() instanceof CropBlock cb)) return fail();
+        var block = blockstate.getBlock();
+        if (!(mob.level() instanceof ServerLevel sl) || !isValidCropBlock(mob.level(), block, blockstate))
+            return fail();
         MutableBoolean hasTaken = new MutableBoolean(false);
         Item blockItem = blockstate.getBlock().asItem();
-        Block.getDrops(blockstate, sl, targetPos, mob.level().getBlockEntity(targetPos), mob, mob.getMainHandItem().copy())
-                .forEach((stack) -> {
-                    if (stack.getItem() == blockItem && !hasTaken.getValue()) {
-                        stack.shrink(1);
-                        hasTaken.setValue(true);
-                    }
+        if(blockItem != Items.CHORUS_FLOWER) {
+            var id = ForgeRegistries.BLOCKS.getKey(block);
+            if (id != null && id.getPath().endsWith("_colony")) {
+                blockItem = ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath("minecraft", id.getPath().replace("_colony", "")));
+            }
+            var finalBlockItem = blockItem;
+            Block.getDrops(blockstate, sl, targetPos, mob.level().getBlockEntity(targetPos), mob, mob.getMainHandItem().copy())
+                    .forEach((stack) -> {
+                        if (stack.getItem() == finalBlockItem && !hasTaken.getValue()) {
+                            stack.shrink(1);
+                            hasTaken.setValue(true);
+                        }
 
-                    if (!stack.isEmpty())
-                        Block.popResource(sl, targetPos, stack);
-                });
+                        if (!stack.isEmpty())
+                            Block.popResource(sl, targetPos, stack);
+                    });
+        }
+        mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
         if (hasTaken.isFalse()) {
-            mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
             this.mob.level().destroyBlock(targetPos, false, mob);
         } else {
-            mob.level().setBlockAndUpdate(targetPos, cb.defaultBlockState());
+            mob.level().setBlockAndUpdate(targetPos, block.defaultBlockState());
         }
         return succeed();
     }
@@ -1109,6 +1150,6 @@ public class ContractTask {
             em.teleportTo(x + 0.5, y + 1, z + 0.5);
             boundGoal.cooldown = 200;
         }
-        return mob.getNavigation().moveTo(mob.getNavigation().createPath(new BlockPos(x, y, z), 0), 1);
+        return mob.getNavigation().moveTo(mob.getNavigation().createPath(new BlockPos(x, y, z), 0), boundGoal.speedModifier);
     }
 }

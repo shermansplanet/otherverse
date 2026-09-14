@@ -45,7 +45,8 @@
     "ClientDataInjector",
     "ItemRendererInjector",
     "BlockRenderDispatcherInjector",
-    "GeoEntityRendererInjector"
+    "GeoEntityRendererInjector",
+    "MultiPartInjector"
   ],
   "injectors": {
     "defaultRequire": 1

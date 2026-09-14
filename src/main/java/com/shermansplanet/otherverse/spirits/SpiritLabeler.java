@@ -66,6 +66,7 @@ public class SpiritLabeler {
         spiritKeywords.put(Spirits.DEATH, new String[]{"death", "bone", "skull", "mortem", "plague", "bones", "dead", "necrotic", "skeleton", "mold", "moldy", "decaying", "rot"});
         spiritKeywords.put(Spirits.NETHER, new String[]{"nether", "netherrack", "netherite", "blackstone"});
         spiritKeywords.put(Spirits.END, new String[]{"end", "purpur", "void", "chorus", "eldritch"});
+        spiritKeywords.put(Spirits.OVERWORLD, new String[]{"cobblestone", "sandstone", "mud", "clay"});
         for (var entry : spiritKeywords.entrySet()) {
             for (var str : entry.getValue()) {
                 SPIRIT_KEYWORDS.put(str, entry.getKey());
@@ -283,7 +284,7 @@ public class SpiritLabeler {
             AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_DEEPSLATE, Spirits.OVERWORLD, 3);
 
             AddForTag(item, spiritAmounts, Tags.Blocks.ORE_BEARING_GROUND_NETHERRACK, Spirits.NETHER, 3);
-            AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_NETHERRACK, Spirits.OVERWORLD, 3);
+            AddForTag(item, spiritAmounts, Tags.Blocks.ORES_IN_GROUND_NETHERRACK, Spirits.NETHER, 3);
 
             AddForTag(item, spiritAmounts, BlockTags.UNDERWATER_BONEMEALS, Spirits.WATER, 1);
 
@@ -345,8 +346,8 @@ public class SpiritLabeler {
 
             if (item instanceof BlockItem bi) {
                 var block = bi.getBlock();
-                if (block instanceof BonemealableBlock && block != Blocks.NETHERRACK) {
-                    spiritAmounts.add(new SpiritAmount(Spirits.NATURE, 27));
+                if (block instanceof BonemealableBlock && block != Blocks.NETHERRACK && block != Blocks.GRASS_BLOCK) {
+                    spiritAmounts.add(new SpiritAmount(Spirits.NATURE, 9));
                 }
                 float strength = block.defaultDestroyTime();
                 if (strength > 10) {
@@ -388,7 +389,8 @@ public class SpiritLabeler {
                 if (SPIRITS_FROM_JSON.data != null && SPIRITS_FROM_JSON.data.containsKey(item) &&
                         Arrays.stream(SPIRITS_FROM_JSON.data.get(item)).anyMatch(s -> s.type == spiritType))
                     continue;
-                if (spiritType == Spirits.FIRE && itemName.contains("coral")) continue;
+                if (spiritType == Spirits.FIRE && (itemName.contains("fire_coral") || itemName.contains("cinder_block")))
+                    continue;
                 spiritAmounts.add(new SpiritAmount(spiritType, 3));
             }
 

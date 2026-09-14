@@ -49,7 +49,7 @@ public class SpiritAffinityTracker {
 
         public void pullAffinityTowards(SpiritType spiritType, float goal) {
             var current = baseAffinities.getOrDefault(spiritType, 0f);
-            var lerp = goal > 0 ? 0.1f : 0.2f;
+            var lerp = goal > 0 ? 0.04f : 0.06f;
             baseAffinities.put(spiritType, current * (1 - lerp) + goal * lerp);
         }
 

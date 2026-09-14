@@ -42,6 +42,7 @@ import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -453,6 +454,8 @@ public class BindingManager {
                         Otherverse.ADVANCEMENTS.trigger(sp, "bind_wither");
                     } else if (t.equals(EntityType.WARDEN)) {
                         Otherverse.ADVANCEMENTS.trigger(sp, "bind_warden");
+                    } else if (ForgeRegistries.ENTITY_TYPES.getKey(t).getPath().equals("hullbreaker")) {
+                        Otherverse.ADVANCEMENTS.trigger(sp, "bind_hullbreaker");
                     }
                 }
             }
@@ -470,7 +473,7 @@ public class BindingManager {
         mob.getBrain().setMemory(MemoryModuleType.ANGRY_AT, targetMob.getUUID());
         mob.setAggressive(true);
         if (mob instanceof Warden w) {
-            w.increaseAngerAt(targetMob);
+            w.increaseAngerAt(targetMob, 150, false);
             w.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 120000L);
         } else if (mob instanceof Banshee banshee && banshee.canDropAnvil()) {
             banshee.tryAnvilDrop();
@@ -480,7 +483,8 @@ public class BindingManager {
     }
 
     public static void tickOtherGoals(Mob mob) {
-        var usedFlags = new HashSet<>();
+        HashSet<Goal.Flag> usedFlags = new HashSet<>();
+        usedFlags.add(Goal.Flag.TARGET);
         for (var goal : mob.goalSelector.getAvailableGoals().stream().sorted(Comparator.comparingInt(WrappedGoal::getPriority)).toList()) {
             if (goal.getGoal() instanceof BoundGoal) continue;
             if (goal.getFlags().stream().anyMatch(usedFlags::contains)) {
@@ -508,7 +512,8 @@ public class BindingManager {
             }
         }
         if (mob.getTarget() != null && mob instanceof Warden w) w.clearAnger(mob.getTarget());
-        mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, (LivingEntity) null);
+        mob.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+        mob.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
         mob.setAggressive(false);
         mob.setTarget(null);
     }
@@ -519,16 +524,18 @@ public class BindingManager {
             binding.unload();
             return;
         }
-        removeBindingFromMob(mob);
+        removeBindingFromMob(mob, !binding.isPositive);
         binding.unload();
     }
 
-    public static void removeBindingFromMob(Mob mob) {
-        Player closest = mob.level().getNearestPlayer(mob, 16);
-        if (closest != null) {
-            mob.setLastHurtByPlayer(closest);
-            mob.setLastHurtByMob(closest);
-            forceAttack(mob, closest);
+    public static void removeBindingFromMob(Mob mob, boolean shouldAnger) {
+        if (shouldAnger) {
+            Player closest = mob.level().getNearestPlayer(mob, 16);
+            if (closest != null) {
+                mob.setLastHurtByPlayer(closest);
+                mob.setLastHurtByMob(closest);
+                forceAttack(mob, closest);
+            }
         }
         mob.getPersistentData().remove("bindingId");
         Goal bg = null;

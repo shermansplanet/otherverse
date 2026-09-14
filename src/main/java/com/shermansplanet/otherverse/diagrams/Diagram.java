@@ -199,7 +199,7 @@ public class Diagram {
             SpiritTransfusions.tryTransfuse(level, focus, this);
             DemesnesManager.tryGrowArchitecture(level, focus, this);
 
-            needsReactivation = ArtifactManager.trySpawn(level, focus, this);
+            needsReactivation = ArtifactManager.trySpawn(level, focus.getPos());
         }
         return needsReactivation;
     }

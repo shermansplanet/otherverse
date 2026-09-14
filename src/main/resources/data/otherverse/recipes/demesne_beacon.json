@@ -1,16 +1,19 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "###",
-        "#!#",
-        "###"
+        "bbb",
+        "b#b",
+        "ooo"
     ],
     "key": {
         "#": {
             "item": "minecraft:ender_eye"
         },
-        "!": {
-            "item": "minecraft:beacon"
+        "b": {
+            "item": "minecraft:iron_bars"
+        },
+        "o": {
+            "item": "minecraft:obsidian"
         }
     },
     "result": {

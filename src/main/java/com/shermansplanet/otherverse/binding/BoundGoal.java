@@ -23,10 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -74,13 +71,16 @@ public class BoundGoal extends Goal {
     public boolean isTamed;
     public int range = 8;
     private boolean needsToScanArea;
+    public float speedModifier = 1f;
 
     public BoundGoal(Mob m, BindingInfo binding) {
         mob = m;
         currentMode = mob.getPersistentData().contains("familiar_mode") ? mob.getPersistentData().getInt("familiar_mode") : 2;
+        if (currentMode == 2) BindingManager.stopAttacking(mob, true);
         if (!mob.getPersistentData().contains(REMEMBERED_BLOCKS)) {
             mob.getPersistentData().put(REMEMBERED_BLOCKS, new CompoundTag());
         }
+        if(mob.getType() == EntityType.VILLAGER) speedModifier = 0.4f;
         this.binding = binding;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.TARGET));
         bindingWearInterval = BindingManager.getBindingWearInterval(mob.getMaxHealth(), binding == null || binding.isPositive);
@@ -128,7 +128,7 @@ public class BoundGoal extends Goal {
         } else {
             currentMode = (currentMode + 1) % 3;
         }
-        if(currentMode == 2) BindingManager.stopAttacking(mob, true);
+        if (currentMode == 2) BindingManager.stopAttacking(mob, true);
         mob.getPersistentData().putInt("familiar_mode", currentMode);
         displayFamiliarMode();
     }
@@ -319,7 +319,7 @@ public class BoundGoal extends Goal {
             isAttacking = false;
         }
         if (!mob.getBoundingBox().inflate(1).intersects(targetMob.getBoundingBox().inflate(1))) {
-            mob.getNavigation().moveTo(targetMob, 1);
+            mob.getNavigation().moveTo(targetMob, speedModifier);
             return;
         }
         targetMob.getNavigation().stop();
@@ -328,7 +328,7 @@ public class BoundGoal extends Goal {
             getPractitioner();
             if (practitioner == null) return;
         }
-        mob.getNavigation().moveTo(practitioner, 0.5f);
+        mob.getNavigation().moveTo(practitioner, speedModifier * 0.5f);
         var diff = mob.position().subtract(targetMob.position()).normalize().scale(0.03f);
         var d1 = targetMob.position().subtract(mob.position()).normalize();
         var d2 = practitioner.position().subtract(mob.position()).normalize();
@@ -435,6 +435,8 @@ public class BoundGoal extends Goal {
 
     private void followPlayer() {
         cooldown--;
+        var shouldMoveToPractitioner = false;
+        var limit = isLoyaltyBound ? 6 : 4;
         if (cooldown <= 0) {
             cooldown = 10;
             getPractitioner();
@@ -448,7 +450,6 @@ public class BoundGoal extends Goal {
                 return;
             }
             if (!isAttacking) {
-                var limit = isLoyaltyBound ? 6 : 4;
                 if (dist > limit * limit) {
                     if (mob instanceof Shulker shulker) {
                         if (dist > 12 * 12) {
@@ -465,8 +466,7 @@ public class BoundGoal extends Goal {
                             }
                         }
                     } else {
-                        mob.getNavigation().moveTo(practitioner, 1);
-                        mob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(practitioner, 1, limit));
+                        shouldMoveToPractitioner = true;
                     }
                 } else {
                     mob.getNavigation().stop();
@@ -507,6 +507,10 @@ public class BoundGoal extends Goal {
         if (!shouldAttack) {
             BindingManager.tickOtherGoals(mob);
             BindingManager.stopAttacking(mob, false);
+            if (shouldMoveToPractitioner) {
+                mob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(practitioner, 1, limit));
+                mob.getNavigation().moveTo(practitioner, speedModifier);
+            }
             isAttacking = false;
             return;
         }

@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_nature"
             },
-            "text": "Natural bounty, self-fueling cycles of life and decay. Interconnected ecologies. Predator and prey, compost and crop."
+            "text": "Natural bounty, self-fueling cycles of life and decay. Interconnected ecologies. Predator and prey, compost and crop.$(br2)Shrine range extends $(bold)up.$()"
         },
         {
             "type": "patchouli:text",

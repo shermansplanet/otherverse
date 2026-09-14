@@ -14,10 +14,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ReskinManager {
@@ -26,6 +23,22 @@ public class ReskinManager {
     private static final HashMap<UUID, List<ResourceLocation>> cachedSkinUpdates = new HashMap<>();
     private static final HashMap<UUID, List<ResourceLocation>> sightSkins = new HashMap<>();
     private static final HashMap<UUID, List<ResourceLocation>> alwaysSkins = new HashMap<>();
+    private static final HashMap<ResourceLocation, HashMap<String, ResourceLocation>> mobSkinCache = new HashMap<>();
+    private static final HashMap<LivingEntity, ResourceLocation> reskinnedMobs = new HashMap<>();
+
+    private static final LinkedList<ITextureSetter> skinnedPlayerList = new LinkedList<>();
+
+    public static void resetData() {
+        for (var player : skinnedPlayerList) {
+            player.setTexture(null);
+        }
+        cachedSkinUpdates.clear();
+        sightSkins.clear();
+        alwaysSkins.clear();
+        mobSkinCache.clear();
+        reskinnedMobs.clear();
+        skinnedPlayerList.clear();
+    }
 
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
@@ -45,6 +58,7 @@ public class ReskinManager {
                     LOGGER.error("RETEXTURE FAILURE");
                     continue;
                 }
+                skinnedPlayerList.add((ITextureSetter) player);
             }
             cachedSkinUpdates.remove(player.getUUID());
             SightOverlay.instance.recalculateColor();
@@ -74,9 +88,6 @@ public class ReskinManager {
             cachedSkinUpdates.put(id, SightManager.shouldRenderSight() ? sightSkins.get(id) : alwaysSkins.getOrDefault(id, new ArrayList<>()));
         }
     }
-
-    private static final HashMap<ResourceLocation, HashMap<String, ResourceLocation>> mobSkinCache = new HashMap<>();
-    private static final HashMap<LivingEntity, ResourceLocation> reskinnedMobs = new HashMap<>();
 
     public static void reskinMob(LivingEntity le, String spiritType) {
         var originalTexture = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(le).getTextureLocation(le);

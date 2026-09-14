@@ -53,13 +53,22 @@ public class BindingRenderer {
     private static BlockRenderDispatcher blockRenderer;
     private static EntityRenderDispatcher entityRenderDispatcher;
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static HashSet<UUID> positiveBoundEntities = new HashSet<>();
-    private static HashSet<UUID> negativeBoundEntities = new HashSet<>();
-    private static HashSet<UUID> contractEntities = new HashSet<>();
-    private static HashMap<UUID, String> familiars = new HashMap<>();
-    private static HashMap<String, EntityType<LivingEntity>> familiarsByPract = new HashMap<>();
-    private static HashMap<Player, EndCrystal> endCrystals = new HashMap<>();
-    private static HashSet<EntityType<?>> bigHeadMobs = new HashSet<>(Set.of(EntityType.WITHER, EntityType.WARDEN, EntityType.GHAST));
+    private static final HashSet<UUID> positiveBoundEntities = new HashSet<>();
+    private static final HashSet<UUID> negativeBoundEntities = new HashSet<>();
+    private static final HashSet<UUID> contractEntities = new HashSet<>();
+    private static final HashMap<UUID, String> familiars = new HashMap<>();
+    private static final HashMap<String, EntityType<LivingEntity>> familiarsByPract = new HashMap<>();
+    private static final HashMap<Player, EndCrystal> endCrystals = new HashMap<>();
+    private static final HashSet<EntityType<?>> bigHeadMobs = new HashSet<>(Set.of(EntityType.WITHER, EntityType.WARDEN, EntityType.GHAST));
+
+    public static void resetData() {
+        positiveBoundEntities.clear();
+        negativeBoundEntities.clear();
+        contractEntities.clear();
+        familiars.clear();
+        familiarsByPract.clear();
+        endCrystals.clear();
+    }
 
     @SubscribeEvent
     public static void OnRenderName(RenderNameTagEvent event) {

@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_fire"
             },
-            "text": "Heat, energy, release, vitality, entropy. Flames, roaring, crackling. Fire spirits are useful when tamed, and dangerous off their leash."
+            "text": "Heat, energy, release, vitality, entropy. Flames, roaring, crackling. Fire spirits are useful when tamed, and dangerous off their leash.$(br2)Shrine range extends $(bold)down.$()"
         },
         {
             "type": "patchouli:text",

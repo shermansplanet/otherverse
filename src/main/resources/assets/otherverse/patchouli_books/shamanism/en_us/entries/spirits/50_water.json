@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_water"
             },
-            "text": "Ocean waves churning over unknown depths. Rushing rivers and placid lakes. Water spirits can slake your thirst or drown you."
+            "text": "Ocean waves churning over unknown depths. Rushing rivers and placid lakes. Water spirits can slake your thirst or drown you.$(br2)Shrine range extends $(bold)down.$()"
         },
         {
             "type": "patchouli:text",

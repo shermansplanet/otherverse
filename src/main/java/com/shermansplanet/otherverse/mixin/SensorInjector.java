@@ -1,7 +1,9 @@
 package com.shermansplanet.otherverse.mixin;
 
-import com.shermansplanet.otherverse.artifacts.ConnectionBlockManager;
+import com.shermansplanet.otherverse.binding.BindingManager;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,4 +35,25 @@ public abstract class SensorInjector<E extends LivingEntity> {
 //    private static void isEntityAttackableIgnoringLineOfSight(LivingEntity p_182378_, LivingEntity p_182379_, CallbackInfoReturnable<Boolean> ci) {
 //        cancelIfBlocked(p_182378_, p_182379_, ci);
 //    }
+
+    private static void cancelIfBound(LivingEntity le, LivingEntity target, CallbackInfoReturnable<Boolean> ci) {
+        if (!BindingManager.isBoundOrContracted(le)) return;
+        ci.setReturnValue(le.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, target));
+        ci.cancel();
+    }
+
+    @Inject(method = "isEntityTargetable", at = @At(value = "HEAD"), cancellable = true)
+    private static void isEntityTargetable(LivingEntity p_26804_, LivingEntity p_26805_, CallbackInfoReturnable<Boolean> ci) {
+        cancelIfBound(p_26804_, p_26805_, ci);
+    }
+
+    @Inject(method = "isEntityAttackable", at = @At(value = "HEAD"), cancellable = true)
+    private static void isEntityAttackable(LivingEntity p_148313_, LivingEntity p_148314_, CallbackInfoReturnable<Boolean> ci) {
+        cancelIfBound(p_148313_, p_148314_, ci);
+    }
+
+    @Inject(method = "isEntityAttackableIgnoringLineOfSight", at = @At(value = "HEAD"), cancellable = true)
+    private static void isEntityAttackableIgnoringLineOfSight(LivingEntity p_182378_, LivingEntity p_182379_, CallbackInfoReturnable<Boolean> ci) {
+        cancelIfBound(p_182378_, p_182379_, ci);
+    }
 }

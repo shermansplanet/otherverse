@@ -977,7 +977,7 @@ public class FamiliarManager {
             BindingInfo binding = data.bindingsById.get(persistentData.getUUID("bindingId"));
             if (binding == null) {
                 LOGGER.debug("COULDN'T FIND BINDING");
-                BindingManager.removeBindingFromMob(mob);
+                BindingManager.removeBindingFromMob(mob, false);
             } else {
                 binding.mob = mob;
                 binding.isCinnabar = false;
