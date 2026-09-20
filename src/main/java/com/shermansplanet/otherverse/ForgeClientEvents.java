@@ -1,22 +1,26 @@
 package com.shermansplanet.otherverse;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BindingRenderer;
+import com.shermansplanet.otherverse.binding.GiveItemMessage;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.others.Buzzed;
 import com.shermansplanet.otherverse.others.BuzzedSoundInstance;
+import com.shermansplanet.otherverse.spirits.HallowTextureManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -52,6 +56,7 @@ public class ForgeClientEvents {
         PracticeWorldManager.worldSetUp = false;
         BindingRenderer.resetData();
         ReskinManager.resetData();
+        HallowTextureManager.resetData();
     }
 
     private static void onMouseEvent(ScreenEvent event) {
@@ -79,12 +84,28 @@ public class ForgeClientEvents {
         event.setCanceled(true);
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onInteractionKeyTriggered(InputEvent.Key event) {
+        if (event.getKey() != Keybindings.KEY_GIVE.getKey().getValue()) return;
+        if (event.getAction() != InputConstants.PRESS) return;
+        var hit = Minecraft.getInstance().hitResult;
+        if (hit == null || hit.getType() != HitResult.Type.ENTITY) return;
+        var e = ((EntityHitResult) hit).getEntity();
+        if (!(e instanceof LivingEntity le) || !BindingRenderer.isBound(le)) return;
+        Keybindings.KEY_GIVE.consumeClick();
+        if (Keybindings.KEY_GIVE.same(Minecraft.getInstance().options.keyDrop)) {
+            Minecraft.getInstance().options.keyDrop.consumeClick();
+        }
+        OtherversePacketHandler.INSTANCE.sendToServer(new GiveItemMessage(le.getId()));
+    }
+
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
-        if (!Keybindings.KEY_SIGHT.consumeClick()) return;
-        if (!canToggleSight()) return;
-        SightManager.toggleSight();
+        if (Keybindings.KEY_SIGHT.consumeClick()) {
+            if (!canToggleSight()) return;
+            SightManager.toggleSight();
+        }
     }
 
     private static boolean canToggleSight() {
@@ -96,7 +117,7 @@ public class ForgeClientEvents {
         }
         var inv = CuriosApi.getCuriosInventory(player);
         if (!inv.isPresent() || inv.resolve().isEmpty()) return false;
-        for(var curioInventory : inv.resolve().get().getCurios().values()){
+        for (var curioInventory : inv.resolve().get().getCurios().values()) {
             var stacks = curioInventory.getStacks();
             for (var i = 0; i < stacks.getSlots(); i++) {
                 if (sightItems.contains(stacks.getStackInSlot(i).getItem())) return true;

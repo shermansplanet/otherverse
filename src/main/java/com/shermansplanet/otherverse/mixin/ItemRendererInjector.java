@@ -264,7 +264,7 @@ public class ItemRendererInjector {
         }
 
         ClientEvents.HALLOW_TEXTURE_MANAGER.quietReload();
-        BakedModel m = model.bake(DUMMY_BAKER, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex.getFirst(), x, new HashMap<>()), BlockModelRotation.X0_Y0, modelLocation);
+        BakedModel m = model.bake(DUMMY_BAKER, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex.getFirst(), x), BlockModelRotation.X0_Y0, modelLocation);
 
         var compState = RenderType.CompositeState.builder()
                 .setShaderState(RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER)

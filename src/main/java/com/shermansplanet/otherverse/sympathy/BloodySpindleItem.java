@@ -72,14 +72,16 @@ public class BloodySpindleItem extends Item {
         if (entity == null) return stack;
         var position = getSummonLoc(tag);
         entity.moveTo(position);
-        stack.shrink(1);
-        if (stack.isEmpty()) sp.getInventory().removeItem(stack);
+        if (!sp.getAbilities().instabuild) {
+            stack.shrink(1);
+            if (stack.isEmpty()) sp.getInventory().removeItem(stack);
+        }
         return stack;
     }
 
 
     public void onUseTick(Level level, LivingEntity player, ItemStack stack, int ticks) {
-        if(ticks % 4 != 0 || !level.isClientSide()) return;
+        if (ticks % 4 != 0 || !level.isClientSide()) return;
         var tag = stack.getTag();
         level.addParticle(ParticleTypes.SOUL, tag.getFloat("summon_x"),
                 tag.getFloat("summon_y"),

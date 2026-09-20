@@ -86,6 +86,10 @@ public class OtherverseJeiPlugin implements IModPlugin {
         registry.addRecipeCategories(
                 new TransfusionRecipeCategory(registry.getJeiHelpers().getGuiHelper()));
         registry.addRecipeCategories(
+                new ColorTransfusionRecipeCategory(registry.getJeiHelpers().getGuiHelper()));
+        registry.addRecipeCategories(
+                new SmeltingTransfusionRecipeCategory(registry.getJeiHelpers().getGuiHelper()));
+        registry.addRecipeCategories(
                 new BiomeCodeRecipeCategory(registry.getJeiHelpers().getGuiHelper()));
     }
 
@@ -108,9 +112,13 @@ public class OtherverseJeiPlugin implements IModPlugin {
                 //debugPracticeRecipes();
                 LOGGER.debug("ADDING PRACTICE RECIPES...");
                 if (PracticeWorldManager.jeiInitialized) return;
+                var colorRecipes = new ArrayList<TransfusionRecipe>();
+                var smeltingRecipes = new ArrayList<TransfusionRecipe>();
                 registry.addRecipes(SpiritExtractionRecipeCategory.TYPE, SpiritLabeler.GenerateRecipes());
-                registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes());
-                registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes());
+                registry.addRecipes(TransfusionRecipeCategory.TYPE, SpiritTransfusions.GenerateRecipes(colorRecipes, smeltingRecipes));
+                registry.addRecipes(TransfusionRecipeCategory.TYPE, MobTransfusions.GenerateRecipes(smeltingRecipes));
+                registry.addRecipes(ColorTransfusionRecipeCategory.TYPE, colorRecipes);
+                registry.addRecipes(SmeltingTransfusionRecipeCategory.TYPE, smeltingRecipes);
                 registry.addRecipes(BindingRecipeCategory.TYPE, MobBindingInfluenceUtils.GenerateRecipes());
                 registry.addRecipes(BiomeCodeRecipeCategory.TYPE, BiomeCodeAssigner.GenerateRecipes());
                 FleshbindingManager.addWoodTextures();

@@ -24,6 +24,8 @@ public class OtherversePotions {
             () -> new ConnectionReboundEffect(MobEffectCategory.HARMFUL, 0xbb0000));
     public static final RegistryObject<MobEffect> RUINS_BOUND = EFFECTS.register("ruins_bound",
             () -> new RuinsBoundEffect(MobEffectCategory.BENEFICIAL, 0x002060));
+    public static final RegistryObject<MobEffect> WATER_RESISTANCE = EFFECTS.register("water_resistance",
+            () -> new RuinsBoundEffect(MobEffectCategory.BENEFICIAL, 0x0099ff));
 
     public static final DeferredRegister<Potion> POTIONS =
             DeferredRegister.create(ForgeRegistries.POTIONS, Otherverse.MODID);
@@ -31,4 +33,11 @@ public class OtherversePotions {
             () -> new Potion(new MobEffectInstance(HEAVINESS_EFFECT.get(), 1800)));
     public static final RegistryObject<Potion> LEVITATION_POTION = POTIONS.register("levitation",
             () -> new Potion(new MobEffectInstance(MobEffects.LEVITATION, 20 * 13)));
+    public static final RegistryObject<Potion> WATER_RESISTANCE_POTION = POTIONS.register("water_resistance",
+            () -> new Potion(new MobEffectInstance(WATER_RESISTANCE.get(), 3600)));
+    public static final RegistryObject<Potion> LONG_WATER_RESISTANCE_POTION = POTIONS.register("long_water_resistance",
+            () -> new Potion("water_resistance", new MobEffectInstance(WATER_RESISTANCE.get(), 9600)));
+
+//    public static final Potion FIRE_RESISTANCE = register("fire_resistance", new Potion(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 3600)));
+//    public static final Potion LONG_FIRE_RESISTANCE = register("long_fire_resistance", new Potion("fire_resistance", new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 9600)));
 }

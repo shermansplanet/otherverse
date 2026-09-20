@@ -49,6 +49,10 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -59,6 +63,7 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -285,6 +290,18 @@ public class Otherverse {
     public void onSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             CriteriaTriggers.register(Otherverse.ADVANCEMENTS);
+        });
+        event.enqueueWork(() -> {
+            BrewingRecipeRegistry.addRecipe(
+                    Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.AWKWARD)),
+                    Ingredient.of(Items.SLIME_BALL),
+                    PotionUtils.setPotion(new ItemStack(Items.POTION), OtherversePotions.WATER_RESISTANCE_POTION.get())
+            );
+            BrewingRecipeRegistry.addRecipe(
+                    Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), OtherversePotions.WATER_RESISTANCE_POTION.get())),
+                    Ingredient.of(Items.REDSTONE),
+                    PotionUtils.setPotion(new ItemStack(Items.POTION), OtherversePotions.LONG_WATER_RESISTANCE_POTION.get())
+            );
         });
     }
 

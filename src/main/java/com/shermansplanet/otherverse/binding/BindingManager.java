@@ -34,14 +34,17 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
@@ -50,18 +53,22 @@ import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent.EnderEntity;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Bus.FORGE)
 public class BindingManager {
@@ -501,6 +508,9 @@ public class BindingManager {
                 goal.tick();
             }
         }
+        if (mob instanceof Villager v) {
+            v.getBrain().tick((ServerLevel) mob.level(), v);
+        }
     }
 
     public static void stopAttacking(Mob mob, boolean stopAll) {
@@ -524,7 +534,8 @@ public class BindingManager {
             binding.unload();
             return;
         }
-        removeBindingFromMob(mob, !binding.isPositive);
+        var shouldAnger = (!binding.isPositive || (OtherverseConfig.POSITIVE_BINDING_ANGER.get() && !(mob instanceof TamableAnimal ta && ta.isTame())));
+        removeBindingFromMob(mob, shouldAnger);
         binding.unload();
     }
 
@@ -577,6 +588,47 @@ public class BindingManager {
                 || (type == EntityType.IRON_GOLEM && stack.is(Items.IRON_INGOT));
     }
 
+//    @SubscribeEvent(priority = EventPriority.LOW)
+//    public static void tryThrowItem(ItemTossEvent event) {
+//        if(event.isCanceled()) return;
+//        var player = event.getPlayer();
+//        var dir = player.getLookAngle().normalize();
+//        var reach = (float) player.getEntityReach();
+//        var hit = ProjectileUtil.getEntityHitResult(
+//                player.level(),
+//                player,
+//                player.getEyePosition(),
+//                player.getEyePosition().add(dir.scale(reach)),
+//                player.getBoundingBox().inflate(reach),
+//                f -> true,
+//                reach * reach
+//        );
+//        if(hit == null) return;
+//        var target = hit.getEntity();
+//        if (target instanceof PartEntity<?> ep) {
+//            target = ep.getParent();
+//        }
+//
+//        if (!(target instanceof Mob mob)) {
+//            return;
+//        }
+//        if (!BindingManager.isBoundOrContracted(mob)) {
+//            return;
+//        }
+//
+//        if (!canBeCinnabarIdol(mob)) return;
+//
+//        if (!getHeldItem(mob).isEmpty()) {
+//            ItemEntity itementity = new ItemEntity(mob.level(),
+//                    mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f),
+//                    getHeldItem(mob).copy());
+//            itementity.setDefaultPickUpDelay();
+//            mob.level().addFreshEntity(itementity);
+//        }
+//        var item = event.getEntity().getItem();
+//        setHeldItem(mob, item.copy());
+//    }
+
     @SubscribeEvent
     public static void tryGiveItem(PlayerInteractEvent.EntityInteractSpecific event) {
         if (event.getLevel().isClientSide()) return;
@@ -592,27 +644,8 @@ public class BindingManager {
             target = ep.getParent();
         }
 
-        if (item.isEmpty() && event.getTarget() instanceof LivingEntity le && getHeldItem(le).isEmpty()) {
-            FamiliarManager.onInteract(event);
-            return;
-        }
-
-        if (isOverrideItem(event.getItemStack(), target.getType()) && target instanceof LivingEntity le) {
-            InteractionResult interactionresult = event.getItemStack().interactLivingEntity(event.getEntity(), le, event.getHand());
-            if (interactionresult.consumesAction()) {
-                event.setCancellationResult(interactionresult);
-                event.setCanceled(true);
-                return;
-            }
-            interactionresult = le.interact(event.getEntity(), event.getHand());
-            if (interactionresult.consumesAction()) {
-                event.setCancellationResult(interactionresult);
-                event.setCanceled(true);
-                return;
-            }
-        }
-
-        if (event.getEntity().isCrouching()) {
+        if (item.isEmpty() && target instanceof Mob mob) {
+            FamiliarManager.onInteract(event, mob);
             return;
         }
 
@@ -645,20 +678,6 @@ public class BindingManager {
             item.shrink(1);
             return;
         }
-
-        if (ImplementManager.isImplement(item)) {
-            return;
-        }
-        if (!getHeldItem(mob).isEmpty()) {
-            ItemEntity itementity = new ItemEntity(mob.level(),
-                    mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f),
-                    getHeldItem(mob).copy());
-            itementity.setDefaultPickUpDelay();
-            mob.level().addFreshEntity(itementity);
-        }
-        setHeldItem(mob, item.copy());
-        event.getEntity().setItemInHand(event.getHand(), ItemStack.EMPTY);
-        event.setResult(Event.Result.ALLOW);
     }
 
     public static boolean drainsBindings(EntityType<? extends LivingEntity> type, boolean isPositive) {
@@ -670,5 +689,24 @@ public class BindingManager {
         if (isPositive || type.getCategory() == MobCategory.MONSTER) return true;
         if (DefaultAttributes.getSupplier(type).hasAttribute(Attributes.ATTACK_DAMAGE)) return true;
         return false;
+    }
+
+    public static void onExchangeItem(GiveItemMessage msg, Supplier<NetworkEvent.Context> ctx) {
+        var player = ctx.get().getSender();
+        var target = player.level().getEntity(msg.mobId);
+        if (target instanceof PartEntity<?> ep) {
+            target = ep.getParent();
+        }
+
+        if (!(target instanceof Mob mob)) {
+            return;
+        }
+        if (!BindingManager.isBoundOrContracted(mob)) {
+            return;
+        }
+        var playerItem = player.getMainHandItem();
+        var mobItem = getHeldItem(mob);
+        setHeldItem(mob, playerItem.copy());
+        player.setItemSlot(EquipmentSlot.MAINHAND, mobItem.copy());
     }
 }

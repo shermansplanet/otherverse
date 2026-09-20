@@ -14,7 +14,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "If your Familiar is resistant to fire, you will gain permanent fire immunity but be damaged by water. Wearing a helmet will mostly protect you from rain.$(br2)Aquatic Familiars grant permanent water breathing.$(br2)Flying Familiars grant flight of various sorts, noted in their sections."
+            "text": "If your Familiar is resistant to fire, you will gain permanent fire immunity but be damaged by water without a water resistance potion. Wearing a helmet will mostly protect you from rain.$(br2)Aquatic Familiars grant permanent water breathing.$(br2)Flying Familiars grant flight of various sorts, noted in their sections."
         },
         {
             "type": "patchouli:text",

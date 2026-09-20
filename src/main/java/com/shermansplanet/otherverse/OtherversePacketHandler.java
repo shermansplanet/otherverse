@@ -1,7 +1,9 @@
 package com.shermansplanet.otherverse;
 
 import com.mojang.logging.LogUtils;
+import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BindingUpdateMessage;
+import com.shermansplanet.otherverse.binding.GiveItemMessage;
 import com.shermansplanet.otherverse.demesnes.*;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.ChalkCircleScreen;
@@ -170,6 +172,13 @@ public class OtherversePacketHandler {
                 ChalkCircleScreen.SetInscriptionMessage::encode,
                 ChalkCircleScreen.SetInscriptionMessage::decode,
                 OtherversePacketHandler::handleInscriptionUpdate
+        );
+        OtherversePacketHandler.INSTANCE.registerMessage(
+                id++,
+                GiveItemMessage.class,
+                GiveItemMessage::encode,
+                GiveItemMessage::decode,
+                BindingManager::onExchangeItem
         );
     }
 

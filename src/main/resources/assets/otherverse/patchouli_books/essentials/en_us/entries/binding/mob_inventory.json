@@ -6,7 +6,7 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "Bound mobs can carry up to a stack of items. You can give any bound mob an item by right-clicking that item on it.$(br2)When you give a bound mob an item (or right-click it with an empty hand), it will drop any item it's already carrying.$(br2)"
+            "text": "Bound mobs can carry up to a stack of items. While looking at a bound mob, you can exchange the item it's holding for the one in your main hand using the 'exchange' key. This is Q by default, intentionally overriding the toss item action."
         }
     ]
 }

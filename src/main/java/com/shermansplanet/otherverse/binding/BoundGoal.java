@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.schedule.Activity;
@@ -72,6 +73,7 @@ public class BoundGoal extends Goal {
     public int range = 8;
     private boolean needsToScanArea;
     public float speedModifier = 1f;
+    private boolean shouldMoveToPractitioner = false;
 
     public BoundGoal(Mob m, BindingInfo binding) {
         mob = m;
@@ -80,7 +82,7 @@ public class BoundGoal extends Goal {
         if (!mob.getPersistentData().contains(REMEMBERED_BLOCKS)) {
             mob.getPersistentData().put(REMEMBERED_BLOCKS, new CompoundTag());
         }
-        if(mob.getType() == EntityType.VILLAGER) speedModifier = 0.4f;
+        if (mob.getType() == EntityType.VILLAGER) speedModifier = 0.5f;
         this.binding = binding;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.TARGET));
         bindingWearInterval = BindingManager.getBindingWearInterval(mob.getMaxHealth(), binding == null || binding.isPositive);
@@ -435,9 +437,9 @@ public class BoundGoal extends Goal {
 
     private void followPlayer() {
         cooldown--;
-        var shouldMoveToPractitioner = false;
         var limit = isLoyaltyBound ? 6 : 4;
         if (cooldown <= 0) {
+            shouldMoveToPractitioner = false;
             cooldown = 10;
             getPractitioner();
             if (practitioner == null) {
@@ -449,28 +451,23 @@ public class BoundGoal extends Goal {
                 poof();
                 return;
             }
-            if (!isAttacking) {
-                if (dist > limit * limit) {
-                    if (mob instanceof Shulker shulker) {
-                        if (dist > 12 * 12) {
-                            var pos = FamiliarManager.getSpaceAroundPlayer(practitioner, 16);
-                            if (pos != null) {
-                                var bp = BlockPos.containing(pos);
-                                for (var dir : Direction.values()) {
-                                    if (mob.level().loadedAndEntityCanStandOnFace(bp.relative(dir), mob, dir.getOpposite())) {
-                                        shulker.teleportTo(pos.x, pos.y, pos.z);
-                                        ((FaceSetter) shulker).setFace(dir);
-                                        break;
-                                    }
+            if (!isAttacking && (dist > limit * limit)) {
+                if (mob instanceof Shulker shulker) {
+                    if (dist > 12 * 12) {
+                        var pos = FamiliarManager.getSpaceAroundPlayer(practitioner, 16);
+                        if (pos != null) {
+                            var bp = BlockPos.containing(pos);
+                            for (var dir : Direction.values()) {
+                                if (mob.level().loadedAndEntityCanStandOnFace(bp.relative(dir), mob, dir.getOpposite())) {
+                                    shulker.teleportTo(pos.x, pos.y, pos.z);
+                                    ((FaceSetter) shulker).setFace(dir);
+                                    break;
                                 }
                             }
                         }
-                    } else {
-                        shouldMoveToPractitioner = true;
                     }
                 } else {
-                    mob.getNavigation().stop();
-                    mob.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+                    shouldMoveToPractitioner = true;
                 }
             }
         }
@@ -510,6 +507,9 @@ public class BoundGoal extends Goal {
             if (shouldMoveToPractitioner) {
                 mob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(practitioner, 1, limit));
                 mob.getNavigation().moveTo(practitioner, speedModifier);
+            } else {
+                mob.getNavigation().stop();
+                mob.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
             }
             isAttacking = false;
             return;

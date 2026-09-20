@@ -1,7 +1,5 @@
 package com.shermansplanet.otherverse.spirits;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
 import com.shermansplanet.otherverse.Otherverse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -9,21 +7,14 @@ import net.minecraft.client.renderer.block.model.MultiVariant;
 import net.minecraft.client.renderer.block.model.multipart.MultiPart;
 import net.minecraft.client.renderer.texture.*;
 import net.minecraft.client.resources.TextureAtlasHolder;
-import net.minecraft.client.resources.metadata.animation.AnimationFrame;
-import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
-import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.textures.ForgeTextureMetadata;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 @OnlyIn(Dist.CLIENT)
@@ -32,12 +23,14 @@ public class HallowTextureManager extends TextureAtlasHolder {
     public record TextureSetData(ResourceLocation loc, AbstractTexture texture, int width, int height) {
     }
 
-    public record TextureFrameData(int width, int height, int yOffset) {
+    public record SubTextureData(int width, int height, int yOffset) {
     }
 
     public static final ResourceLocation ATLAS_LOCATION = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/atlas/hallows.png");
     public static ArrayList<ResourceLocation> hallowResourceLocations = new ArrayList<>();
-    public static final HashMap<ResourceLocation, TextureFrameData> offsetsByMaterial = new HashMap<>();
+    public static final HashMap<ResourceLocation, SubTextureData> offsetsByMaterial = new HashMap<>();
+    private static final HashMap<ResourceLocation, DynamicSprite> spriteCache = new HashMap<>();
+    private static final List<TextureAtlasSprite.Ticker> animatedTextures = new ArrayList<>();
 
     public HallowTextureManager(TextureManager p_118802_) {
         super(p_118802_, ATLAS_LOCATION, ResourceLocation.parse("hallow"));
@@ -45,6 +38,19 @@ public class HallowTextureManager extends TextureAtlasHolder {
 
     protected Stream<ResourceLocation> getResourcesToLoad() {
         return hallowResourceLocations.stream().filter(Objects::nonNull);
+    }
+
+    public static void tickAnimatedTextures() {
+//        for (var tex : animatedTextures) tex.tickAndUpload();
+    }
+
+    public static void resetData() {
+        spriteCache.forEach((rl, sprite) -> sprite.contents().close());
+        animatedTextures.forEach(TextureAtlasSprite.Ticker::close);
+        hallowResourceLocations.clear();
+        offsetsByMaterial.clear();
+        spriteCache.clear();
+        animatedTextures.clear();
     }
 
     public void quietReload() {
@@ -61,21 +67,23 @@ public class HallowTextureManager extends TextureAtlasHolder {
         p_250624_.endTick();
     }
 
-    public TextureAtlasSprite getSpritePublic(TextureSetData tex, Material material, HashMap<ResourceLocation, DynamicSprite> spriteCache) {
+    public TextureAtlasSprite getSpritePublic(TextureSetData tex, Material material) {
         if (spriteCache.containsKey(material.texture())) return spriteCache.get(material.texture());
-        var frameData = offsetsByMaterial.getOrDefault(material.texture(), new TextureFrameData(16, 16, 0));
-        var sprite = makeSprite(tex.loc, (DynamicTexture) tex.texture,
-                frameData.width, frameData.height, tex.width, tex.height, frameData.yOffset);
-        spriteCache.put(material.texture(), sprite);
-        return sprite;
-    }
 
-    private static DynamicSprite makeSprite(ResourceLocation newTexLoc, DynamicTexture newTex, int frameWidth, int frameHeight, int wholeTextureWidth, int wholeTextureHeight, int yOffset) {
-        var anim = new AnimationMetadataSection(ImmutableList.of(new AnimationFrame(0, -1)), frameWidth, frameHeight, 1, false);
-        return new DynamicSprite(
-                ATLAS_LOCATION, new SpriteContents(newTexLoc, new FrameSize(frameWidth, frameHeight), newTex.getPixels(), anim, ForgeTextureMetadata.EMPTY),
-                wholeTextureWidth, wholeTextureHeight, 0, yOffset
+        var subTextureData = offsetsByMaterial.getOrDefault(material.texture(), new SubTextureData(16, 16, 0));
+        var contents = material.sprite().contents();
+        var anim = ((IAnimatedTextureGetter) (contents)).getAnimationMetadata();
+
+        var sprite = new DynamicSprite(
+                ATLAS_LOCATION, new SpriteContents(tex.loc, anim.calculateFrameSize(subTextureData.width, subTextureData.height), ((DynamicTexture) tex.texture).getPixels(), anim, contents.forgeMeta),
+                tex.width, tex.height, 0, subTextureData.yOffset
         );
+        spriteCache.put(material.texture(), sprite);
+
+        var ticker = sprite.createTicker();
+        if (ticker != null) animatedTextures.add(ticker);
+
+        return sprite;
     }
 
     public static void GetBlockModels(UnbakedModel unbakedModel, Set<BlockModel> blockModels) {

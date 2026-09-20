@@ -46,6 +46,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -107,6 +108,12 @@ public class PlacedHallowRenderer {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS && SightManager.shouldRenderSight()) {
             renderShrineRanges(player, event);
         }
+    }
+
+    @SubscribeEvent
+    public static void clientTick(TickEvent.ClientTickEvent event) {
+        if(event.phase != TickEvent.Phase.END) return;
+        HallowTextureManager.tickAnimatedTextures();
     }
 
     @SubscribeEvent
@@ -266,7 +273,7 @@ public class PlacedHallowRenderer {
 
         ClientEvents.HALLOW_TEXTURE_MANAGER.quietReload();
 
-        Function<Material, TextureAtlasSprite> func = x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex.getFirst(), x, new HashMap<>());
+        Function<Material, TextureAtlasSprite> func = x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex.getFirst(), x);
 
         var newLoc = new ModelResourceLocation(Otherverse.MODID,
                 modelLocation.getNamespace() + "_" + modelLocation.getPath() + "_hallow_" + spiritType, modelLocation.getVariant());

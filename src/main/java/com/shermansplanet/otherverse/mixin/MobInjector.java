@@ -1,5 +1,6 @@
 package com.shermansplanet.otherverse.mixin;
 
+import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;

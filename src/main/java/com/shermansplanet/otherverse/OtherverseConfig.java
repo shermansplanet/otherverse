@@ -19,6 +19,7 @@ public class OtherverseConfig {
     public static final ForgeConfigSpec.ConfigValue<Float> BINDING_COST;
     public static final ForgeConfigSpec.ConfigValue<Float> BINDING_ATTACK_CUTOFF;
     public static final ForgeConfigSpec.ConfigValue<Float> BINDING_ATTACK_CUTOFF_ANY;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> POSITIVE_BINDING_ANGER;
     public static final ForgeConfigSpec.ConfigValue<Integer> TOTAL_SELF;
     public static final ForgeConfigSpec.ConfigValue<Integer> DAILY_SELF;
     public static final ForgeConfigSpec.ConfigValue<Integer> ADVANCEMENT_SELF;
@@ -57,6 +58,7 @@ public class OtherverseConfig {
         BINDING_COST = BUILDER.comment("Base multiplier of a mob's max health required to bind it.").define("binding_cost", 3f);
         BINDING_ATTACK_CUTOFF = BUILDER.comment("Hostile mobs with more than this much max HP will attack their bindings.").define("binding_attack_cutoff_hostile", 20f);
         BINDING_ATTACK_CUTOFF_ANY = BUILDER.comment("ALL mobs with more than this much max HP will attack their bindings.").define("binding_attack_cutoff_any", 100f);
+        POSITIVE_BINDING_ANGER = BUILDER.comment("Does breaking positive bindings anger the mob? Tamed mobs will not be angered regardless.").define("positive_binding_anger", true);
         TOTAL_SELF = BUILDER.comment("Total amount of Self. Self doesn't change with max HP; e.g. if you had the default 10 total Self but 20 hearts of HP, you would lose 2 hearts by spending 1 Self  .").define("total_self", 10);
         DAILY_SELF = BUILDER.comment("Self recovered by sleeping.").define("daily_self", 3);
         ADVANCEMENT_SELF = BUILDER.comment("Self recovered from an advancement.").define("advancement_self", 10);

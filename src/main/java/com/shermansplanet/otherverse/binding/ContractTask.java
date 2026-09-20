@@ -287,8 +287,16 @@ public class ContractTask {
 
     public Pair<Entity, BlockPos> getClosestReachableDroppedItem() {
         var lookDiameter = boundGoal.range * 2;
+        var aabb = AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter);
+        if (corner0 != null) {
+            var corner0Pos = corner0.getPos(mob.level());
+            var corner1Pos = corner1.getPos(mob.level());
+            var minCorner = new BlockPos(Math.min(corner0Pos.getX(), corner1Pos.getX()), Math.min(corner0Pos.getY(), corner1Pos.getY()), Math.min(corner0Pos.getZ(), corner1Pos.getZ()));
+            var maxCorner = new BlockPos(Math.max(corner0Pos.getX(), corner1Pos.getX()) + 1, Math.max(corner0Pos.getY(), corner1Pos.getY()) + 1, Math.max(corner0Pos.getZ(), corner1Pos.getZ()) + 1);
+            aabb = new AABB(minCorner, maxCorner);
+        }
         var possibleEntities = new ArrayList<Entity>();
-        for (Entity e : mob.level().getEntities(mob, AABB.ofSize(mob.position(), lookDiameter, lookDiameter, lookDiameter))) {
+        for (Entity e : mob.level().getEntities(mob, aabb)) {
             if ((e instanceof ItemEntity ie && isValidTakeItem(ie.getItem()))
                     || (mob.getType() == EntityType.PILLAGER && e instanceof AbstractArrow arrow && isValidTakeItem(getArrowItem(arrow)))) {
                 if (!matchesPositionFilter(e.blockPosition())) {
@@ -1011,9 +1019,9 @@ public class ContractTask {
         if (!(mob.level() instanceof ServerLevel sl) || !isValidCropBlock(mob.level(), block, blockstate))
             return fail();
         Item blockItem = blockstate.getBlock().asItem();
-        if(blockItem == Items.CHORUS_FLOWER) {
+        if (blockItem == Items.CHORUS_FLOWER) {
             this.mob.level().destroyBlock(targetPos, true, mob);
-        }else{
+        } else {
             MutableBoolean hasTaken = new MutableBoolean(false);
             var id = ForgeRegistries.BLOCKS.getKey(block);
             if (id != null && id.getPath().endsWith("_colony")) {

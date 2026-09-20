@@ -2,7 +2,6 @@ package com.shermansplanet.otherverse.familiar;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
 import com.shermansplanet.otherverse.spirits.HallowTextureManager;
 import com.shermansplanet.otherverse.spirits.SpiritColorAnalyzer;
@@ -12,7 +11,6 @@ import net.minecraft.client.renderer.texture.*;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,12 +21,12 @@ public class MobRetexturer {
     private static HashMap<String, Palette> spiritPaletteCache = new HashMap<>();
     private static HashMap<String, Palette> spiritPaletteCacheSplit = new HashMap<>();
 
-    public static Pair<HallowTextureManager.TextureSetData,List<HallowTextureManager.TextureFrameData>> makeSpiritVariant(List<ResourceLocation> textureSet, String spiritType) {
+    public static Pair<HallowTextureManager.TextureSetData,List<HallowTextureManager.SubTextureData>> makeSpiritVariant(List<ResourceLocation> textureSet, String spiritType) {
 
         var nativeImages = new ArrayList<NativeImage>();
         var maxWidth = 0;
         var height = 0;
-        var offsets = new ArrayList<HallowTextureManager.TextureFrameData>();
+        var offsets = new ArrayList<HallowTextureManager.SubTextureData>();
         for (int imageIndex = 0; imageIndex < textureSet.size(); imageIndex++) {
             var oldTexture = textureSet.get(imageIndex);
             var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(oldTexture.getNamespace(), oldTexture.getPath()));
@@ -37,7 +35,7 @@ public class MobRetexturer {
                 return null;
             }
             maxWidth = Math.max(maxWidth, image.getWidth());
-            offsets.add(new HallowTextureManager.TextureFrameData(image.getWidth(), image.getHeight(), height));
+            offsets.add(new HallowTextureManager.SubTextureData(image.getWidth(), image.getHeight(), height));
             height += image.getHeight();
             nativeImages.add(image);
         }
@@ -83,7 +81,7 @@ public class MobRetexturer {
     }
 
     private static Palette.Pixel getPixelBlend(Palette.Pixel itemPixel, Palette.Pixel spiritPixel) {
-        var coeff = ((float) Math.sqrt(itemPixel.getPerceptualBrightnessSqr() / spiritPixel.getPerceptualBrightnessSqr()) + 2) / 3;
+        var coeff = ((float) Math.sqrt(itemPixel.getPerceptualBrightnessSqr() / spiritPixel.getPerceptualBrightnessSqr()) + 3) / 4;
         var mixel = new Palette.Pixel(
                 Mth.clamp(Math.round(spiritPixel.r * coeff), 0, 255),
                 Mth.clamp(Math.round(spiritPixel.g * coeff), 0, 255),

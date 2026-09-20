@@ -23,7 +23,6 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
     public static final RecipeType<TransfusionRecipe> TYPE =
             RecipeType.create(Otherverse.MODID, "transfusion", TransfusionRecipe.class);
 
-    private final IDrawable background;
     private final Component localizedName;
     private final IDrawable icon;
     private final IDrawable overlay;
@@ -32,7 +31,6 @@ public class TransfusionRecipeCategory implements IRecipeCategory<TransfusionRec
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public TransfusionRecipeCategory(IGuiHelper guiHelper) {
-        background = guiHelper.createBlankDrawable(100, 32);
         localizedName = Component.translatable("otherverse.jei.transfusion");
         overlay = guiHelper.createDrawable(
                 ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),

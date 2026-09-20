@@ -498,9 +498,9 @@ public class HallowHelper {
         if (depositing) {
             if (isBlock) {
                 spiritCount -= fillBlockHallow(sl, event.getPos(), itemSpiritType,
-                        Math.min(otherCapacity, spiritCount), false, false);
+                        Math.min(otherCapacity - otherAmount, spiritCount), false, false);
             } else {
-                var transfer = Math.min(otherCapacity, spiritCount);
+                var transfer = Math.min(otherCapacity - otherAmount, spiritCount);
                 spiritCount -= transfer;
                 blockTag.putInt("spirit_count", otherAmount + transfer);
             }

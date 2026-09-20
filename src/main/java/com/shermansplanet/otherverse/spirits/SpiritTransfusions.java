@@ -462,33 +462,25 @@ public class SpiritTransfusions {
         }
     }
 
-    public static List<TransfusionRecipe> GenerateRecipes() {
+    public static List<TransfusionRecipe> GenerateRecipes(List<TransfusionRecipe> colorRecipes, ArrayList<TransfusionRecipe> smeltingRecipes) {
         List<TransfusionRecipe> recipes = new ArrayList<>();
         var i = 0;
-        var smeltingByPrice = new HashMap<Integer, TransfusionRecipe>();
+        var colorSpirits = new HashSet<>(Arrays.stream(Spirits.colorSpiritTypes).toList());
         for (var transfusionSet : ALL_SPIRIT_TRANSFUSIONS.data.entrySet()) {
             for (var transfusionData : transfusionSet.getValue()) {
-                if (transfusionData.spiritType == Spirits.PHLOGISTON) {
-                    if (!smeltingByPrice.containsKey(transfusionData.price)) {
-                        var newRecipe = new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "spirit_transfusion_smelting_" + transfusionData.price),
-                                new HashSet<>(List.of(Spirits.spiritItems.get(Spirits.PHLOGISTON).get().getDefaultInstance())),
-                                new ArrayList<>(), new ArrayList<>(),
-                                transfusionData.price);
-                        recipes.add(newRecipe);
-                        smeltingByPrice.put(transfusionData.price, newRecipe);
-                    }
-                    var recipe = smeltingByPrice.get(transfusionData.price);
-                    recipe.itemFrom.add(transfusionSet.getKey().getDefaultInstance());
-                    recipe.itemTo.add(transfusionData.output);
-                    continue;
-                }
                 var set = new HashSet<ItemStack>();
                 set.add(Spirits.spiritItems.get(transfusionData.spiritType).get().getDefaultInstance());
-                recipes.add(
-                        new TransfusionRecipe(
-                                ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "spirit_transfusion_" + i++), set,
-                                List.of(transfusionSet.getKey().getDefaultInstance()), List.of(transfusionData.output),
-                                transfusionData.price));
+                var recipe = new TransfusionRecipe(
+                        ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "spirit_transfusion_" + i++), set,
+                        List.of(transfusionSet.getKey().getDefaultInstance()), List.of(transfusionData.output),
+                        transfusionData.price);
+                if (colorSpirits.contains(transfusionData.spiritType)) {
+                    colorRecipes.add(recipe);
+                } else if (transfusionData.spiritType == Spirits.PHLOGISTON && transfusionData.output.getItem() != Items.GUNPOWDER) {
+                    smeltingRecipes.add(recipe);
+                } else {
+                    recipes.add(recipe);
+                }
             }
         }
         return recipes;

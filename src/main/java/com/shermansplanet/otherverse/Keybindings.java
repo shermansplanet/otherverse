@@ -24,10 +24,15 @@ public class Keybindings {
             new KeyMapping("key.sight", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_O, "key.categories.practice");
 
+    public static final KeyMapping KEY_GIVE =
+            new KeyMapping("key.give", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM,
+                    GLFW.GLFW_KEY_Q, "key.categories.practice");
+
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent e) {
         e.register(KEY_IMPLEMENT);
         e.register(KEY_FAMILIAR);
         e.register(KEY_SIGHT);
+        e.register(KEY_GIVE);
     }
 }

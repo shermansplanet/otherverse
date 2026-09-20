@@ -55,4 +55,9 @@ public abstract class ItemStackInjector extends net.minecraftforge.common.capabi
             ci.cancel();
         }
     }
+
+    public boolean canGrindstoneRepair() {
+        var self = (ItemStack) (Object) this;
+        return (self.hasTag() && self.getTag().contains("hallow")) || self.getItem().canGrindstoneRepair(self);
+    }
 }

@@ -30,7 +30,6 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
@@ -102,26 +101,20 @@ public class MobTransfusions {
 
     private static final HashMap<String, List<ItemOrEntityType>> transfusionShortcuts = new HashMap<>();
 
-    public static List<TransfusionRecipe> GenerateRecipes() {
+    public static List<TransfusionRecipe> GenerateRecipes(ArrayList<TransfusionRecipe> smeltingRecipes) {
         List<TransfusionRecipe> recipes = new ArrayList<>();
-        var i = 0;
-        var smeltingRecipe = new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "mob_transfusion_smelting"),
-                new HashSet<>(List.of(MobBindingInfluenceUtils.getIdol(EntityType.BLAZE))),
-                new ArrayList<>(), new ArrayList<>(),
-                1);
-        recipes.add(smeltingRecipe);
+        var i=0;
         for (var transfusionSet : ALL_MOB_TRANSFUSIONS.data.entrySet()) {
             for (var transfusionData : transfusionSet.getValue()) {
+                var recipe = new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "mob_transfusion_" + i++),
+                        MobBindingInfluenceUtils.getIdols(transfusionData.entityTypes),
+                        List.of(transfusionSet.getKey().getItemStack()), List.of(transfusionData.destItem),
+                        transfusionData.price);
                 if (transfusionData.entityTypes.size() == 1 && transfusionData.entityTypes.contains(EntityType.BLAZE) && transfusionData.price == 1) {
-                    smeltingRecipe.itemFrom.add(transfusionSet.getKey().getItemStack());
-                    smeltingRecipe.itemTo.add(transfusionData.destItem);
-                    continue;
+                    smeltingRecipes.add(recipe);
+                }else {
+                    recipes.add(recipe);
                 }
-                recipes.add(
-                        new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "mob_transfusion_" + i++),
-                                MobBindingInfluenceUtils.getIdols(transfusionData.entityTypes),
-                                List.of(transfusionSet.getKey().getItemStack()), List.of(transfusionData.destItem),
-                                transfusionData.price));
             }
         }
         return recipes;

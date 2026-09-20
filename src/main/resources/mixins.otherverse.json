@@ -34,7 +34,8 @@
     "MonsterInjector",
     "PhantomInjector",
     "WardenInjector",
-    "FallingBlockEntityInjector"
+    "FallingBlockEntityInjector",
+    "BrainInjector"
   ],
   "client":[
     "ModelBakeryInjector",
@@ -46,7 +47,8 @@
     "ItemRendererInjector",
     "BlockRenderDispatcherInjector",
     "GeoEntityRendererInjector",
-    "MultiPartInjector"
+    "MultiPartInjector",
+    "SpriteContentsInjector"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -560,7 +560,7 @@ public class ImplementManager {
         Otherverse.ADVANCEMENTS.trigger(player, "implementum");
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onItemToss(ItemTossEvent event) {
         if (!isImplement(event.getEntity().getItem())) return;
         event.setCanceled(true);

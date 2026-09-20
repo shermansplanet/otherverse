@@ -683,7 +683,7 @@ public class FamiliarManager {
             }
         }
 
-        if (sp.isInWaterOrRain() && ((type.fireImmune() && !type.equals(EntityType.WARDEN)) || type.equals(EntityType.ENDERMAN))) {
+        if (sp.isInWaterOrRain() && !sp.hasEffect(OtherversePotions.WATER_RESISTANCE.get()) && ((type.fireImmune() && !type.equals(EntityType.WARDEN)) || type.equals(EntityType.ENDERMAN))) {
             if (sp.isInWater() || !sp.hasItemInSlot(EquipmentSlot.HEAD) || sp.getRandom().nextInt(20) == 0) {
                 var demesne = DemesnesManager.getData(sp.serverLevel(), sp.blockPosition());
                 if (demesne == null || demesne.getPerkLevel(DemesnesManager.DemesnePerk.PROTECTION) == 0 || !demesne.hasSanction(DemesnesManager.DemesnePerk.SANCTION_BUILD, sp)) {
@@ -1737,21 +1737,15 @@ public class FamiliarManager {
         return !getPractitionerForFamiliar(entity).isEmpty();
     }
 
-    public static void onInteract(PlayerInteractEvent.EntityInteractSpecific event) {
-        var target = event.getTarget();
-        if (target instanceof PartEntity<?> ep) target = ep.getParent();
+    public static void onInteract(PlayerInteractEvent.EntityInteractSpecific event, Mob mob) {
         var name = event.getEntity().getGameProfile().getName();
-        if (FamiliarManager.isFamiliar(target)) {
-            if (!getPractitionerForFamiliar(target).equals(name)) return;
-        } else if (target.getPersistentData().contains("last_bound_by")) {
-            if (!target.getPersistentData().getString("last_bound_by").equals(name)) return;
-        }
-        if (!(target instanceof Mob mob)) return;
-        if (!event.getEntity().getMainHandItem().isEmpty()) return;
+        if (!BindingManager.isAlliedWith(mob, name)) return;
         for (var g : mob.goalSelector.getAvailableGoals()) {
             if (g.getGoal() instanceof BoundGoal bg) {
                 bg.practitioner = event.getEntity();
                 bg.toggleFamiliarBehavior();
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
                 return;
             }
         }

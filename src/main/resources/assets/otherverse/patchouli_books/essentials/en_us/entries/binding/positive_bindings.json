@@ -14,7 +14,7 @@
         },
         {
             "type": "patchouli:text",
-            "text": "Positively bound mobs with more than 20 HP will drain their binding influences; they may not be there against their will, but they still demand payment for their service and will leave if you can't pay. Unlike negative bindings, this is not limited to mobs that can attack, but they drain bindings less often. They only look at diagram foci for this, ignoring the 'habitat' portion of their binding."
+            "text": "Positively bound mobs with more than 20 HP will drain their binding influences; they may not be there against their will, but they still demand payment for their service and will get upset if you can't pay. Unlike negative bindings, this is not limited to mobs that can attack, but they drain bindings less often. They only look at diagram foci for this, ignoring the 'habitat' portion of their binding."
         }
     ]
 }

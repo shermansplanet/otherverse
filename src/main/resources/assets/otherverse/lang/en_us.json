@@ -91,6 +91,11 @@
     "item.minecraft.splash_potion.effect.heaviness" : "Splash Potion of Heaviness",
     "item.minecraft.tipped_arrow.effect.heaviness" : "Arrow of Heaviness",
     "item.minecraft.lingering_potion.effect.heaviness" : "Lingering Potion of Heaviness",
+    "effect.otherverse.water_resistance" : "Water Resistance",
+    "item.minecraft.potion.effect.water_resistance" : "Potion of Water Resistance",
+    "item.minecraft.splash_potion.effect.water_resistance" : "Splash Potion of Water Resistance",
+    "item.minecraft.tipped_arrow.effect.water_resistance" : "Arrow of Water Resistance",
+    "item.minecraft.lingering_potion.effect.water_resistance" : "Lingering Potion of Water Resistance",
     
     "death.attack.otherverse_self": "%1$s was drained of Self",
 
@@ -123,6 +128,11 @@
     "otherverse.jei.biome_code": "Biome Scrying",
 
     "key.categories.practice": "Pact Magic",
+
+    "key.familiar": "Summon Familiar",
+    "key.implement": "Summon Implement",
+    "key.sight": "Toggle Sight",
+    "key.give": "Exchange",
 
     "otherverse.self.restored_advancement": "You feel a surge of accomplishment, and your Self is restored.",
     "otherverse.self.restored_dawn": "A new day dawns, and a portion of your Self is restored.",
