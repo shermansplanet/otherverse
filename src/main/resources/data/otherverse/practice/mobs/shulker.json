@@ -1,0 +1,19 @@
+{
+	"other" : "minecraft:shulker",
+	"spirit" : "end",
+	"binding" : {
+		"otherverse:spirit_earth" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:slime_block",
+			"health" : 7,
+			"output" : "endersdelight:shulker_mollusk"
+		},
+		{
+			"input" : "minecraft:nautilus_shell",
+			"health" : 7,
+			"output" : "minecraft:shulker_shell"
+		}
+	]
+}

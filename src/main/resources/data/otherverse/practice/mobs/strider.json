@@ -1,0 +1,22 @@
+{
+	"other" : "minecraft:strider",
+	"binding" : {
+		"minecraft:air" : 3
+	},
+	"healing" : {
+		"minecraft:warped_fungus" : 1,
+		"mynethersdelight:hot_cream_cone" : 13
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:egg",
+			"health" : 3,
+			"output" : "mynethersdelight:strider_rock"
+		},
+		{
+			"input" : "minecraft:rotten_flesh",
+			"health" : 6,
+			"output" : "mynethersdelight:strider_slice"
+		}
+	]
+}

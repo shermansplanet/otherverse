@@ -344,6 +344,7 @@ public class SpiritLabeler {
                         (int) (ComposterBlock.COMPOSTABLES.getFloat(item) * 10)));
             }
 
+            var itemName = ForgeRegistries.ITEMS.getKey(item).getPath();
             if (item instanceof BlockItem bi) {
                 var block = bi.getBlock();
                 if (block instanceof BonemealableBlock && block != Blocks.NETHERRACK && block != Blocks.GRASS_BLOCK) {
@@ -358,19 +359,13 @@ public class SpiritLabeler {
                 if (lightEmission > 0) {
                     spiritAmounts.add(new SpiritAmount(Spirits.LIGHT, lightEmission * 3));
                 }
-            }
-
-            var itemName = ForgeRegistries.ITEMS.getKey(item).getPath();
-            if (itemName.startsWith("infested")) {
-                spiritAmounts.add(new SpiritAmount(Spirits.FLESH, 7));
-            }
-            var time = itemName.contains("oxidized") ? 9
-                    : itemName.contains("weathered") ? 6
-                    : itemName.contains("exposed") ? 3 : 0;
-            if (time > 0) spiritAmounts.add(new SpiritAmount(Spirits.TIME, time));
-            if (itemName.contains("copper")) {
-                if (time < 9) spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18 - time * 2));
-                spiritAmounts.add(new SpiritAmount(Spirits.TECH, 7));
+                var time = itemName.contains("oxidized") ? 9
+                        : itemName.contains("weathered") ? 6
+                        : itemName.contains("exposed") ? 3 : 0;
+                if (time > 0) spiritAmounts.add(new SpiritAmount(Spirits.TIME, time));
+                if (itemName.contains("copper") && !itemName.contains("ore")) {
+                    if (time < 9) spiritAmounts.add(new SpiritAmount(Spirits.FORTUNE, 18 - time * 2));
+                }
             }
 
             if (itemName.contains("coral") && !itemName.contains("dead")) {

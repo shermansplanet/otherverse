@@ -47,6 +47,9 @@ public class PracticeJsonManager extends SimpleJsonResourceReloadListener {
                     case "spirit_transfusion":
                         SpiritTransfusions.loadJsonTransfusion(practice);
                         break;
+                    case "color_transfusion":
+                        SpiritTransfusions.loadColorTransfusion(practice);
+                        break;
                     case "spirit_composition":
                         SpiritLabeler.loadJsonSpirits(practice);
                         break;

@@ -1,0 +1,20 @@
+{
+  "practice": "color_transfusion",
+  "is_block": true,
+  "white" : "minecraft:white_wool",
+  "light_gray" : "minecraft:light_gray_wool",
+  "gray" : "minecraft:gray_wool",
+  "black" : "minecraft:black_wool",
+  "brown" : "minecraft:brown_wool",
+  "red" : "minecraft:red_wool",
+  "orange" : "minecraft:orange_wool",
+  "yellow" : "minecraft:yellow_wool",
+  "lime" : "minecraft:lime_wool",
+  "green" : "minecraft:green_wool",
+  "cyan" : "minecraft:cyan_wool",
+  "light_blue" : "minecraft:light_blue_wool",
+  "blue" : "minecraft:blue_wool",
+  "purple" : "minecraft:purple_wool",
+  "magenta" : "minecraft:magenta_wool",
+  "pink" : "minecraft:pink_wool"
+}

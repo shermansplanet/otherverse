@@ -11,6 +11,7 @@ import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -39,12 +41,22 @@ public class BlockFocus implements IFocus {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static HashMap<Block, Item> blockReplacements = new HashMap<>();
+    private static HashMap<Block, Item> blockReplacements;
 
-    static {
-        blockReplacements.put(Blocks.TWISTING_VINES_PLANT, Items.TWISTING_VINES);
-        blockReplacements.put(Blocks.WEEPING_VINES_PLANT, Items.WEEPING_VINES);
-        blockReplacements.put(Blocks.KELP_PLANT, Items.KELP);
+    public static Item getBlockReplacement(Block b) {
+        if (blockReplacements == null) {
+            blockReplacements = new HashMap<>();
+            blockReplacements.put(Blocks.TWISTING_VINES_PLANT, Items.TWISTING_VINES);
+            blockReplacements.put(Blocks.WEEPING_VINES_PLANT, Items.WEEPING_VINES);
+            blockReplacements.put(Blocks.KELP_PLANT, Items.KELP);
+            blockReplacements.put(Blocks.NETHER_PORTAL, Spirits.spiritItems.get(Spirits.NETHER).get());
+            blockReplacements.put(Blocks.FIRE, Spirits.spiritItems.get(Spirits.FIRE).get());
+            blockReplacements.put(Blocks.SOUL_FIRE, Spirits.spiritItems.get(Spirits.FIRE).get());
+            blockReplacements.put(ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice_panicles")),
+                    ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice_panicle")));
+            //farmersdelight:rice_panicles
+        }
+        return blockReplacements.get(b);
     }
 
     public BlockFocus(Level level, BlockPos blockPos, Diagram diagram) {
@@ -72,8 +84,9 @@ public class BlockFocus implements IFocus {
     public ItemStack getItemNotMob() {
         var levelData = DiagramManager.getOrCreateLevelData(level);
         BlockState blockstate = level.getBlockState(blockPos);
-        if(blockstate.is(OtherverseBlocks.CHALK_LINE.get())) return OtherverseItems.CHALK.get().getDefaultInstance();
-        Item item = blockReplacements.getOrDefault(blockstate.getBlock(), blockstate.getBlock().asItem());
+        if (blockstate.is(OtherverseBlocks.CHALK_LINE.get())) return OtherverseItems.CHALK.get().getDefaultInstance();
+        Item item = getBlockReplacement(blockstate.getBlock());
+        if (item == null) item = blockstate.getBlock().asItem();
         ItemStack stack = new ItemStack(item);
         if (blockstate.is(Blocks.NETHER_PORTAL)) {
             return Spirits.spiritItems.get(Spirits.NETHER).get().getDefaultInstance();
@@ -166,7 +179,7 @@ public class BlockFocus implements IFocus {
         var capacity = 0;
         for (BlockPos sourcePos : hallowPositions) {
             var ht = data.getPlacedItemTag(sourcePos);
-            if(spiritType == Spirits.TECH && ht.contains("shrine") && level.hasNeighborSignal(blockPos)){
+            if (spiritType == Spirits.TECH && ht.contains("shrine") && level.hasNeighborSignal(blockPos)) {
                 return 0;
             }
             capacity += Math.max(0, ht.getInt("capacity") - ht.getInt("spirit_count"));

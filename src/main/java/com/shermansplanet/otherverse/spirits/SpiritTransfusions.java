@@ -11,6 +11,7 @@ import com.shermansplanet.otherverse.potions.OtherversePotions;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
@@ -82,6 +83,44 @@ public class SpiritTransfusions {
         }
     }
 
+    public static void loadColorTransfusion(JsonObject practice) {
+        if (practice.has("is_block") && practice.get("is_block").getAsBoolean()) {
+            var blocks = new Block[16];
+            for (var i = 0; i < 16; i++) {
+                var key = Spirits.colorSpiritTypes[i].label();
+                Block block = null;
+                if (practice.has(key)) {
+                    var val = ResourceLocation.parse(practice.get(key).getAsString());
+                    if (ForgeRegistries.BLOCKS.containsKey(val)) block = ForgeRegistries.BLOCKS.getValue(val);
+                }
+                blocks[i] = block;
+            }
+            Block universal = null;
+            if (practice.has("default")) {
+                var val = ResourceLocation.parse(practice.get("default").getAsString());
+                if (ForgeRegistries.BLOCKS.containsKey(val)) universal = ForgeRegistries.BLOCKS.getValue(val);
+            }
+            registerDyableBlocks(blocks, universal);
+        } else {
+            var items = new Item[16];
+            for (var i = 0; i < 16; i++) {
+                var key = Spirits.colorSpiritTypes[i].label();
+                Item item = null;
+                if (practice.has(key)) {
+                    var val = ResourceLocation.parse(practice.get(key).getAsString());
+                    if (ForgeRegistries.ITEMS.containsKey(val)) item = ForgeRegistries.ITEMS.getValue(val);
+                }
+                items[i] = item;
+            }
+            Item universal = null;
+            if (practice.has("default")) {
+                var val = ResourceLocation.parse(practice.get("default").getAsString());
+                if (ForgeRegistries.ITEMS.containsKey(val)) universal = ForgeRegistries.ITEMS.getValue(val);
+            }
+            registerDyableItems(items, universal);
+        }
+    }
+
 
     public record SpiritTransfusionData(SpiritType spiritType, ItemStack output, int price, Block blockOutput) {
     }
@@ -94,13 +133,6 @@ public class SpiritTransfusions {
 
         register(Items.GLASS_BOTTLE, Spirits.AIR, 13,
                 PotionUtils.setPotion(new ItemStack(Items.POTION), OtherversePotions.LEVITATION_POTION.get()), null);
-
-        registerDyableBlocks(new Block[]{
-                Blocks.WHITE_WOOL, Blocks.LIGHT_GRAY_WOOL, Blocks.GRAY_WOOL, Blocks.BLACK_WOOL,
-                Blocks.BROWN_WOOL, Blocks.RED_WOOL, Blocks.ORANGE_WOOL, Blocks.YELLOW_WOOL,
-                Blocks.LIME_WOOL, Blocks.GREEN_WOOL, Blocks.CYAN_WOOL, Blocks.LIGHT_BLUE_WOOL,
-                Blocks.BLUE_WOOL, Blocks.PURPLE_WOOL, Blocks.MAGENTA_WOOL, Blocks.PINK_WOOL
-        });
 
         registerDyableBlocks(new Block[]{
                 Blocks.WHITE_TERRACOTTA, Blocks.LIGHT_GRAY_TERRACOTTA, Blocks.GRAY_TERRACOTTA,
@@ -156,17 +188,6 @@ public class SpiritTransfusions {
                 Blocks.BLUE_CONCRETE_POWDER, Blocks.PURPLE_CONCRETE_POWDER, Blocks.MAGENTA_CONCRETE_POWDER,
                 Blocks.PINK_CONCRETE_POWDER
         });
-
-        registerDyableBlocks(new Block[]{
-                Blocks.WHITE_CANDLE, Blocks.LIGHT_GRAY_CANDLE,
-                Blocks.GRAY_CANDLE, Blocks.BLACK_CANDLE,
-                Blocks.BROWN_CANDLE, Blocks.RED_CANDLE,
-                Blocks.ORANGE_CANDLE, Blocks.YELLOW_CANDLE,
-                Blocks.LIME_CANDLE, Blocks.GREEN_CANDLE,
-                Blocks.CYAN_CANDLE, Blocks.LIGHT_BLUE_CANDLE,
-                Blocks.BLUE_CANDLE, Blocks.PURPLE_CANDLE,
-                Blocks.MAGENTA_CANDLE, Blocks.PINK_CANDLE
-        }, Blocks.CANDLE);
 
         registerDyableBlocks(new Block[]{
                 Blocks.WHITE_BANNER, Blocks.LIGHT_GRAY_BANNER,
@@ -233,15 +254,17 @@ public class SpiritTransfusions {
 
     public static void analyzeSmeltingRecipe(SmeltingRecipe recipe, ServerLevel sl) {
         var ingredients = recipe.getIngredients();
+        if (ingredients.isEmpty()) return;
         for (var ingredient : ingredients) {
             for (var item : ingredient.getItems()) {
-                register(item.getItem(), Spirits.PHLOGISTON, recipe.getCookingTime() / 100, recipe.getResultItem(sl.registryAccess()).getItem(), true);
+                register(item.getItem(), Spirits.PHLOGISTON, Math.max(1, recipe.getCookingTime() / 100), recipe.getResultItem(sl.registryAccess()).getItem(), true);
             }
         }
     }
 
     private static void registerDyableBlocks(Block[] blocks, Block universal) {
         registerDyableBlocks(blocks);
+        if (universal == null) return;
         for (int ii = 0; ii < 16; ii++) {
             register(universal.asItem(), Spirits.colorSpiritTypes[ii], 3, blocks[ii]);
         }
@@ -249,29 +272,43 @@ public class SpiritTransfusions {
 
     private static void registerDyableBlocks(Block[] blocks) {
         for (int i = 0; i < 16; i++) {
+            if (blocks[i] == null) continue;
             Item input = blocks[i].asItem();
             for (int ii = 0; ii < 16; ii++) {
-                if (ii == i) continue;
+                if (ii == i || blocks[ii] == null) continue;
                 register(input, Spirits.colorSpiritTypes[ii], 3, blocks[ii]);
             }
+        }
+    }
+
+    private static void registerDyableItems(Item[] items, Item universal) {
+        registerDyableItems(items);
+        if (universal == null) return;
+        for (int ii = 0; ii < 16; ii++) {
+            register(universal, Spirits.colorSpiritTypes[ii], 3, items[ii], false);
         }
     }
 
     private static void registerDyableItems(Item[] items) {
         for (int i = 0; i < 16; i++) {
             Item input = items[i];
+            if (input == null) continue;
             for (int ii = 0; ii < 16; ii++) {
-                if (ii == i) continue;
+                if (ii == i || items[ii] == null) continue;
                 register(input, Spirits.colorSpiritTypes[ii], 3, items[ii], false);
             }
         }
     }
 
     private static void register(Item input, SpiritType spiritType, int price, Item output, boolean fromRecipe) {
+        if (output == null) {
+            return;
+        }
         register(input, spiritType, price, output.getDefaultInstance(), output instanceof BlockItem bi ? bi.getBlock() : null, fromRecipe);
     }
 
     public static void register(Item input, SpiritType spiritType, int price, Block output) {
+        if (output == Blocks.AIR) return;
         register(input, spiritType, price, output.asItem().getDefaultInstance(), output);
         if (input == Items.DIRT && output != Blocks.GRASS_BLOCK) {
             register(Items.GRASS_BLOCK, spiritType, price, output.asItem().getDefaultInstance(), output);
@@ -283,13 +320,14 @@ public class SpiritTransfusions {
     }
 
     public static void register(Item input, SpiritType spiritType, int price, ItemStack output, Block blockOutput, boolean fromRecipe) {
-        if (input == Items.AIR || blockOutput == Blocks.AIR || output.is(Items.AIR)) return;
+        if (input == Items.AIR || output.is(Items.AIR) || input == null) {
+            return;
+        }
         var spiritTransfusions = fromRecipe ? TRANSFUSIONS_FROM_RECIPES.data : TRANSFUSIONS_FROM_JSON.data;
         if (!spiritTransfusions.containsKey(input)) {
             spiritTransfusions.put(input, new ArrayList<>());
         }
-        spiritTransfusions.get(input)
-                .add(new SpiritTransfusionData(spiritType, output, price, blockOutput));
+        spiritTransfusions.get(input).add(new SpiritTransfusionData(spiritType, output, price, blockOutput));
     }
 
     @SubscribeEvent

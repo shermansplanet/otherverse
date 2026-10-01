@@ -1,0 +1,9 @@
+{
+  "practice": "color_transfusion",
+  "is_block": true,
+  "yellow" : "minecraft:sandstone",
+  "red" : "minecraft:red_sandstone",
+  "white" : "biomesoplenty:white_sandstone",
+  "orange" : "biomesoplenty:orange_sandstone",
+  "black" : "biomesoplenty:black_sandstone"
+}

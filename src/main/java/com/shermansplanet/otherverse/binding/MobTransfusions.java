@@ -140,7 +140,7 @@ public class MobTransfusions {
         if (binding == null || binding.mob == null) {
             return false;
         }
-        if(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, focus.getPos()).getY() > focus.getPos().getY()){
+        if(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, target).getY() > focus.getPos().getY()){
             return false;
         }
         if (!diagram.trySpendPower(level, focus.getPos(), 33, new HashSet<>())) {

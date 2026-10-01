@@ -304,7 +304,7 @@ public class ContractTask {
                 }
                 for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
                     Block block = mob.level().getBlockState(e.blockPosition().subtract(processOffset(offsetIndex))).getBlock();
-                    if (!blockFilters.isEmpty() && !blockFilters.contains(block.asItem()) && !blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
+                    if (!blockFilters.isEmpty() && !blockFilters.contains(block.asItem()) && !blockFilters.contains(BlockFocus.getBlockReplacement(block))) {
                         continue;
                     }
                     possibleEntities.add(e);
@@ -435,7 +435,7 @@ public class ContractTask {
                     var anyMatches = false;
                     for (var offsetIndex = 0; offsetIndex < offsets.size(); offsetIndex++) {
                         Block block = mob.level().getBlockState(pos.subtract(processOffset(offsetIndex))).getBlock();
-                        if (blockFilters.contains(block.asItem()) || blockFilters.contains(BlockFocus.blockReplacements.get(block))) {
+                        if (blockFilters.contains(block.asItem()) || blockFilters.contains(BlockFocus.getBlockReplacement(block))) {
                             anyMatches = true;
                         }
                     }

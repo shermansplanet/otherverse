@@ -135,6 +135,7 @@ public class VigilMazeFeature extends Feature<NoneFeatureConfiguration> {
 
             var brick = elevated ? Blocks.NETHER_BRICKS : Blocks.RED_NETHER_BRICKS;
             var slab = elevated ? Blocks.NETHER_BRICK_SLAB : Blocks.RED_NETHER_BRICK_SLAB;
+            int depth = 16;
 
             for (var mazeBlock : mazeBlocks.entrySet()) {
                 if (mazeBlock.getKey().x < baseX || mazeBlock.getKey().x >= baseX + 16 || mazeBlock.getKey().y < baseZ || mazeBlock.getKey().y >= baseZ + 16)
@@ -152,6 +153,15 @@ public class VigilMazeFeature extends Feature<NoneFeatureConfiguration> {
                     ctx.level().setBlock(pos.below(1), Blocks.REDSTONE_WIRE.defaultBlockState(), 2);
                     if (ctx.random().nextFloat() < 0.3f) {
                         ctx.level().setBlock(pos.below(2), Blocks.TNT.defaultBlockState(), 2);
+                    }
+
+                    if (ctx.random().nextFloat() < 0.3f) {
+                        var blocksBelow = ctx.random().nextInt(depth - 5, depth - 2);
+                        ctx.level().setBlock(pos.below(blocksBelow), Blocks.TNT.defaultBlockState(), 2);
+                        ctx.level().setBlock(pos.below(blocksBelow + 1), Blocks.REDSTONE_TORCH.defaultBlockState(), 2);
+                        ctx.level().setBlock(pos.below(blocksBelow - 1), Blocks.REDSTONE_BLOCK.defaultBlockState(), 2);
+                        //var dir = Direction.DOWN;
+                        //ctx.level().setBlock(pos.below(blocksBelow + 1), Blocks.OBSERVER.defaultBlockState().setValue(ObserverBlock.FACING, dir), 2);
                     }
                 }
                 if (!elevated && ctx.random().nextFloat() < 0.1f) {
@@ -239,8 +249,6 @@ public class VigilMazeFeature extends Feature<NoneFeatureConfiguration> {
                 continue;
             }
 
-            int depth = 16;
-
             for (var x = baseX; x < baseX + 16; x++) {
                 for (var z = baseZ; z < baseZ + 16; z++) {
                     if (mazeBlocks.containsKey(new Vector2i(x, z))) continue;
@@ -254,7 +262,7 @@ public class VigilMazeFeature extends Feature<NoneFeatureConfiguration> {
                                 .setValue(PointedDripstoneBlock.THICKNESS,
                                         i == dripstoneHeight ? DripstoneThickness.TIP :
                                                 i == dripstoneHeight - 1 ? DripstoneThickness.FRUSTUM :
-                                                i == 1 ? DripstoneThickness.BASE : DripstoneThickness.MIDDLE);
+                                                        i == 1 ? DripstoneThickness.BASE : DripstoneThickness.MIDDLE);
                         ctx.level().setBlock(pos.below(depth - i), bs, 2);
                     }
                     ctx.level().setBlock(pos.below(depth), Blocks.DRIPSTONE_BLOCK.defaultBlockState(), 2);
@@ -296,14 +304,14 @@ public class VigilMazeFeature extends Feature<NoneFeatureConfiguration> {
                             var descentLength = r.nextInt(maxDescentLength) + (isChain ? 4 : 1);
                             for (var i = 0; i <= descentLength; i++) {
                                 var bs = isChain ? (i == descentLength && r.nextFloat() < 0.4f
-                                                    ? Blocks.ANVIL.defaultBlockState()
-                                                    : Blocks.CHAIN.defaultBlockState()) :
+                                        ? Blocks.ANVIL.defaultBlockState()
+                                        : Blocks.CHAIN.defaultBlockState()) :
                                         Blocks.POINTED_DRIPSTONE.defaultBlockState()
                                                 .setValue(PointedDripstoneBlock.TIP_DIRECTION, Direction.DOWN)
                                                 .setValue(PointedDripstoneBlock.THICKNESS,
                                                         i == descentLength ? DripstoneThickness.TIP :
-                                                        i == descentLength - 1 ? DripstoneThickness.FRUSTUM :
-                                                        i == 1 ? DripstoneThickness.BASE : DripstoneThickness.MIDDLE);
+                                                                i == descentLength - 1 ? DripstoneThickness.FRUSTUM :
+                                                                        i == 1 ? DripstoneThickness.BASE : DripstoneThickness.MIDDLE);
                                 ctx.level().setBlock(pos.below(i), bs, 2);
                             }
                         }

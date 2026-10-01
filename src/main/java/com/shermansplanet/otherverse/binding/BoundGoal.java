@@ -643,7 +643,7 @@ public class BoundGoal extends Goal {
                         }
                         task.potentialTargets.sort(Comparator.comparingDouble(bp -> eyePos.distanceToSqr(new Vec3(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f))));
                     } else {
-                        for (var i = 0; i < 8; i++) {
+                        for (var i = 0; i < 128; i++) {
                             var index = task.lookIndex + i;
                             if (index >= task.potentialTargets.size()) {
                                 task.resetLookIndex();

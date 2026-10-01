@@ -1,0 +1,21 @@
+{
+  "practice": "color_transfusion",
+  "is_block": true,
+  "white" : "minecraft:white_candle",
+  "light_gray" : "minecraft:light_gray_candle",
+  "gray" : "minecraft:gray_candle",
+  "black" : "minecraft:black_candle",
+  "brown" : "minecraft:brown_candle",
+  "red" : "minecraft:red_candle",
+  "orange" : "minecraft:orange_candle",
+  "yellow" : "minecraft:yellow_candle",
+  "lime" : "minecraft:lime_candle",
+  "green" : "minecraft:green_candle",
+  "cyan" : "minecraft:cyan_candle",
+  "light_blue" : "minecraft:light_blue_candle",
+  "blue" : "minecraft:blue_candle",
+  "purple" : "minecraft:purple_candle",
+  "magenta" : "minecraft:magenta_candle",
+  "pink" : "minecraft:pink_candle",
+  "default" : "minecraft:candle"
+}

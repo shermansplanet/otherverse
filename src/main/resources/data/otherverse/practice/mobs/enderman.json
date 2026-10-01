@@ -1,0 +1,28 @@
+{
+	"other" : "minecraft:enderman",
+	"spirit" : "end",
+	"binding" : {
+		"otherverse:spirit_water" : 1,
+		"minecraft:water_bucket" : 16
+	},
+	"healing" : {
+		"entity.minecraft.endermite" : 1
+	},
+	"transfusion" : [
+		{
+			"input" : "minecraft:diamond",
+			"health" : 1,
+			"output" : "minecraft:ender_pearl"
+		},
+		{
+			"input" : "minecraft:emerald",
+			"health" : 9,
+			"output" : "minecraft:ender_pearl"
+		},
+		{
+			"input" : "minecraft:spider_eye",
+			"health" : 7,
+			"output" : "endersdelight:enderman_sight"
+		}
+	]
+}

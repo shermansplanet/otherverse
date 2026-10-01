@@ -5,6 +5,11 @@
 			"input" : "minecraft:spider_eye",
 			"health" : 9,
 			"output" : "minecraft:ghast_tear"
+		},
+		{
+			"input" : "farmersdelight:raw_pasta",
+			"health" : 9,
+			"output" : "mynethersdelight:ghasta"
 		}
 	]
 }

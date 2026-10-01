@@ -1,12 +1,8 @@
 {
-	"other" : "minecraft:enderman",
+	"other" : "minecraft:endermite",
 	"spirit" : "end",
 	"binding" : {
-		"otherverse:spirit_water" : 1,
-		"minecraft:water_bucket" : 16
-	},
-	"healing" : {
-		"entity.minecraft.endermite" : 1
+		"minecraft:soul_sand" : 24
 	},
 	"transfusion" : [
 		{
@@ -18,6 +14,11 @@
 			"input" : "minecraft:emerald",
 			"health" : 9,
 			"output" : "minecraft:ender_pearl"
+		},
+		{
+			"input" : "minecraft:flint",
+			"health" : 3,
+			"output" : "endersdelight:mite_crust"
 		}
 	]
 }
