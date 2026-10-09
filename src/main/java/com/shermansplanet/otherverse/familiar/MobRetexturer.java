@@ -32,6 +32,7 @@ public class MobRetexturer {
             var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(oldTexture.getNamespace(), oldTexture.getPath()));
             if (image == null) {
                 System.out.println("COULDN'T LOAD TEXTURE " + oldTexture.getPath());
+                nativeImages.forEach(NativeImage::close);
                 return null;
             }
             maxWidth = Math.max(maxWidth, image.getWidth());
@@ -72,6 +73,7 @@ public class MobRetexturer {
                 }
             }
         }
+        nativeImages.forEach(NativeImage::close);
         DynamicTexture newTex = new DynamicTexture(tex);
         var textureManager = Minecraft.getInstance().getTextureManager();
         var nameTex = textureSet.get(0);
@@ -100,23 +102,30 @@ public class MobRetexturer {
     }
 
     private static Palette paletteFromSpirit(String s) {
-        var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
-        if (image == null) image = MissingTextureAtlasSprite.getTexture().getPixels();
-        return new Palette(Collections.singleton(image), true);
+        return paletteFromSpiritTexture(s, true);
     }
 
     private static Palette paletteFromSpiritSplit(String s) {
+        return paletteFromSpiritTexture(s, false);
+    }
+
+    private static Palette paletteFromSpiritTexture(String s, boolean isForItem) {
         var image = getNativeImage(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/item/spirit_" + s + ".png"));
-        if (image == null) image = MissingTextureAtlasSprite.getTexture().getPixels();
-        return new Palette(Collections.singleton(image), false);
+        if (image == null) return new Palette(Collections.singleton(MissingTextureAtlasSprite.getTexture().getPixels()), isForItem);
+        try (image) {
+            return new Palette(Collections.singleton(image), isForItem);
+        }
     }
 
     public static ResourceLocation retextureMob(ResourceLocation originalTextureLoc, String spiritType) throws NullPointerException {
         var spiritPalettes = spiritPaletteCache.computeIfAbsent(spiritType, MobRetexturer::paletteFromSpiritSplit);
         var originalTexture = getNativeImage(originalTextureLoc);
         if(originalTexture == null) throw new NullPointerException();
-        var originalPalettes = new Palette(Collections.singleton(originalTexture));
-        var rawTex = MakeTexture(originalTexture, originalPalettes, spiritPalettes);
+        NativeImage rawTex;
+        try (originalTexture) {
+            var originalPalettes = new Palette(Collections.singleton(originalTexture));
+            rawTex = MakeTexture(originalTexture, originalPalettes, spiritPalettes);
+        }
         var newTexLoc = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID,
                 "skin_" + originalTextureLoc.getNamespace() + "_" + originalTextureLoc.getPath() + "_" + spiritType);
         DynamicTexture newTex = new DynamicTexture(rawTex);
@@ -136,6 +145,9 @@ public class MobRetexturer {
             return false;
         }
         var palette = new Palette(textures);
+        for (var texture : textures) {
+            if (texture != null) texture.close();
+        }
         ((ITextureSetter) player).setTexture(null);
         var rawTex = MakePlayerTexture(player, palette);
         if (rawTex == null) {
@@ -158,7 +170,7 @@ public class MobRetexturer {
             return null;
         }
         NativeImage texture;
-        try {
+        try (resource) {
             texture = NativeImage.read(resource);
         } catch (IOException e) {
             System.out.println("COULD NOT READ IMAGE AT " + texLoc);
@@ -170,9 +182,19 @@ public class MobRetexturer {
     private static NativeImage MakePlayerTexture(AbstractClientPlayer player, Palette mobPalette) {
         var playerTexture = getPlayerTexture(player);
         if (playerTexture == null) return null;
-        var playerPalettes = new Palette(Collections.singleton(playerTexture));
-        paletteCache.put(player.getSkinTextureLocation(), playerPalettes);
-        return MakeTexture(playerTexture, playerPalettes, mobPalette);
+        try {
+            var playerPalettes = new Palette(Collections.singleton(playerTexture));
+            paletteCache.put(player.getSkinTextureLocation(), playerPalettes);
+            return MakeTexture(playerTexture, playerPalettes, mobPalette);
+        } finally {
+            // images borrowed from an HttpTexture are owned by it; ones we loaded ourselves need closing
+            if (!isOwnedByHttpTexture(player, playerTexture)) playerTexture.close();
+        }
+    }
+
+    private static boolean isOwnedByHttpTexture(AbstractClientPlayer player, NativeImage image) {
+        var texture = Minecraft.getInstance().getTextureManager().getTexture(player.getSkinTextureLocation(), MissingTextureAtlasSprite.getTexture());
+        return texture instanceof HttpTexture tex && ((ITextureGetter) tex).getTexture() == image;
     }
 
     private static NativeImage MakeTexture(NativeImage originalTex, Palette originalPalettes, Palette targetPalette) {

@@ -80,6 +80,7 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -233,6 +234,14 @@ public class FamiliarManager {
         ruinsMobs.add(Otherverse.GUEST.get());
         ruinsMobs.add(Otherverse.SNUFFER.get());
         ruinsMobs.add(Otherverse.TYPHLOTIC_ZOMBIE.get());
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        // these mobs hold a reference to the old overworld
+        mobInstances.clear();
+        playersToUpdate.clear();
+        justJoinedPlayer = null;
     }
 
     private static Mob getMobInstance(ServerLevel sl, EntityType<?> et) {

@@ -20,6 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,6 +39,7 @@ public class IdolRenderer extends BlockEntityWithoutLevelRenderer {
     private final EntityRenderDispatcher entityRenderDispatcher;
     private static final Logger LOGGER = LogUtils.getLogger();
     public static HashMap<EntityType, Entity> renderEntities = new HashMap<>();
+    private static Level renderEntitiesLevel;
     public static IdolRenderer instance;
 
     public IdolRenderer(BlockEntityRenderDispatcher dispatcher, EntityModelSet modelSet, EntityRenderDispatcher entityRenderDispatcher) {
@@ -73,6 +75,12 @@ public class IdolRenderer extends BlockEntityWithoutLevelRenderer {
         if (entityType == null) {
             entityType = MobBindingInfluenceUtils.getCycleType();
             if (entityType == null) return;
+        }
+        var currentLevel = Minecraft.getInstance().level;
+        if (currentLevel != renderEntitiesLevel) {
+            // cached entities hold a reference to their level, so drop them when the level changes
+            renderEntities.clear();
+            renderEntitiesLevel = currentLevel;
         }
         Entity renderEntity = renderEntities.get(entityType);
         if (renderEntity == null) {

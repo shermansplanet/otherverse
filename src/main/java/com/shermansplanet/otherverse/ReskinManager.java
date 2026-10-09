@@ -24,9 +24,9 @@ public class ReskinManager {
     private static final HashMap<UUID, List<ResourceLocation>> sightSkins = new HashMap<>();
     private static final HashMap<UUID, List<ResourceLocation>> alwaysSkins = new HashMap<>();
     private static final HashMap<ResourceLocation, HashMap<String, ResourceLocation>> mobSkinCache = new HashMap<>();
-    private static final HashMap<LivingEntity, ResourceLocation> reskinnedMobs = new HashMap<>();
+    private static final WeakHashMap<LivingEntity, ResourceLocation> reskinnedMobs = new WeakHashMap<>();
 
-    private static final LinkedList<ITextureSetter> skinnedPlayerList = new LinkedList<>();
+    private static final Set<ITextureSetter> skinnedPlayerList = Collections.newSetFromMap(new WeakHashMap<>());
 
     public static void resetData() {
         for (var player : skinnedPlayerList) {

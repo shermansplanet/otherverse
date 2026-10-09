@@ -35,7 +35,9 @@ import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -262,8 +264,23 @@ public class SympathyManager {
         entitiesByUUID.clear();
     }
 
+    @SubscribeEvent
+    public static void onStop(ServerStoppedEvent event) {
+        entitiesByUUID.clear();
+    }
+
+    @SubscribeEvent
+    public static void onEntityLeave(EntityLeaveLevelEvent event) {
+        if (event.getLevel().isClientSide()) return;
+        entitiesByUUID.remove(event.getEntity().getUUID().toString(), event.getEntity());
+    }
+
     public static Entity getEntityByUniqueId(String uniqueId, ServerLevel sl) {
-        if (entitiesByUUID.containsKey(uniqueId)) return entitiesByUUID.get(uniqueId);
+        var cached = entitiesByUUID.get(uniqueId);
+        if (cached != null) {
+            if (!cached.isRemoved()) return cached;
+            entitiesByUUID.remove(uniqueId);
+        }
         if (uniqueId.startsWith("familiar:")) {
             var playerName = uniqueId.replace("familiar:", "");
             for (var player : sl.getServer().getPlayerList().getPlayers()) {

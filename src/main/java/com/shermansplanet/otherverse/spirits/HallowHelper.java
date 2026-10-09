@@ -95,6 +95,13 @@ public class HallowHelper {
     }
 
     @SubscribeEvent
+    public static void onLevelUnload(LevelEvent.Unload event) {
+        if (!(event.getLevel() instanceof Level level)) return;
+        ShrineHelper.onLevelUnload(level);
+        DiagramManager.onLevelUnload(level);
+    }
+
+    @SubscribeEvent
     public static void onGrindstoneChange(GrindstoneEvent.OnPlaceItem event) {
         var newstack = event.getTopItem().copy();
         if (newstack.getItem() instanceof SpiritItem) {

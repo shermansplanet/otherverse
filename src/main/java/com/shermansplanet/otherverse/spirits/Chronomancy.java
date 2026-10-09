@@ -18,17 +18,27 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Chronomancy {
 
-    public static HashSet<Entity> frozenEntitiesForClient = new HashSet<>();
-    public static HashSet<Entity> frozenEntitiesForServer = new HashSet<>();
+    // weak so entities that are removed while frozen don't keep their level alive
+    public static final Set<Entity> frozenEntitiesForClient = Collections.newSetFromMap(new WeakHashMap<>());
+    public static final Set<Entity> frozenEntitiesForServer = Collections.newSetFromMap(new WeakHashMap<>());
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        frozenEntitiesForServer.clear();
+    }
 
     @SubscribeEvent
     public static void onUse(PlayerInteractEvent.RightClickItem event) {

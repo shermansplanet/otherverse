@@ -82,6 +82,7 @@ public class BindingRenderer {
         if (event.phase == TickEvent.Phase.END) return;
         var lvl = Minecraft.getInstance().level;
         if (lvl == null || lvl.getGameTime() % 40 != 0) return;
+        endCrystals.entrySet().removeIf(e -> e.getKey().level() != lvl || e.getKey().isRemoved() || e.getValue().isRemoved());
 
         for (var player : lvl.players()) {
             var type = familiarsByPract.get(player.getGameProfile().getName());

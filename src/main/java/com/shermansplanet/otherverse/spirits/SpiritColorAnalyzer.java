@@ -45,8 +45,7 @@ public class SpiritColorAnalyzer {
         if (resource == null) {
             return null;
         }
-        try {
-            BufferedReader streamReader = new BufferedReader(new InputStreamReader(resource, "UTF-8"));
+        try (BufferedReader streamReader = new BufferedReader(new InputStreamReader(resource, "UTF-8"))) {
             return GSON.fromJson(streamReader, JsonElement.class);
         } catch (Exception ignored) {
             return null;
@@ -152,7 +151,7 @@ public class SpiritColorAnalyzer {
                 if (resource == null) {
                     continue;
                 }
-                try {
+                try (resource) {
                     textures.add(NativeImage.read(resource));
                 } catch (IOException ignored) {
                 }
@@ -185,7 +184,11 @@ public class SpiritColorAnalyzer {
         }
         var textures = getTexturesRecursive(item);
         if (textures == null) return new SpiritLabeler.SpiritAmount[0];
-        return getColorCountsFromTextures(textures);
+        try {
+            return getColorCountsFromTextures(textures);
+        } finally {
+            textures.forEach(NativeImage::close);
+        }
     }
 
     public static ArrayList<ResourceLocation> getResourcesRecursive(ResourceLocation resourceLocation) {

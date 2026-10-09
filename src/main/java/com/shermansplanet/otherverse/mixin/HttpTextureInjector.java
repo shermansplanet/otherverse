@@ -21,6 +21,7 @@ public class HttpTextureInjector extends SimpleTexture implements ITextureGetter
 
     @Inject(method = "loadCallback", at = @At("HEAD"))
     private void onLoadCallback(NativeImage ni, CallbackInfo ci) {
+        if (nativeImage != null) nativeImage.close();
         nativeImage = new NativeImage(ni.getWidth(), ni.getHeight(), false);
         nativeImage.copyFrom(ni);
     }

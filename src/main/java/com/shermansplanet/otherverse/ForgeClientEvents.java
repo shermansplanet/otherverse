@@ -5,11 +5,13 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.binding.BindingRenderer;
 import com.shermansplanet.otherverse.binding.GiveItemMessage;
+import com.shermansplanet.otherverse.binding.IdolRenderer;
 import com.shermansplanet.otherverse.binding.MobBindingInfluenceUtils;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.others.Buzzed;
 import com.shermansplanet.otherverse.others.BuzzedSoundInstance;
+import com.shermansplanet.otherverse.spirits.Chronomancy;
 import com.shermansplanet.otherverse.spirits.HallowTextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -57,6 +59,10 @@ public class ForgeClientEvents {
         BindingRenderer.resetData();
         ReskinManager.resetData();
         HallowTextureManager.resetData();
+        IdolRenderer.renderEntities.clear();
+        OtherverseClientPacketHandler.waitingMessages.clear();
+        Chronomancy.frozenEntitiesForClient.clear();
+        bossCache.clear();
     }
 
     private static void onMouseEvent(ScreenEvent event) {
@@ -132,8 +138,9 @@ public class ForgeClientEvents {
         var level = net.minecraft.client.Minecraft.getInstance().level;
         if (level == null) return;
         Optional<LivingEntity> entityHolder = Optional.empty();
-        if (bossCache.containsKey(bossUUID)) {
-            entityHolder = bossCache.get(bossUUID);
+        var cached = bossCache.get(bossUUID);
+        if (cached != null && (cached.isEmpty() || !cached.get().isRemoved())) {
+            entityHolder = cached;
         } else {
             var toMatch = event.getBossEvent().getName().getString();
             for (var e : level.entitiesForRendering()) {

@@ -882,14 +882,19 @@ public class ShrineHelper {
         }
 
         public void cleanup() {
-            for (var chunkPos : chunkPositions) {
-                var set = shrinesByChunk.get(level).get(chunkPos);
-                if (set == null) continue;
-                set.remove(this);
+            var chunkShrines = shrinesByChunk.get(level);
+            if (chunkShrines != null) {
+                for (var chunkPos : chunkPositions) {
+                    var set = chunkShrines.get(chunkPos);
+                    if (set == null) continue;
+                    set.remove(this);
+                }
             }
             var levelShrines = shrinesByPosition.get(level);
-            for (var hallowPos : hallowPositions) {
-                if (levelShrines.get(hallowPos) == this) levelShrines.remove(hallowPos);
+            if (levelShrines != null) {
+                for (var hallowPos : hallowPositions) {
+                    if (levelShrines.get(hallowPos) == this) levelShrines.remove(hallowPos);
+                }
             }
             if (!isCombined) {
                 recalculateNetwork(false);
@@ -955,6 +960,11 @@ public class ShrineHelper {
     public static void onStartup() {
         shrinesByPosition.clear();
         shrinesByChunk.clear();
+    }
+
+    public static void onLevelUnload(Level level) {
+        shrinesByPosition.remove(level);
+        shrinesByChunk.remove(level);
     }
 
     public static boolean recalculateShrine(Shrine shrine) {

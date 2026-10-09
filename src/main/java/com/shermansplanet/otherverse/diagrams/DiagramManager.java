@@ -593,5 +593,12 @@ public class DiagramManager {
         clientDiagramDataByLevel.clear();
     }
 
+    // client levels are recreated on every dimension change, so don't hang on to the unloaded one
+    public static void onLevelUnload(Level level) {
+        if (!level.isClientSide()) return;
+        var data = clientDiagramDataByLevel.get(getDimensionHash(level));
+        if (data != null && data.level == level) data.level = null;
+    }
+
     public enum BlockUpdateType {ADDED, REMOVED, CHANGED}
 }

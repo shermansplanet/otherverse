@@ -56,9 +56,11 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -79,7 +81,7 @@ public class RuinsManager {
     public static HashMap<Player, Vec3> lightningPositions = new HashMap<>();
     public static HashMap<Player, Vec3> priorPositions = new HashMap<>();
     public static HashMap<Player, Integer> ticksOnSand = new HashMap<>();
-    public static HashMap<Player, HashMap<Mob, Integer>> claimAmounts = new HashMap<>();
+    public static HashMap<Player, Map<Mob, Integer>> claimAmounts = new HashMap<>();
     public static HashSet<Player> hasRuinsEffect = new HashSet<>();
 
     public static float skyMultiplier = 1f;
@@ -89,6 +91,33 @@ public class RuinsManager {
 
     private static final HashSet<Block> burnBlocks = new HashSet<>(
             Arrays.stream(new Block[]{Blocks.RED_SAND, Blocks.ORANGE_TERRACOTTA, Blocks.MAGMA_BLOCK}).toList());
+
+    private static void forgetPlayer(Player player) {
+        lightningPositions.remove(player);
+        priorPositions.remove(player);
+        ticksOnSand.remove(player);
+        claimAmounts.remove(player);
+        hasRuinsEffect.remove(player);
+    }
+
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        forgetPlayer(event.getEntity());
+    }
+
+    @SubscribeEvent
+    public static void onClone(PlayerEvent.Clone event) {
+        forgetPlayer(event.getOriginal());
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        lightningPositions.clear();
+        priorPositions.clear();
+        ticksOnSand.clear();
+        claimAmounts.clear();
+        hasRuinsEffect.clear();
+    }
 
     @SubscribeEvent
     public static void onPlayerJump(LivingEvent.LivingJumpEvent event) {
@@ -358,7 +387,7 @@ public class RuinsManager {
         if (!(event.getSource().getDirectEntity() instanceof ClaimArrow)) return;
         if (!(event.getSource().getEntity() instanceof ServerPlayer sp)) return;
         if (!(event.getEntity() instanceof Mob target)) return;
-        if (!claimAmounts.containsKey(sp)) claimAmounts.put(sp, new HashMap<>());
+        if (!claimAmounts.containsKey(sp)) claimAmounts.put(sp, new WeakHashMap<>());
         var claim = claimAmounts.get(sp);
         var claimAmount = claim.getOrDefault(target, 0) + 1;
         claim.put(target, claimAmount);

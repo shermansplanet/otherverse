@@ -56,6 +56,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -187,6 +188,15 @@ public class DemesnesManager {
 
     @SubscribeEvent
     public static void startup(ServerAboutToStartEvent event) {
+        reset();
+    }
+
+    @SubscribeEvent
+    public static void shutdown(ServerStoppedEvent event) {
+        reset();
+    }
+
+    private static void reset() {
         activeRituals = new HashMap<>();
         ritualsToRemove = new ArrayList<>();
         claimedDemesnes = new HashMap<>();

@@ -58,12 +58,14 @@ public class TransientDiagramData {
 
     public void putPlacedItemTag(BlockPos pos, CompoundTag tag) {
         placedItemTags.put(pos, tag);
+        if (savedData != null) {
+            savedData.setDirty();
+        }
+        // level is null on the client for dimensions the player isn't currently in
+        if (level == null) return;
         var st = Spirits.spiritsByLabel.get(tag.getString("spirit_type"));
         for (var dir : Direction.values()) {
             ShrineHelper.getShrine(level, pos.relative(dir), st);
-        }
-        if (savedData != null) {
-            savedData.setDirty();
         }
         if (!level.isClientSide()) {
             OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
@@ -115,12 +117,14 @@ public class TransientDiagramData {
         if (placedItemTags.remove(pos) == null) {
             return;
         }
+        if (savedData != null) {
+            savedData.setDirty();
+        }
+        // level is null on the client for dimensions the player isn't currently in
+        if (level == null) return;
         var shrine = ShrineHelper.getShrine(level, pos);
         if (shrine != null) {
             ShrineHelper.recalculateShrine(shrine);
-        }
-        if (savedData != null) {
-            savedData.setDirty();
         }
         if (!level.isClientSide()) {
             OtherversePacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),

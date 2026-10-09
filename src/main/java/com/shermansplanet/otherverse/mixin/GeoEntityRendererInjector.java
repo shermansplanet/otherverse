@@ -14,7 +14,9 @@ import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.GeoRenderer;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 @Mixin(GeoEntityRenderer.class)
 public abstract class GeoEntityRendererInjector<T extends Entity & GeoAnimatable> extends EntityRenderer<T> implements GeoRenderer<T> {
@@ -22,7 +24,7 @@ public abstract class GeoEntityRendererInjector<T extends Entity & GeoAnimatable
         super(p_174008_);
     }
 
-    private static HashSet<LivingEntity> golems = new HashSet<>();
+    private static final Set<LivingEntity> golems = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Inject(method = "getTextureLocation", at = @At("HEAD"), cancellable = true)
     protected void onGetTexLoc(T animatable, CallbackInfoReturnable<ResourceLocation> ci) {
