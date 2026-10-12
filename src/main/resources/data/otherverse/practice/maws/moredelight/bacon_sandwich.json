@@ -1,0 +1,15 @@
+{
+	"other" : "minecraft:pig",
+	"transfusion" : [
+		{
+			"input" : "farmersdelight:egg_sandwich",
+			"health" : 4,
+			"output" : "moredelight:egg_with_bacon_sandwich"
+		},
+		{
+			"input" : "minecraft:bread",
+			"health" : 4,
+			"output" : "farmersdelight:bacon_sandwich"
+		}
+	]
+}

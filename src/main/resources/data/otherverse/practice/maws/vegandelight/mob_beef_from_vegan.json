@@ -1,0 +1,25 @@
+{
+	"other" : "minecraft:cow",
+	"transfusion" : [
+		{
+			"input" : "vegandelight:minced_tofu",
+			"health" : 3,
+			"output" : "farmersdelight:minced_beef"
+		},
+		{
+			"input" : "vegandelight:leather_substitute",
+			"health" : 3,
+			"output" : "minecraft:leather"
+		},
+		{
+			"input" : "vegandelight:soymilk_bucket",
+			"health" : 1,
+			"output" : "minecraft:milk_bucket"
+		},
+		{
+			"input" : "vegandelight:soymilk_bottle",
+			"health" : 3,
+			"output" : "farmersdelight:milk_bottle"
+		}
+	]
+}

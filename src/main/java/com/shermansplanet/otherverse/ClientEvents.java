@@ -114,9 +114,6 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void onFMLClientSetupEvent(final FMLClientSetupEvent event) {
-        LOGGER.error("ACCESS_TOKEN " + Minecraft.getInstance().getUser().getAccessToken());
-        LOGGER.error("UUID " + Minecraft.getInstance().getUser().getUuid());
-
         event.enqueueWork(
                 () -> {
                     MenuScreens.register(Otherverse.DEMESNES_CLAIM_MENU.get(), DemesnesClaimScreen::new);

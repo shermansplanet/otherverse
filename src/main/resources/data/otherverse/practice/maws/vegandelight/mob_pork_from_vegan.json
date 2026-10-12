@@ -1,0 +1,20 @@
+{
+	"other" : "minecraft:pig",
+	"transfusion" : [
+		{
+			"input" : "vegandelight:smoked_tofu_slices",
+			"health" : 3,
+			"output" : "farmersdelight:bacon"
+		},
+		{
+			"input" : "vegandelight:cooked_smoked_tofu_slices",
+			"health" : 3,
+			"output" : "farmersdelight:cooked_bacon"
+		},
+		{
+			"input" : "vegandelight:smoked_tofu",
+			"health" : 8,
+			"output" : "farmersdelight:smoked_ham"
+		}
+	]
+}

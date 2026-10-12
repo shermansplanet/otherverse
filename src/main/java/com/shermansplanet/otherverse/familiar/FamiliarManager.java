@@ -4,10 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.*;
 import com.shermansplanet.otherverse.binding.*;
 import com.shermansplanet.otherverse.demesnes.DemesnesManager;
-import com.shermansplanet.otherverse.diagrams.BlockFocus;
-import com.shermansplanet.otherverse.diagrams.DiagramManager;
-import com.shermansplanet.otherverse.diagrams.SelfManager;
-import com.shermansplanet.otherverse.diagrams.TransientDiagramData;
+import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.implement.ImplementManager;
 import com.shermansplanet.otherverse.others.Buzzed;
 import com.shermansplanet.otherverse.potions.OtherversePotions;
@@ -1758,5 +1755,55 @@ public class FamiliarManager {
                 return;
             }
         }
+    }
+
+    public static InteractionResult onNameTagClick(ItemStack stack, Player player, LivingEntity entity) {
+        if (!stack.hasCustomHoverName()) {
+            if (player.isCreative()) {
+                stack.setHoverName(Component.literal("Familiar"));
+            } else {
+                return InteractionResult.PASS;
+            }
+        }
+        if (!(player instanceof ServerPlayer sp)) {
+            return InteractionResult.SUCCESS;
+        }
+        if (!FamiliarManager.isEligibleFamiliar(entity)) {
+            LOGGER.debug(entity.getPersistentData().hasUUID("bindingId") ? "has binding" : "no binding");
+            LOGGER.debug(entity.getType() + " cannot be a familiar");
+            return InteractionResult.PASS;
+        }
+
+        if (!FamiliarManager.getFamiliarData(player).isEmpty()) {
+            if (!player.isCreative()) {
+                if (OtherverseConfig.CAN_REDO_RITUALS.get()) {
+                    SpiritAffinityTracker.decreaseAllAffinities(sp);
+                } else {
+                    return InteractionResult.PASS;
+                }
+            }
+            FamiliarManager.abandonFamiliar(sp);
+        }
+
+        var sl = (ServerLevel) player.level();
+        var data = DiagramManager.getOrCreateLevelData(sl.getServer().overworld());
+        var binding = data.bindingsById.get(entity.getPersistentData().getUUID("bindingId"));
+        if (binding == null || binding.mob != entity) return InteractionResult.PASS;
+        var playerSet = new HashSet<EntityType<?>>();
+        playerSet.add(EntityType.PLAYER);
+        var requiredPower = Math.max(1, (int) (entity.getMaxHealth() / (binding.isPositive ? 4 : 2)));
+        var otherfoci = DiagramManager.getFociInBoundingBox(DiagramManager.getOrCreateLevelData(sl), entity.getBoundingBox());
+        var bindingFocus = data.allBlockFoci.get(binding.position);
+        if (bindingFocus != null) otherfoci.add(bindingFocus);
+        for (var otherfocus : otherfoci) {
+            if (player.isCreative() || (otherfocus.getDiagram() != null &&
+                    otherfocus.getDiagram().trySpendPower(sl, otherfocus.getPos(), requiredPower * PowerSource.POWER_FROM_SELF, playerSet))) {
+                entity.setCustomName(stack.getHoverName());
+                FamiliarManager.makeFamiliar(entity, player);
+                return InteractionResult.CONSUME;
+            }
+        }
+        player.sendSystemMessage(Component.literal("This mob needs to be influenced by " + requiredPower + " Self to complete this ritual."));
+        return InteractionResult.CONSUME;
     }
 }

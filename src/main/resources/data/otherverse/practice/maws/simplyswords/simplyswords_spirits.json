@@ -1,0 +1,46 @@
+{
+  "practice" : "spirit_composition",
+  "spirits" : {
+    "simplyswords:netherfused_gem" : ["200 nether", "200 fate", "16 war"],
+    "simplyswords:runefused_gem" : ["200 fate", "16 war"],
+    "simplyswords:runic_tablet" : ["100 fate"],
+    "simplyswords:empowered_remnant" : ["100 fate", "16 war"],
+    "simplyswords:runic_forge" : ["90 fate", "16 war"],
+
+    "simplyswords:iron_scythe" : ["7 death"],
+    "simplyswords:gold_scythe" : ["7 death"],
+    "simplyswords:diamond_scythe" : ["7 death"],
+    "simplyswords:netherite_scythe" : ["7 death"],
+    "simplyswords:runic_scythe" : ["7 death"],
+
+    "simplyswords:bramblethorn" : ["28 nature"],
+    "simplyswords:brimstone_claymore" : ["14 fire", "14 phlogiston"],
+    "simplyswords:emberblade" : ["14 fire", "14 phlogiston"],
+    "simplyswords:emberlash" : ["28 fire"],
+    "simplyswords:hearthflame" : ["28 fire"],
+    "simplyswords:magiscythe" : ["14 death", "14 air"],
+    "simplyswords:soulkeeper" : ["14 dark", "14 fate"],
+    "simplyswords:soulrender" : ["28 death"],
+    "simplyswords:stormbringer" : ["28 air"],
+    "simplyswords:storms_edge" : ["28 air"],
+    "simplyswords:stormscale" : ["28 air"],
+    "simplyswords:toxic_longsword" : ["28 death"],
+    "simplyswords:twisted_blade" : ["28 war"],
+    "simplyswords:watcher_claymore" : ["14 dark", "14 death"],
+    "simplyswords:watching_warglaive" : ["14 dark", "14 death"],
+    "simplyswords:soulpyre" : ["28 nether"],
+    "simplyswords:frostfall" : ["28 cold"],
+    "simplyswords:molten_edge" : ["28 fire"],
+    "simplyswords:livyatan" : ["28 air"],
+    "simplyswords:icewhisper" : ["28 cold"],
+    "simplyswords:arcanethyst" : ["14 air", "14 fate"],
+    "simplyswords:thunderbrand" : ["28 air"],
+    "simplyswords:mjolnir" : ["28 air"],
+    "simplyswords:slumbering_lichblade" : ["28 death"],
+    "simplyswords:waxweaver" : ["14 death", "14 phlogiston"],
+    "simplyswords:shadowsting" : ["28 dark"],
+    "simplyswords:whisperwind" : ["28 air"],
+
+    "simplyswords:decaying_relic" : ["-3 death"]
+  }
+}

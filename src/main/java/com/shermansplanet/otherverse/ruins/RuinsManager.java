@@ -591,7 +591,7 @@ public class RuinsManager {
         }).start();
     }
 
-    private static void sendToRuins(ServerPlayer player) {
+    public static void sendToRuins(ServerPlayer player) {
         if (isInRuins(player)) return;
         var key = DiagramManager.getDimensionHash(player.serverLevel());
         player.getPersistentData().putInt("dimension_before_ruins", key);

@@ -29,6 +29,7 @@ import com.shermansplanet.otherverse.artifacts.SpawnAltarRenderer;
 import com.shermansplanet.otherverse.ruins.MemorySnareBlockEntity;
 import com.shermansplanet.otherverse.spirits.*;
 import com.shermansplanet.otherverse.spirits.particles.OtherverseParticles;
+import com.shermansplanet.otherverse.sympathy.BloodMendingEnchantment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
@@ -54,6 +55,7 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -110,6 +112,10 @@ public class Otherverse {
             .icon(() -> Spirits.spiritItems.get(Spirits.COLOR_GRAY).get().getDefaultInstance())
             .build()
     );
+
+    private static final DeferredRegister<Enchantment> ENCHANTMENTS = DeferredRegister.create(
+            ForgeRegistries.ENCHANTMENTS, MODID);
+    public static final RegistryObject<Enchantment> BLOOD_MENDING = ENCHANTMENTS.register("blood_mending", BloodMendingEnchantment::new);
 
     private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(
             ForgeRegistries.SOUND_EVENTS, MODID);
@@ -219,7 +225,7 @@ public class Otherverse {
         ENTITIES.register(modEventBus);
         OtherverseBlocks.BLOCKS.register(modEventBus);
         for (SpiritType st : Spirits.allSpiritTypes) {
-            if(st == Spirits.EMPTY) continue;
+            if (st == Spirits.EMPTY) continue;
             RegistryObject<Item> item = OtherverseItems.ITEMS.register(st.GetResourceLocation(),
                     () -> new SpiritItem(st, new Item.Properties()));
             Spirits.spiritItems.put(st, item);
@@ -230,6 +236,7 @@ public class Otherverse {
         RECIPE_TYPES.register(modEventBus);
         MENU_TYPES.register(modEventBus);
         CREATIVE_TABS.register(modEventBus);
+        ENCHANTMENTS.register(modEventBus);
         OtherverseFeatureGen.FEATURES.register(modEventBus);
         bind(context, Registries.PARTICLE_TYPE, OtherverseParticles::registerParticles);
 

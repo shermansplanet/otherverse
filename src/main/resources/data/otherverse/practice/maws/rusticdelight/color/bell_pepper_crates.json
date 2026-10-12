@@ -1,0 +1,13 @@
+{
+  "practice": "color_transfusion",
+  "is_block": true,
+  "white": "rusticdelight:bell_pepper_white_crate",
+  "black": "rusticdelight:bell_pepper_black_crate",
+  "red": "rusticdelight:bell_pepper_red_crate",
+  "orange": "rusticdelight:bell_pepper_orange_crate",
+  "yellow": "rusticdelight:bell_pepper_yellow_crate",
+  "green": "rusticdelight:bell_pepper_green_crate",
+  "blue": "rusticdelight:bell_pepper_blue_crate",
+  "purple": "rusticdelight:bell_pepper_purple_crate",
+  "pink": "rusticdelight:bell_pepper_pink_crate"
+}

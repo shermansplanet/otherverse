@@ -1,0 +1,10 @@
+{
+	"other" : "minecraft:cow",
+	"transfusion" : [
+		{
+			"input" : "minecraft:bread",
+			"health" : 4,
+			"output" : "moredelight:simple_hamburger"
+		}
+	]
+}

@@ -1,0 +1,20 @@
+{
+  "practice": "color_transfusion",
+  "is_block": true,
+  "white" : "alexscaves:rock_candy_white",
+  "light_gray" : "alexscaves:rock_candy_light_gray",
+  "gray" : "alexscaves:rock_candy_gray",
+  "black" : "alexscaves:rock_candy_black",
+  "brown" : "alexscaves:rock_candy_brown",
+  "red" : "alexscaves:rock_candy_red",
+  "orange" : "alexscaves:rock_candy_orange",
+  "yellow" : "alexscaves:rock_candy_yellow",
+  "lime" : "alexscaves:rock_candy_lime",
+  "green" : "alexscaves:rock_candy_green",
+  "cyan" : "alexscaves:rock_candy_cyan",
+  "light_blue" : "alexscaves:rock_candy_light_blue",
+  "blue" : "alexscaves:rock_candy_blue",
+  "purple" : "alexscaves:rock_candy_purple",
+  "magenta" : "alexscaves:rock_candy_magenta",
+  "pink" : "alexscaves:rock_candy_pink"
+}

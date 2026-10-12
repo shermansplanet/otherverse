@@ -1,0 +1,15 @@
+{
+	"other" : "minecraft:sheep",
+	"transfusion" : [
+		{
+			"input" : "vegandelight:tofu_slices",
+			"health" : 3,
+			"output" : "farmersdelight:mutton_chops"
+		},
+		{
+			"input" : "vegandelight:tofu",
+			"health" : 12,
+			"output" : "minecraft:mutton"
+		}
+	]
+}

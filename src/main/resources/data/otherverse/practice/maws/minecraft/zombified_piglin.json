@@ -1,0 +1,6 @@
+{
+	"other" : "minecraft:zombified_piglin",
+	"healing" : {
+		"otherverse:spirit_nether" : 1
+	}
+}

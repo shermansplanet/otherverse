@@ -7,6 +7,7 @@ import com.shermansplanet.otherverse.diagrams.*;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.spirits.SpiritItem;
 import com.shermansplanet.otherverse.sympathy.FateWebBlock;
 import com.shermansplanet.otherverse.sympathy.SympathyManager;
 import com.shermansplanet.otherverse.sympathy.SympathyRangeUpdateMessage;
@@ -396,7 +397,7 @@ public class ContractManager {
                     break;
                 }
             }
-            if(!foundRecipe) return new CompoundTag();
+            if (!foundRecipe) return new CompoundTag();
         }
         return tag;
     }
@@ -479,7 +480,11 @@ public class ContractManager {
                 if (key.startsWith("filter") && !taskType.equals("go") && !taskType.equals("craft")) {
                     prep = "";
                 }
-                toolTip.add(Component.literal(prefix + prep).append(item.getDescription()));
+                if (item instanceof SpiritItem si) {
+                    toolTip.add(Component.literal(prefix + si.spiritType.label()));
+                } else {
+                    toolTip.add(Component.literal(prefix + prep).append(item.getDescription()));
+                }
                 var index = key.substring(7);
                 var tagitemkey = "tag_item_" + index;
                 if (contractTag.contains(tagitemkey)) {

@@ -1,0 +1,7 @@
+{
+	"practice" : "spirit_transfusion",
+	"input" : "minecraft:carrot",
+	"spirit" : "fortune",
+	"count" : 8,
+	"item" : "minecraft:golden_carrot"
+}

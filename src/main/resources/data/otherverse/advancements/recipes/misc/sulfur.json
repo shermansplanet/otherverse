@@ -1,0 +1,35 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_sulfur_block": {
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"otherverse:sulfur_block"
+						]
+					}
+				]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_the_recipe": {
+			"conditions": {
+				"recipe": "otherverse:sulfur"
+			},
+			"trigger": "minecraft:recipe_unlocked"
+		}
+	},
+	"requirements": [
+		[
+			"has_sulfur_block",
+			"has_the_recipe"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"otherverse:sulfur"
+		]
+	},
+	"sends_telemetry_event": false
+}

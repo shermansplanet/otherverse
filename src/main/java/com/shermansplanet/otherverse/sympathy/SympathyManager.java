@@ -2,7 +2,6 @@ package com.shermansplanet.otherverse.sympathy;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
-import com.shermansplanet.otherverse.diagrams.BlockFocus;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
@@ -10,16 +9,16 @@ import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
-import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -28,9 +27,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -42,7 +47,6 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -63,6 +67,45 @@ public class SympathyManager {
         newstack.getOrCreateTag().putString("sympathy_target", getKeyFor(event.getEntity()));
         newstack.getOrCreateTag().putString("sympathy_label", event.getEntity().getType().getDescriptionId());
         le.setItemSlot(EquipmentSlot.MAINHAND, newstack);
+    }
+
+    @SubscribeEvent
+    public static void onBookKill(LivingDeathEvent event) {
+        if (event.getSource() == null || !(event.getSource().getEntity() instanceof Player player)) return;
+        var item = player.getMainHandItem();
+        if (!item.is(Items.ENCHANTED_BOOK)) return;
+        if (event.getEntity().getMaxHealth() < 20) return;
+        var isMending = EnchantedBookItem.getEnchantments(item).stream().anyMatch(t -> {
+            var op = BuiltInRegistries.ENCHANTMENT.getOptional(EnchantmentHelper.getEnchantmentId((CompoundTag) t));
+            return op.filter(enchantment -> enchantment == Enchantments.MENDING).isPresent();
+        });
+        if (!isMending) return;
+        var newItem = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(Otherverse.BLOOD_MENDING.get(), 1));
+        player.setItemInHand(InteractionHand.MAIN_HAND, newItem);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp)) return;
+        if (sp.serverLevel().getGameTime() % 20 == 0) {
+            if (sp.getHealth() <= 1) return;
+            for (var stack : sp.getInventory().items) {
+                tryBloodMend(sp, stack);
+                if (sp.getHealth() <= 1) return;
+            }
+        }
+    }
+
+    public static void tryBloodMend(LivingEntity le, ItemStack stack) {
+        if (!stack.isDamageableItem() || stack.getEnchantmentLevel(Otherverse.BLOOD_MENDING.get()) == 0) return;
+        var damage = stack.getDamageValue();
+        var healthPerDamage = 0.7f;
+        if (damage < stack.getMaxDamage() / 3) return;
+        var maxDamageRepair = Math.min(Mth.floor((le.getHealth() - 1) / healthPerDamage), damage);
+        var beforeHealth = le.getHealth();
+        le.hurt(le.level().damageSources().magic(), maxDamageRepair * healthPerDamage);
+        var healthDelta = beforeHealth - le.getHealth();
+        stack.setDamageValue(damage - Mth.floor(healthDelta / healthPerDamage + 0.001f));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)

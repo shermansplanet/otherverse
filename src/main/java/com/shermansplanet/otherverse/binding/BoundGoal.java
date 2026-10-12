@@ -213,6 +213,9 @@ public class BoundGoal extends Goal {
             }
         }
         mob.getBrain().setActiveActivityToFirstValid(ImmutableList.of(isAttacking ? Activity.FIGHT : Activity.IDLE));
+        if (!held.isEmpty() && mob.level().getGameTime() % 20 == Mth.abs(mob.getId()) % 20 && mob.getHealth() > 1) {
+            SympathyManager.tryBloodMend(mob, held);
+        }
         if (FamiliarManager.isFamiliar(mob) || isLoyaltyBound || isTamed || mob instanceof TamableAnimal ta && ta.isTame())
             return;
         if (mob.level().getGameTime() % (20L * bindingWearInterval) != 0) {
@@ -256,10 +259,14 @@ public class BoundGoal extends Goal {
             if (MobBindingInfluenceUtils.GetInfluence(mob, itemStack) * (binding.isPositive ? 1 : -1) >= 0) {
                 continue;
             }
-            if (itemStack.hasTag() && itemStack.getTag().contains("hallow")) {
-                CompoundTag hallowTag = itemStack.getTag().getCompound("hallow");
-                var spent = focus.drainHallow(Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type")), SPIRIT_DRAIN, true, true);
-                if (spent < SPIRIT_DRAIN) continue;
+            if (itemStack.hasTag()) {
+                var tag = itemStack.getTag();
+                var isTablet = tag.contains("linked_position_x");
+                if (isTablet || itemStack.getTag().contains("hallow")) {
+                    var spiritType = Spirits.spiritsByLabel.get(isTablet ? tag.getString("spirit_type") : tag.getCompound("hallow").getString("spirit_type"));
+                    var spent = focus.drainHallow(spiritType, SPIRIT_DRAIN, true, true);
+                    if (spent < SPIRIT_DRAIN) continue;
+                }
             }
             foci.add(focus);
         }
@@ -272,9 +279,10 @@ public class BoundGoal extends Goal {
         IFocus mostUniqueFocus = getMostUniqueFocus(foci);
 
         ItemStack mostUniqueItem = mostUniqueFocus.getItem();
-        if (mostUniqueItem.hasTag() && mostUniqueItem.getTag().contains("hallow")) {
-            CompoundTag hallowTag = mostUniqueItem.getTag().getCompound("hallow");
-            mostUniqueFocus.drainHallow(Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type")), SPIRIT_DRAIN, true, false);
+        if (mostUniqueItem.hasTag() && (mostUniqueItem.getTag().contains("hallow") || mostUniqueItem.getTag().contains("linked_position_x"))) {
+            var tag = mostUniqueItem.getTag();
+            var isTablet = tag.contains("linked_position_x");
+            mostUniqueFocus.drainHallow(Spirits.spiritsByLabel.get((isTablet ? tag : tag.getCompound("hallow")).getString("spirit_type")), SPIRIT_DRAIN, true, false);
         } else if (mostUniqueItem.getItem() instanceof IdolItem) {
             BindingInfo bindingInfo = DiagramManager.getOrCreateLevelData(level).bindingsByPosition.get(mostUniqueFocus.getPos());
             if (bindingInfo == null || bindingInfo.mob == null) {

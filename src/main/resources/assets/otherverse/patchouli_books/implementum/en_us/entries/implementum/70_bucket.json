@@ -8,7 +8,7 @@
             "type": "patchouli:spotlight",
             "item": {"item" : "minecraft:bucket"},
             "title" : "Empty Bucket",
-            "text": "An Empty Bucket Implement will increase the capacity of any hallows you create by one third. The updated capacities will be reflected in JEI.$(br2)The block underneath the hallow at its creation will still multiply that base number as usual.$(br2)Despite buckets not having technology spirits, it will count as a technology Implement."
+            "text": "An Empty Bucket Implement will increase the capacity of any hallows you create by one third. The updated capacities will be reflected in JEI. The block underneath the hallow at its creation will still multiply that base number as usual.$(br2)Despite buckets not having technology spirits, it will count as a technology Implement."
         },
         {
             "type": "patchouli:text",

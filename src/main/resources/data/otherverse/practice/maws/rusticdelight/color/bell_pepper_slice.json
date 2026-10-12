@@ -1,0 +1,13 @@
+{
+  "practice": "color_transfusion",
+  "is_block": false,
+  "white": "rusticdelight:bell_pepper_slice_white",
+  "black": "rusticdelight:bell_pepper_slice_black",
+  "red": "rusticdelight:bell_pepper_slice_red",
+  "orange": "rusticdelight:bell_pepper_slice_orange",
+  "yellow": "rusticdelight:bell_pepper_slice_yellow",
+  "green": "rusticdelight:bell_pepper_slice_green",
+  "blue": "rusticdelight:bell_pepper_slice_blue",
+  "purple": "rusticdelight:bell_pepper_slice_purple",
+  "pink": "rusticdelight:bell_pepper_slice_pink"
+}

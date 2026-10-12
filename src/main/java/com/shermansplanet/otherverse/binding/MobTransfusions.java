@@ -103,7 +103,7 @@ public class MobTransfusions {
 
     public static List<TransfusionRecipe> GenerateRecipes(ArrayList<TransfusionRecipe> smeltingRecipes) {
         List<TransfusionRecipe> recipes = new ArrayList<>();
-        var i=0;
+        var i = 0;
         for (var transfusionSet : ALL_MOB_TRANSFUSIONS.data.entrySet()) {
             for (var transfusionData : transfusionSet.getValue()) {
                 var recipe = new TransfusionRecipe(ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "mob_transfusion_" + i++),
@@ -112,7 +112,7 @@ public class MobTransfusions {
                         transfusionData.price);
                 if (transfusionData.entityTypes.size() == 1 && transfusionData.entityTypes.contains(EntityType.BLAZE) && transfusionData.price == 1) {
                     smeltingRecipes.add(recipe);
-                }else {
+                } else {
                     recipes.add(recipe);
                 }
             }
@@ -140,7 +140,7 @@ public class MobTransfusions {
         if (binding == null || binding.mob == null) {
             return false;
         }
-        if(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, target).getY() > focus.getPos().getY()){
+        if (level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, target).getY() > focus.getPos().getY()) {
             return false;
         }
         if (!diagram.trySpendPower(level, focus.getPos(), 33, new HashSet<>())) {
@@ -312,14 +312,17 @@ public class MobTransfusions {
     public static boolean tryFeed(ServerLevel level, IFocus sourceFocus, Diagram diagram) {
         Item item = sourceFocus.getItem().getItem();
         SpiritType spiritType = null;
-        if (sourceFocus.getItem().hasTag() && sourceFocus.getItem().getTag().contains("hallow")) {
-            CompoundTag ht = sourceFocus.getItem().getTag().getCompound("hallow");
-            spiritType = Spirits.spiritsByLabel.get(ht.getString("spirit_type"));
-            if (spiritType == null || spiritType == Spirits.EMPTY) {
-                LOGGER.error("HALLOW WITHOUT SPIRIT TYPE");
-                return false;
+        if (sourceFocus.getItem().hasTag()) {
+            var tag = sourceFocus.getItem().getTag();
+            var isTablet = tag.contains("linked_position_x");
+            if (isTablet || sourceFocus.getItem().getTag().contains("hallow")) {
+                spiritType = Spirits.spiritsByLabel.get(isTablet ? tag.getString("spirit_type") : tag.getCompound("hallow").getString("spirit_type"));
+                if (spiritType == null || spiritType == Spirits.EMPTY) {
+                    LOGGER.error("HALLOW WITHOUT SPIRIT TYPE");
+                    return false;
+                }
+                item = Spirits.spiritItems.get(spiritType).get();
             }
-            item = Spirits.spiritItems.get(spiritType).get();
         }
         BlockPos target = diagram.influences.get(sourceFocus.getPos());
         if (target == null) {

@@ -6,11 +6,15 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "To perform the Implementum ritual, simply go to sleep in a bed that is being influenced by your chosen Implement. When you awake, the item will bind itself to you. You will also unlock a new curio slot that can only hold an Implement."
+            "text": "Your Implement is a declaration of who you are and what you do, expressed as an item. To perform the Implementum ritual, simply go to sleep in a bed that is being influenced by your chosen Implement. When you awake, the item will bind itself to you. You will also unlock a new curio slot that can only hold an Implement."
         },
         {
             "type": "patchouli:text",
             "text": "You will find yourself unable to rid yourself of your Implement, even by dying.$(br2)If it is destroyed - by being broken, placed, poured out, eaten, etc. - then you can use the Implement hotkey (i by default) to regenerate it at the cost of some Self.$(br2)Your reach will also be increased while holding your Implement."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "When it regenerates, your Implement will be the same as it was when claimed, so most Practitioners make sure their Implement is in top condition for the ritual. However, if you take an Implement that is more than 90% damaged, you gain an affinity for the Ruins, and can transport yourself there by breaking it."
         }
     ]
 }

@@ -8,6 +8,7 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.familiar.TreeStripper;
 import com.shermansplanet.otherverse.spirits.FleshTechManager;
 import com.shermansplanet.otherverse.spirits.ShrineHelper;
+import com.shermansplanet.otherverse.spirits.SpiritItem;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -223,7 +224,9 @@ public class ContractTask {
                 id.append(tag.getInt(key));
             } else if (key.startsWith("block") || key.startsWith("inventory")) {
                 var filterList = (taskType == TaskType.MOVE) ? itemFilters : blockFilters;
-                filterList.add(Item.byId(tag.getInt(key)));
+                var item = Item.byId(tag.getInt(key));
+                if (item instanceof SpiritItem) filterList = itemFilters;
+                filterList.add(item);
                 if (key.startsWith("block")) onlyHasInventoryBlockFilters = false;
                 id.append(tag.getInt(key));
             } else if (key.startsWith("position")) {
@@ -275,6 +278,8 @@ public class ContractTask {
         if (itemFilters.isEmpty()) {
             return !felling || (blockState.is(BlockTags.LOGS));
         }
+        if (blockState.is(Blocks.FIRE) && itemFilters.contains(Spirits.spiritItems.get(Spirits.FIRE).get()))
+            return true;
         if (!itemFilters.contains(block.asItem())) return false;
         if (blockstateFilters.isEmpty()) return true;
         var blockstateFilter = blockstateFilters.get(block);
@@ -887,12 +892,17 @@ public class ContractTask {
                 if (newBlockDamage >= 10) {
                     if (felling && blockstate.is(BlockTags.LOGS)) {
                         targetPos = tryGetBranch(targetPos);
+                        blockstate = mob.level().getBlockState(targetPos);
                     }
                     mob.level().playSound(null, targetPos, blockstate.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1f, 1f);
                     if (tool.isEmpty() && mob.getType() == EntityType.ENDERMAN) {
-                        var tag = DiagramManager.getOrCreateLevelData(mob.level()).getPlacedItemTag(targetPos);
                         var item = blockstate.getBlock().asItem().getDefaultInstance();
-                        item.setTag(tag);
+                        var levelData = DiagramManager.getOrCreateLevelData(mob.level());
+                        var tag = levelData.getPlacedItemTag(targetPos);
+                        if (tag != null) {
+                            item.getOrCreateTag().put("hallow", tag);
+                            levelData.removePlacedItemTag(targetPos);
+                        }
                         BindingManager.setHeldItem(mob, item);
                     } else {
                         Block.dropResources(blockstate, mob.level(), targetPos, mob.level().getBlockEntity(targetPos), mob, tool);

@@ -1,0 +1,15 @@
+{
+	"other" : "minecraft:chicken",
+	"transfusion" : [
+		{
+			"input" : "vegandelight:tofu_slices",
+			"health" : 3,
+			"output" : "farmersdelight:chicken_cuts"
+		},
+		{
+			"input" : "vegandelight:tofu",
+			"health" : 12,
+			"output" : "minecraft:chicken"
+		}
+	]
+}

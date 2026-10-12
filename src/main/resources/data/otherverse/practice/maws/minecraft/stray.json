@@ -1,0 +1,6 @@
+{
+	"other" : "minecraft:stray",
+	"healing" : {
+		"otherverse:spirit_cold" : 1
+	}
+}

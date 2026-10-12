@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Unit;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -125,6 +126,12 @@ public class BindingManager {
         var data = e.getPersistentData();
         if (data.isEmpty()) return false;
         return data.hasUUID("bindingId") || data.contains("construct_type") || data.contains("unbound_contract") || data.contains("practitioner") || data.contains("practitioner_loyalty");
+    }
+
+    public static boolean isSummon(LivingEntity e) {
+        var data = e.getPersistentData();
+        if (data.isEmpty()) return false;
+        return data.contains("construct_type") || data.contains("practitioner_loyalty");
     }
 
     public static boolean canBeCinnabarIdol(LivingEntity e) {
@@ -580,46 +587,11 @@ public class BindingManager {
                 || (type == EntityType.IRON_GOLEM && stack.is(Items.IRON_INGOT));
     }
 
-//    @SubscribeEvent(priority = EventPriority.LOW)
-//    public static void tryThrowItem(ItemTossEvent event) {
-//        if(event.isCanceled()) return;
-//        var player = event.getPlayer();
-//        var dir = player.getLookAngle().normalize();
-//        var reach = (float) player.getEntityReach();
-//        var hit = ProjectileUtil.getEntityHitResult(
-//                player.level(),
-//                player,
-//                player.getEyePosition(),
-//                player.getEyePosition().add(dir.scale(reach)),
-//                player.getBoundingBox().inflate(reach),
-//                f -> true,
-//                reach * reach
-//        );
-//        if(hit == null) return;
-//        var target = hit.getEntity();
-//        if (target instanceof PartEntity<?> ep) {
-//            target = ep.getParent();
-//        }
-//
-//        if (!(target instanceof Mob mob)) {
-//            return;
-//        }
-//        if (!BindingManager.isBoundOrContracted(mob)) {
-//            return;
-//        }
-//
-//        if (!canBeCinnabarIdol(mob)) return;
-//
-//        if (!getHeldItem(mob).isEmpty()) {
-//            ItemEntity itementity = new ItemEntity(mob.level(),
-//                    mob.getX(0.5f), mob.getY(0.5f), mob.getZ(0.5f),
-//                    getHeldItem(mob).copy());
-//            itementity.setDefaultPickUpDelay();
-//            mob.level().addFreshEntity(itementity);
-//        }
-//        var item = event.getEntity().getItem();
-//        setHeldItem(mob, item.copy());
-//    }
+    @SubscribeEvent
+    public static void onLivingExperienceDrop(LivingExperienceDropEvent event) {
+        if (!isSummon(event.getEntity())) return;
+        event.setDroppedExperience(0);
+    }
 
     @SubscribeEvent
     public static void tryGiveItem(PlayerInteractEvent.EntityInteractSpecific event) {
@@ -650,6 +622,16 @@ public class BindingManager {
         if (!(target instanceof Mob mob)) {
             return;
         }
+
+        if (item.is(OtherverseItems.FAMILIAR_NAME_TAG.get())) {
+            var result = FamiliarManager.onNameTagClick(item, event.getEntity(), mob);
+            if (result != InteractionResult.PASS) {
+                event.setCancellationResult(result);
+                event.setCanceled(true);
+                return;
+            }
+        }
+
         if (!BindingManager.isBoundOrContracted(mob)) {
             return;
         }

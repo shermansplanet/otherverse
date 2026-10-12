@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -27,6 +28,7 @@ import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @Mod.EventBusSubscriber(modid = Otherverse.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -77,7 +79,11 @@ public class PracticeWorldManager {
     public static void levelLoad(LevelEvent.Load event) {
         if (!(event.getLevel() instanceof ServerLevel sl)) return;
         if (sl.getServer().overworld() != sl) return;
-        var smeltingRecipes = sl.getServer().getRecipeManager().getAllRecipesFor(RecipeType.SMELTING);
+        var allRecipes = sl.getServer().getRecipeManager().getRecipes();
+        var smeltingRecipes = new ArrayList<SmeltingRecipe>();
+        for(var recipe : allRecipes){
+            if(recipe instanceof SmeltingRecipe sr) smeltingRecipes.add(sr);
+        }
         SpiritLabeler.analyzeSmeltingRecipes(smeltingRecipes, sl);
         BiomeCodeAssigner.AssignBiomeCodes(sl);
         MobBindingInfluenceUtils.analyzeMobInstances(sl.getServer().overworld());

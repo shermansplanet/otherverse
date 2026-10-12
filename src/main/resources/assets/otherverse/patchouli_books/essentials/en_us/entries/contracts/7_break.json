@@ -12,7 +12,7 @@
         },
         {
             "type": "patchouli:text",        
-            "text": "Mobs with more powerful attacks will mine faster.$(br2)If a mob is holding a tool, it will use that tool to break the block.$(br2)An enderman who is not holding anything will pick up the block instead of breaking it."
+            "text": "Mobs with more powerful attacks will mine faster.$(br2)If a mob is holding a tool, it will use that tool to break the block. The tool will take damage, but $(l:otherverse:items/blood_mending)blood mending$() may help.$(br2)An enderman who is not holding anything will pick up the block instead of breaking it."
         }
     ]
 }

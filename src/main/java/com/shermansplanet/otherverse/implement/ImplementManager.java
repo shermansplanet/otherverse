@@ -17,6 +17,7 @@ import com.shermansplanet.otherverse.diagrams.IFocus;
 import com.shermansplanet.otherverse.diagrams.SelfManager;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.registries.OtherverseItems;
+import com.shermansplanet.otherverse.ruins.RuinsManager;
 import com.shermansplanet.otherverse.spirits.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -90,8 +91,6 @@ public class ImplementManager {
 
     private static AttributeModifier implementModifier = new AttributeModifier("implement_bonus", 1f / 3f, AttributeModifier.Operation.MULTIPLY_TOTAL);
     private static HashSet<String> allowedImplements = new HashSet<>();
-
-    private static final String[] preservedTags = new String[]{"Trim", "Enchantments"};
 
     static {
         durabilities.put(Items.COBBLESTONE, 64);
@@ -406,7 +405,7 @@ public class ImplementManager {
                 if (!influence.getValue().equals(focus.getPos())) continue;
                 if (!(player.level().getBlockEntity(influence.getKey()) instanceof ChalkCircle cc)) continue;
                 if (!canBeImplement(cc.getItem())) continue;
-                if (!getImplementData(player).isEmpty()) {
+                if (!getImplementData(player).isEmpty() && !player.isCreative()) {
                     SpiritAffinityTracker.decreaseAllAffinities(sp);
                 }
                 new ImplementumProcess(cc, 200, sp);
@@ -447,6 +446,14 @@ public class ImplementManager {
     @SubscribeEvent
     public static void onClickShrieker(PlayerInteractEvent.RightClickItem e) {
         shriek(e);
+    }
+
+    @SubscribeEvent
+    public static void onImplementBreak(PlayerDestroyItemEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp) || !isImplement(event.getOriginal())) return;
+        var tag = getImplementData(sp);
+        if (tag == null || !tag.getBoolean("ruins_aligned")) return;
+        RuinsManager.sendToRuins(sp);
     }
 
     public static void shriek(PlayerInteractEvent e) {
@@ -491,6 +498,22 @@ public class ImplementManager {
     }
 
     private static void addImplementTag(ItemStack item, CompoundTag playerImplementTag) {
+        if (!playerImplementTag.contains("item_tag")) {
+            addImplementTagOld(item, playerImplementTag);
+            return;
+        }
+        var itemTag = playerImplementTag.getCompound("item_tag");
+        if (itemTag.contains("hallow")) {
+            var hallowTag = itemTag.getCompound("hallow");
+            var amount = Arrays.stream(Spirits.colorSpiritTypes).anyMatch(s -> s == Spirits.spiritsByLabel.get(hallowTag.getString("spirit_type")))
+                    ? 999 : REFILL_AMOUNT;
+            hallowTag.putInt("spirit_count", amount);
+        }
+        item.setTag(itemTag);
+    }
+
+    // left in for backwards compatibility
+    private static void addImplementTagOld(ItemStack item, CompoundTag playerImplementTag) {
         var itemTag = item.getOrCreateTag();
         itemTag.putBoolean("implement", true);
         itemTag.putInt("implement_mode", 0);
@@ -504,7 +527,7 @@ public class ImplementManager {
             itemTag.put("hallow", hallowTag);
         }
         itemTag.putString("implement_spirit", playerImplementTag.getString("spirit"));
-        for (var s : preservedTags) {
+        for (var s : new String[]{"Trim", "Enchantments"}) {
             if (playerImplementTag.contains(s)) {
                 itemTag.put(s, playerImplementTag.get(s));
             }
@@ -523,11 +546,32 @@ public class ImplementManager {
         var playerImplementTag = new CompoundTag();
         if (item.is(Items.WATER_BUCKET)) item = new ItemStack(Items.BUCKET);
         playerImplementTag.putString("item", ForgeRegistries.ITEMS.getKey(item.getItem()).toString());
-        for (var s : preservedTags) {
-            if (item.hasTag() && item.getTag().contains(s)) {
-                playerImplementTag.put(s, item.getTag().get(s));
-            }
+
+        // modify item tag, this will get saved
+        var itemTag = item.getOrCreateTag();
+        itemTag.putBoolean("implement", true);
+        itemTag.putInt("implement_mode", 0);
+        if (item.getItem() instanceof DyeItem dye) {
+            var spiritType = Spirits.colorsByDye.get(dye.getDyeColor());
+            HallowHelper.addFakeEnchantment(itemTag);
+            var hallowTag = new CompoundTag();
+            hallowTag.putInt("capacity", 999);
+            hallowTag.putInt("spirit_count", 999);
+            hallowTag.putString("spirit_type", spiritType.label());
+            itemTag.put("hallow", hallowTag);
         }
+        var durability = durabilities.get(item.getItem());
+        if (item.isEdible()) {
+            durability = 9;
+        }
+        if (durability != null) {
+            itemTag.putInt("implement_max_uses", durability);
+            itemTag.putInt("implement_remaining_uses", durability);
+        }
+        if (item.isDamageableItem() && ((float) item.getDamageValue() / item.getMaxDamage() > 0.9f)) {
+            playerImplementTag.putBoolean("ruins_aligned", true);
+        }
+
         var mostSpirit = Spirits.OVERWORLD;
         if (item.hasTag() && item.getTag().contains("hallow")) {
             mostSpirit = Spirits.spiritsByLabel.get(item.getTag().getCompound("hallow").getString("spirit_type"));
@@ -550,7 +594,8 @@ public class ImplementManager {
         }
         SpiritAffinityTracker.setImplementAffinity(mostSpirit, player);
         playerImplementTag.putString("spirit", mostSpirit.label());
-        addImplementTag(item, playerImplementTag);
+        itemTag.putString("implement_spirit", mostSpirit.label());
+        playerImplementTag.put("item_tag", itemTag);
         player.getCapability(PRACTICE_HANDLER).ifPresent(practice -> practice.setImplement(playerImplementTag, player));
         CuriosApi.getCuriosInventory(player).ifPresent(inventory -> {
             var uuid = UUID.fromString("fad38921-4c76-46fe-b5fa-14a6eede9dba");
@@ -569,7 +614,7 @@ public class ImplementManager {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDeath(LivingDeathEvent event) {
-        if(event.isCanceled()) return;
+        if (event.isCanceled()) return;
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
         var hadImplement = false;
         var inventory = p.getInventory();
