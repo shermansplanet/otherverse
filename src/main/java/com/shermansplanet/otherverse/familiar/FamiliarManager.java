@@ -1557,16 +1557,18 @@ public class FamiliarManager {
         else if (familiarType.equals(EntityType.CREEPER) && (event.getSource().is(DamageTypes.EXPLOSION) || event.getSource().is(DamageTypes.PLAYER_EXPLOSION))) {
             event.setCanceled(true);
         } else if (familiarType.equals(EntityType.ENDER_DRAGON) && event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD)) {
-            var end = sp.getServer().getLevel(Level.END);
-            sp.changeDimension(end, new ITeleporter() {
-                @Override
-                public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
-                    var y = end.getMaxBuildHeight();
-                    var e = ITeleporter.super.placeEntity(entity, currentWorld, destWorld, yaw, repositionEntity);
-                    e.moveTo(0.5f, y, 0.5f);
-                    return e;
-                }
-            });
+            if(!RuinsManager.isInRuins(sp)) {
+                var end = sp.getServer().getLevel(Level.END);
+                sp.changeDimension(end, new ITeleporter() {
+                    @Override
+                    public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+                        var y = end.getMaxBuildHeight();
+                        var e = ITeleporter.super.placeEntity(entity, currentWorld, destWorld, yaw, repositionEntity);
+                        e.moveTo(0.5f, y, 0.5f);
+                        return e;
+                    }
+                });
+            }
         } else if (familiarType.equals(EntityType.FROG) && event.getSource().is(DamageTypes.FALL) && sp.getPersistentData().getBoolean("frogfall")) {
             event.setCanceled(true);
             sp.getPersistentData().putBoolean("frogfall", false);
@@ -1588,8 +1590,8 @@ public class FamiliarManager {
             var inLava = sp.serverLevel().getFluidState(BlockPos.containing(positionBelow)).getFluidType() == ForgeMod.LAVA_TYPE.get();
             if (inLava) event.setCanceled(true);
         } else if (familiarType.equals(Otherverse.GUEST.get()) && event.getSource().getEntity() instanceof LivingEntity le && sp.getLastHurtMob() != le && le.getLastHurtByMob() != sp) {
-            for (var e : sp.serverLevel().getEntities(le, le.getBoundingBox().inflate(64))) {
-                if (e instanceof Mob mob && mob.getTarget() == null) BindingManager.forceAttack(mob, le);
+            for (var e : sp.serverLevel().getEntities(le, le.getBoundingBox().inflate(32))) {
+                if (e instanceof Mob mob) BindingManager.forceAttack(mob, le);
             }
         }
     }

@@ -1,0 +1,15 @@
+{
+    "name": "Fortune",
+    "sortnum": 145,
+    "icon": "otherverse:spirit_fortune",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_fortune"
+            },
+            "text": "The riches of the earth, the value of scarce resources. Commerce and trade.$(br2)Fortune spirits are very useful in transfusion but shrines have no special effect."
+        }
+    ]
+}

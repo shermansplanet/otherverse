@@ -48,7 +48,7 @@
     "alexscaves:fissile_core": ["33 technology", "44 phlogiston"],
     "alexscaves:charred_remnant": ["11 technology"],
     "alexscaves:raygun": ["44 war","33 technology"],
-    "alexscaves:nuclear_bomb": ["66 technology", "111 phlogiston", "111 war", "44 death"],
+    "alexscaves:nuclear_bomb": ["66 technology", "222 phlogiston", "222 war", "44 death"],
 
     "alexscaves:occult_gem": ["11 fate", "33 dark", "33 fortune"],
     "alexscaves:vesper_wing": ["11 dark", "11 air"],

@@ -66,6 +66,7 @@ public class HallowHelper {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Dictionary<Block, Float> hallowMultipliers = new Hashtable<>();
+    private static long lastClick;
 
     static {
         hallowMultipliers.put(Blocks.IRON_BLOCK, 0.333f);
@@ -115,6 +116,7 @@ public class HallowHelper {
 
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
+        lastClick = 0;
         if (event.getLevel() instanceof ServerLevel sl) {
             DiagramManager.tryLoadOverworld(sl);
 
@@ -350,9 +352,9 @@ public class HallowHelper {
         toolTip.add(Component.literal("Linked to a shrine at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + (inThisDimension ? " in this dimension" : " in another dimension")));
         var spiritCount = Component.literal(String.valueOf(cc.getFirst()));
         var efficiency = getEfficiency(referencePos, pos, inThisDimension);
-        var defaultStyle = Style.EMPTY.withStrikethrough(false).withColor(0xffffff);
+        var defaultStyle = Style.EMPTY.withStrikethrough(false);
         if (efficiency < 1) {
-            spiritCount = spiritCount.withStyle(Style.EMPTY.withStrikethrough(true).withColor(0xaa4444))
+            spiritCount = spiritCount.withStyle(Style.EMPTY.withStrikethrough(true))
                     .append(Component.literal(String.valueOf(Math.round(efficiency * cc.getFirst()))).withStyle(defaultStyle));
         }
         toolTip.add(spiritCount.append(Component.literal("/" + cc.getSecond() + " " + spiritLabel + " spirits").withStyle(defaultStyle)));
@@ -397,13 +399,14 @@ public class HallowHelper {
         return false;
     }
 
-    private static long lastClick;
-
     @SubscribeEvent
     public static void makeShrine(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         var time = event.getLevel().getGameTime();
-        if (time - lastClick < 5) return;
+        if (time - lastClick < 5) {
+            lastClick = time;
+            return;
+        }
         lastClick = time;
         if (!event.getEntity().isShiftKeyDown()) return;
         if (!event.getEntity().getMainHandItem().isEmpty() || !event.getEntity().getOffhandItem().isEmpty()) return;
@@ -463,7 +466,7 @@ public class HallowHelper {
         if (blockTag == null || !blockTag.contains("spirit_type")) return;
         var blockSpiritType = Spirits.spiritsByLabel.get(blockTag.getString("spirit_type"));
         var isBucketImplement = stack.is(Items.BUCKET) && ImplementManager.isImplement(stack);
-        if (stack.is(OtherverseItems.SPIRIT_TABLET.get()) && blockTag.contains("shrine")) {
+        if (stack.is(OtherverseItems.SPIRIT_TABLET.get())) {
             stack.shrink(1);
             var newstack = new ItemStack(Spirits.spiritItems.get(blockSpiritType).get(), 1);
             newstack.getOrCreateTag().putInt("linked_position_x", event.getPos().getX());

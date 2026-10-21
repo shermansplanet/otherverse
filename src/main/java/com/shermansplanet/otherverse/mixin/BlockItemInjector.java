@@ -15,6 +15,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LiquidBlockContainer;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -43,7 +45,7 @@ public class BlockItemInjector {
                 ci.cancel();
             } else {
                 BlockState blockstate = this.getPlacementState(blockplacecontext);
-                if (blockstate != null && blockstate.getBlock() instanceof TorchBlock) {
+                if (blockstate != null && blockstate.getBlock() instanceof TorchBlock && !(blockstate.getBlock() instanceof LiquidBlockContainer)) {
                     BlockState existingState = blockplacecontext.getLevel().getBlockState(blockplacecontext.getClickedPos());
                     if (existingState.getFluidState().is(Fluids.WATER)) {
                         var player = blockplacecontext.getPlayer();

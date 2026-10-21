@@ -9,7 +9,7 @@
             "item": {
                 "item": "otherverse:spirit_tablet"
             },
-            "text": "If you use a spirit tablet on a shrine, it will become linked to that shrine. If then placed in a diagram, it will allow the diagram to interface with the linked shrine for bindings and transfusions.$(br2)As the tablet becomes further than 16 blocks from the shrine, its efficiency falters, with 50% at 555 blocks."
+            "text": "If you use a spirit tablet on a shrine or placed hallow, it will become linked to it. If then placed in a diagram, it will allow the diagram to interface with the linked hallow for bindings and transfusions.$(br2)As the tablet becomes further than 16 blocks from the hallow, its efficiency falters, with 50% at 555 blocks."
         },
         {
             "type": "patchouli:text",

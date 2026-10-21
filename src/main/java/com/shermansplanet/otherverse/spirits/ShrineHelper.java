@@ -414,6 +414,7 @@ public class ShrineHelper {
             @Override
             public int overflowBlock(BlockPos pos, Level level, int amount, boolean simulate) {
                 if (amount < 33) return 0;
+                amount = Math.min(amount, 333);
                 if (!isBlockExplodable(level, pos, level.getBlockState(pos))) return 0;
                 var extra = (amount / 33);
                 if (!simulate && level instanceof ServerLevel sl) {

@@ -6,11 +6,11 @@
     "pages": [
         {
             "type": "patchouli:text",
-            "text": "If you beat a mob to death with a mending book, the act of violence will warp the book itself, turning the enchantment into blood mending. If an item with this enchantment drops beneath 2/3 durability, it will consume the health of its wielder to repair itself."
+            "text": "If you beat a mob with at least 20 max HP to death with a mending book, the act of violence will warp the book itself, turning the enchantment into blood mending. If an item with this enchantment drops beneath 2/3 durability, it will consume the health of its wielder to repair itself."
         },
         {
             "type": "patchouli:text",
-            "text": "This is very useful for items that bound mobs will be using - so long as the mob's health is topped up via its binding, its tool will never break."
+            "text": "This is very useful for items that bound mobs will be using; so long as the mob's health is topped up via its binding, its tool will never break."
         }
     ]
 }

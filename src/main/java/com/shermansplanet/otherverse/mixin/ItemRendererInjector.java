@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.ClientEvents;
 import com.shermansplanet.otherverse.familiar.MobRetexturer;
 import com.shermansplanet.otherverse.spirits.HallowTextureManager;
@@ -183,7 +184,7 @@ public class ItemRendererInjector {
         if (stack.isEmpty() || !stack.hasTag() || !stack.getTag().contains("hallow") || stack.is(Items.TRIDENT)) return;
 
         var spiritType = stack.getTag().getCompound("hallow").getString("spirit_type");
-        if(spiritType.isEmpty()) return;
+        if (spiritType.isEmpty()) return;
 
         var model = modelReplacements.computeIfAbsent(stack.getItem(), t -> new HashMap<>())
                 .computeIfAbsent(spiritType, t -> getModel(stack.getItem(), t));
@@ -240,17 +241,17 @@ public class ItemRendererInjector {
         Set<BlockModel> blockModels = new HashSet<>();
         HallowTextureManager.GetBlockModels(model, blockModels);
 
-        for(BlockModel blockModel : blockModels) {
+        for (BlockModel blockModel : blockModels) {
             for (var s : blockModel.textureMap.keySet()) {
                 Material material = blockModel.getMaterial(s);
                 if (MissingTextureAtlasSprite.getLocation().equals(material.texture())) continue;
                 var rl = ResourceLocation.fromNamespaceAndPath(material.texture().getNamespace(),
                         "textures/" + material.texture().getPath() + ".png");
-                if(locations.contains(rl)) continue;
+                if (locations.contains(rl)) continue;
                 locations.add(rl);
             }
         }
-        if(locations.isEmpty()) return null;
+        if (locations.isEmpty()) return null;
         var primaryTex = MobRetexturer.makeSpiritVariant(locations, spiritName);
         if (primaryTex == null) {
             return null;
@@ -264,21 +265,26 @@ public class ItemRendererInjector {
         }
 
         ClientEvents.HALLOW_TEXTURE_MANAGER.quietReload();
-        BakedModel m = model.bake(DUMMY_BAKER, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex.getFirst(), x), BlockModelRotation.X0_Y0, modelLocation);
 
-        var compState = RenderType.CompositeState.builder()
-                .setShaderState(RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER)
-                .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst().loc(), false, false))
-                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                .setOutputState(ITEM_ENTITY_TARGET)
-                .setLightmapState(LIGHTMAP)
-                .setOverlayState(OVERLAY)
-                .setWriteMaskState(COLOR_DEPTH_WRITE)
-                .createCompositeState(true);
+        try {
+            BakedModel m = model.bake(DUMMY_BAKER, x -> ClientEvents.HALLOW_TEXTURE_MANAGER.getSpritePublic(primaryTex.getFirst(), x), BlockModelRotation.X0_Y0, modelLocation);
+            var compState = RenderType.CompositeState.builder()
+                    .setShaderState(RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER)
+                    .setTextureState(new RenderStateShard.TextureStateShard(primaryTex.getFirst().loc(), false, false))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setOutputState(ITEM_ENTITY_TARGET)
+                    .setLightmapState(LIGHTMAP)
+                    .setOverlayState(OVERLAY)
+                    .setWriteMaskState(COLOR_DEPTH_WRITE)
+                    .createCompositeState(true);
 
-        var key = "hallow_item_" + itemKey.getNamespace() + "_" + itemKey.getPath() + "_" + spiritName;
-        var rt = RenderType.create(key, DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compState);
+            var key = "hallow_item_" + itemKey.getNamespace() + "_" + itemKey.getPath() + "_" + spiritName;
+            var rt = RenderType.create(key, DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compState);
 
-        return Pair.of(m, rt);
+            return Pair.of(m, rt);
+        } catch (Exception exception) {
+            LogUtils.getLogger().warn("Caught exception while trying to bake {} hallow texture for {}!\n" + exception, spiritName, itemKey);
+            return null;
+        }
     }
 }

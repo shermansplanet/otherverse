@@ -2,6 +2,7 @@ package com.shermansplanet.otherverse.sympathy;
 
 import com.mojang.logging.LogUtils;
 import com.shermansplanet.otherverse.Otherverse;
+import com.shermansplanet.otherverse.binding.BindingManager;
 import com.shermansplanet.otherverse.diagrams.ChalkCircle;
 import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.diagrams.IFocus;
@@ -36,6 +37,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -48,6 +50,8 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import java.util.*;
 
@@ -87,12 +91,35 @@ public class SympathyManager {
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp)) return;
-        if (sp.serverLevel().getGameTime() % 20 == 0) {
+        if (sp.level().getGameTime() % 20 == 0) {
             if (sp.getHealth() <= 1) return;
             for (var stack : sp.getInventory().items) {
                 tryBloodMend(sp, stack);
                 if (sp.getHealth() <= 1) return;
             }
+            var curioInv = CuriosApi.getCuriosInventory(sp);
+            if (curioInv.isPresent()) {
+                for (Map.Entry<String, ICurioStacksHandler> entry : curioInv.resolve().get().getCurios().entrySet()) {
+                    ICurioStacksHandler curioInventory = entry.getValue();
+                    var stacks = curioInventory.getStacks();
+                    for (var i = 0; i < stacks.getSlots(); i++) {
+                        tryBloodMend(sp, stacks.getStackInSlot(i));
+                        if (sp.getHealth() <= 1) return;
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMobTick(LivingEvent.LivingTickEvent event) {
+        if (!(event.getEntity() instanceof Mob mob) || !(mob.level() instanceof ServerLevel sl)) return;
+        if (sl.getGameTime() % 60 != Math.abs(mob.getId()) % 60) return;
+        if(BindingManager.isBoundOrContracted(mob)) return;
+        if (mob.getHealth() <= 1) return;
+        for (var stack : mob.getAllSlots()) {
+            tryBloodMend(mob, stack);
+            if (mob.getHealth() <= 1) return;
         }
     }
 
@@ -246,8 +273,8 @@ public class SympathyManager {
                 return delta;
             }
         }
-        BlockPos spindlePos = null;
-        if (hallowFocus.isBlock()) {
+        BlockPos spindlePos = hallowFocus.getDiagram().influences.get(hallowPos);
+        if (spindlePos == null && hallowFocus.isBlock()) {
             for (var otherHallowPos : ShrineHelper.getAllHallows(hallowPos, Spirits.FATE, data)) {
                 var blockFocus = data.allBlockFoci.get(otherHallowPos);
                 if (blockFocus == null || blockFocus.getDiagram() == null) continue;
