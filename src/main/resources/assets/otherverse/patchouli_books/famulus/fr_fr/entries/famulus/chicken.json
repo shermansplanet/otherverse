@@ -1,0 +1,12 @@
+{
+    "name": "Poule",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'chicken'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier poule vous fera tomber lentement, sauf si vous êtes accroupi. De plus, chaque œuf que vous lancez donnera une poule, mais ces poules disparaîtront dès que vous vous éloignerez trop."
+        }
+    ]
+}

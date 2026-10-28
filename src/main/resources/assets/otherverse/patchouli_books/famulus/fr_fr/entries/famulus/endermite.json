@@ -1,0 +1,12 @@
+{
+    "name": "Endermite",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'endermite'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si votre inventaire contient une perle de l'Ender, un Familier endermite vous accordera un essaim d'endermites qui vous suivent et attaquent tout ce que vous attaquez. Ces endermites disparaissent si vous vous éloignez trop."
+        }
+    ]
+}

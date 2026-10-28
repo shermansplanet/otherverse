@@ -1,0 +1,24 @@
+{
+    "name": "Avantages du Familier",
+    "sortnum": 1,
+    "icon": "otherverse:familiar_name_tag",
+    "category": "otherverse:famulus_general",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Votre Familier est désormais inextricablement lié à vous, et n'a plus besoin de diagramme de liaison. Lorsque vous appuyez sur la touche du Familier (« r » par défaut), vous l'invoquez à vos côtés où qu'il se trouve. Vous pouvez même ainsi ramener votre Familier d'entre les morts, mais il y a un prix à payer. S'il est invoqué dans un petit espace, votre Familier rétrécira pour y tenir."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Vous pouvez donner des contrats à votre Familier comme s'il s'agissait d'une créature liée.$(br2)Les Familiers aquatiques ne suffoquent pas sur terre, et les Familiers sensibles au soleil ne brûlent pas à la lumière du jour. Les Familiers sont immunisés contre la zombification.$(br2)Si votre Familier se trouve dans un tronçon chargé, ses couleurs influenceront votre apparence dans la Vue."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si votre Familier résiste au feu, vous gagnerez une immunité permanente au feu, mais l'eau vous blessera sans potion de résistance à l'eau. Porter un casque vous protégera en grande partie de la pluie.$(br2)Les Familiers aquatiques confèrent une respiration aquatique permanente.$(br2)Les Familiers volants confèrent diverses formes de vol, décrites dans leurs sections."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si votre Familier a un type d'esprit, vous gagnerez de façon permanente une affinité pour ce type d'esprit et en perdrez pour son opposé. Les homoncules et les golems créés par la Pratique sont respectivement de type Chair et Technologie. Consultez la section « Affinité spirituelle » des Essentiels pour plus d'informations sur les affinités spirituelles et une liste des types d'esprits opposés."
+        }
+    ]
+}

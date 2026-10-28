@@ -1,0 +1,19 @@
+{
+    "name": "Sanctuaires dimensionnels",
+    "sortnum": 165,
+    "icon": "otherverse:spirit_overworld",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:biome_brazier"
+            },
+            "text": "Si vous placez un brasero de biome à portée d'un sanctuaire de votre dimension actuelle (surface/nether/end), vous pouvez l'allumer avec la matière première de cette dimension (sel/soufre/vif-argent) et il maintiendra son tronçon chargé."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Cela coûte 9 esprits au sanctuaire à l'allumage, puis 9 de plus à chaque lever du soleil.$(br2)Pour les dimensions moddées, utilisez un sanctuaire de la surface et du cinabre.$(br2)Les portées des sanctuaires sont $(bold)centrées.$()"
+        }
+    ]
+}

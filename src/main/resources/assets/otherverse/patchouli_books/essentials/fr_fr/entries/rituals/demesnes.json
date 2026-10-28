@@ -1,0 +1,18 @@
+{
+    "name": "Domaines",
+    "icon": "otherverse:demesne_beacon",
+    "category": "otherverse:rituals",
+    "sortnum": 3,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Domaines",
+            "text": "Le rituel des Domaines vous permet de revendiquer un ensemble de tronçons comme $(bold)Domaine :$() une zone qui vous appartient irrévocablement, dans laquelle vous pouvez plier les règles de la magie et de la réalité à votre volonté."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:demesnes",
+            "text": "Vous trouverez plus d'informations sur la revendication d'un Domaine et son amélioration dans le livre des Domaines."
+        }
+    ]
+}

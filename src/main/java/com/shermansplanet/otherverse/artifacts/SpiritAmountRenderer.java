@@ -11,6 +11,7 @@ import com.shermansplanet.otherverse.diagrams.DiagramManager;
 import com.shermansplanet.otherverse.familiar.FamiliarManager;
 import com.shermansplanet.otherverse.ruins.MemorySnareBlockEntity;
 import com.shermansplanet.otherverse.spirits.HallowHelper;
+import com.shermansplanet.otherverse.spirits.SpiritType;
 import com.shermansplanet.otherverse.spirits.Spirits;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -91,7 +92,7 @@ public class SpiritAmountRenderer {
             }
             if (blockEntity instanceof MemorySnareBlockEntity snare) {
                 labelTextLines = new MutableComponent[]{
-                        Component.literal("Stored XP: " + snare.storedExperience)
+                        Component.translatable("otherverse.label.stored_xp", snare.storedExperience)
                 };
                 shouldRenderLabel = true;
                 return;
@@ -100,7 +101,7 @@ public class SpiritAmountRenderer {
             var sympathyPosition = data.getSympathyPosition(labelPosition.toString());
             if (sympathyPosition != null) {
                 labelTextLines = new MutableComponent[]{
-                        Component.literal("Bound to (" + sympathyPosition.getX() + ", " + sympathyPosition.getY() + ", " + sympathyPosition.getZ() + ")")
+                        Component.translatable("otherverse.label.bound_to", sympathyPosition.getX(), sympathyPosition.getY(), sympathyPosition.getZ())
                 };
                 shouldRenderLabel = true;
                 return;
@@ -110,9 +111,9 @@ public class SpiritAmountRenderer {
             var typeString = tag.getString("spirit_type");
             var countAndCapacity = HallowHelper.getShrineSpiritCountAndCapacity(lvl, blockPos, Spirits.spiritsByLabel.get(typeString));
             labelTextLines = new MutableComponent[]{
-                    Component.literal(tag.contains("shrine") ? "Shrine:" : "Hallow:"),
-                    Component.literal(countAndCapacity.getFirst() + "/"
-                            + countAndCapacity.getSecond() + " " + typeString)
+                    Component.translatable(tag.contains("shrine") ? "otherverse.label.shrine" : "otherverse.label.hallow"),
+                    Component.translatable("otherverse.tooltip.hallow_contents", countAndCapacity.getFirst(),
+                            countAndCapacity.getSecond(), SpiritType.getDisplayName(typeString))
             };
             shouldRenderLabel = true;
         } else if (hit.getType() == HitResult.Type.ENTITY) {
@@ -121,15 +122,15 @@ public class SpiritAmountRenderer {
             var name = (entity.hasCustomName() ? entity.getCustomName() : entity.getType().getDescription()).copy();
             if (le.getPersistentData().contains("construct_type")) {
                 if (le.getPersistentData().getString("construct_type").equals("flesh")) {
-                    name = name.append(" Homunculus");
+                    name = Component.translatable("otherverse.label.homunculus", name);
                 } else if (le.getPersistentData().getString("construct_type").equals("technology")) {
-                    name = name.append(" Golem");
+                    name = Component.translatable("otherverse.label.golem", name);
                 }
             }
             var bindingInfo = BindingRenderer.getBindingInfo(le);
             try {
-                var mainLine = name.append(Component.literal(" (" + (int) (le.getHealth()) + "/" + (int) le.getMaxHealth() + ")"));
-                labelTextLines = bindingInfo.isEmpty() ? new MutableComponent[]{mainLine} : new MutableComponent[]{mainLine, Component.literal(bindingInfo)};
+                var mainLine = Component.translatable("otherverse.label.mob_health", name, (int) (le.getHealth()), (int) le.getMaxHealth());
+                labelTextLines = bindingInfo == null ? new MutableComponent[]{mainLine} : new MutableComponent[]{mainLine, bindingInfo};
             } catch (Exception e) {
                 return;
             }

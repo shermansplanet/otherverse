@@ -1,0 +1,16 @@
+{
+    "name": "Teinture",
+    "sortnum": 50,
+    "icon": "minecraft:gray_dye",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "tag": "forge:dyes"
+            },
+            "title": "Teinture",
+            "text": "Un Instrument teinture deviendra une source quasi illimitée d'esprits de sa couleur, et peut être utilisé sur n'importe quel bloc coloré pour en changer la couleur.$(br2)Utilisez la touche de l'Instrument pour recharger votre Instrument."
+        }
+    ]
+}

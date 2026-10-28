@@ -1,0 +1,16 @@
+{
+    "name": "Le Soi",
+    "sortnum": 8,
+    "icon": "otherverse:self",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Il existe de nombreuses façons d'alimenter des diagrammes, mais au début, vous n'avez d'autre choix que de puiser dans votre $(bold)Soi$() : l'essence qui fait que vous êtes $(italic)vous$() et qui vous fait tenir. Il s'ensuit que le déposer dans un diagramme a des... effets indésirables. Vous récupérez un peu de Soi à chaque lever du soleil, et le récupérez entièrement lorsque vous obtenez un Progrès."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Pour placer une partie de votre Soi dans un diagramme, faites un clic droit accroupi sur un foyer d'objet, la main vide. Les foyers d'objet peuvent contenir jusqu'à 7 de Soi.$(br2)Le Soi est une source de puissance polyvalente, et tentera d'alimenter tout foyer qu'il influence."
+        }
+    ]
+}

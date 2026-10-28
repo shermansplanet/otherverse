@@ -1,0 +1,16 @@
+{
+    "name": "Horloge",
+    "sortnum": 65,
+    "icon": "minecraft:clock",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:clock"
+            },
+            "title": "Horloge",
+            "text": "Un Instrument horloge peut être utilisé pour figer tout ce qui vous entoure pendant dix secondes. Cela consume l'Instrument ; vous devez dépenser un Soi pour le restaurer avant de pouvoir le réutiliser."
+        }
+    ]
+}

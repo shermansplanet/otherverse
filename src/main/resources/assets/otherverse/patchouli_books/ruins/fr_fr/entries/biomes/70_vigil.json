@@ -1,0 +1,17 @@
+{
+    "name": "Veille",
+    "sortnum": 70,
+    "icon": "minecraft:red_nether_bricks",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Veille",
+            "text": "La Veille est un labyrinthe perfide de pièges qui exige une vigilance constante. Des îles flottantes font tomber des enclumes et des stalactites sur ceux qui passent en dessous. Des $(bold)briques du Nether à redstone$() spéciales, à peine différentes des briques rouges du Nether ordinaires, peuvent déclencher de la TNT cachée si l'on marche dessus."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Et même si vous échappez aux explosions, elles attireront l'attention de phantoms typhlotiques appelés $(bold)banshees$(). Les banshees se contentent normalement de planer au-dessus de la Veille en ignorant les joueurs, mais quelque chose d'aussi bruyant et spectaculaire qu'une explosion attisera leur courroux - et ce n'est $(italic)pas$() un endroit où vous voulez être projeté d'un rebord."
+        }
+    ]
+}

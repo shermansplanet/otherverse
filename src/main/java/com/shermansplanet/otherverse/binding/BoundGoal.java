@@ -150,15 +150,14 @@ public class BoundGoal extends Goal {
         var name = (mob.hasCustomName() ? mob.getCustomName() : mob.getType().getDescription()).copy();
         var atk = mob.getAttribute(Attributes.ATTACK_DAMAGE);
         var s = switch (currentMode) {
-            case 0 -> " is now obeying its contract.";
-            case 1 -> " is now following you"
-                    + ((atk == null || atk.getValue() < 0.5f) ? "." : " and attacking your enemies.");
-            case 2 -> " is now staying put.";
+            case 0 -> "otherverse.familiar_mode.contract";
+            case 1 -> (atk == null || atk.getValue() < 0.5f) ? "otherverse.familiar_mode.follow" : "otherverse.familiar_mode.follow_attack";
+            case 2 -> "otherverse.familiar_mode.stay";
             default -> throw new IllegalStateException("Unexpected value: " + currentMode);
         };
         getPractitioner();
         if (practitioner != null) {
-            practitioner.displayClientMessage(name.append(Component.literal(s)), true);
+            practitioner.displayClientMessage(Component.translatable(s, name), true);
         }
     }
 

@@ -1,0 +1,20 @@
+{
+    "name": "Action : Attaquer",
+    "icon": "minecraft:wooden_sword",
+    "category": "otherverse:contracts",
+    "sortnum": 90,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "tag": "minecraft:swords"
+            },
+            "title": "Attaquer",
+            "text": "Une épée en tant qu'objet désigne l'action « attaquer ». Les influences d'objet limitent les cibles potentielles aux créatures qui laissent tomber l'un de ces objets.$(br2)Les influences de bloc sont des filtres plus généraux : botte de foin pour les créatures passives, cible pour les créatures hostiles, et établi pour les joueurs."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Pour la plupart des créatures à attaques à distance, une influence de bloc vide désigne une position vers laquelle elles tireront régulièrement."
+        }
+    ]
+}

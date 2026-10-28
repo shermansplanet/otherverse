@@ -66,7 +66,7 @@ public class DemesnesClaimRitual {
 
     private void makeEvent() {
         demesnesEvent = new ServerBossEvent(
-                Component.literal(claimant.getGameProfile().getName() + "'s Demesnes Claim"),
+                Component.translatable("otherverse.demesne_claim.boss_bar", claimant.getGameProfile().getName()),
                 BossEvent.BossBarColor.GREEN, BossEvent.BossBarOverlay.PROGRESS);
         demesnesEvent.setProgress(0f);
         demesnesEvent.setVisible(true);
@@ -86,7 +86,7 @@ public class DemesnesClaimRitual {
             return;
         }
         if (!ritualBounds.contains(claimant.position())) {
-            claimant.displayClientMessage(Component.literal("By leaving the Claimed area during the ritual, you forfeit your Claim."), false);
+            claimant.displayClientMessage(Component.translatable("otherverse.demesne_claim.forfeit"), false);
             abandon();
             return;
         }

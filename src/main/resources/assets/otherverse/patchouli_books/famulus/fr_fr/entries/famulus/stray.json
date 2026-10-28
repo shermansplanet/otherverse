@@ -1,0 +1,12 @@
+{
+    "name": "Vagabond",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'stray'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier vagabond fera que toutes vos attaques infligent de la lenteur."
+        }
+    ]
+}

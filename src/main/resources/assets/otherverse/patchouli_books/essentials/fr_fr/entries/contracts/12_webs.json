@@ -1,0 +1,33 @@
+{
+    "name": "Toiles et fuseaux",
+    "icon": "otherverse:spindle_light_gray",
+    "category": "otherverse:contracts",
+    "sortnum": 120,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Pour certaines actions, une influence de bloc vide peut inscrire une référence à sa propre position dans un contrat. Mais il est souvent utile de faire référence à une position hors du diagramme, voire de changer cette position à la volée. C'est là qu'interviennent les Toiles du Destin et les fuseaux."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:web_of_fate"
+            },
+            "title": "Toiles du Destin",
+            "text": "Une $(bold)Toile du Destin$() se crée en transfusant des esprits du destin dans une toile d'araignée.$(br2)Elle peut être placée dans un foyer de bloc d'un diagramme de contrat, partout où une position est définie. Par exemple, une Toile du Destin pourrait influencer une action « aller »."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:spindle",
+            "text": "Les fuseaux peuvent être fabriqués puis imprégnés d'esprits de couleur pour changer leur couleur. Utiliser un fuseau sur une Toile du Destin donnera à la toile la même couleur que le fuseau."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsque vous créez un contrat avec une Toile du Destin, vous verrez une variable (votre nom + la couleur de la toile) au lieu d'un emplacement.$(br2)Vous pouvez utiliser un fuseau de cette couleur sur un bloc pour mettre à jour cet emplacement quand vous le souhaitez, ou l'utiliser dans le vide pour effacer l'emplacement. Votre Vue révélera tous les emplacements que vous avez définis."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Cliquer sur une Toile du Destin avec un fuseau en maintenant Maj inscrira plutôt dans la Toile la cible $(italic)actuelle$() du fuseau. Cette position ne sera pas mise à jour lorsque vous utiliserez le fuseau."
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "name": "Misère",
+    "sortnum": 10,
+    "icon": "minecraft:mud",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Misère",
+            "text": "La Misère est sombre et oppressante, sous un déluge éternel de pluie qui s'accumule dans des citernes naturelles circulaires. Méfiez-vous de l'eau en ce lieu : une fois que vous y entrez, elle vous attire vers le fond et vous ne pourrez plus remonter respirer."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les bêtes typhlotiques de la Misère s'appellent les $(bold)pénombres$(). Ces méduses sont sensibles aux courants alchimiques, et fondront sur vous avec leurs tentacules urticants si vous avez des effets de potion visibles (des effets qui émettent des particules)."
+        }
+    ]
+}

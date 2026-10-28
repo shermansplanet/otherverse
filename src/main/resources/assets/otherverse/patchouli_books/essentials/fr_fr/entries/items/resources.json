@@ -1,0 +1,36 @@
+{
+    "name": "Primordiaux dimensionnels",
+    "sortnum": 1,
+    "icon": "otherverse:cinnabar",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Le sel, le soufre et le vif-argent sont des substances naturellement en harmonie avec leurs dimensions d'origine : respectivement la Surface, le Nether et l'End. Leur principal usage est la $(l:otherverse:binding/fleshbinding)liaison charnelle$(). Le sel, brandi ou lancé, est mortel pour les vex."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/resources_1.png"
+            ],
+            "text": "On trouve du sel au fond des océans de la Surface."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/resources_2.png"
+            ],
+            "text": "On trouve du soufre sous forme de minerai dans le Nether."
+        },
+        {
+            "type": "patchouli:smelting",
+            "recipe": "otherverse:quicksilver",
+            "text": "Le vif-argent ne se trouve qu'à l'état de traces dans l'End, mais heureusement, les endermen le concentrent naturellement dans leurs perles."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:cinnabar",
+            "text": "Les trois Primordiaux peuvent être combinés en cinabre, qui sert à fabriquer des autels d'apparition et des tablettes spirituelles. Les blocs de cinabre permettent de $(l:otherverse:binding/fleshbinding#cinnabar)transporter facilement les créatures liées$()."
+        }
+    ]
+}

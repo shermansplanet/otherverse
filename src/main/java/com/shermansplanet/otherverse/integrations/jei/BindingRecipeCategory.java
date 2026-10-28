@@ -164,7 +164,7 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
         graphics.drawString(mc.font, heartstring, 28, 12, 0x333333, false);
 
         int color = 0x333333;
-        var startstring = "Negative:";
+        Component startstring = Component.translatable("otherverse.jei.binding.negative");
         int x = 47;
         var h = columns * 30 + 25;
         var isPositive = false;
@@ -185,12 +185,12 @@ public class BindingRecipeCategory implements IRecipeCategory<BindingRecipe> {
             if (BindingManager.drainsBindings(recipe.entityType, isPositive)) {
                 x += (s.length() + 1) * 6 + 2;
                 icon2.draw(graphics, x, h);
-                s = BindingManager.getSpiritDrain(hp) + "/" + BindingManager.getBindingWearInterval(hp, isPositive) + "s";
-                graphics.drawString(mc.font, s, x + 8, h, color, false);
+                var drain = Component.translatable("otherverse.jei.binding.drain", BindingManager.getSpiritDrain(hp), BindingManager.getBindingWearInterval(hp, isPositive));
+                graphics.drawString(mc.font, drain, x + 8, h, color, false);
             }
 
             h += 12;
-            startstring = "Positive:";
+            startstring = Component.translatable("otherverse.jei.binding.positive");
             x = 47;
             isPositive = true;
             icon1 = heartIcon;

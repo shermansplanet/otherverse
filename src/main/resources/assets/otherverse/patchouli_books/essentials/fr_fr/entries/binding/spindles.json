@@ -1,0 +1,19 @@
+{
+    "name": "Fuseaux sanglants",
+    "sortnum": 35,
+    "icon": "otherverse:spindle_bloody",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spindle_bloody"
+            },
+            "text": "Si vous utilisez un fuseau pour infliger des dégâts, il deviendra un fuseau sanglant, et conservera un lien Sympathique avec la créature qu'il a blessée.$(br2)Si cette créature est liée, le fuseau peut être utilisé dans des diagrammes comme s'il était cette créature (tant que la créature se trouve dans un tronçon chargé)."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si vous donnez un fuseau sanglant à une créature liée, celle-ci tentera de maîtriser et d'entraver la cible du fuseau. Tant que la cible a plus de la moitié de la santé de la créature liée, celle-ci attaquera la cible. Sinon, elle entravera la cible et la traînera lentement vers vous.$(br2)Jeter un fuseau sanglant dans l'eau le lavera de son sang."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Hoglin",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'hoglin'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier hoglin vous donne une bien meilleure résistance au recul, et vos attaques projetteront les ennemis dans les airs - plus l'attaque est forte, plus ils sont projetés haut."
+        }
+    ]
+}

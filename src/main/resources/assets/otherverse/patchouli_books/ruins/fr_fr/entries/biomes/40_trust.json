@@ -1,0 +1,17 @@
+{
+    "name": "Confiance",
+    "sortnum": 40,
+    "icon": "minecraft:stripped_cherry_wood",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Confiance",
+            "text": "La Confiance est sereine et accueillante, jusqu'à ce que vous enfreigniez ses lois de l'Hospitalité. Elle est peuplée d'endermen typhlotiques appelés $(bold)invités$(). L'Hospitalité les empêche d'attaquer, mais ils peuvent tout de même sentir un contact visuel et s'approcheront paisiblement de vous si vous les regardez."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les règles de la Confiance sont les suivantes :$(br2)Ne blessez pas un invité.$(br2)Ne cueillez pas les fleurs et n'abattez pas les arbres qui poussent ici.$(br2)Partagez vos repas ; ne mangez pas à moins d'avoir donné de la nourriture à un invité dans la minute précédente.$(br2)Si vous enfreignez l'une de ces lois, les invités ont la permission de vous attaquer, et ils le feront."
+        }
+    ]
+}

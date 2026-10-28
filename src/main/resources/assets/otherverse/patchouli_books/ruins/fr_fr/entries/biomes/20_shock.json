@@ -1,0 +1,17 @@
+{
+    "name": "Choc",
+    "sortnum": 20,
+    "icon": "minecraft:soul_sand",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Choc",
+            "text": "Le Choc est violent et stressant, sans doute la zone la moins agréable des Ruines. Mieux vaut rester en mouvement ici : plus vous vous déplacez lentement, plus le ciel s'assombrit, et la foudre frappera de plus en plus près. Ce qui n'est pas facile, car le sable des âmes recouvre la majeure partie du sol."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les bêtes typhlotiques du Choc s'appellent les $(bold)éteigneurs$(). Comme les renifleurs, ils ont un odorat très aiguisé, et suivront votre piste olfactive à travers leur biome natal, convergeant de loin vers les endroits où vous êtes passé. S'il est frappé par la foudre, un éteigneur obtient un bonus de vitesse bref mais intense."
+        }
+    ]
+}

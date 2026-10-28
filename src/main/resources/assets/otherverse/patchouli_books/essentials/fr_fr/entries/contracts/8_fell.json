@@ -1,0 +1,16 @@
+{
+    "name": "Action : Abattre",
+    "icon": "minecraft:wooden_axe",
+    "category": "otherverse:contracts",
+    "sortnum": 80,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "tag": "minecraft:axes"
+            },
+            "title": "Abattre",
+            "text": "Une hache en tant qu'objet désigne l'action « abattre ».$(br2)Elle fonctionne exactement comme « casser », sauf qu'en ciblant une bûche, elle cassera une à une toutes les bûches qui y sont rattachées. Sans filtre, elle cible n'importe quelle bûche."
+        }
+    ]
+}

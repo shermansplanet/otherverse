@@ -1,0 +1,12 @@
+{
+    "name": "Warden",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'warden'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier warden vous donnera une force et une robustesse accrues dans l'obscurité, mais la lumière directe du soleil vous aveuglera. Si un reliquaire contient au moins 13 esprits d'obscurité, vous pouvez faire un clic droit en le tenant pour libérer ces esprits sous forme d'une puissante attaque sonique."
+        }
+    ]
+}

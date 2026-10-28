@@ -1,0 +1,20 @@
+{
+    "name": "Seau vide",
+    "sortnum": 70,
+    "icon": "minecraft:bucket",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:bucket"
+            },
+            "title": "Seau vide",
+            "text": "Un Instrument seau vide augmentera d'un tiers la capacité de tous les reliquaires que vous créez. Les capacités mises à jour seront reflétées dans JEI. Le bloc situé sous le reliquaire lors de sa création multipliera toujours ce nombre de base comme d'habitude.$(br2)Bien que les seaux ne contiennent pas d'esprits de technologie, il comptera comme un Instrument de technologie."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Un Instrument seau est un reliquaire universel, qui peut accepter des esprits de n'importe quel type lorsqu'il est vide. Il ramasse aussi les fluides sous forme d'esprits. Comme tout reliquaire, il peut être utilisé sur des blocs pour les transfuser, ou sur des blocs-reliquaires pour transférer des esprits.$(br2)Comme indiqué dans la section Bloc, un Instrument seau de lave placera de la lave comme un bloc Instrument, et ne compte pas comme un Instrument seau vide."
+        }
+    ]
+}

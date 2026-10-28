@@ -1,6 +1,6 @@
 {
-    "name": "The Ruins",
-    "landing_text": "A guide to the Ruins dimension.",
+    "name": "otherverse.book.ruins.name",
+    "landing_text": "otherverse.book.ruins.landing_text",
     "version": 3,
     "model" : "otherverse:ruins",
     "show_progress" : false,

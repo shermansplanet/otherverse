@@ -1,0 +1,12 @@
+{
+    "name": "Squelette",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'skeleton'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous avez un Familier squelette, les flèches que vous tirez ne seront pas consommées, même si votre arc n'a pas l'enchantement Infinité."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Loup",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'wolf'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier loup invoquera à vos côtés une meute temporaire de loups loyaux, tant que vous avez un os dans votre inventaire. Plus la lune est pleine, plus les loups seront nombreux. Les nuits de pleine lune, vos propres capacités seront elles aussi grandement renforcées."
+        }
+    ]
+}

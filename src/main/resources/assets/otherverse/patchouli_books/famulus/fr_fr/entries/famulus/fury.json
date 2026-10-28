@@ -1,0 +1,12 @@
+{
+    "name": "Furie",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'fury'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier furie peut rediriger la rage. Lorsque vous l'invoquez, tous les ennemis qui vous ciblaient ciblent désormais votre Familier. Il vous donnera aussi un vol créatif lent dans les Ruines."
+        }
+    ]
+}

@@ -1,0 +1,62 @@
+{
+    "name": "Structure des contrats",
+    "icon": "minecraft:orange_dye",
+    "category": "otherverse:contracts",
+    "sortnum": 20,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Une créature tentera d'effectuer n'importe quelle action possible influençant son contrat racine. Cette liste peut contenir n'importe quel nombre d'actions. Elle les vérifie dans l'ordre affiché dans l'infobulle, qui est déterminé par la position des foyers. Si vous regardez votre diagramme d'en haut en faisant face au nord, cet ordre va de haut en bas, puis de gauche à droite."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_10.png"
+            ],
+            "text": "Si une créature avec ce contrat n'a aucun objet à déposer, elle cherchera des objets à prendre."
+        },
+        {
+            "title": "Replis",
+            "type": "patchouli:text",
+            "text": "Mais parfois, on veut mieux contrôler les priorités. De la teinture orange peut être placée de façon à influencer un contrat, comme s'il s'agissait d'une action. Elle désigne un $(bold)repli$() : si aucune des autres actions n'est possible, la créature choisit parmi toutes les actions influençant la teinture (comme si la teinture était le contrat)."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_4.png"
+            ],
+            "text": "aller(sable), repli(aller(sable rouge))."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Cela peut être imbriqué autant de fois que voulu pour créer un ordre de priorité explicite (par ex. « va vers le sable si possible ; sinon, va vers le sable rouge ; si tu ne peux pas, va vers le sable des âmes »).$(br2)Si un ensemble d'actions n'a pas de repli et qu'aucune n'est possible, la logique recommence depuis le contrat de base."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_6.png"
+            ],
+            "text": "aller(sable), repli(aller(sable rouge), repli(aller(sable des âmes)))."
+        },
+        {
+            "title": "Conditions",
+            "type": "patchouli:text",
+            "text": "Si de la teinture rouge, jaune et/ou verte influence une action et est elle-même influencée par des actions, elle devient le nouveau « décideur » lorsque l'action qu'elle influence réussit (vert), échoue (rouge), ou l'un ou l'autre (jaune).$(br2)Ce diagramme fait marcher une créature éternellement entre le sable et le sable rouge."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_5.png"
+            ],
+            "text": "aller(sable, succès(aller(sable rouge)))."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "En résumé : un $(italic)repli$() (teinture orange utilisée comme action) s'active si aucune des actions voisines n'est possible, par ex. s'il n'y a pas de sable vers lequel marcher. Il est placé comme s'il s'agissait d'une action, en influençant le contrat racine ou une autre teinture."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Une $(italic)condition$() (teinture verte/jaune/rouge) s'active lorsque son action parente se termine, par ex. lorsqu'une créature a atteint le sable ou que le sable est devenu inaccessible. Elle est placée en influençant une action, comme un filtre.$(br2)Lorsqu'une teinture s'active, le contrat se met à examiner toutes les actions qui influencent la teinture."
+        }
+    ]
+}

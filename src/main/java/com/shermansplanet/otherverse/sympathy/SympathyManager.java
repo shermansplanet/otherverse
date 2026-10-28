@@ -145,9 +145,9 @@ public class SympathyManager {
         if (!event.getItemStack().is(OtherverseItems.SPINDLE_BLOODY.get())) return;
         var tag = event.getItemStack().getOrCreateTag();
         if (tag.getBoolean("can_summon"))
-            event.getToolTip().add(Component.literal("Using this spindle will summon its target."));
+            event.getToolTip().add(Component.translatable("otherverse.tooltip.spindle.can_summon"));
         if (tag.getBoolean("can_bind_remotely"))
-            event.getToolTip().add(Component.literal("If this spindle is tossed into a block focus, it will act as if its target were in that focus."));
+            event.getToolTip().add(Component.translatable("otherverse.tooltip.spindle.can_bind_remotely"));
     }
 
     @SubscribeEvent
@@ -182,7 +182,7 @@ public class SympathyManager {
                 var targetPos = data.getSympathyPosition(key);
                 if (targetPos != null) {
                     data.putSympathyPosition(bindPos.toString(), targetPos);
-                    event.getEntity().displayClientMessage(Component.literal("Web of Fate bound to " + targetPos.getX() + ", " + targetPos.getY() + ", " + targetPos.getZ()), true);
+                    event.getEntity().displayClientMessage(Component.translatable("otherverse.sympathy.web_bound", targetPos.getX(), targetPos.getY(), targetPos.getZ()), true);
                     col = DyeColor.WHITE;
                 }
             }
@@ -322,8 +322,7 @@ public class SympathyManager {
         if (!event.getItemStack().hasTag() || !event.getItemStack().getTag().contains("sympathy_label")) return;
         var spindleTag = event.getItemStack().getTag();
         var label = spindleTag.getString("sympathy_label");
-        event.getToolTip().add(Component.literal("Sympathy target: ")
-                .append(Component.translatable(label))
+        event.getToolTip().add(Component.translatable("otherverse.tooltip.sympathy_target", Component.translatable(label))
                 .withStyle(Style.EMPTY.withColor(0xaaaaaa).withItalic(true)));
     }
 

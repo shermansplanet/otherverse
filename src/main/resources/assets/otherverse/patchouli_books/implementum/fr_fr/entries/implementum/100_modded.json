@@ -1,0 +1,12 @@
+{
+    "name": "Instruments moddés",
+    "sortnum": 100,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "De nombreux outils, armes et armures moddés peuvent être choisis comme Instruments ; voir ces catégories pour plus de détails. La dague sacrificielle (le point d'entrée du mod macabre) peut aussi être choisie comme Instrument pour faciliter les voyages vers cette dimension."
+        }
+    ]
+}

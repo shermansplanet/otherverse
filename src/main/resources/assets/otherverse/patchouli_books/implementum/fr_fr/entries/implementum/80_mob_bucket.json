@@ -1,0 +1,16 @@
+{
+    "name": "Seaux de créature",
+    "sortnum": 80,
+    "icon": "minecraft:cod_bucket",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:cod_bucket"
+            },
+            "title": "Seau de créature",
+            "text": "Un Instrument seau de créature vous permettra de l'utiliser à répétition, faisant apparaître de nombreuses créatures de ce type avant de devoir recharger votre Instrument avec du Soi."
+        }
+    ]
+}

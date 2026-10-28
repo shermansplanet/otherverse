@@ -1,0 +1,20 @@
+{
+    "name": "Combiner les portées",
+    "sortnum": 1,
+    "icon": "minecraft:netherite_block",
+    "category": "otherverse:shrines",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous placez au moins trois sanctuaires du même type en un cercle à peu près régulier, de sorte que la portée de chaque sanctuaire chevauche celle de ses voisins, les portées se combineront en une seule portée plus grande englobant tout le cercle."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/combined.png"
+            ],
+            "border": true,
+            "text": "Les portées combinées apparaissent aux couleurs de l'arc-en-ciel dans votre Vue."
+        }
+    ]
+}

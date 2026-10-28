@@ -1,0 +1,19 @@
+{
+    "name": "Tablettes spirituelles",
+    "sortnum": 1,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:shrines",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_tablet"
+            },
+            "text": "Si vous utilisez une tablette spirituelle sur un sanctuaire ou un reliquaire placé, elle y sera liée. Placée ensuite dans un diagramme, elle permettra au diagramme d'interagir avec le reliquaire lié pour les liaisons et les transfusions.$(br2)Lorsque la tablette s'éloigne à plus de 16 blocs du reliquaire, son efficacité faiblit, jusqu'à 50 % à 555 blocs."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si la tablette est très loin ou dans une autre dimension, l'efficacité descend jusqu'à 10 %.$(br2)Ce multiplicateur affecte le nombre d'esprits transférés dans les deux sens, ainsi que l'influence de liaison.$(br2)Les tablettes spirituelles peuvent être déliées dans une meule."
+        }
+    ]
+}

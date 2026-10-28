@@ -1,0 +1,20 @@
+{
+    "name": "Architecture vivante",
+    "sortnum": 20,
+    "icon": "otherverse:spindle_lime",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous avez l'avantage Architecture vivante, vous pouvez créer des diagrammes qui copient et collent automatiquement au sein de votre Domaine. Le cœur d'un tel diagramme est une balise de Domaine dans un foyer de bloc influencé par deux Toiles du Destin (voir la section Contrats des Essentiels). Les positions données par ces Toiles définissent les coins d'une section de blocs à copier."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Tout inventaire (tonneau, coffre, etc.) dans un foyer de bloc influençant la balise de Domaine tentera de placer son contenu pour reproduire cette zone « copiée ». L'inventaire doit être influencé par une troisième Toile du Destin, qui définit la position de « collage ». La zone copiée et la position de collage peuvent être changées à tout moment avec des fuseaux. Seule la position de collage doit se trouver dans votre Domaine."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si le diagramme veut placer un bloc à un endroit déjà occupé, il cassera lentement le bloc qui gêne. Attention : dans ce cas, le bloc est effacé et ne laisse tomber aucun objet. Même une fois tous les blocs placés, le diagramme reste actif et tentera de « corriger » toute différence."
+        }
+    ]
+}

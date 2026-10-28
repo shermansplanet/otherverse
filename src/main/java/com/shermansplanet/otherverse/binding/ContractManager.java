@@ -421,17 +421,16 @@ public class ContractManager {
         }
         CompoundTag contractTag = tag.getCompound("contract");
         var range = contractTag.getInt("range");
-        if (range > 8) event.getToolTip().add(Component.literal("Range: " + range + " blocks"));
+        if (range > 8) event.getToolTip().add(Component.translatable("otherverse.contract.range", range));
         makeTooltipRecursive(event.getToolTip(), contractTag, "");
     }
 
     private static void makeTooltipRecursive(List<Component> toolTip, CompoundTag contractTag, String prefix) {
         String taskType = contractTag.getString("type");
         if (contractTag.contains("corner_0")) {
-            toolTip.add(Component.literal(prefix + "from ")
-                    .append(getPositionComponent(contractTag.getCompound("corner_0")))
-                    .append(" to ")
-                    .append(getPositionComponent(contractTag.getCompound("corner_1"))));
+            toolTip.add(Component.literal(prefix).append(Component.translatable("otherverse.contract.area",
+                    getPositionComponent(contractTag.getCompound("corner_0")),
+                    getPositionComponent(contractTag.getCompound("corner_1")))));
         }
         if (contractTag.contains("recipe_result")) {
             var item = Item.byId(contractTag.getInt("recipe_result"));
@@ -446,25 +445,25 @@ public class ContractManager {
             }
             if (key.equals("count")) {
                 if (contractTag.contains("min")) {
-                    toolTip.add(Component.literal(prefix + "between "
-                            + contractTag.getInt("min") + " and " + contractTag.getInt("max")));
+                    toolTip.add(Component.literal(prefix).append(Component.translatable("otherverse.contract.count_between",
+                            contractTag.getInt("min"), contractTag.getInt("max"))));
                 } else {
-                    toolTip.add(Component.literal(prefix + "exactly " + contractTag.getInt(key)));
+                    toolTip.add(Component.literal(prefix).append(Component.translatable("otherverse.contract.count_exactly", contractTag.getInt(key))));
                 }
                 continue;
             }
-            String prep = (taskType.equals("take") || taskType.equals("craft")) ? "from " : taskType.equals("go") ? "to " : "in/on ";
+            String prep = (taskType.equals("take") || taskType.equals("craft")) ? "otherverse.contract.from" : taskType.equals("go") ? "otherverse.contract.to" : "otherverse.contract.in_on";
             if (key.startsWith("filter") || key.startsWith("block") || key.startsWith("inventory")) {
                 var item = Item.byId(contractTag.getInt(key));
                 if (taskType.equals("attack")) {
                     if (key.startsWith("block") || key.startsWith("inventory")) {
-                        var s = item == Items.HAY_BLOCK ? "passive mobs"
-                                : item == Items.TARGET ? "hostile mobs"
-                                : item == Items.CRAFTING_TABLE ? "players"
-                                : item == Items.CHAIN ? "bound mobs"
+                        var s = item == Items.HAY_BLOCK ? "otherverse.contract.target.passive"
+                                : item == Items.TARGET ? "otherverse.contract.target.hostile"
+                                : item == Items.CRAFTING_TABLE ? "otherverse.contract.target.players"
+                                : item == Items.CHAIN ? "otherverse.contract.target.bound"
                                 : "";
                         if (!s.isEmpty()) {
-                            toolTip.add(Component.literal(prefix + s));
+                            toolTip.add(Component.literal(prefix).append(Component.translatable(s)));
                             continue;
                         }
                     }
@@ -478,12 +477,12 @@ public class ContractManager {
                     continue;
                 }
                 if (key.startsWith("filter") && !taskType.equals("go") && !taskType.equals("craft")) {
-                    prep = "";
+                    prep = null;
                 }
                 if (item instanceof SpiritItem si) {
-                    toolTip.add(Component.literal(prefix + si.spiritType.label()));
+                    toolTip.add(Component.literal(prefix).append(si.spiritType.getDisplayName()));
                 } else {
-                    toolTip.add(Component.literal(prefix + prep).append(item.getDescription()));
+                    toolTip.add(Component.literal(prefix).append(withPreposition(prep, item.getDescription())));
                 }
                 var index = key.substring(7);
                 var tagitemkey = "tag_item_" + index;
@@ -500,13 +499,13 @@ public class ContractManager {
                 continue;
             }
             if (key.startsWith("offset")) {
-                toolTip.add(Component.literal(prefix + "offset ")
-                        .append(getPositionComponent(contractTag.getCompound(key), contractTag.getIntArray(key + "_basis"))));
+                toolTip.add(Component.literal(prefix).append(Component.translatable("otherverse.contract.offset",
+                        getPositionComponent(contractTag.getCompound(key), contractTag.getIntArray(key + "_basis")))));
                 continue;
             }
             if (key.startsWith("position")) {
                 CompoundTag pos = contractTag.getCompound(key);
-                toolTip.add(Component.literal(prefix + prep).append(getPositionComponent(pos)));
+                toolTip.add(Component.literal(prefix).append(withPreposition(prep, getPositionComponent(pos))));
                 continue;
             }
             if (key.equals("inscription")) {
@@ -517,14 +516,18 @@ public class ContractManager {
                 CompoundTag subTag = contractTag.getCompound(key);
                 if (subTag.contains("type")) {
                     String typestring = subTag.getString("type");
-                    typestring = typestring.substring(0, 1).toUpperCase() + typestring.substring(1);
-                    toolTip.add(Component.literal(prefix + typestring));
+                    var fallback = typestring.substring(0, 1).toUpperCase() + typestring.substring(1);
+                    toolTip.add(Component.literal(prefix).append(Component.translatableWithFallback("otherverse.contract.task." + typestring, fallback)));
                 }
             } else if (!key.equals("type")) {
-                toolTip.add(Component.literal(prefix + "On " + key + ":"));
+                toolTip.add(Component.literal(prefix).append(Component.translatableWithFallback("otherverse.contract.on." + key, "On " + key + ":")));
             }
             makeTooltipRecursive(toolTip, contractTag.getCompound(key), "-" + prefix);
         }
+    }
+
+    private static Component withPreposition(String prep, Component object) {
+        return prep == null ? object : Component.translatable(prep, object);
     }
 
     private static Component getPositionComponent(CompoundTag tag) {
@@ -534,8 +537,8 @@ public class ContractManager {
                     positionOrSpindle.x, positionOrSpindle.y, positionOrSpindle.z
             });
         }
-        var component = Component.literal(positionOrSpindle.playerName + " "
-                + positionOrSpindle.color.getName());
+        var component = Component.translatable("otherverse.contract.spindle", positionOrSpindle.playerName,
+                Component.translatable("color.minecraft." + positionOrSpindle.color.getName()));
         return component.withStyle(Style.EMPTY.withColor(positionOrSpindle.color.getTextColor()));
     }
 
@@ -548,8 +551,8 @@ public class ContractManager {
                     positionOrSpindle.z - basis[2]
             });
         }
-        var component = Component.literal(positionOrSpindle.playerName + "'s "
-                + positionOrSpindle.color.getName() + " position");
+        var component = Component.translatable("otherverse.contract.spindle_position", positionOrSpindle.playerName,
+                Component.translatable("color.minecraft." + positionOrSpindle.color.getName()));
         return component.withStyle(Style.EMPTY.withColor(positionOrSpindle.color.getTextColor()));
     }
 

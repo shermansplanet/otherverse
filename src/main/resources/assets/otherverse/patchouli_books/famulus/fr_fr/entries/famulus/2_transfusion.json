@@ -1,0 +1,12 @@
+{
+    "name": "Transfusion du Familier",
+    "sortnum": 2,
+    "icon": "otherverse:familiar_name_tag",
+    "category": "otherverse:famulus_general",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous tenez un objet que votre Familier pourrait transfuser lorsque vous appuyez sur la touche du Familier, l'objet sera instantanément transfusé en utilisant votre propre santé, au lieu d'invoquer votre Familier.$(br2)Si votre inventaire contient un objet qui pourrait servir dans un diagramme à soigner votre Familier, c'est lui qui sera consommé à la place de votre santé."
+        }
+    ]
+}

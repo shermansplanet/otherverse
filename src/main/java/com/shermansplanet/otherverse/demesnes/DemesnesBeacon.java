@@ -183,7 +183,7 @@ public class DemesnesBeacon extends BlockEntity implements MenuProvider, IItemHa
 
     @Override
     public Component getDisplayName() {
-        return hoverName == null ? Component.literal("Demesnes Beacon") : hoverName;
+        return hoverName == null ? Component.translatable("block.otherverse.demesne_beacon") : hoverName;
     }
 
     @Nullable

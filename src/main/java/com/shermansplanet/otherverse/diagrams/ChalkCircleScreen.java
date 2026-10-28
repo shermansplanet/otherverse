@@ -87,7 +87,7 @@ public class ChalkCircleScreen extends AbstractContainerScreen<ChalkCircleMenu> 
         int boxX = this.leftPos + 12;
         int boxY = this.topPos + 12;
 
-        this.editBox = new EditBox(this.font, boxX, boxY, 81, 16, Component.literal("Text Box"));
+        this.editBox = new EditBox(this.font, boxX, boxY, 81, 16, Component.translatable("otherverse.chalk_circle.inscription"));
         this.editBox.setCanLoseFocus(false);
         this.editBox.setMaxLength(12);
 

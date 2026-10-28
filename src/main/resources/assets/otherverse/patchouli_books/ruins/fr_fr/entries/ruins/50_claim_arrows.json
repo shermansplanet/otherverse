@@ -1,0 +1,17 @@
+{
+    "name": "Flèches de revendication",
+    "sortnum": 50,
+    "icon": "otherverse:claim_arrow",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:claim_arrow",
+            "text": "Les flèches de revendication n'infligent que la moitié des dégâts, mais elles marquent votre emprise sur ceux que vous vainquez au combat, vous donnant du pouvoir sur vos ennemis.$(br)Si vous touchez une créature avec une flèche de revendication en tenant un fuseau dans votre main secondaire, le fuseau deviendra sanglant et"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "intriqué avec cette créature (tant que la créature est dans un tronçon chargé).$(br2)Si vous touchez la créature trois fois sans rater ni être blessé par elle, vous pourrez utiliser le fuseau (maintenez le clic droit) pour invoquer la créature. Cela consume le fuseau.$(br2)Après neuf touches, vous pouvez jeter le fuseau dans un foyer de bloc (PAS un foyer d'objet) et il agira comme si la créature se trouvait dans ce foyer."
+        }
+    ]
+}

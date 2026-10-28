@@ -1,0 +1,12 @@
+{
+    "name": "Poisson",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'cod'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si un Familier poisson est dans l'eau et ne tient pas déjà d'objet, il trouvera de temps en temps un objet (n'importe quel objet autre qu'un poisson qu'on peut obtenir en pêchant) et le ramassera. Pensez à lui donner un contrat pour déposer ses objets quelque part."
+        }
+    ]
+}

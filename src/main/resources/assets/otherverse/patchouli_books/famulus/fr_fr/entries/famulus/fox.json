@@ -1,0 +1,12 @@
+{
+    "name": "Renard",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'fox'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Lorsque vous laissez un Familier renard porter le coup fatal, il vous accorde l'invisibilité, le saut amélioré, la vision nocturne et l'immunité aux dégâts de chute. La durée des effets sera plus longue pour des cibles plus puissantes."
+        }
+    ]
+}

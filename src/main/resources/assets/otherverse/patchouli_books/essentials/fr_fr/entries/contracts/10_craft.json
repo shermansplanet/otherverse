@@ -1,0 +1,27 @@
+{
+    "name": "Action : Fabriquer",
+    "icon": "minecraft:crafting_table",
+    "category": "otherverse:contracts",
+    "sortnum": 100,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:crafting_table"
+            },
+            "title": "Fabriquer",
+            "text": "Un établi en tant qu'objet désigne l'action « fabriquer ».$(br2)Les ingrédients de la recette doivent être disposés dans des cercles de craie comme ils le seraient sur un établi. Au moins l'un des ingrédients doit influencer l'établi."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_7.png"
+            ],
+            "text": "Fabrication d'une torche."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Une créature accomplissant cette action cherchera un établi dont les inventaires adjacents contiennent tous les ingrédients nécessaires (plus ce qu'elle tient). Elle ira à l'établi et fabriquera l'objet, en ramassant le résultat si possible."
+        }
+    ]
+}

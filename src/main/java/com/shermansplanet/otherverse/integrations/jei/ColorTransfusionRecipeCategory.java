@@ -27,7 +27,7 @@ public class ColorTransfusionRecipeCategory extends TransfusionRecipeCategory {
 
     public ColorTransfusionRecipeCategory(IGuiHelper guiHelper) {
         super(guiHelper);
-        localizedName = Component.literal("Color Transfusion");
+        localizedName = Component.translatable("otherverse.jei.color_transfusion");
         icon = guiHelper.createDrawable(
                 ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 39, 17, 16, 16);

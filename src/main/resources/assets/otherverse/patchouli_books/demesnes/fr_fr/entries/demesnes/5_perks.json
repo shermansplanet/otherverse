@@ -1,0 +1,16 @@
+{
+    "name": "Avantages de Domaine",
+    "sortnum": 5,
+    "icon": "otherverse:demesne_beacon",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous avez réussi le rituel des Domaines, vous pouvez faire un clic droit sur n'importe quelle balise de Domaine pour débloquer des avantages. Les quatre du centre sont débloqués dès le départ ; choisir un avantage débloque les avantages adjacents. Certains peuvent être débloqués plusieurs fois pour améliorer leur effet. Mais attention : les choix d'avantages sont permanents, et vous ne pouvez en sélectionner que 10 au maximum !"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "La plupart des avantages sont assez simples pour être expliqués dans les infobulles qui apparaissent quand vous les survolez. Certains nécessitent toutefois plus d'explications ; lisez la suite si vous voulez en savoir plus."
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "name": "Action : Casser",
+    "icon": "minecraft:wooden_pickaxe",
+    "category": "otherverse:contracts",
+    "sortnum": 70,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "tag": "minecraft:pickaxes"
+            },
+            "title": "Casser",
+            "text": "Une pioche en tant qu'objet désigne l'action « casser ».$(br2)Les filtres d'objet désignent les objets à casser. Si des filtres de bloc sont présents, la créature ne cassera que les blocs posés sur ces types de blocs. S'il n'y a aucun filtre, la créature cassera n'importe quel bloc à sa hauteur ou plus haut."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les créatures aux attaques plus puissantes minent plus vite.$(br2)Si une créature tient un outil, elle utilisera cet outil pour casser le bloc. L'outil s'usera, mais le $(l:otherverse:items/blood_mending)raccommodage sanguin$() peut aider.$(br2)Un enderman qui ne tient rien ramassera le bloc au lieu de le casser."
+        }
+    ]
+}

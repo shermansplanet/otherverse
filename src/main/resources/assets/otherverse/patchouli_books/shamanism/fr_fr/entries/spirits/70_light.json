@@ -1,0 +1,15 @@
+{
+    "name": "Lumière",
+    "sortnum": 70,
+    "icon": "otherverse:spirit_light",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_light"
+            },
+            "text": "La lueur d'une lanterne dans la nuit, le réconfort de la torche. L'éclat brûlant du soleil. Clarté, savoir, pensée logique.$(br2)Lorsqu'un sanctuaire de lumière déborde, tous les joueurs à sa portée reçoivent Surbrillance et Vision nocturne pendant une seconde par esprit en excès.$(br2)La portée du sanctuaire est $(bold)centrée.$()"
+        }
+    ]
+}

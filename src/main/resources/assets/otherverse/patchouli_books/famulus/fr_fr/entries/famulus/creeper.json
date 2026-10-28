@@ -1,0 +1,16 @@
+{
+    "name": "Creeper",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'creeper'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier creeper vous permet de lancer de la TNT comme s'il s'agissait d'une boule de neige ou d'un œuf. Elle explosera en touchant quelque chose."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Vous êtes aussi immunisé contre les explosions, et la foudre vous renforce.$(br2)Les creepers chercheront toujours à vous approcher pour exploser près de vous, mais ils exploseront en nuages d'effets de potion positifs aléatoires au lieu de détruire des blocs."
+        }
+    ]
+}

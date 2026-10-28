@@ -1,0 +1,19 @@
+{
+    "name": "Eau",
+    "sortnum": 50,
+    "icon": "otherverse:spirit_water",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_water"
+            },
+            "text": "Les vagues de l'océan brassant des profondeurs inconnues. Rivières tumultueuses et lacs paisibles. Les esprits d'eau peuvent étancher votre soif ou vous noyer.$(br2)La portée du sanctuaire s'étend vers le $(bold)bas.$()"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsqu'un sanctuaire d'eau déborde, les esprits d'eau en excès se manifestent sous forme d'eau (autant d'esprits d'eau qu'en contient un seau d'eau). De même, le surpuisage détruit l'eau en échange d'esprits (l'eau courante ne produit qu'un esprit). Contrairement à un sanctuaire de feu avec la lave, un sanctuaire d'eau peut affecter plusieurs blocs à chaque débordement ou surpuisage, créant ou détruisant potentiellement de grandes quantités d'eau d'un coup."
+        }
+    ]
+}

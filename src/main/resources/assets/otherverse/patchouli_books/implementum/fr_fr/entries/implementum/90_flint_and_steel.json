@@ -1,0 +1,16 @@
+{
+    "name": "Briquet",
+    "sortnum": 80,
+    "icon": "minecraft:flint_and_steel",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:flint_and_steel"
+            },
+            "title": "Briquet",
+            "text": "Utiliser un Instrument briquet dans le vide tirera une boule de feu semblable à celle d'un blaze. Si vous avez aussi un Familier blaze, vous pouvez utiliser cette capacité très rapidement."
+        }
+    ]
+}

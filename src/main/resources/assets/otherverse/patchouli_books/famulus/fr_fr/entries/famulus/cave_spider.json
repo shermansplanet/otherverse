@@ -1,0 +1,12 @@
+{
+    "name": "Araignée venimeuse",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'cave_spider'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier araignée venimeuse fera que toutes vos attaques infligent du poison."
+        }
+    ]
+}

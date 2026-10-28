@@ -1,0 +1,19 @@
+{
+    "name": "Protection",
+    "sortnum": 90,
+    "icon": "otherverse:spirit_protection",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_protection"
+            },
+            "text": "La sécurité physique et mentale d'une forteresse fortifiée. Les esprits de protection se rassemblent dans les matériaux durs, les boucliers et les armures.$(br2)Lorsqu'un joueur ou une créature liée/apprivoisée subit des dégâts à portée d'un sanctuaire de protection, le sanctuaire tentera de dépenser un nombre d'esprits égal au triple des dégâts."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Cela divisera par deux les dégâts subis. Les effets de plusieurs sanctuaires se cumulent. Un sanctuaire de protection dépensera aussi neuf esprits pour annuler toute dégradation du terrain par des créatures à sa portée (sauf si elle est causée par une créature liée/apprivoisée). Les créatures moddées pourraient contourner cela.$(br2)Les terres labourées ne seront pas piétinées à portée d'un sanctuaire de protection.$(br2)La portée du sanctuaire est $(bold)centrée.$()"
+        }
+    ]
+}

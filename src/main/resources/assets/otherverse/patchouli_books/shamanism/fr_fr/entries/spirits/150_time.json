@@ -1,0 +1,19 @@
+{
+    "name": "Temps",
+    "sortnum": 140,
+    "icon": "otherverse:spirit_time",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_time"
+            },
+            "text": "Progression naturelle, cause et effet suivant la logique d'horlogerie des lois physiques. Cycles de croissance et de déclin.$(br2)Les ticks aléatoires peuvent être convertis en esprits du temps. Si un bloc influencé par un reliquaire du temps devait recevoir un tick aléatoire, il produira à la place neuf esprits du temps (tant que le reliquaire a de la place)."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si une entité entre dans un foyer de bloc influencé par un reliquaire du temps, elle sera « figée » : les flèches s'arrêteront en plein vol, la TNT cessera son compte à rebours, les créatures cesseront de bouger, etc. Maintenir une entité figée consomme un esprit du temps par seconde. Les créatures alignées sur le Temps et le Destin sont immunisées contre cet effet.$(br2)Les sanctuaires du temps n'ont aucun effet particulier."
+        }
+    ]
+}

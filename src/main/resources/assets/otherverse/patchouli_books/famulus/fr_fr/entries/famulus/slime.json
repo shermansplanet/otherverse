@@ -1,0 +1,12 @@
+{
+    "name": "Slime/Cube de magma",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'slime'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous avez un Familier slime ou cube de magma, vous rétrécirez à la moitié de votre taille à la moitié de votre santé (faisant apparaître 2 slimes moyens amicaux) et au quart de votre taille au quart de votre santé (faisant apparaître 8 petits slimes amicaux). Plus vous êtes petit, plus vous sautez haut."
+        }
+    ]
+}

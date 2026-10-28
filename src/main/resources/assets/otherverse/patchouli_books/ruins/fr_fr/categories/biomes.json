@@ -1,0 +1,6 @@
+{
+    "name": "Biomes",
+    "description": "Un guide de chaque biome des Ruines : leurs dangers, leur faune et leurs ressources.",
+    "icon": "minecraft:compass",
+    "sortnum": 2
+}

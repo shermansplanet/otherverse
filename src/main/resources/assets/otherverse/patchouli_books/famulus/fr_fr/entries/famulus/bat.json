@@ -1,0 +1,12 @@
+{
+    "name": "Chauve-souris",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'bat'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier chauve-souris vous accordera la vision nocturne et le vol créatif, mais uniquement dans l'obscurité. Plus il fait sombre, plus vous pourrez voler vite."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Cochon",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'pig'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous donnez une carotte dorée à votre Familier cochon, il deviendra très rapide pendant une minute. Lorsque vous le chevauchez dans le Nether, vous serez reconnu comme royauté porcine et obtiendrez un garde du corps piglin barbare loyal."
+        }
+    ]
+}

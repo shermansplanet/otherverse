@@ -103,7 +103,7 @@ public class SpiritAffinityTracker {
 
     public static void decreaseAllAffinities(ServerPlayer player) {
         SelfManager.changeSelf(player, -3);
-        player.sendSystemMessage(Component.literal("The spirits are not impressed with your lack of commitment..."));
+        player.sendSystemMessage(Component.translatable("otherverse.affinity.decreased_all"));
         getAffinities(player).decreaseAllAffinities();
         markUpdated(player);
     }

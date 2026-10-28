@@ -1,0 +1,35 @@
+{
+    "name": "Action : Prendre",
+    "icon": "minecraft:hopper",
+    "category": "otherverse:contracts",
+    "sortnum": 50,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:hopper"
+            },
+            "title": "Prendre",
+            "text": "Un entonnoir en tant qu'objet désigne l'action « prendre », qui par défaut signifie ramasser les objets au sol. Les pillards liés peuvent même ramasser les flèches tirées comme des objets.$(br2)Les filtres dans les $(bold)foyers d'objet$() déterminent ce qu'une créature peut ramasser. S'il n'y a pas de tels filtres, elle ramasse tout."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Filtres de foyer de bloc",
+            "text": "Un $(bold)foyer de bloc$() vide ou une Toile du Destin dit à la créature de prendre des objets à cette position dans le monde, au sol ou dans un inventaire.$(br2)Un bloc conteneur (tonneau, fourneau, etc.) dans un foyer de bloc dit à la créature de prendre des objets dans les conteneurs de ce type.$(br2)Les blocs non conteneurs disent à la créature de prendre les objets tombés au-dessus de ce type de bloc."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_8.png"
+            ],
+            "text": "« Prendre des objets dans les tonneaux. »"
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_9.png"
+            ],
+            "text": "« Ramasser la poudre à canon sur la pierre des abîmes taillée. »"
+        }
+    ]
+}

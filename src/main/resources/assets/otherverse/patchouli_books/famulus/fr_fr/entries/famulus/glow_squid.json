@@ -1,0 +1,12 @@
+{
+    "name": "Poulpe luisant",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'glow_squid'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier poulpe luisant vous donnera la vision nocturne et mettra en surbrillance toutes les créatures autour de vous, tant que vous avez de l'encre luisante dans votre inventaire."
+        }
+    ]
+}

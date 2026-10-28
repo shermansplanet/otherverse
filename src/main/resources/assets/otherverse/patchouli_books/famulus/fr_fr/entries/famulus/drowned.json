@@ -1,0 +1,12 @@
+{
+    "name": "Noyé",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'drowned'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous avez un Familier noyé, la noyade vous soignera au lieu de vous blesser, et vous serez renforcé pendant une minute ensuite."
+        }
+    ]
+}

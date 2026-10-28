@@ -1,0 +1,12 @@
+{
+    "name": "Shulker",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'shulker'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier shulker vous permet de vous débarrasser de l'effet de lévitation en vous accroupissant. La lévitation est alors remplacée par une chute lente. Un shulker à qui l'on a ordonné de vous suivre se téléportera sur des surfaces proches si possible."
+        }
+    ]
+}

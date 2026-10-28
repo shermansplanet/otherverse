@@ -1,0 +1,30 @@
+{
+    "name": "Tracer des diagrammes",
+    "icon": "otherverse:chalk",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:charcoal_stick"
+            },
+            "text": "En plaçant une torche dans l'eau, vous obtenez un $(bold)bâton de fusain$(), que vous pouvez utiliser sur le sol pour tracer des $(bold)diagrammes$(). L'eau effacera ces marques."
+        },
+        {
+            "title": "Craie",
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:chalk",
+            "text": "Une fois que vous aurez trouvé de la calcite, vous voudrez passer à la $(bold)craie$(). La craie dure bien plus longtemps qu'un bâton de fusain, et peut être fabriquée avec de la teinture pour tracer des marques de différentes couleurs."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/chalk_1.png"
+            ]
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les marques de craie se « connectent » aux marques de craie adjacentes un peu comme la redstone, mais c'est un effet purement visuel. $(bold) Tout ce qui compte, c'est quelles cases ont de la craie et lesquelles n'en ont pas.$()$(br2)C'est ce qui détermine les $(bold)foyers$() d'un diagramme et la façon dont ils s'$(bold)influencent$() les uns les autres."
+        }
+    ]
+}

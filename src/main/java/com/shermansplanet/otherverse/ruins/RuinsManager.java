@@ -440,7 +440,7 @@ public class RuinsManager {
     public static void onTooltip(ItemTooltipEvent event) {
         if (!(event.getItemStack().getItem() instanceof ArmorItem armor) || armor.getMaterial() != OtherverseItems.OtherverseArmorMaterials.RUINS)
             return;
-        event.getToolTip().add(1, Component.literal("See the Ruins book for more info on this armor's special abilities.").withStyle(Style.EMPTY.withItalic(true).withColor(0x707070)));
+        event.getToolTip().add(1, Component.translatable("otherverse.tooltip.ruins_armor").withStyle(Style.EMPTY.withItalic(true).withColor(0x707070)));
     }
 
     @SubscribeEvent
@@ -470,7 +470,7 @@ public class RuinsManager {
             if (!player.level().getBiome(player.blockPosition()).unwrapKey().get().location().getPath().equals("ruins_trust"))
                 return;
             if (player.level().getGameTime() - lastGuestFed > 20 * 60) {
-                player.displayClientMessage(Component.literal("By not sharing food, you have violated Hospitality."), true);
+                player.displayClientMessage(Component.translatable("otherverse.hospitality.food"), true);
                 breakHospitality(player);
             }
         }
@@ -483,10 +483,10 @@ public class RuinsManager {
                 return;
             var block = event.getState().getBlock();
             if (block == Blocks.STRIPPED_CHERRY_WOOD || block == Blocks.CHERRY_LEAVES) {
-                player.displayClientMessage(Component.literal("By felling a tree, you have violated Hospitality."), true);
+                player.displayClientMessage(Component.translatable("otherverse.hospitality.tree"), true);
                 breakHospitality(player);
             } else if (Arrays.stream(TrustTreeFeature.flowers).anyMatch(b -> b.is(block))) {
-                player.displayClientMessage(Component.literal("By picking a flower, you have violated Hospitality."), true);
+                player.displayClientMessage(Component.translatable("otherverse.hospitality.flower"), true);
                 breakHospitality(player);
             }
         }
@@ -569,7 +569,7 @@ public class RuinsManager {
             HolderSet<Structure> holderset = HolderSet.direct(registry.getHolderOrThrow(BuiltinStructures.ANCIENT_CITY));
             Pair<BlockPos, Holder<Structure>> result = sl.getChunkSource().getGenerator().findNearestMapStructure(sl, holderset, player.blockPosition(), 100, false);
             if (result == null || result.getFirst() == null) {
-                player.displayClientMessage(Component.literal("Could not find ancient city."), false);
+                player.displayClientMessage(Component.translatable("otherverse.ruins.no_ancient_city"), false);
             } else {
                 var r = RandomSource.create(sl.getGameTime());
                 var pos = player.position().add(0, 1, 0);

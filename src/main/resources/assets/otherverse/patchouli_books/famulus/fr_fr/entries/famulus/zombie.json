@@ -1,0 +1,12 @@
+{
+    "name": "Zombie/Zombie desséché",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'zombie'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Avec un Familier zombie ou zombie desséché, les créatures éligibles que vous frappez seront parfois zombifiées, vous accordant une brève régénération. De plus, tout ce qui vous donnait l'effet de faim vous donnera désormais l'effet de saturation."
+        }
+    ]
+}

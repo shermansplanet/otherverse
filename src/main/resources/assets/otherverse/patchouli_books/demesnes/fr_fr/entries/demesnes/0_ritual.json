@@ -1,0 +1,29 @@
+{
+    "name": "Accomplir le rituel",
+    "sortnum": 0,
+    "icon": "otherverse:demesne_beacon",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:demesne_beacon",
+            "text": "Pour accomplir le rituel des Domaines, vous devrez construire une balise de Domaine et la placer au sommet d'une pyramide, comme une balise ordinaire."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "La taille de la pyramide détermine l'étendue de votre Revendication : une plateforme de 3x3 blocs revendique une zone de 1x1, et ainsi de suite jusqu'à une pyramide à base 9x9 qui vous permet de revendiquer 7x7 tronçons. Vous pouvez prévisualiser la zone Revendiquée avec votre Vue. Faites un clic droit sur la balise pour voir pour quel type d'esprit vous gagnerez une affinité en cas de réussite."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Une fois prêt, cliquez sur le bouton Revendiquer pour commencer le rituel. Pour réussir, vous devrez vaincre trois vagues de challengers qui contestent votre Revendication de cet espace. Ils apparaîtront autour de la frontière et seront mis en évidence dans votre Vue. Quitter les limites ou mourir mettra fin au rituel et renverra les challengers ; vous devrez alors réessayer."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "La difficulté du rituel augmente de façon exponentielle avec la taille de votre Revendication. Une Revendication de 1x1 peut attirer quelques zombies par vague, une de 3x3 ressemble à un Raid, et au-delà il faudra probablement préparer la zone. Sachez que des ghasts ou des creepers peuvent se présenter, mais rappelez-vous que les sanctuaires de protection empêchent les créatures de dégrader le terrain."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Le type de challengers qui se présentent varie selon des facteurs comme la dimension, les mods installés et l'heure de la journée. Ils tenteront d'apparaître près de votre niveau Y et s'adapteront au terrain local (l'eau attirera des créatures aquatiques, l'air libre des créatures volantes). Les vagues suivantes peuvent attirer des challengers d'autres dimensions."
+        }
+    ]
+}

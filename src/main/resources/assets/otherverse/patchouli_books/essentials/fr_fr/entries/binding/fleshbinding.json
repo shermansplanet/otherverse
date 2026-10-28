@@ -1,0 +1,51 @@
+{
+    "name": "Liaison charnelle",
+    "sortnum": 30,
+    "icon": "otherverse:salt",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "La liaison charnelle est une technique puissante par laquelle une créature peut être liée sous forme d'objet, appelé $(bold)idole$().$(br2)Cela ne fonctionne $(italic)que$() sur les créatures suffisamment affaiblies (ramenées à 10 points de santé ou moins). Pour libérer une créature d'une liaison charnelle, il suffit d'utiliser son idole comme un œuf d'apparition."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/binding_5.png"
+            ],
+            "border": true,
+            "text": "Quatre idoles de cochon dans un diagramme."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/binding_4.png"
+            ],
+            "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Pour accomplir une liaison charnelle, il vous faudra quatre objets. $(br)1. Un objet que la créature pourrait laisser tomber (ou l'un de ses résultats de transfusion de créature).$(br)2. Le $(l:otherverse:items/resources)Primordial$() de votre dimension actuelle (sel pour la Surface, soufre pour le Nether, vif-argent pour l'End, cinabre ailleurs).$(br)3. Un tout petit peu de puissance de n'importe quelle source, comme du Soi ou une idole."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Le quatrième objet deviendra le $(bold)matériau$() de l'idole, qui détermine son fonctionnement lorsqu'elle est placée dans un foyer d'objet. Une idole de niveau 1 en bûches ou en planches fonctionne comme une créature liée vivante, mais ne peut pas être soignée et est drainée avec 1/3 d'efficacité. Les idoles en lapis peuvent être soignées. Les idoles en diamant peuvent aussi être soignées, et sont aussi efficaces qu'une créature vivante."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/binding_6.png"
+            ],
+            "border": true
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:cinnabar_block"
+            },
+            "anchor": "cinnabar",
+            "title": "Idoles de cinabre",
+            "text": "Vous pouvez faire un clic droit avec un bloc de cinabre sur n'importe quelle créature déjà liée pour la piéger dans le bloc et la transporter facilement. Ces idoles ne peuvent pas être utilisées dans des diagrammes ; la créature sera libérée automatiquement si l'idole entre dans un foyer d'objet.$(br2)Vous récupérerez le bloc de cinabre en libérant la créature."
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "name": "Colère",
+    "sortnum": 60,
+    "icon": "minecraft:magma_block",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Colère",
+            "text": "La Colère est une terre désolée, brûlée et épineuse, traversée de rivières de lave. Il y fait si chaud que le sol lui-même finit par vous brûler. Si vous ne pouvez pas vous procurer de résistance au feu, vous devrez peut-être construire des ponts pour garder les pieds au frais."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "La Colère abrite des blazes typhlotiques appelés $(bold)furies$(), les seules bêtes typhlotiques capables d'attaquer à distance. Mais elles n'attaqueront que si vous avez dégainé une arme en premier. Leur définition d'une « arme » est large : tout ce qui contient des esprits de guerre compte, même des outils comme les haches."
+        }
+    ]
+}

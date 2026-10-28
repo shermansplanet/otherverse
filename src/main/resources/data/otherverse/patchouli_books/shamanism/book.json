@@ -1,6 +1,6 @@
 {
-    "name": "Shamanism",
-    "landing_text": "A guide working with spirits.",
+    "name": "otherverse.book.shamanism.name",
+    "landing_text": "otherverse.book.shamanism.landing_text",
     "version": 3,
     "model" : "otherverse:shamanism",
     "show_progress" : false,

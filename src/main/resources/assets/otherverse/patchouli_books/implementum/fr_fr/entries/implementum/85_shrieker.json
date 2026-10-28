@@ -1,0 +1,16 @@
+{
+    "name": "Hurleur sculk",
+    "sortnum": 85,
+    "icon": "minecraft:sculk_shrieker",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:sculk_shrieker"
+            },
+            "title": "Hurleur sculk",
+            "text": "Vous pouvez utiliser un Instrument hurleur sculk pour invoquer un Warden n'importe où. Cela coûte un niveau et détruit votre Instrument ; vous devrez dépenser du Soi pour en invoquer un nouveau. Le Warden ne vous est pas particulièrement loyal."
+        }
+    ]
+}

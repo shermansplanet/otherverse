@@ -1,0 +1,19 @@
+{
+    "name": "Nature",
+    "sortnum": 140,
+    "icon": "otherverse:spirit_nature",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_nature"
+            },
+            "text": "Abondance naturelle, cycles autoalimentés de vie et de décomposition. Écologies interconnectées. Prédateur et proie, compost et récolte.$(br2)La portée du sanctuaire s'étend vers le $(bold)haut.$()"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsqu'un sanctuaire de nature déborde, les esprits en excès sont appliqués aux blocs environnants comme de la poudre d'os. Trente-trois esprits équivalent à une poudre d'os sur un bloc. Les terres labourées ne seront pas piétinées à portée d'un sanctuaire de nature."
+        }
+    ]
+}

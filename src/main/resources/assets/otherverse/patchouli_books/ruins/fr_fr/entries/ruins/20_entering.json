@@ -1,0 +1,34 @@
+{
+    "name": "Entrer dans les Ruines",
+    "sortnum": 20,
+    "icon": "minecraft:sculk",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Entrer dans les Ruines",
+            "text": "Il existe plusieurs façons de voyager vers et depuis les Ruines. La plus simple est de mourir sur un bloc de sculk en se trouvant dans un foyer de bloc. Au lieu de mourir vraiment, vous perdrez un peu d'expérience et serez envoyé dans les Ruines pour un certain temps. Une fois ce temps écoulé, vous retournerez dans la dimension (mais pas à l'endroit) d'où vous veniez."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/ruins_2.png"
+            ],
+            "border": true,
+            "text": "Un diagramme d'accès aux Ruines valide."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Le temps que vous passez dans les Ruines avant d'en être ramené et la quantité d'expérience perdue à l'entrée dépendent des blocs qui vous influencent lorsque vous mourez sur le sculk.$(br2)Chaque feu des âmes extrait 10 XP et vous donne 1 minute.$(br)Chaque torche des âmes extrait 100 XP et vous donne 10 minutes.$(br)Chaque lanterne des âmes extrait 600 XP et vous donne 1 heure.$(br)"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si vous parvenez à trouver une cité antique, vous pouvez plutôt mourir sur un bloc d'ardoise des abîmes renforcée (un cadre de portail antique) influencé par l'un des blocs mentionnés. Cela ne coûte aucune expérience et vous transporte définitivement dans les Ruines.$(br2)Si vous avez un Domaine avec l'avantage Portails, vous pouvez aussi créer un portail permanent vers les Ruines."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:escape_rope",
+            "text": "Pour hâter votre retour dans la dimension d'où vous veniez, vous pouvez tomber dans le vide sous les Ruines ou utiliser une corde d'évasion. Vous n'avez pas besoin d'un Domaine pour utiliser une corde d'évasion de cette façon."
+        }
+    ]
+}

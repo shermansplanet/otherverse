@@ -1,0 +1,16 @@
+{
+    "name": "Wither",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'wither'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier Wither vous donnera un vol créatif lent, la régénération, l'immunité à l'effet de Wither, et la capacité de lancer des crânes de Wither comme projectiles dangereux en faisant un clic droit lorsque vous en tenez un."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Il est difficile de contenir un tel pouvoir, et votre concentration faiblit pendant votre sommeil. Où que vous vous réveilliez, tout ce qui vous entoure (dans un cube de 33x33x33 blocs) dépérira."
+        }
+    ]
+}

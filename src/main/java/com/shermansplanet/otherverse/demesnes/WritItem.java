@@ -10,8 +10,8 @@ public class WritItem extends Item {
     }
 
     public Component getName(ItemStack item) {
-        if(!item.hasTag()) return Component.literal("Writ");
+        if(!item.hasTag()) return Component.translatable("item.otherverse.writ");
         var perk = DemesnesManager.DemesnePerk.values()[item.getTag().getInt("sanction")];
-        return Component.literal(perk.name.replace("Sanction:", "Writ of"));
+        return perk.getWritName();
     }
 }

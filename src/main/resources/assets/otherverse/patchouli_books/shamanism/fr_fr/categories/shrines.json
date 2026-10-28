@@ -1,0 +1,6 @@
+{
+    "name": "Sanctuaires",
+    "description": "Un cran au-dessus des reliquaires.",
+    "icon": "minecraft:jack_o_lantern{hallow:{spirit_type:'light'}}",
+    "sortnum": 0
+}

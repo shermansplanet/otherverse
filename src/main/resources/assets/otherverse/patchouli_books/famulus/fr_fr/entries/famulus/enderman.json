@@ -1,0 +1,12 @@
+{
+    "name": "Enderman",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'enderman'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier enderman vous rendra toutes les perles de l'Ender ou fruits de chorus que vous utilisez pour vous téléporter, et ces téléportations ne vous blesseront pas. L'eau vous fera du mal, mais un casque vous protégera en grande partie de la pluie."
+        }
+    ]
+}

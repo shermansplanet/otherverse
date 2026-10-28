@@ -1,0 +1,12 @@
+{
+    "name": "Golem de fer",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'iron_golem'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier golem de fer vous donne une armure permanente en plus de celle que vous portez. Cette armure supplémentaire équivaut à un ensemble complet d'armure en fer, avec un peu de robustesse en plus."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "name": "Pourri",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'typhlotic_zombie'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous avez un Familier pourri, manger de la nourriture contenant des esprits de chair vous donnera Régénération III pendant trois secondes par esprit de chair. Vous serez aussi immunisé contre la nausée, et tout ce qui vous donnait la faim vous donnera désormais la saturation."
+        }
+    ]
+}

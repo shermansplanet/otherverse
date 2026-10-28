@@ -1,0 +1,46 @@
+{
+    "name": "Technologie/Chair",
+    "sortnum": 130,
+    "icon": "otherverse:contract",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_technology"
+            },
+            "text": "L'ingéniosité de ce qui est construit. La maîtrise de la nature. Progrès, automatisation, artifice. Fils de redstone et de cuivre."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_flesh"
+            },
+            "text": "L'appareil incroyablement complexe de la vie. Adaptation, reproduction, organes spécialisés reliés par le sang et les nerfs."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Avec les sanctuaires de technologie ou de chair, vous pouvez créer respectivement des $(bold)golems$() et des $(bold)homoncules$(). Si une créature liée (pas une idole) se trouve dans un diagramme influençant le sanctuaire, le sanctuaire tentera de dépenser un nombre d'esprits égal au triple des PV max de la créature pour créer une copie de celle-ci, qui se comportera comme si elle était liée sans nécessiter de liaison. Les sanctuaires de technologie et de chair ne drainent pas les esprits des créatures.$(br2)Les portées des sanctuaires sont $(bold)centrées.$()"
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/fleshtech.png"
+            ],
+            "border": true,
+            "text": "Les copies prennent la texture du type d'esprit correspondant."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les golems et les homoncules ne laissent tomber aucun objet, et commencent à subir des dégâts fréquents s'ils ne sont pas à portée d'un sanctuaire de leur type d'esprit.$(br2)Les golems ont la moitié de la vitesse de leur créature d'origine, mais faire déborder un sanctuaire de technologie rendra tous les golems à portée plus rapides, et avec assez d'esprits vous pouvez plus que compenser. Il en va de même pour les homoncules et la force d'attaque."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "3 esprits par minute doublent la vitesse d'un golem (la ramenant à la normale), 9 la triplent, 27 la quadruplent, et ainsi de suite. 3 esprits par minute ajoutent 3 dégâts aux attaques d'un homoncule, 9 en ajoutent 6, 27 en ajoutent 9, et ainsi de suite.$(br2)Si un sanctuaire de technologie reçoit un signal de redstone, il ne créera plus de nouveaux golems mais pourra toujours renforcer ceux qui existent. Notez que les reliquaires en bloc de redstone produisent quand même un signal !"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les golems et les homoncules sont alignés sur la technologie et la chair, plutôt que sur le type d'esprit de leur créature d'origine. Cela peut être combiné avec la mécanique de « sacrifice » (voir la section « Esprits » des Essentiels) pour étendre efficacement la portée d'un sanctuaire de technologie ou de chair.$(br2)Les golems et les homoncules ne peuvent pas être utilisés dans des diagrammes."
+        }
+    ]
+}

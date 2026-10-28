@@ -74,7 +74,7 @@ public class ArtifactManager {
         var spiritTag = biomeTag.getCompound("spirits");
         for (var spirit : spiritTag.getAllKeys()) {
             event.getToolTip().add(
-                    Component.literal(spiritTag.getInt(spirit) + " " + spirit)
+                    Component.translatable("otherverse.tooltip.spirit_amount", spiritTag.getInt(spirit), SpiritType.getDisplayName(spirit))
                             .withStyle(Style.EMPTY.withColor(col)));
         }
     }

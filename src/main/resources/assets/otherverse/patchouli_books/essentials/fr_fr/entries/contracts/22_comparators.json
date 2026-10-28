@@ -1,0 +1,16 @@
+{
+    "name": "Comparateurs",
+    "icon": "minecraft:comparator",
+    "category": "otherverse:contracts",
+    "sortnum": 220,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si une action est influencée par un comparateur, toutes les influences du comparateur agiront comme des filtres d'objets pour l'action. Cependant, des données supplémentaires seront prises en compte : l'état de bloc pour les influences de bloc, et les données NBT pour les influences d'objet."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Certaines actions interprètent différemment les foyers de bloc et d'objet, mais lorsqu'ils passent par un comparateur, les foyers de bloc sont traités comme des foyers d'objet.$(br2)Par exemple, une pioche influencée par un comparateur lui-même influencé par un bloc de blé arrivé à maturité créera un contrat qui dit à une créature de ne casser que le blé mûr."
+        }
+    ]
+}

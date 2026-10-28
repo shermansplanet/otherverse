@@ -1,0 +1,19 @@
+{
+    "name": "Autel d'apparition",
+    "sortnum": 10,
+    "icon": "otherverse:spawn_altar",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spawn_altar"
+            },
+            "text": "Les autels d'apparition peuvent consommer des esprits de guerre pour faire apparaître des créatures.$(br2)Un autel d'apparition doit être activé en l'utilisant sur un générateur. L'autel devient alors un reliquaire d'esprits de guerre et absorbe le type de créature du générateur, en brisant celui-ci."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Une fois placé, un autel d'apparition peut absorber des esprits de guerre comme n'importe quel autre reliquaire (depuis d'autres reliquaires ou en décomposant directement des objets).$(br2)Après avoir absorbé des esprits de guerre, un autel d'apparition tentera de faire apparaître des créatures du type qui lui est assigné, en dépensant un esprit de guerre par PV de la créature apparue."
+        }
+    ]
+}

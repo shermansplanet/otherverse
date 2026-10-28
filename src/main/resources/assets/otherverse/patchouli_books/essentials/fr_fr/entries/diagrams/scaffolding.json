@@ -1,0 +1,20 @@
+{
+    "name": "Échafaudage d'ardoise",
+    "sortnum": 25,
+    "icon": "otherverse:slate_scaffolding",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "title": "Échafaudage d'ardoise",
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:slate_scaffolding",
+            "text": "L'échafaudage d'ardoise peut être placé sur des marques de craie et inversement, ce qui permet d'empiler des diagrammes en couches compactes. Il empêche aussi l'eau d'effacer la craie. Un objet placé dans un foyer d'objet sur un échafaudage d'ardoise « tombera » dans un foyer d'objet vide situé juste en dessous."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/scaffolding.png"
+            ]
+        }
+    ]
+}

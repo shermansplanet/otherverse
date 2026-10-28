@@ -1,0 +1,12 @@
+{
+    "name": "La Vue",
+    "sortnum": 7,
+    "icon": "minecraft:ender_eye",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "La Vue est un outil précieux pour tout Praticien. Lorsqu'elle est activée (touche O par défaut), elle révèle des informations sur les diagrammes, les Pratiques et les Praticiens."
+        }
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "name": "Œil des Sans-Yeux",
+    "sortnum": 70,
+    "icon": "otherverse:eye_of_the_eyeless",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:eye_of_the_eyeless",
+            "text": "Vous pouvez utiliser un Œil des Sans-Yeux pour indiquer le chemin des cités antiques. Si vous vous tenez dans un foyer de bloc influencé par douze de ces yeux, avec du sculk sous vous et sous les yeux, vous serez transporté dans les Ruines."
+        }
+    ]
+}

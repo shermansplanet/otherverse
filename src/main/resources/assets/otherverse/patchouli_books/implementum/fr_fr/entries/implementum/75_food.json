@@ -1,0 +1,16 @@
+{
+    "name": "Nourriture",
+    "sortnum": 75,
+    "icon": "minecraft:golden_apple",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:golden_apple"
+            },
+            "title": "Nourriture",
+            "text": "Tout ce qui se mange peut être choisi comme Instrument. Un Instrument nourriture peut être mangé neuf fois avant d'être entièrement consommé, et lorsque c'est le cas, vous pouvez en invoquer un autre avec la touche de l'Instrument."
+        }
+    ]
+}

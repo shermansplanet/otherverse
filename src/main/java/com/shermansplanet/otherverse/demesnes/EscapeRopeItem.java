@@ -69,9 +69,9 @@ public class EscapeRopeItem extends Item {
             for (var i = 0; i < 8; i++) {
                 sl.sendParticles(ParticleTypes.GLOW, pos.x, pos.y, pos.z, 1, 0, 0.1f, 0, 0.02D);
             }
-            player.displayClientMessage((Component.literal(fromBlock
-                    ? "Destination is set to clicked position."
-                    : "Destination is set to your current position.")), true);
+            player.displayClientMessage(Component.translatable(fromBlock
+                    ? "otherverse.escape_rope.destination_clicked"
+                    : "otherverse.escape_rope.destination_current"), true);
             return InteractionResultHolder.consume(itemstack);
         }
 
@@ -99,8 +99,7 @@ public class EscapeRopeItem extends Item {
             if (currentTime < t) {
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(t - currentTime);
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(t - currentTime - TimeUnit.MINUTES.toMillis(minutes));
-                player.displayClientMessage((Component.literal(
-                        "You will be able to use your escape rope in " + minutes + ":" + seconds)), false);
+                player.displayClientMessage(Component.translatable("otherverse.escape_rope.cooldown", minutes, seconds), false);
                 return InteractionResultHolder.pass(itemstack);
             }
         }

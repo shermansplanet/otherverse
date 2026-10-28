@@ -1,0 +1,12 @@
+{
+    "name": "Panda",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'panda'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier panda vous transmet ses talents de déforestation, vous permettant d'abattre des arbres entiers en cassant une seule bûche. La même capacité s'applique aux feuilles, qui tomberont toutes si vous utilisez une cisaille."
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "name": "Quantités",
+    "icon": "otherverse:chalk",
+    "category": "otherverse:contracts",
+    "sortnum": 150,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous vous accroupissez et utilisez de la craie sur un foyer d'objet vide, un écran s'ouvrira où vous pourrez inscrire un texte personnalisé dans le cercle (visible avec la Vue). Si le cercle influence une action dans un contrat, il peut préciser des quantités exactes ou des plages que la créature doit déposer ou prendre."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Écrire simplement un nombre oblige le contrat à exiger exactement ce nombre. Écrire <[nombre] ou >[nombre] autorise n'importe quel nombre inférieur ou supérieur. Écrire [nombre]-[nombre] autorise une plage précise (bornes incluses)."
+        }
+    ]
+}

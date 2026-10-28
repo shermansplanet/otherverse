@@ -1,0 +1,12 @@
+{
+    "name": "Frisson",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'typhlotic_shark'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Lorsque vous invoquez votre Familier frisson, toutes les créatures dont la santé est inférieure à celle de vous et votre Familier réunis s'enfuiront, terrifiées. Il vous donnera aussi un vol créatif lent dans les Ruines."
+        }
+    ]
+}

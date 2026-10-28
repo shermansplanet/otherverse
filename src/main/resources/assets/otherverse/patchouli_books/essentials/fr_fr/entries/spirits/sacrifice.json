@@ -1,0 +1,12 @@
+{
+    "name": "Sacrifice",
+    "sortnum": 6,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Il existe une autre façon, plus sanglante, d'augmenter la capacité spirituelle d'un reliquaire placé dans le monde. Si une créature du même type d'esprit meurt au-dessus d'un tel reliquaire, un tiers de ses PV max sera ajouté à la capacité du reliquaire."
+        }
+    ]
+}

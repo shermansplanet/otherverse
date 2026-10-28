@@ -1,0 +1,19 @@
+{
+    "name": "Foudre",
+    "sortnum": 60,
+    "icon": "minecraft:lightning_rod",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si 33 de puissance influencent un paratonnerre qui influence une créature liée, la foudre frappera cette créature.$(br2)Il est utile de placer la créature liée dans l'eau si vous ne voulez pas qu'elle meure brûlée."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/lightning.png"
+            ],
+            "border": true
+        }
+    ]
+}

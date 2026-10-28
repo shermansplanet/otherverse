@@ -1,0 +1,16 @@
+{
+    "name": "Dragon de l'Ender",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'ender_dragon'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Oui, le dragon de l'Ender peut être un Familier. Il vous accordera un vol de type élytres et la capacité de vous régénérer grâce aux cristaux de l'End (plus il y en a à portée, plus vous vous régénérez vite). Si vous tombez hors du monde, vous serez ramené sur l'île principale de l'End avant de mourir."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Vous pouvez aussi utiliser un briquet pour tirer des boules de feu de dragon (bien plus vite, si c'est votre Instrument). Mais attention : ce Familier est si puissant que vous ne parviendrez pas tout à fait à maîtriser ce pouvoir. Si vous ne tirez pas au moins une de ces boules de feu par jour, vous commencerez à en tirer à des moments aléatoires."
+        }
+    ]
+}

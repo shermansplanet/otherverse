@@ -1,6 +1,6 @@
 {
-    "name": "Famulus",
-    "landing_text": "A guide to the Famulus ritual.",
+    "name": "otherverse.book.famulus.name",
+    "landing_text": "otherverse.book.famulus.landing_text",
     "version": 3,
     "model" : "otherverse:famulus",
     "show_progress" : false,

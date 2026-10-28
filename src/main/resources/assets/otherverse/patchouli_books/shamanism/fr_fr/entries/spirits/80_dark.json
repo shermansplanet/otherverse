@@ -1,0 +1,15 @@
+{
+    "name": "Obscurité",
+    "sortnum": 80,
+    "icon": "otherverse:spirit_dark",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_dark"
+            },
+            "text": "Dissimulation, mystère et tromperie. Émotions brutes. Le subconscient. Souvenirs oubliés ou refoulés.$(br2)Lorsqu'un sanctuaire d'obscurité déborde, tous les joueurs à sa portée reçoivent Cécité et Invisibilité pendant une seconde par esprit en excès.$(br2)La portée du sanctuaire est $(bold)centrée.$()"
+        }
+    ]
+}

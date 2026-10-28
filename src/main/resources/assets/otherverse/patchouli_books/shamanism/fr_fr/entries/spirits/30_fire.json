@@ -1,0 +1,19 @@
+{
+    "name": "Feu",
+    "sortnum": 30,
+    "icon": "otherverse:spirit_fire",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_fire"
+            },
+            "text": "Chaleur, énergie, libération, vitalité, entropie. Flammes qui rugissent et crépitent. Les esprits de feu sont utiles une fois domptés, et dangereux une fois déchaînés.$(br2)La portée du sanctuaire s'étend vers le $(bold)bas.$()"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsqu'un sanctuaire de feu déborde, les esprits de feu en excès se manifestent sous forme de lave (autant d'esprits de feu qu'en contient un seau de lave). De même, le surpuisage détruit la lave en échange d'esprits. S'il n'y a pas assez d'esprits pour de la lave ou nulle part où la placer, sept esprits en excès déborderont sous forme d'une boule de feu tirée depuis une face non couverte du sanctuaire choisie au hasard."
+        }
+    ]
+}

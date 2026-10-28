@@ -1,0 +1,12 @@
+{
+    "name": "Bourdonné",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'buzzed'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous donnez une fiole de miel à votre Familier bourdonné, il émettra une phéromone qui réinitialise le délai de reproduction de tous les animaux dans un rayon de seize blocs. Il vous donnera aussi un vol créatif lent dans les Ruines."
+        }
+    ]
+}

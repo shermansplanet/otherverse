@@ -1,0 +1,12 @@
+{
+    "name": "Poisson d'argent",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'silverfish'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si votre inventaire contient de la pierre infestée (que vous pouvez désormais produire à volonté), un Familier poisson d'argent vous accordera un essaim de poissons d'argent qui vous suivent et attaquent tout ce que vous attaquez. Ils disparaissent si vous vous éloignez trop."
+        }
+    ]
+}

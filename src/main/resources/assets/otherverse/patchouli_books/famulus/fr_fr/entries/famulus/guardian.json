@@ -1,0 +1,12 @@
+{
+    "name": "Gardien",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'guardian'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier gardien vous donne les capacités de la Force du conduit chaque fois que vous êtes dans l'eau ou sous la pluie, comme si vous étiez toujours à portée d'un conduit."
+        }
+    ]
+}

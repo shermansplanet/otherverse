@@ -1,0 +1,17 @@
+{
+    "name": "Dégoût",
+    "sortnum": 80,
+    "icon": "minecraft:slime_block",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Dégoût",
+            "text": "Le Dégoût est un lieu nauséabond de pourriture et de décomposition. Des roses de Wither parsèment le paysage, et il suffit de mettre le pied dans l'eau pour que la puanteur vous fasse tourner la tête. Toute nourriture fraîche laissée au sol se transforme en chair putréfiée au bout de sept secondes (la nourriture fraîche est tout objet contenant des esprits de nourriture mais pas de chair)."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Des zombies typhlotiques appelés $(bold)pourris$() errent en ce lieu. Ils vous poursuivront si vous avez de la nourriture fraîche dans votre inventaire ; son arôme tranche avec la puanteur du Dégoût. On peut distraire les pourris en jetant de la nourriture fraîche au sol, mais rappelez-vous qu'elle se gâte vite. Les pourris sont soignés par l'effet de Wither."
+        }
+    ]
+}

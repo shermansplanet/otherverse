@@ -9,6 +9,8 @@ import com.shermansplanet.otherverse.registries.OtherverseBlocks;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EndCrystalRenderer;
@@ -252,20 +254,20 @@ public class BindingRenderer {
         return false;
     }
 
-    public static String getBindingInfo(LivingEntity le) {
+    public static MutableComponent getBindingInfo(LivingEntity le) {
         var boundBy = le.getPersistentData().getString("last_bound_by");
         if (familiars.containsKey(le.getUUID())) {
-            return "Familiar of " + familiars.get(le.getUUID());
+            return Component.translatable("otherverse.binding_info.familiar", familiars.get(le.getUUID()));
         } else if (positiveBoundEntities.contains(le.getUUID())) {
-            return "Positively bound by " + boundBy;
+            return Component.translatable("otherverse.binding_info.positive", boundBy);
         } else if (negativeBoundEntities.contains(le.getUUID())) {
-            return "Negatively bound by " + boundBy;
+            return Component.translatable("otherverse.binding_info.negative", boundBy);
         } else if (le.getPersistentData().contains("construct_type") && !boundBy.isEmpty()) {
-            return "Created by " + boundBy;
+            return Component.translatable("otherverse.binding_info.created", boundBy);
         } else if (le.getPersistentData().contains("practitioner_loyalty")) {
-            return "Loyal to " + le.getPersistentData().getString("practitioner_loyalty");
+            return Component.translatable("otherverse.binding_info.loyal", le.getPersistentData().getString("practitioner_loyalty"));
         }
-        return "";
+        return null;
     }
 
     public static void updateBinding(LivingEntity le, BindingUpdateMessage update) {

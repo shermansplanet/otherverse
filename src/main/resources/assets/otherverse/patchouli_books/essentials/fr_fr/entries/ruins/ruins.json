@@ -1,0 +1,17 @@
+{
+    "name": "Les Ruines",
+    "icon": "minecraft:sculk",
+    "category": "otherverse:ruins",
+    "sortnum": 3,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Les Ruines suintent dans la Surface en des lieux que nous appelons les Abîmes, gardés par de grandes bêtes typhlotiques que nous appelons Wardens, et se répandent sur un substrat de souvenirs et d'expériences calcifiés que nous appelons sculk. Voyez avec quelle facilité le sculk libère ces expériences lorsqu'on le brise ? Mais avec une touche délicate, on peut en capturer un spécimen vivant."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:ruins",
+            "text": "Peut-être, si l'on parvenait à extraire des mots écrits de ce sculk, pourrait-on apprendre quelque chose sur le Royaume d'où il s'est répandu."
+        }
+    ]
+}

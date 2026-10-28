@@ -98,17 +98,17 @@ public class Otherverse {
     private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(
             Registries.CREATIVE_MODE_TAB, MODID);
     public static final RegistryObject<CreativeModeTab> TAB_PRACTICE = CREATIVE_TABS.register("practice", () -> CreativeModeTab.builder()
-            .title(Component.literal("Practice Items"))
+            .title(Component.translatable("itemGroup.otherverse.practice"))
             .icon(() -> OtherverseItems.CHALK.get().getDefaultInstance())
             .build()
     );
     public static final RegistryObject<CreativeModeTab> TAB_OTHERS = CREATIVE_TABS.register("others", () -> CreativeModeTab.builder()
-            .title(Component.literal("Mobs"))
+            .title(Component.translatable("itemGroup.otherverse.others"))
             .icon(() -> OtherverseItems.IDOL.get().getDefaultInstance())
             .build()
     );
     public static final RegistryObject<CreativeModeTab> TAB_SPIRITS = CREATIVE_TABS.register("spirits", () -> CreativeModeTab.builder()
-            .title(Component.literal("Spirit Types"))
+            .title(Component.translatable("itemGroup.otherverse.spirits"))
             .icon(() -> Spirits.spiritItems.get(Spirits.COLOR_GRAY).get().getDefaultInstance())
             .build()
     );

@@ -459,7 +459,7 @@ public class ChalkCircle extends BlockEntity implements IItemHandler, IFocus, IF
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Chalk Circle");
+        return Component.translatable("container.otherverse.chalk_circle");
     }
 
     @Override

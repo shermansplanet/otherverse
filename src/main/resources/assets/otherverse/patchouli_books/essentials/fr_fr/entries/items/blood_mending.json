@@ -1,0 +1,16 @@
+{
+    "name": "Raccommodage sanguin",
+    "sortnum": 25,
+    "icon": "minecraft:enchanted_book",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous battez à mort une créature d'au moins 20 PV max avec un livre de Raccommodage, cet acte de violence déformera le livre lui-même, transformant l'enchantement en raccommodage sanguin. Si un objet doté de cet enchantement tombe sous les 2/3 de sa durabilité, il consommera la santé de son porteur pour se réparer."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "C'est très utile pour les objets qu'utiliseront des créatures liées : tant que la santé de la créature est maintenue au maximum par sa liaison, son outil ne se brisera jamais."
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "name": "Action : Récolter",
+    "icon": "minecraft:wooden_hoe",
+    "category": "otherverse:contracts",
+    "sortnum": 85,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "tag": "minecraft:hoes"
+            },
+            "title": "Récolter",
+            "text": "Une houe en tant qu'objet désigne l'action « récolter ».$(br2)Elle fonctionne exactement comme « casser », sauf qu'elle ne cible que les cultures arrivées à maturité et les replante automatiquement ensuite. Sans filtre, elle cible n'importe quelle culture. Cette action fonctionne aussi sur les fleurs de chorus, les verrues du Nether et les colonies de champignons de Farmer's Delight."
+        }
+    ]
+}

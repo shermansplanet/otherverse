@@ -1,0 +1,12 @@
+{
+    "name": "Âne/Lama/Mule",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'donkey'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier âne, lama ou mule dispose d'un inventaire considérablement agrandi, en somme un grand coffre que vous pouvez invoquer à tout moment."
+        }
+    ]
+}

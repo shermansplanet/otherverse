@@ -1,0 +1,12 @@
+{
+    "name": "Ravageur",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'ravager'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier ravageur vous accordera une force et une résistance incroyables au combat, mais déclenchera un raid dans chaque village que vous visitez."
+        }
+    ]
+}

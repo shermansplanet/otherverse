@@ -1,0 +1,28 @@
+{
+    "name": "Cordes d'évasion et portails",
+    "sortnum": 10,
+    "icon": "otherverse:escape_rope",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:escape_rope",
+            "text": "Si vous avez l'avantage Corde d'évasion, vous pouvez utiliser une corde d'évasion n'importe où dans votre Domaine pour définir sa position « maison ». Utilisez-la ensuite n'importe où ailleurs pour y revenir instantanément."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "L'avantage Portails vous permet de créer des faisceaux de portail permanents en influençant un foyer de bloc vide avec une corde d'évasion et un peu de puissance (6 PV de créature liée ou 2 de Soi, et le triple si le portail vous transporte entre dimensions). Le portail obtenu visera la destination de la corde d'évasion."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les portails sont ancrés à leur base (la position du foyer de bloc dans leur diagramme de création), et s'étendent verticalement et horizontalement pour remplir l'espace disponible. Leur couleur peut être changée en utilisant une teinture sur leur base, et ils peuvent être éteints en plaçant un bloc sur leur base."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/portals.png"
+            ],
+            "border": true
+        }
+    ]
+}

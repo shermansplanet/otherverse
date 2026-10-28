@@ -1,0 +1,12 @@
+{
+    "name": "Banshee",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'banshee'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si un Familier banshee tient des enclumes, il volera au-dessus de sa cible et lui lâchera des enclumes dessus. Il vous donnera aussi un vol de type élytres, mais seulement dans les Ruines."
+        }
+    ]
+}

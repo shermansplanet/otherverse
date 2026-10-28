@@ -1,0 +1,12 @@
+{
+    "name": "Arpenteur",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'strider'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier arpenteur fera que la lave vous soigne et vous permettra de courir rapidement à sa surface, mais vous ralentira dans les biomes froids."
+        }
+    ]
+}

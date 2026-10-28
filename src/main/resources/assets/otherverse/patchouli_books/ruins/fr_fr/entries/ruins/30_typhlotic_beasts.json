@@ -1,0 +1,17 @@
+{
+    "name": "Bêtes typhlotiques",
+    "sortnum": 30,
+    "icon": "otherverse:spirit_dark",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Bêtes typhlotiques",
+            "text": "Les bêtes typhlotiques sont les superprédateurs de l'écosystème des Ruines. Chacune trouve sa niche dans un biome émotionnel unique, se nourrissant d'échos et d'autres immatéria. Les bêtes typhlotiques prennent de nombreuses formes, mais elles partagent certains traits."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "« Typhlotique » signifie « aveugle », et c'est bien trouvé : les bêtes typhlotiques sont toutes dépourvues d'yeux et comptent sur d'autres sens pour détecter leurs proies. Vous pourriez parvenir à échapper totalement à leur attention. Tant mieux, car si elles vous rattrapent, elles endommageront non seulement votre forme physique, mais aussi votre Soi même."
+        }
+    ]
+}

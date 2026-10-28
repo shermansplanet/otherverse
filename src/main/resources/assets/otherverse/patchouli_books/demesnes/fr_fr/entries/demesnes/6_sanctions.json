@@ -1,0 +1,16 @@
+{
+    "name": "Mandats et Sanctions",
+    "sortnum": 6,
+    "icon": "otherverse:writ",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Les Sanctions sont les icônes dans des cercles sur l'écran du Domaine. Au lieu d'être débloquées comme les avantages, elles peuvent être librement activées et désactivées. Chacune représente un ensemble de permissions qui peuvent être accordées ou révoquées dans les limites de votre Domaine."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Cliquer en maintenant Maj sur un bouton de Sanction produira un $(bold)Mandat$() pour cette Sanction. Utilisez un Mandat sur un autre joueur pour lui accorder ou lui révoquer cette Sanction précise dans votre Domaine.$(br2)Les sanctuaires ne peuvent placer ou retirer des blocs dans votre Domaine que si la Sanction de Remodelage est autorisée."
+        }
+    ]
+}

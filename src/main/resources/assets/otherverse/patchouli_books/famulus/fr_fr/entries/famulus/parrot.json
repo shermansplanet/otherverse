@@ -1,0 +1,12 @@
+{
+    "name": "Perroquet",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'parrot'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier perroquet vous permet de voler comme si vous aviez des élytres, mais le vol d'un perroquet repose sur sa légèreté - plus votre inventaire est rempli, plus la gravité garde son emprise sur vous."
+        }
+    ]
+}

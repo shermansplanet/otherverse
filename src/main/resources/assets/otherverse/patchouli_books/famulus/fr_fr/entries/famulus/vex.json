@@ -1,0 +1,12 @@
+{
+    "name": "Vex",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'vex'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier vex est une chose éphémère, qui ne persiste que quelques minutes avant d'expirer et de nécessiter du Soi pour être ranimé. Cependant, lorsque vous le rappelez d'entre les morts, il amènera quelques amis avec lui. Il vous donnera aussi un vol créatif plus lent."
+        }
+    ]
+}

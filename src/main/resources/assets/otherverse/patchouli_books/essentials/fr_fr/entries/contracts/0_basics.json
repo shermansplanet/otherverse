@@ -1,0 +1,22 @@
+{
+    "name": "Créer/appliquer des contrats",
+    "icon": "otherverse:contract",
+    "category": "otherverse:contracts",
+    "sortnum": 0,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:contract"
+            },
+            "text": "Pour créer un contrat, placez une feuille de papier dans un diagramme. Des comportements simples comme complexes peuvent être « programmés » dans le contrat via les influences du papier.$(br2)Utiliser un contrat sur une créature liée applique le contrat. Un contrat placé dans un foyer d'objet influençant une créature au moment de sa liaison sera aussi appliqué."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_1.png"
+            ],
+            "text": "L'infobulle d'un contrat indique ce qu'il fait."
+        }
+    ]
+}

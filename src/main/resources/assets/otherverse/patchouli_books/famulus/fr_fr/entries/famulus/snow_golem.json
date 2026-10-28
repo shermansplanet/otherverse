@@ -1,0 +1,12 @@
+{
+    "name": "Golem de neige",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'snow_golem'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier golem de neige vous protégera des dégâts de froid. Si vous avez de la glace bleue dans votre inventaire, vous gèlerez l'eau ou la lave sous vos pieds. Vous guérirez dans les biomes froids, mais fondrez lentement dans les biomes chauds, à moins d'avoir des blocs de neige dans votre inventaire, auquel cas l'un d'eux fondra à votre place."
+        }
+    ]
+}

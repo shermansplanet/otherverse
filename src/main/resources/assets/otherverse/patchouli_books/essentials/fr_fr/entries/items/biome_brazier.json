@@ -1,0 +1,46 @@
+{
+    "name": "Brasero de biome",
+    "sortnum": 20,
+    "icon": "otherverse:biome_brazier",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:biome_brazier",
+            "text": "Lorsqu'on lui fournit le bon équilibre d'esprits, le brasero de biome a la capacité de charger des tronçons, de localiser des biomes à distance, et même de transformer des biomes et de générer des ressources naturelles."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:scrying_powder"
+            },
+            "text": "Pour localiser un biome, créez d'abord de la poudre de divination en imprégnant de la poudre de blaze d'esprits du destin. Utilisez-la ensuite sur le brasero de biome, qui s'embrasera de flammes bleues. Une fois allumé, le brasero absorbera un esprit à la fois depuis tous les reliquaires qui l'influencent."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Chaque biome a une séquence spécifique de quatre esprits, qui doivent être fournis au brasero dans cet ordre. Ces séquences se trouvent dans JEI via le brasero de biome ou les objets d'esprit. Après avoir reçu les quatre esprits, le brasero se met à émettre des flammes pointant dans la direction du biome de ce type le plus proche."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:realm_wracked_coal"
+            },
+            "text": "Pour transformer des biomes, vous devez d'abord jeter du charbon ou du charbon de bois à travers un portail pour créer du charbon ravagé par les Royaumes. L'utiliser dans un biome imprimera ce biome sur le charbon. Son infobulle révélera quels esprits seront nécessaires pour recréer le biome ailleurs."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Utilisez du charbon ravagé par les Royaumes sur un brasero pour l'allumer. Une fois allumé, le brasero absorbera les esprits de tous les reliquaires qui l'influencent. Lorsqu'il en a assez, il transformera une toute petite zone autour de lui en biome fourni. Fournir à nouveau le même ensemble d'esprits agrandira le rayon. Une fois le rayon maximal atteint (16 blocs), le brasero commencera à générer des éléments du biome, comme des arbres ou des minerais."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/brazier_1.png"
+            ],
+            "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Pour utiliser un brasero de biome afin de charger des tronçons, il vous faudra un sanctuaire dimensionnel. Vous en apprendrez plus à ce sujet dans le livre du Chamanisme."
+        }
+    ]
+}

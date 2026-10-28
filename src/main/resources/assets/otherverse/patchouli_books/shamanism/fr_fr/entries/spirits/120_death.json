@@ -1,0 +1,15 @@
+{
+    "name": "Mort",
+    "sortnum": 120,
+    "icon": "otherverse:spirit_death",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_death"
+            },
+            "text": "Transitions irréversibles, symboles de mortalité, ce qui reste quand la vie s'éteint. Symboles du souvenir.$(br2)Si un joueur ou une créature liée/apprivoisée meurt à portée d'un sanctuaire de mort, le sanctuaire tentera de dépenser 444 esprits pour empêcher la mort.$(br2)La portée du sanctuaire est $(bold)centrée.$()"
+        }
+    ]
+}

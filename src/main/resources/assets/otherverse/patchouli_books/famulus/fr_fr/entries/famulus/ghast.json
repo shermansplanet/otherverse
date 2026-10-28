@@ -1,0 +1,12 @@
+{
+    "name": "Ghast",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'ghast'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier ghast vous accordera la résistance au feu et un vol limité. Si vous utilisez un briquet dans le vide, il tirera une boule de feu de ghast (bien plus rapidement, si c'est votre Instrument)."
+        }
+    ]
+}

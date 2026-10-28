@@ -1,0 +1,20 @@
+{
+    "name": "Cas particuliers",
+    "sortnum": 2,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Il existe quelques façons d'obtenir des esprits que vous ne verrez pas dans JEI. Les portails du Nether (les blocs de portail violets, pas l'obsidienne) donnent des esprits du Nether. Les blocs de feu donnent des esprits de feu. Les blocs de source d'eau donnent des esprits d'eau. Si un bloc influencé par un reliquaire du temps devait recevoir un tick aléatoire, il donnera à la place neuf esprits du temps."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Il existe aussi une façon spéciale d'obtenir des esprits de guerre : chaque point de dégâts infligé par une arme consacrée placera un esprit de guerre dans cette arme. Avec un montage astucieux et un $(l:otherverse:items/spawn_altar)autel d'apparition$(), on peut ainsi créer une ferme à créatures autonome.$(br2)Les reliquaires bouclier convertissent aussi les dégâts bloqués en esprits de protection."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si vous utilisez des diagrammes pour cuire un objet, ils ne le cuiront que d'une étape (c.-à-d. la pierre taillée en pierre, mais pas en pierre lisse) $(italic)à moins que$() l'objet ciblé ne soit aussi influencé par un fourneau."
+        }
+    ]
+}

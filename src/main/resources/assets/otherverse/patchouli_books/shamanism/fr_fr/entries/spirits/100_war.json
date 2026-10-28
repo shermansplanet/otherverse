@@ -1,0 +1,19 @@
+{
+    "name": "Guerre",
+    "sortnum": 100,
+    "icon": "otherverse:spirit_war",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_war"
+            },
+            "text": "Conflit et blessure, armes de violence. La bannière ensanglantée de la victoire à tout prix. Cycles de persécution et de vengeance.$(br2)Chaque point de dégâts infligé par une arme consacrée à la guerre placera un esprit de guerre dans cette arme.$(br2)La portée du sanctuaire est $(bold)centrée.$()"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsqu'un joueur ou une créature liée/apprivoisée inflige des dégâts à portée d'un sanctuaire de guerre, le sanctuaire tentera de dépenser un nombre d'esprits égal au triple des dégâts. Cela doublera les dégâts subis. Les effets de plusieurs sanctuaires se cumulent.$(br2)Les esprits de guerre sont aussi le carburant des autels d'apparition."
+        }
+    ]
+}

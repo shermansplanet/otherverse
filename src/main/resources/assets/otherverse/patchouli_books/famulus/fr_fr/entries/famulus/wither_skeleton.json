@@ -1,0 +1,12 @@
+{
+    "name": "Wither squelette",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'wither_skeleton'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier wither squelette vous permet d'infliger l'effet de Wither chaque fois que vous frappez un ennemi avec une épée en pierre. Si l'épée est votre Instrument, l'effet sera bien plus puissant et durable."
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "name": "Influence : subtilités",
+    "sortnum": 15,
+    "icon": "otherverse:chalk",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un foyer ne peut influencer qu'un seul autre foyer au maximum. Cependant, dans certaines situations, un foyer est une influence valide pour plusieurs foyers « cibles ». Comment les esprits choisissent-ils alors ?"
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/chalk_4.png"
+            ]
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Pour choisir entre plusieurs cibles, un foyer examine le $(bold)flux d'influence sortant$() de chaque cible possible : le nombre de foyers que la cible pourrait potentiellement influencer, moins le nombre de foyers qui pourraient potentiellement l'influencer.$(br2)Autrement dit, le nombre de cercles orange moins le nombre de cercles bleus qui apparaissent lorsque vous regardez un foyer avec la Vue."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si plusieurs cibles ont le même flux sortant, elles sont ignorées. Parmi celles qui restent, celle qui a le flux sortant le plus élevé est choisie.$(br2)En regardant un foyer, vous remarquerez peut-être des cercles plus petits et plus sombres. Ils représentent des influences (bleu) et des cibles (orange) potentielles qui $(italic)ont$() une symétrie valide, mais n'ont $(italic)pas$() été choisies en raison du principe qui vient d'être décrit."
+        }
+    ]
+}

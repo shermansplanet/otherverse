@@ -1,0 +1,20 @@
+{
+    "name": "Outil",
+    "sortnum": 10,
+    "icon": "minecraft:netherite_pickaxe",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "tag": "forge:tools"
+            },
+            "title": "Outils",
+            "text": "Les outils (y compris les armes et les boucliers) sont un choix d'Instrument populaire. Ils conserveront pour toujours les enchantements qu'ils avaient au moment du rituel, mais perdront tout enchantement supplémentaire en se brisant."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les Instruments destinés à casser des blocs peuvent désormais en casser plusieurs à la fois ; vous pouvez utiliser la touche de l'Instrument pour parcourir les options. Vous trouverez aussi les outils Instruments légèrement plus rapides à utiliser que leurs équivalents ordinaires. "
+        }
+    ]
+}

@@ -429,7 +429,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             if (spiritCode != null && !spiritCode.isEmpty()) {
                 labels = new MutableComponent[spiritCode.size()];
                 for (var i = 0; i < spiritCode.size(); i++) {
-                    labels[i] = Component.literal(spiritCode.get(i).label());
+                    labels[i] = spiritCode.get(i).getDisplayName();
                 }
                 return;
             }
@@ -442,8 +442,8 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                 .withStyle(Style.EMPTY.withBold(true));
         var i = 1;
         for (var spiritCount : spiritCounts.entrySet()) {
-            labels[i] = Component.literal(
-                    spiritCount.getValue().getFirst() + "/" + spiritCount.getValue().getSecond() + " " + spiritCount.getKey().label());
+            labels[i] = Component.translatable("otherverse.tooltip.hallow_contents",
+                    spiritCount.getValue().getFirst(), spiritCount.getValue().getSecond(), spiritCount.getKey().getDisplayName());
             i++;
         }
     }
@@ -501,7 +501,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             level.playSound(null, getBlockPos(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1, 1);
             markUpdated();
             if (player != null)
-                player.displayClientMessage(Component.literal("No shrine nearby with enough spirits."), true);
+                player.displayClientMessage(Component.translatable("otherverse.brazier.no_shrine"), true);
             DiagramManager.getOrCreateLevelData(sl).removeChunkloader(getBlockPos());
         }
     }
@@ -633,19 +633,19 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
             var biomeName = BiomeCodeAssigner.getBiomeFor(spiritCode);
             if (biomeName == null) {
                 for (var player : players)
-                    player.displayClientMessage(Component.literal("Spirit sequence does not correspond to any known biome"), false);
+                    player.displayClientMessage(Component.translatable("otherverse.brazier.unknown_sequence"), false);
             } else {
                 var biomeComponent = Component.translatable("biome." + biomeName.toString().replace(':', '.'));
                 var registry = sl.registryAccess().registry(Registries.BIOME).get();
                 var biome = registry.getHolderOrThrow(registry.getResourceKey(registry.get(biomeName)).get());
                 for (var player : players) {
-                    player.displayClientMessage(Component.literal("Attempting to locate ").append(biomeComponent), false);
+                    player.displayClientMessage(Component.translatable("otherverse.brazier.locating", biomeComponent), false);
                 }
                 new Thread(() -> {
                     var result = sl.findClosestBiome3d(Predicate.isEqual(biome), getBlockPos(), 6400, 32, 64);
                     if (result == null || result.getFirst() == null) {
                         for (var player : players)
-                            player.displayClientMessage(Component.literal("Could not find ").append(biomeComponent), false);
+                            player.displayClientMessage(Component.translatable("otherverse.brazier.not_found", biomeComponent), false);
                     } else {
                         for (var i = 0; i < 8; i++) {
                             var r = RandomSource.create(sl.getGameTime());
@@ -659,7 +659,7 @@ public class BiomeBrazierBlockEntity extends BlockEntity {
                             direction = dir;
                         }
                         for (var player : players)
-                            player.displayClientMessage(Component.literal("Now scrying towards ").append(biomeComponent), false);
+                            player.displayClientMessage(Component.translatable("otherverse.brazier.scrying", biomeComponent), false);
                     }
                 }).start();
             }

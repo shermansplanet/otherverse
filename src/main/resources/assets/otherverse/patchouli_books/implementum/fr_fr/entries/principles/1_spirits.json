@@ -1,0 +1,16 @@
+{
+    "name": "Harmonisation spirituelle",
+    "sortnum": 1,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:principles",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Lorsque vous revendiquez un Instrument, vous gagnez de façon permanente une certaine affinité pour son type d'esprit le plus abondant (en privilégiant les esprits qui ne sont pas des couleurs). S'il s'agit d'un reliquaire, vous gagnerez plutôt une affinité pour le type d'esprit du reliquaire. Vous perdrez de l'affinité pour le type opposé."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Consultez la section « Affinité spirituelle » des Essentiels pour plus d'informations sur les affinités spirituelles et une liste des types d'esprits opposés.$(br2)Si votre Instrument est un reliquaire, vous pouvez utiliser la touche de l'Instrument pour le remplir de jusqu'à 33 esprits au prix de votre Soi."
+        }
+    ]
+}

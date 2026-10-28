@@ -1,0 +1,20 @@
+{
+    "name": "Bloc",
+    "sortnum": 20,
+    "icon": "minecraft:stone",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:stone"
+            },
+            "title": "Bloc",
+            "text": "Certains blocs peuvent être des Instruments. Vous pouvez utiliser un bloc Instrument pour placer des copies de ce bloc un certain nombre de fois avant que l'Instrument ne doive être rechargé avec votre Soi.$(br2)De plus, vous trouverez bien plus facile de casser les blocs de ce type."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "En consultant la composition spirituelle d'un bloc dans JEI, les blocs éligibles comme Instruments sont annotés d'un nombre rouge sous une icône de bloc, indiquant combien de ces blocs peuvent être placés entre deux recharges.$(br2)Un Instrument seau de lave placera de la lave comme s'il s'agissait d'un bloc Instrument."
+        }
+    ]
+}

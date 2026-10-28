@@ -1,0 +1,16 @@
+{
+    "name": "Cœur",
+    "sortnum": 90,
+    "icon": "otherverse:homunculus_heart",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:homunculus_heart"
+            },
+            "title": "Cœur d'homoncule",
+            "text": "Tant que vous tenez un Instrument cœur d'homoncule, tous les homoncules autour de vous seront maintenus en vie, même hors de portée d'un sanctuaire de chair. De plus, tous les dégâts qu'ils subissent seront transférés au cœur."
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "name": "Action : Déposer",
+    "icon": "minecraft:dispenser",
+    "category": "otherverse:contracts",
+    "sortnum": 60,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:dispenser"
+            },
+            "title": "Déposer",
+            "text": "Un distributeur en tant qu'objet désigne l'action « déposer », filtrée de la même manière que l'action « prendre ».$(br2)Si possible, la créature placera l'objet tenu sous forme de bloc plutôt que de le jeter au sol."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si vous dites à une araignée liée de déposer une toile d'araignée quelque part, elle n'a pas besoin d'en tenir : elle en tissera une à l'endroit voulu, au prix d'un peu de sa santé."
+        }
+    ]
+}

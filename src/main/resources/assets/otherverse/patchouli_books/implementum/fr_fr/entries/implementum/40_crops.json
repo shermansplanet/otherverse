@@ -1,0 +1,14 @@
+{
+    "name": "Cultivable",
+    "sortnum": 40,
+    "icon": "minecraft:wheat_seeds",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": "tag:minecraft:saplings,tag:forge:seeds",
+            "title": "Cultivables",
+            "text": "Tout ce qui peut recevoir de la poudre d'os - pousses, cultures, et même l'herbe et le nylium - est traité comme un bloc Instrument. En plus des capacités habituelles d'un bloc Instrument, utiliser un tel Instrument sur un bloc de ce type déjà placé consommera une utilisation pour lui appliquer l'effet de la poudre d'os."
+        }
+    ]
+}

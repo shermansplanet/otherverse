@@ -377,11 +377,10 @@ public class ImplementManager {
         var tag = e.getItemStack().getTag();
         if (tag == null) return;
         var spiritType = tag.getString("implement_spirit");
-        e.getToolTip().add(Component.literal("Implement (" + spiritType + ")").withStyle(Style.EMPTY.withColor(IMPLEMENT_UI_COLOR)));
+        e.getToolTip().add(Component.translatable("otherverse.tooltip.implement", SpiritType.getDisplayName(spiritType)).withStyle(Style.EMPTY.withColor(IMPLEMENT_UI_COLOR)));
         if (tag.contains("implement_max_uses")) {
-            e.getToolTip().add(Component.literal(
-                    tag.getInt("implement_remaining_uses") + "/" + tag.getInt("implement_max_uses") + " uses left"
-            ).withStyle(Style.EMPTY.withColor(IMPLEMENT_UI_COLOR)));
+            e.getToolTip().add(Component.translatable("otherverse.tooltip.implement_uses",
+                    tag.getInt("implement_remaining_uses"), tag.getInt("implement_max_uses")).withStyle(Style.EMPTY.withColor(IMPLEMENT_UI_COLOR)));
         }
     }
 
@@ -703,7 +702,7 @@ public class ImplementManager {
             if (player.getItemBySlot(s).isEmpty()) slot = s;
         }
         if (slot == null && player.getInventory().getFreeSlot() == -1) {
-            player.displayClientMessage(Component.literal("No free inventory slot in which to summon your Implement!"), true);
+            player.displayClientMessage(Component.translatable("otherverse.implement.no_free_slot"), true);
             return;
         }
         var shouldSpendSelf = !player.isCreative();
@@ -729,12 +728,7 @@ public class ImplementManager {
         var vals = ImplementVeinMining.MiningMode.values();
         var newModeIndex = (oldMode + 1) % vals.length;
         var newMode = ImplementVeinMining.MiningMode.values()[newModeIndex];
-        player.displayClientMessage(Component.literal(switch (newMode) {
-            case NONE -> "Breaking blocks normally";
-            case SQUARE -> "Breaking blocks in 3x3 square";
-            case TUNNEL -> "Breaking blocks in a tunnel";
-            case ANY -> "Breaking any connected blocks";
-        }), true);
+        player.displayClientMessage(Component.translatable("otherverse.implement.mode." + newMode.name().toLowerCase(Locale.ROOT)), true);
         item.getTag().putInt("implement_mode", newModeIndex);
     }
 

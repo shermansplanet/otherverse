@@ -1,0 +1,16 @@
+{
+    "name": "Allay",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'allay'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Comme beaucoup de créatures volantes, un Familier allay vous donnera une version amoindrie du vol créatif. Mais son principal avantage est que vous pouvez exploiter son affinité naturelle pour les contrats, en particulier les plus simples servant à déplacer des objets."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si vous appuyez sur la touche du Familier en regardant un bloc et en tenant une feuille de papier, le papier deviendra un contrat pour prendre des objets dans ce bloc. Si vous appuyez de nouveau en tenant le contrat et en regardant un autre bloc, une clause sera ajoutée pour déposer les objets dans/sur ce second bloc. Si vous tenez un objet dans votre main secondaire, le contrat filtrera ce type d'objet."
+        }
+    ]
+}

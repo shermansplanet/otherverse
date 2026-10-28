@@ -1,0 +1,28 @@
+{
+    "name": "Transfusion de créature",
+    "sortnum": 20,
+    "icon": "otherverse:self",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Tout comme les esprits, les créatures liées peuvent être drainées de leur santé pour transfuser ce que leur foyer de liaison influence. Ces recettes se trouvent dans le même onglet JEI que la transfusion d'esprits. Notez que certaines recettes nécessitent de drainer plusieurs créatures à la fois. De nombreuses créatures peuvent aussi être drainées directement pour obtenir des esprits, ce qu'on trouve dans l'onglet JEI Composition spirituelle."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/binding_3.png"
+            ],
+            "border": true,
+            "text": "Deux poules transforment le blé en plumes."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Une liaison cessera de drainer une créature avant qu'elle ne meure. Les créatures liées peuvent aussi être $(italic)soignées$() en consommant certaines influences. Celles-ci sont visibles dans la section des liaisons de JEI/EMI, indiquées par des cœurs rouges au lieu de chaînes noires. Certaines créatures peuvent drainer la santé de certaines autres créatures liées pour se soigner. Les créatures peuvent aussi se soigner avec leur type d'esprit (2 esprits pour 1 point de santé)."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Par défaut, une créature absorbera un objet de soin même si elle n'a besoin que d'une partie du soin qu'il procure. Si vous préférez ne gaspiller aucun soin, l'objet de soin peut être placé dans un foyer posé sur un bloc d'améthyste, ou influencé par un éclat d'améthyste."
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "name": "Phlogistique",
+    "sortnum": 60,
+    "icon": "otherverse:spirit_phlogiston",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_phlogiston"
+            },
+            "text": "Énergie stockée, potentiel de combustion. Petit bois, combustible, explosifs. Tension. Un arrangement temporairement stable.$(br2)Lorsqu'un sanctuaire de phlogistique déborde, les esprits en excès se manifestent sous forme d'explosion.$(br2)La portée du sanctuaire s'étend vers le $(bold)bas.$()"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Une explosion nécessite 33 esprits, et sa puissance augmente pour chaque tranche supplémentaire de 33 esprits (plafonnée à 333). Elle ne détruit ni la craie, ni les blocs situés sous la craie, ni les blocs-reliquaires. Le sanctuaire provoque des explosions sur les blocs de sa portée, du plus proche au plus lointain, en ignorant les blocs d'air. Il passe au bloc suivant même si le bloc qui explose est trop résistant pour se briser."
+        }
+    ]
+}

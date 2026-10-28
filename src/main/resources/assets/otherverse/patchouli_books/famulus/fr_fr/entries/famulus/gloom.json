@@ -1,0 +1,12 @@
+{
+    "name": "Pénombre",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'typhlotic_jellyfish'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier pénombre appliquera un effet de lenteur dans un rayon de huit blocs. S'il tient une potion, il la boira ; pendant la durée de la potion, il appliquera cet effet à la place. Seuls les effets positifs vous seront appliqués, à vous et à vos créatures liées. Il vous donnera aussi un vol créatif lent dans les Ruines."
+        }
+    ]
+}

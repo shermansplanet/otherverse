@@ -1,0 +1,12 @@
+{
+    "name": "Axolotl",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'axolotl'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier axolotl vous accordera la régénération lorsque vous êtes dans l'eau."
+        }
+    ]
+}

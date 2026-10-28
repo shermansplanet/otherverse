@@ -27,7 +27,7 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class DemesnesClaimScreen extends AbstractContainerScreen<DemesnesClaimMenu> {
-    static final String ritualStartText = "CLAIM";
+    static final Component ritualStartText = Component.translatable("otherverse.demesne_claim.start");
     static final ResourceLocation SCREEN_LOCATION = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/demesnes.png");
     static final ResourceLocation UI_LOCATION = ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png");
 
@@ -48,9 +48,9 @@ public class DemesnesClaimScreen extends AbstractContainerScreen<DemesnesClaimMe
                     new BlockPos(menu.centerX.get(), menu.centerY.get(), menu.centerZ.get()),
                     menu.range.get())
             );
-        }, Component.literal(ritualStartText)) {
+        }, ritualStartText) {
             protected MutableComponent createNarrationMessage() {
-                return Component.literal(ritualStartText);
+                return ritualStartText.copy();
             }
         };
 
@@ -112,10 +112,10 @@ public class DemesnesClaimScreen extends AbstractContainerScreen<DemesnesClaimMe
                 graphics.drawString(font, ritualStartText, midx + 33, midy + 85, startButton.isHoveredOrFocused() ? 0xaaff00 : 0xded4bc);
             }
 
-            graphics.drawString(font, "Level cost:", midx - 78, midy + 85, 0xbab3a0);
+            graphics.drawString(font, Component.translatable("otherverse.demesne_claim.level_cost"), midx - 78, midy + 85, 0xbab3a0);
             graphics.drawString(font, String.valueOf(levelCost), midx - 20, midy + 85, hasLevels ? 0xaaff00 : 0xe6272a);
         } else {
-            var s = menu.canClaim.get() == 1 ? "No pyramid found." : "Area already claimed.";
+            var s = Component.translatable(menu.canClaim.get() == 1 ? "otherverse.demesne_claim.no_pyramid" : "otherverse.demesne_claim.already_claimed");
             graphics.drawString(font, s, midx - 78, midy + 82, 0xbab3a0);
         }
     }

@@ -1,0 +1,18 @@
+{
+    "name": "Lier les boss",
+    "sortnum": 70,
+    "icon": "minecraft:dragon_egg",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Le Wither",
+            "text": "Le Wither est trop puissant pour être lié au sommet de sa vitalité. Vous devez attendre qu'il commence à être aux abois (moins de la moitié de sa santé) avant de pouvoir le lier. Cela nécessite presque toujours des flèches de revendication (voir le livre des Ruines)."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Le dragon de l'Ender",
+            "text": "Vous pouvez forcer l'œuf du dragon de l'Ender à éclore en l'influençant avec 8 cristaux de l'End dans des foyers de bloc. Si l'œuf se trouve dans une liaison de dragon valide, il éclora en un dragon lié."
+        }
+    ]
+}

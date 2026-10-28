@@ -1,0 +1,28 @@
+{
+    "name": "Affinité spirituelle",
+    "sortnum": 1,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:demesnes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Comme pour les deux autres grands rituels, votre choix de Domaine augmente de façon permanente votre affinité pour un certain type d'esprit. Ce type dépend de nombreux facteurs. Vous pouvez le voir en haut du menu de votre Domaine, avant même de commencer le rituel. Cependant, certains types d'esprits ne sont possibles que si certaines conditions sont remplies pendant le rituel lui-même."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les Domaines de terre se trouvent sous terre. Les Domaines d'air se trouvent haut dans les airs. Les Domaines de feu se revendiquent en tuant au moins la moitié de vos challengers par le feu ou la lave. Les Domaines de froid sont dans des biomes froids, ceux d'eau dans des biomes aquatiques, et ceux de phlogistique dans des biomes chauds et secs. Les Domaines de mort sont dans les vallées de sable des âmes, ou revendiqués en tuant au moins la moitié de vos challengers par le Wither."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les Domaines de nourriture sont dans des bosquets, ou ont leur balise entourée de terres labourées pour la revendication. Pour revendiquer un Domaine de protection, aucun challenger non volant ne doit s'aventurer à plus de quatre blocs du bord de la zone revendiquée. Placer la balise dans un vestige de bastion ou un avant-poste de pillards donne un Domaine de guerre, et dans un fort, une forteresse du Nether ou l'île centrale de l'End, un Domaine du destin."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les balises d'un Domaine de lumière doivent être entourées de pierre lumineuse pour la revendication. Les Domaines d'obscurité doivent se trouver dans les abîmes ou une forêt noire. Les Domaines de chair se revendiquent si plus de la moitié de vos challengers sont tués par d'autres créatures. Pour les Domaines de technologie, ils doivent mourir de chute, d'étouffement, d'enclumes, de spéléothèmes ou de flèches tirées par des distributeurs. Les Domaines de nature sont dans des biomes où apparaissent des créatures alignées sur la Nature."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les Domaines de fortune ont des pyramides en blocs d'or, et les Domaines du temps se trouvent dans des biomes anciens. Si aucune de ces conditions ne s'applique, le type d'esprit du Domaine sera celui de la dimension où il se trouve. Ou, si le nom du biome du Domaine contient un type d'esprit, c'est cet esprit qui sera choisi."
+        }
+    ]
+}

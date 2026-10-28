@@ -1,0 +1,12 @@
+{
+    "name": "Ours blanc",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'polar_bear'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier ours blanc vous protégera des dégâts de froid, et vous donnera un bonus de vitesse et de dégâts dans les biomes froids."
+        }
+    ]
+}

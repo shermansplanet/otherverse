@@ -1,0 +1,12 @@
+{
+    "name": "Éteigneur",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'otherverse',entity_type_path:'snuffer'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous avez un Familier éteigneur, le sable des âmes ne vous ralentira pas et la foudre vous accélérera au lieu de vous blesser. La région du Choc ne vous frappera de la foudre que si vous tenez un paratonnerre."
+        }
+    ]
+}

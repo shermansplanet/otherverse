@@ -1,0 +1,16 @@
+{
+    "name": "Armure",
+    "sortnum": 30,
+    "icon": "minecraft:netherite_chestplate",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "tag": "forge:armors"
+            },
+            "title": "Armure",
+            "text": "Si vous choisissez une armure comme Instrument, vous recevrez une armure supplémentaire en la portant. S'il s'agit de bottes, vous recevrez plutôt un bonus de vitesse.$(br2)Comme pour les outils, seuls les enchantements déjà présents lors du rituel persistent."
+        }
+    ]
+}

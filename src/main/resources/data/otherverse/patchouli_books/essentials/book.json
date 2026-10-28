@@ -1,6 +1,6 @@
 {
-    "name": "Essentials",
-    "landing_text": "No, see, this book IS the tl;dr.",
+    "name": "otherverse.book.essentials.name",
+    "landing_text": "otherverse.book.essentials.landing_text",
     "version": 3,
     "model" : "otherverse:essentials",
     "show_progress" : false,

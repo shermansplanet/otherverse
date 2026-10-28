@@ -1,0 +1,12 @@
+{
+    "name": "Cheval",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'horse'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Lorsque vous prenez un cheval comme Familier, sa vitesse, sa hauteur de saut et sa santé doublent toutes."
+        }
+    ]
+}

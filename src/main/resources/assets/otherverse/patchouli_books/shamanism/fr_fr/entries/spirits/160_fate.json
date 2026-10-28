@@ -1,0 +1,26 @@
+{
+    "name": "Destin",
+    "sortnum": 160,
+    "icon": "otherverse:spirit_fate",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_fate"
+            },
+            "text": "Logique de conte, magie, cartes et légendes. Des événements prédits qui doivent advenir, des fleuves de destinée convergeant vers un point.$(br2)Les sanctuaires du destin n'ont aucun effet particulier."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spindle_bloody"
+            },
+            "text": "Si vous utilisez un fuseau pour infliger des dégâts, il deviendra un fuseau sanglant, et conservera un lien Sympathique avec la créature qu'il a blessée.$(br)Si une créature liée influence un reliquaire du destin qui influence ce fuseau, tout soin ou dégât reçu par la créature liée sera réparti entre elle et la créature liée par sympathie."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les montants impairs seront arrondis au hasard vers le haut ou vers le bas. Chaque point de santé gagné ou perdu par cette connexion Sympathique coûte un esprit du destin au reliquaire.$(br2)Cette Pratique ne fonctionne que si la créature ciblée se trouve dans un tronçon chargé.$(br2)Un joueur peut remplacer l'une ou l'autre partie de ce montage en utilisant son Soi dans un cercle de craie."
+        }
+    ]
+}

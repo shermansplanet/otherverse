@@ -70,7 +70,7 @@ public class Guest extends EnderMan {
     public boolean hurt(DamageSource source, float amount) {
         if (source.getEntity() instanceof ServerPlayer player &&
                 player.level().getBiome(player.blockPosition()).unwrapKey().get().location().getPath().equals("ruins_trust")) {
-            player.displayClientMessage(Component.literal("By harming a guest, you have violated Hospitality."), true);
+            player.displayClientMessage(Component.translatable("otherverse.hospitality.harm_guest"), true);
             RuinsManager.breakHospitality(player);
         }
         return super.hurt(source, amount);

@@ -1,0 +1,19 @@
+{
+    "name": "Froid",
+    "sortnum": 40,
+    "icon": "otherverse:spirit_cold",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_cold"
+            },
+            "text": "La beauté glaçante de la neige et de la glace, la morsure fractale du givre. Animation suspendue, conservation, congélation.$(br2)La portée du sanctuaire est $(bold)centrée.$()"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsqu'un sanctuaire de froid déborde, les esprits en excès affectent l'environnement : 3 esprits gèlent un bloc d'eau ou de lave, ou déposent des couches de neige au sol. 24 esprits transforment la neige en neige poudreuse. Lorsqu'un sanctuaire de froid est surpuisé, il détruit les couches de neige pour produire 3 esprits de froid, ou transforme la neige poudreuse en neige pour produire 18 esprits de froid."
+        }
+    ]
+}

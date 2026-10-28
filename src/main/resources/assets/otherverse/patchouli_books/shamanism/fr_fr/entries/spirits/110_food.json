@@ -1,0 +1,15 @@
+{
+    "name": "Nourriture",
+    "sortnum": 110,
+    "icon": "otherverse:spirit_food",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_food"
+            },
+            "text": "Subsistance et satiété. Le miracle de l'existence qui perdure. Santé, vigueur et abondance. Gourmandise et excès.$(br2)Lorsqu'un sanctuaire de nourriture déborde, les esprits en excès remplissent la barre de faim des joueurs à portée. Lorsqu'il est surpuisé, il draine la faim en échange d'esprits de nourriture.$(br2)La portée du sanctuaire est $(bold)centrée.$()"
+        }
+    ]
+}

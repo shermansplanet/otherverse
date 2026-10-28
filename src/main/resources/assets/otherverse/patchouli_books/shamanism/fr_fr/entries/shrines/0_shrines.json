@@ -1,0 +1,24 @@
+{
+    "name": "Sanctuaires",
+    "sortnum": 0,
+    "icon": "minecraft:jack_o_lantern",
+    "category": "otherverse:shrines",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Les sanctuaires sont des reliquaires multiblocs qui ont été marqués par un Praticien. Pour désigner un reliquaire multibloc comme sanctuaire, faites un clic droit dessus en maintenant Maj, la main vide. Cela coûte un peu de santé, mais pas de Soi. Vous pouvez ajouter de nouveaux blocs à un sanctuaire et ils en feront partie. Refaire un clic droit en maintenant Maj le retransformera en reliquaire, mais votre affinité pour ce type d'esprit subira une baisse temporaire."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "De nombreux sanctuaires peuvent être $(bold)débordés$() (remplis alors qu'ils sont déjà pleins) ou $(bold)surpuisés$() (vidés alors qu'ils sont vides) pour provoquer des effets dans une zone autour du sanctuaire. Vous pouvez voir ces zones avec votre Vue. La portée d'un sanctuaire est proportionnelle à sa capacité totale. Les sanctuaires plus larges/hauts auront des portées plus larges/hautes. Les sanctuaires gagnent un multiplicateur de portée bonus pour chaque type de bloc unique qu'ils contiennent."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Ces capacités de débordement/surpuisage ne se déclenchent que si le sanctuaire a assez de carburant/capacité pour produire un effet. Par exemple, les sanctuaires de nature peuvent utiliser 33 esprits en débordement pour faire pousser les cultures ; ils ne décomposeront donc pas directement des graines, puisque celles-ci n'ont que 30 esprits de nature. Pour y parvenir, il faudrait un reliquaire de nature intermédiaire pouvant contenir au moins 33 esprits à drainer d'un coup."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Certaines capacités de sanctuaire affectent les joueurs ou les créatures liées/apprivoisées dans la portée du sanctuaire. Ces capacités affectent aussi tout joueur dont le Soi est influencé par le sanctuaire, ou toute créature liée/apprivoisée dont un fuseau sanglant est influencé par le sanctuaire.$(br2)Les portées des sanctuaires sont relatives au bas du sanctuaire, et peuvent s'étendre vers le haut, vers le bas ou être centrées sur le bas, selon le type d'esprit."
+        }
+    ]
+}

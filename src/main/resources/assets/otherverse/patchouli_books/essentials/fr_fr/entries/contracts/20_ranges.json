@@ -1,0 +1,19 @@
+{
+    "name": "Zones",
+    "icon": "minecraft:glass",
+    "category": "otherverse:contracts",
+    "sortnum": 200,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si une action est influencée par un bloc de verre en tant qu'objet, lui-même influencé par exactement deux foyers de bloc vides ou $(l:otherverse:contracts/12_webs)Destinés$(), ces deux influences deviendront les coins d'une zone 3D dans laquelle accomplir l'action."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/endermine.png"
+            ],
+            "text": "Très utile pour miner une zone."
+        }
+    ]
+}

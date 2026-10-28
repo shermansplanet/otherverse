@@ -1,0 +1,19 @@
+{
+    "name": "Terre",
+    "sortnum": 10,
+    "icon": "otherverse:spirit_earth",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_earth"
+            },
+            "text": "Pierre robuste et terre lourde. Des montagnes qui se déplacent à l'échelle des temps tectoniques. Ancrée et persévérante, mais lente.$(br2)La portée du sanctuaire s'étend vers le $(bold)bas.$()"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsqu'un sanctuaire de terre déborde, les esprits en excès se manifestent sous forme de blocs de terre. Lorsqu'il est surpuisé, il extrait les esprits de terre des blocs de sa portée qui en contiennent, détruisant ces blocs au passage. La portée d'un sanctuaire de terre s'étend vers le bas depuis sa base."
+        }
+    ]
+}

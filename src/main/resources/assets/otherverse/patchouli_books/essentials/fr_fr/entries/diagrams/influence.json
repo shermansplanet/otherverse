@@ -1,0 +1,120 @@
+{
+    "name": "Influence : bases",
+    "sortnum": 10,
+    "icon": "otherverse:chalk",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "La fonction d'un diagramme est déterminée par quels foyers $(bold)influencent$() quels autres foyers. Par exemple, si un foyer contenant une chaîne influence un foyer contenant une créature, il contribuera à lier cette créature. $(br2)Avec votre Vue, vous pouvez voir le flux d'influence représenté par des particules. Et si vous regardez un foyer, ses influences seront surlignées en bleu vif et le foyer qu'il influence en orange vif."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_1.png"
+            ],
+            "border": true,
+            "text": "Sans doute le diagramme le plus simple. Le foyer intérieur est influencé par le foyer extérieur."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Symétrie",
+            "text": "Pour déterminer quels foyers influencent un foyer, cherchez une $(bold)symétrie$() autour du foyer, où $(italic)toutes$() les cases ou $(italic)aucune$() n'ont de craie. Souvent, il s'agira des quatre positions directement adjacentes ou diagonales. Il peut aussi s'agir des quatre cases situées à plusieurs blocs dans les directions cardinales ou diagonales, voire parfois de huit emplacements symétriques."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_symmetry.png"
+            ],
+            "border": true,
+            "text": "Vous pouvez faire un clic droit sur le sol avec de la craie en maintenant Maj pour passer en mode Aide à la symétrie et voir ce qui est symétrique autour de l'endroit cliqué."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_yes.png"
+            ],
+            "border": true,
+            "text": "Les quatre cases autour du foyer intérieur ont de la craie, elles peuvent donc l'influencer..."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_no.png"
+            ],
+            "border": true,
+            "text": "...mais les quatre cases autour du foyer extérieur n'ont pas toutes de la craie, donc l'inverse n'est pas vrai."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les foyers d'objet sont symétriques avec toute autre marque de craie faisant partie du même diagramme.$(br2)Les foyers de bloc sont symétriques entre eux, ou avec toute case $(bold)adjacente$() au diagramme.$(br2)Dans ce diagramme, le foyer de bloc en haut à droite correspond aux trois cases vides qui lui sont symétriques autour du foyer d'objet central ; il influence donc le foyer d'objet central."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_3.png"
+            ],
+            "border": true
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_6.png"
+            ],
+            "border": true,
+            "text": "Ce foyer de bloc est influencé par les foyers d'objet qui l'entourent."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_7.png"
+            ],
+            "border": true,
+            "text": "Ce foyer de bloc est influencé par les foyers de bloc qui l'entourent."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_8.png"
+            ],
+            "border": true,
+            "text": "Le foyer de bloc ne peut pas influencer le foyer d'objet, car une case symétrique contient de la craie."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_9.png"
+            ],
+            "border": true,
+            "text": "Ici, c'est parce que les cases symétriques ne sont ni dans le diagramme ni adjacentes à celui-ci."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_10.png"
+            ],
+            "border": true,
+            "text": "On peut ajouter de la craie pour que le foyer de bloc influence le foyer d'objet."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_11.png"
+            ],
+            "border": true,
+            "text": "Il y a bien des façons de le faire ! Il faut juste que les cases soient dans le diagramme ou adjacentes à celui-ci."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/influence_4.png"
+            ],
+            "border": true,
+            "text": "Les influences peuvent être enchaînées de façons arbitrairement complexes."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Vous en savez maintenant assez sur les diagrammes pour commencer à les utiliser dans votre Pratique !$(br2)La plupart des Pratiques peuvent se faire avec des diagrammes simples, mais les choses se compliquent vite quand on met en place des $(l:otherverse:contracts)contrats$() avancés ou des montages de $(l:otherverse:spirits/spirit_transfusion)transfusion$() en plusieurs étapes.$(br2)Si vous voulez en savoir plus sur les subtilités de l'influence, lisez la suite. Sinon, à vous de Pratiquer ! Pourquoi ne pas commencer par créer un $(l:otherverse:spirits/hallows)reliquaire$() ?"
+        }
+    ]
+}

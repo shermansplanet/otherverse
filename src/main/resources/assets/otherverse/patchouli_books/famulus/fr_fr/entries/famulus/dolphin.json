@@ -1,0 +1,12 @@
+{
+    "name": "Dauphin",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'dolphin'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier dauphin vous donne en permanence la Grâce du dauphin."
+        }
+    ]
+}

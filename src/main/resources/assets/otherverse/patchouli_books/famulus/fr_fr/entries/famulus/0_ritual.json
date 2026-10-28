@@ -1,0 +1,16 @@
+{
+    "name": "Accomplir le rituel",
+    "sortnum": 0,
+    "icon": "otherverse:familiar_name_tag",
+    "category": "otherverse:famulus_general",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Pour accomplir le rituel du Famulus, nommez une créature liée avec une étiquette de familier nommée. Pour que le rituel réussisse, la créature doit être influencée par une quantité de votre Soi égale à la moitié de sa santé (ou au quart de sa santé, si elle est liée positivement)."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:familiar_name_tag"
+        }
+    ]
+}

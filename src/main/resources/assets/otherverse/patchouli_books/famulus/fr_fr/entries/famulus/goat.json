@@ -1,0 +1,12 @@
+{
+    "name": "Chèvre",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'goat'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Avec un Familier chèvre, vous pouvez jouer d'une corne de chèvre pour donner un bonus de dégâts à tous les joueurs proches. Vos attaques au corps à corps infligeront aussi un recul supplémentaire proportionnel à leurs dégâts, et transféreront toute votre vitesse à votre cible (cela peut même faire subir des dégâts de chute à un ennemi au sol, si vous le frappez juste avant d'atterrir)."
+        }
+    ]
+}

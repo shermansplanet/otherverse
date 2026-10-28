@@ -1,0 +1,16 @@
+{
+    "name": "Décalages",
+    "icon": "minecraft:compass",
+    "category": "otherverse:contracts",
+    "sortnum": 210,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Par défaut, des actions comme « placer des objets au-dessus des blocs de terre » ont un $(bold)décalage$() - c'est la partie « au-dessus ».$(br2)Mais le décalage peut aussi être précisé : si l'action est influencée par une $(bold)boussole$() en tant qu'objet, tous les foyers de bloc vides ou $(l:otherverse:contracts/12_webs)Destinés$() influençant la boussole détermineront un nouvel ensemble de décalages, selon leur propre position par rapport à la boussole."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Par exemple, si une boussole a une influence de foyer de bloc vide deux blocs au nord et une autre deux blocs à l'ouest, l'action influencée par la boussole tentera de s'effectuer deux blocs au nord ou à l'ouest de tout bloc cible spécifié, que la cible soit une position ou un type de bloc. Les $(l:otherverse:contracts/12_webs)Toiles du Destin$() peuvent aussi être utilisées ici, et sont utiles pour les décalages verticaux."
+        }
+    ]
+}

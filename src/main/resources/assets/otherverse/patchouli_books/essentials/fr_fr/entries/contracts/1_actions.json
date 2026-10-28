@@ -1,0 +1,30 @@
+{
+    "name": "Actions et filtres",
+    "icon": "otherverse:contract",
+    "category": "otherverse:contracts",
+    "sortnum": 10,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Certains objets qui influencent le contrat lors de sa création désignent des $(bold)actions$() que la créature liée doit accomplir.$(br2)Par exemple, un entonnoir lui dira de ramasser tous les objets au sol qu'elle voit."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_2.png"
+            ],
+            "text": "L'action « prendre »."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Tout ce qui influence une action agit comme un $(bold)filtre$(). Par exemple, ce diagramme dit à une créature de ne ramasser que des pépites d'or ou des pépites de fer.$(br2)Le fonctionnement précis des filtres dépend de l'action, et sera abordé dans d'autres sections."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/contracts_3.png"
+            ],
+            "text": "prendre(pépite d'or, pépite de fer)"
+        }
+    ]
+}

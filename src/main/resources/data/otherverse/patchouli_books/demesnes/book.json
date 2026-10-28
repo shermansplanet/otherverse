@@ -1,6 +1,6 @@
 {
-    "name": "Demesnes",
-    "landing_text": "A guide to the Demesnes ritual.",
+    "name": "otherverse.book.demesnes.name",
+    "landing_text": "otherverse.book.demesnes.landing_text",
     "version": 3,
     "model" : "otherverse:demesnes",
     "show_progress" : false,

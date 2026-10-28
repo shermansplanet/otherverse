@@ -1,0 +1,17 @@
+{
+    "name": "Peur",
+    "sortnum": 30,
+    "icon": "minecraft:snow",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Peur",
+            "text": "La Peur est glaciale et menaçante ; le vent gelé charrie des souvenirs de sons à glacer le sang. Le sol est surtout fait de neige poudreuse, mais un œil attentif remarquera qu'une partie a été légèrement tassée et qu'on peut y marcher sans danger."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les bêtes typhlotiques de la Peur s'appellent les $(bold)frissons$(). Ces requins nagent à travers la neige et peuvent voler un peu. Ils sentent le sang de très loin. Veillez à toujours avoir votre santé au maximum, de peur que les frissons ne flairent votre blessure et ne viennent vous achever."
+        }
+    ]
+}

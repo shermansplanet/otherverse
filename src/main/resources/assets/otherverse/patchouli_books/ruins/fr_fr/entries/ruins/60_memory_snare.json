@@ -1,0 +1,13 @@
+{
+    "name": "Piège à souvenirs",
+    "sortnum": 60,
+    "icon": "otherverse:memory_snare",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:memory_snare",
+            "text": "Si vous utilisez du miel bleu pour greffer des tentacules de pénombre sur un capteur sculk, vous obtenez un piège à souvenirs. Ce bloc absorbe toute l'XP dans un rayon de quatre blocs, et la régurgite lorsqu'il est cassé ou reçoit un signal de redstone."
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "name": "Air",
+    "sortnum": 20,
+    "icon": "otherverse:spirit_air",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:spirit_air"
+            },
+            "text": "La libre étendue du ciel, la vitesse d'un tourbillon, la caresse légère de la brise. Rapide et agile, mais capricieux.$(br2)La portée du sanctuaire est $(bold)centrée.$()"
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsqu'un sanctuaire d'air déborde, les esprits d'air sont expulsés en une bourrasque qui repousse les entités loin du sanctuaire. Lorsqu'il est surpuisé, il attire les entités vers lui. La force de l'attraction ou de la poussée dépend du nombre d'esprits d'air."
+        }
+    ]
+}

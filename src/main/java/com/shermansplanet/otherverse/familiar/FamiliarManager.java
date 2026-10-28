@@ -1190,7 +1190,7 @@ public class FamiliarManager {
             var maxHp = (float) DefaultAttributes.getSupplier(type).getValue(Attributes.MAX_HEALTH);
             var cost = (int) Math.ceil(Mth.log2((int) maxHp) * 0.6f);
             if (!player.isCreative() && !SelfManager.changeSelf(player, -cost)) {
-                player.displayClientMessage(Component.literal("You need " + cost + " Self to revive your Familiar!"), true);
+                player.displayClientMessage(Component.translatable("otherverse.familiar.revive_cost", cost), true);
             } else {
                 entityTag.putFloat("Health", maxHp);
                 entityTag.putShort("DeathTime", (short) 0);
@@ -1762,7 +1762,7 @@ public class FamiliarManager {
     public static InteractionResult onNameTagClick(ItemStack stack, Player player, LivingEntity entity) {
         if (!stack.hasCustomHoverName()) {
             if (player.isCreative()) {
-                stack.setHoverName(Component.literal("Familiar"));
+                stack.setHoverName(Component.translatable("otherverse.familiar.default_name"));
             } else {
                 return InteractionResult.PASS;
             }
@@ -1805,7 +1805,7 @@ public class FamiliarManager {
                 return InteractionResult.CONSUME;
             }
         }
-        player.sendSystemMessage(Component.literal("This mob needs to be influenced by " + requiredPower + " Self to complete this ritual."));
+        player.sendSystemMessage(Component.translatable("otherverse.familiar.influence_required", requiredPower));
         return InteractionResult.CONSUME;
     }
 }

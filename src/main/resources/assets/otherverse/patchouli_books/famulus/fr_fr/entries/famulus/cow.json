@@ -1,0 +1,12 @@
+{
+    "name": "Vache",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'cow'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier vache ne confère aucune capacité spéciale, mais grâce à la mécanique de transfusion évoquée plus tôt, il vous permet de remplir de lait n'importe quel seau que vous tenez."
+        }
+    ]
+}

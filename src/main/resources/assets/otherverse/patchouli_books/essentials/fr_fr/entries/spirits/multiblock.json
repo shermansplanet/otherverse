@@ -1,0 +1,20 @@
+{
+    "name": "Reliquaires multiblocs",
+    "sortnum": 5,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Lorsque vous placez plusieurs reliquaires du même type d'esprit sous forme de blocs adjacents, ils agissent comme un seul grand reliquaire dont la capacité est la somme de celles de tous les reliquaires qui le composent. On peut insérer ou extraire des esprits depuis n'importe lequel de ses blocs."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/shrine.png"
+            ],
+            "border": true,
+            "text": "Un reliquaire de nature multibloc."
+        }
+    ]
+}

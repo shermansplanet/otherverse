@@ -1,0 +1,16 @@
+{
+    "name": "Transfusion d'esprits",
+    "sortnum": 3,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Les reliquaires sont capables de $(bold)transfuser$() leurs esprits dans les objets qu'ils influencent, transformant ainsi la cible. Vous trouverez les recettes de transfusion dans JEI, indiquant le nombre d'esprits nécessaires pour transformer un objet en un autre. Cela permet aussi d'enchanter des livres."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Utiliser simplement un reliquaire sur un bloc dans le monde y transfusera aussi des esprits. Ainsi, si vous tenez un reliquaire rempli d'esprits rouges, par exemple, vous pouvez l'utiliser sur n'importe quel bloc de laine pour le transformer en laine rouge. Vous pouvez aussi changer la couleur de la craie déjà tracée de cette façon.$(br2)33 esprits de nature peuvent aussi servir de poudre d'os, ce qui est environ deux fois plus efficace que le compostage."
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "name": "Chapeau de sorcière",
+    "sortnum": 50,
+    "icon": "otherverse:witch_hat",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:witch_hat"
+            },
+            "text": "Les chapeaux de sorcière sont des accessoires de Praticien à la mode, qui peuvent être teints dans des diagrammes et portés dans l'emplacement de curio « tête ». Un chapeau dans un foyer d'objet prend la couleur de l'esprit de couleur le plus abondant parmi les objets qui l'influencent, et sa boucle prend la deuxième couleur la plus abondante."
+        }
+    ]
+}

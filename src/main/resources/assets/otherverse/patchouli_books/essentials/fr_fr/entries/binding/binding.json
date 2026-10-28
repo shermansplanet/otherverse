@@ -1,0 +1,60 @@
+{
+    "name": "Liaison",
+    "sortnum": 10,
+    "icon": "minecraft:chain",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Une créature devient liée lorsqu'elle se trouve dans un $(bold)foyer de bloc$() influencé par certains objets. Ces objets diffèrent selon la créature, et ont tendance à être contraires à sa nature. Chaque objet apporte une certaine influence à la liaison, et l'influence totale doit être au moins égale au triple de la santé maximale de la créature pour la lier. Une créature liée ne peut ni bouger ni attaquer."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/binding_1.png"
+            ],
+            "border": true,
+            "text": "Assez de chaînes peuvent lier n'importe quoi."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "De nombreuses créatures ont un type d'esprit associé. Elles peuvent être liées par son opposé.$(br2)Par exemple, les creepers sont alignés sur le phlogistique et nécessitent 60 d'influence de liaison ; ils peuvent donc être liés par des reliquaires contenant au total au moins 60 esprits d'eau. Certaines créatures ont des types d'esprits supplémentaires qui peuvent les lier ou les soigner.$(br2)Les esprits sont souvent la forme de liaison la plus compacte, mais demandent plus de préparation."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/binding_7.png"
+            ],
+            "border": true,
+            "text": "Un creeper lié par trois cristaux de prismarine consacrés, contenant chacun 20 esprits d'eau."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les créatures peuvent quitter leur foyer de liaison tout en restant liées, mais seulement si la craie du diagramme n'est absolument pas altérée.$(br2)Si le diagramme change au point de ne plus fournir assez d'influence valide, la liaison se brise. Les créatures qui brisent leur liaison deviennent soit hostiles, soit paniquées envers le joueur le plus proche, et reçoivent un bref regain de puissance."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/binding_2.png"
+            ],
+            "border": true,
+            "text": "C'est généralement une mauvaise chose."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les créatures mineures resteront liées indéfiniment. Mais les créatures de plus de 20 points de santé max capables d'attaquer (ou toute créature de plus de 100 points de santé max) attaqueront lentement leur liaison, drainant esprits/santé ou détruisant des objets. Ce rythme augmente de façon exponentielle avec la santé max de la créature. Elles cibleront toujours l'influence la plus $(italic)unique$() ; par exemple, si un hoglin est lié par sept champignons biscornus et une chaîne, il attaquera la chaîne."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si une créature tente de drainer une liaison qui ne se trouve pas dans un tronçon chargé, elle brisera la liaison. Heureusement, le $(l:otherverse:items/biome_brazier)brasero de biome$() permet à un Praticien de garder des tronçons chargés.$(br2)Les créatures apprivoisées ne nécessitent que 1 d'influence pour être liées."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Vous pouvez voir l'effet de chaque objet sur une créature dans JEI/EMI en cliquant sur son idole ou son œuf d'apparition. Les nombres à côté des icônes de chaîne noire indiquent l'influence fournie par chaque objet/esprit, ainsi que l'influence totale nécessaire pour lier la créature. Notez que certaines créatures peuvent être liées par d'autres créatures liées ; par exemple, les creepers peuvent être liés par des chats liés, et un warden peut lier n'importe quelle créature capable d'attaquer sa liaison."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Pour les créatures qui attaquent leur liaison, une icône de chaîne barrée indique à quelle fréquence et avec quelle gravité elles le font. « 4/164s » signifie que toutes les 164 secondes, elle détruira un objet, drainera 4 esprits d'un reliquaire, ou infligera 4 dégâts à une créature qui contribue à la lier.$(br2)Vous pouvez faire un clic droit sur une créature liée, la main vide, pour basculer entre des comportements simples. Mais pour des routines plus complexes, il vous faudra un contrat."
+        }
+    ]
+}

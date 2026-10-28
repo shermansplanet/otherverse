@@ -1,0 +1,20 @@
+{
+    "name": "Action : Aller",
+    "icon": "minecraft:rail",
+    "category": "otherverse:contracts",
+    "sortnum": 40,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:rail"
+            },
+            "title": "Aller",
+            "text": "Un rail en tant qu'objet désigne l'action « aller ».$(br2)Les filtres dans les foyers d'objet ou de bloc désignent les blocs vers lesquels la créature tentera de se diriger.$(br2)Un foyer de bloc vide désigne la position de ce foyer dans le monde."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Cette action ne commencera que s'il existe un bloc cible viable à portée.$(br2)Elle réussit si la créature atteint son bloc cible, et échoue si le bloc cible est retiré ou devient inaccessible."
+        }
+    ]
+}

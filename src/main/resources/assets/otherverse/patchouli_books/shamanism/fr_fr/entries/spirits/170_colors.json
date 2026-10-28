@@ -1,0 +1,12 @@
+{
+    "name": "Couleurs",
+    "sortnum": 170,
+    "icon": "otherverse:spirit_black",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous faites déborder un sanctuaire de couleur, les esprits en excès deviennent des particules décoratives qui apparaissent au hasard dans la portée du sanctuaire.$(br2)Chaque couleur produit un type de particule différent.$(br2)Les portées des sanctuaires s'étendent vers le $(bold)haut.$()"
+        }
+    ]
+}

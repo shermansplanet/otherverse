@@ -1,0 +1,12 @@
+{
+    "name": "Grand gardien",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'elder_guardian'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier grand gardien vous donne autorité sur les mers ; les créatures ne vous attaqueront pas tant que vous êtes sous l'eau."
+        }
+    ]
+}

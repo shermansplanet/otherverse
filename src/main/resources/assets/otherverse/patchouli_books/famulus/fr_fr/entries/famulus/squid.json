@@ -1,0 +1,12 @@
+{
+    "name": "Poulpe",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'squid'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier poulpe vous donnera un bref élan de vitesse extrême lorsque votre santé tombe sous le tiers de son maximum. Il pêchera aussi pour vous comme un Familier poisson, sauf qu'au lieu de ne rapporter que des objets autres que des poissons, il ne rapportera que des poissons."
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "name": "Action : Observer",
+    "icon": "minecraft:observer",
+    "category": "otherverse:contracts",
+    "sortnum": 110,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:observer"
+            },
+            "title": "Observer",
+            "text": "Un observateur désigne l'action « observer ».$(br2)Elle ne fait rien faire à la créature, mais réussit ou échoue selon que les conditions de ses filtres sont remplies ou non. Les filtres sont interprétés de la même manière que pour l'action « prendre »."
+        }
+    ]
+}

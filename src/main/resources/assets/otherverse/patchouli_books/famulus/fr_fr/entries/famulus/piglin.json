@@ -1,0 +1,12 @@
+{
+    "name": "Piglin",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'piglin'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier piglin partagera ses marchandises avec vous gratuitement. S'il ne tient pas déjà quelque chose, il produira de temps en temps un objet de troc et le tiendra. Pensez à lui donner un contrat pour déposer ses objets quelque part."
+        }
+    ]
+}

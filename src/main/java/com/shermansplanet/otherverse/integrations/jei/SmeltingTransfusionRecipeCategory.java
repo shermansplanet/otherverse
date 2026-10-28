@@ -17,7 +17,7 @@ public class SmeltingTransfusionRecipeCategory extends TransfusionRecipeCategory
 
     public SmeltingTransfusionRecipeCategory(IGuiHelper guiHelper) {
         super(guiHelper);
-        localizedName = Component.literal("Smelting Transfusion");
+        localizedName = Component.translatable("otherverse.jei.smelting_transfusion");
         icon = guiHelper.createDrawable(
                 ResourceLocation.fromNamespaceAndPath(Otherverse.MODID, "textures/gui/jei.png"),
                 57, 17, 16, 16);

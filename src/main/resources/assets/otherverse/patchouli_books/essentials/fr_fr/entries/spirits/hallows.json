@@ -1,0 +1,55 @@
+{
+    "name": "Reliquaires",
+    "sortnum": 1,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "La plupart des objets contiennent des esprits de plusieurs types. La façon la plus simple d'exploiter ces esprits est de transformer un objet en $(bold)reliquaire$() : un objet capable de stocker et de transférer des esprits d'un type précis. Les objets consacrés conservent aussi leur fonction d'origine.$(br2)La capacité spirituelle d'un reliquaire est égale au nombre total d'esprits de TOUS types que contient son objet de base."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/spirits.png"
+            ],
+            "border": true,
+            "text": "Comme on le voit dans JEI/EMI, un bloc de redstone contient 18 esprits de technologie, 18 de fortune et 16 rouges."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Pour créer un reliquaire, placez simplement l'objet voulu dans un foyer d'objet, influencé par des foyers contenant des sources de puissance ($(l:otherverse:diagrams/self)Soi$() ou créatures liées). Le foyer doit se trouver au-dessus d'un bloc précis, qui détermine la capacité du reliquaire : fer (33 %), or (66 %), diamant (100 %) ou netherite (300 %). Ces multiplicateurs s'appliquent aussi au coût en puissance.$(br2)Les objets peuvent être déconsacrés avec une meule."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/hallow.png"
+            ],
+            "border": true,
+            "text": "Consécration d'une perle de l'Ender. Remarquez comme elle adopte les couleurs de son type d'esprit."
+        },
+        {
+            "title": "Déterminer le type d'esprit",
+            "type": "patchouli:text",
+            "text": "Le type d'esprit d'un reliquaire est choisi au hasard parmi les types d'esprits que contient son objet de base. Si le reliquaire a des influences d'objet lors de sa création, il tentera de choisir un type d'esprit qu'il partage avec tous ces objets. Le choix privilégiera les esprits qui ne sont pas des couleurs si possible."
+        },
+        {
+            "title": "Reliquaires dans les diagrammes",
+            "type": "patchouli:text",
+            "text": "Placés dans des foyers d'objet ou de bloc, les reliquaires ayant encore de la capacité tenteront d'extraire des esprits de leurs influences. Cela videra les autres reliquaires, et détruira les blocs ou objets non consacrés. Si un tel bloc ou objet se trouve au-dessus d'un bloc d'améthyste, ou est influencé par un éclat d'améthyste, il ne sera détruit qu'une fois que le reliquaire aura assez de place libre pour absorber tous ses esprits."
+        },
+        {
+            "title": "Reliquaires placés",
+            "type": "patchouli:text",
+            "text": "Si vous tenez un reliquaire, vous pouvez l'utiliser sur un reliquaire placé dans le monde ou sur un reliquaire dans un cercle de craie pour en extraire des esprits (maintenez Maj pour en insérer à la place).$(br2)Vous pouvez aussi utiliser la commande /hallow en mode créatif pour consacrer ce que vous tenez."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/hallow_2.png"
+            ],
+            "border": true,
+            "text": "La plupart des reliquaires conservent les couleurs de leurs esprits lorsqu'ils sont placés comme blocs."
+        }
+    ]
+}

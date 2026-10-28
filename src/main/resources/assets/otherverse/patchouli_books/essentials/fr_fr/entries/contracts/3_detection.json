@@ -1,0 +1,16 @@
+{
+    "name": "Portée de détection",
+    "icon": "minecraft:spyglass",
+    "category": "otherverse:contracts",
+    "sortnum": 30,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Sans position ou zone cible précise, les créatures liées chercheront des blocs cibles potentiels dans un rayon de 8 blocs. Si elles trouvent un bloc éligible, elles retiendront sa position et la vérifieront la prochaine fois qu'elles effectuent la tâche, même si elles sont à plus de 8 blocs."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Ce rayon de détection de 8 blocs augmente de 8 blocs supplémentaires pour chaque longue-vue influençant le contrat lors de sa création. Mais attention : plus les cibles potentielles sont éloignées, plus les créatures passeront un temps exponentiellement long à les détecter."
+        }
+    ]
+}

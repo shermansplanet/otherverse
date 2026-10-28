@@ -1,0 +1,12 @@
+{
+    "name": "Araignée",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'spider'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier araignée vous accordera la capacité d'escalader n'importe quelle surface."
+        }
+    ]
+}

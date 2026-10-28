@@ -1,0 +1,12 @@
+{
+    "name": "Grenouille",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'frog'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier grenouille vous permettra de sauter TRÈS haut sans dégâts de chute, mais seulement depuis des grandes feuilles tombantes et des nénuphars."
+        }
+    ]
+}

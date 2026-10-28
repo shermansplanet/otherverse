@@ -1,0 +1,12 @@
+{
+    "name": "Mouton",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'sheep'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si un Familier mouton d'une couleur donnée ne tient rien, il produira fréquemment de la teinture de cette couleur et la tiendra. Pensez à lui donner un contrat pour déposer ses objets quelque part."
+        }
+    ]
+}

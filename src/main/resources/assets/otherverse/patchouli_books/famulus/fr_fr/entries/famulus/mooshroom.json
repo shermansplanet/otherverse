@@ -1,0 +1,12 @@
+{
+    "name": "Champimeuh",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'mooshroom'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Si vous avez un Familier champimeuh, vous pouvez utiliser une cisaille dans le vide pour vous tondre des champignons au prix d'un peu de santé. Si vous êtes dans le Nether, vous obtiendrez des champignons du Nether."
+        }
+    ]
+}

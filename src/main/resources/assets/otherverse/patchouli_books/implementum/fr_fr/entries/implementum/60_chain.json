@@ -1,0 +1,16 @@
+{
+    "name": "Chaîne",
+    "sortnum": 60,
+    "icon": "minecraft:chain",
+    "category": "otherverse:implementum",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "minecraft:chain"
+            },
+            "title": "Chaîne",
+            "text": "Un Instrument chaîne facilitera grandement la liaison ; les créatures n'auront besoin que d'une influence égale à 2x leur santé (au lieu de 3x) pour être liées.$(br2)En revanche, lier les créatures apprivoisées ne sera plus facilité."
+        }
+    ]
+}

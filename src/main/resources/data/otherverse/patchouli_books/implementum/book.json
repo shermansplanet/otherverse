@@ -1,6 +1,6 @@
 {
-    "name": "Implementum",
-    "landing_text": "A guide to the Implementum ritual.",
+    "name": "otherverse.book.implementum.name",
+    "landing_text": "otherverse.book.implementum.landing_text",
     "version": 3,
     "model" : "otherverse:implementum",
     "show_progress" : false,

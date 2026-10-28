@@ -1,0 +1,12 @@
+{
+    "name": "Chat",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'cat'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier chat ou ocelot est puissant mais exigeant : il ne daigne partager ses capacités que pendant 30 secondes après avoir été nourri de poisson frais (vous devrez vous accroupir pour nourrir un Familier). Ces avantages sont l'invisibilité, le saut amélioré, la vision nocturne, l'immunité aux dégâts de chute et le fait de ne pas déclencher les capteurs sculk. Les creepers vous fuiront aussi en permanence, mais les loups vous attaqueront à vue."
+        }
+    ]
+}

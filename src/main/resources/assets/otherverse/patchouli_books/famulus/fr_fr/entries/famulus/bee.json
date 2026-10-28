@@ -1,0 +1,16 @@
+{
+    "name": "Abeille",
+    "sortnum": 10,
+    "icon": "otherverse:idol{entity_type_namespace:'minecraft',entity_type_path:'bee'}",
+    "category": "otherverse:famulus",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un Familier abeille vous accordera un vol limité. De plus, si votre inventaire contient une fiole de miel, vous rassemblerez un essaim d'abeilles qui vous suivent et attaquent tout ce que vous attaquez. Ces abeilles disparaissent si vous vous éloignez trop."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Par ailleurs, les abeilles sauvages ne s'énerveront pas si vous cassez ou récoltez leurs ruches, même sans fumée."
+        }
+    ]
+}

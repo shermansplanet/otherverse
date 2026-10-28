@@ -1,0 +1,20 @@
+{
+    "name": "Affinité spirituelle",
+    "sortnum": 4,
+    "icon": "otherverse:spirit_tablet",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Chaque fois que vous utilisez un diagramme pour travailler avec des esprits, votre affinité pour ce type d'esprit augmente et celle pour le type opposé diminue. Plus votre affinité est grande, plus ces esprits se déplacent vite dans vos diagrammes.$(br2)Vous pouvez vérifier votre affinité en jetant un reliquaire dans l'eau : il flottera à une hauteur proportionnelle à votre affinité pour son type d'esprit."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les paires d'esprits opposés sont Terre et Air, Feu et Froid, Phlogistique et Eau, Lumière et Obscurité, Protection et Guerre, Nourriture et Mort, Chair et Technologie, Nature et Fortune, Destin et Temps, Blanc et Noir, Gris et Gris clair, Vert clair et Violet, Marron et Rose, Orange et Bleu clair, Rouge et Cyan, Vert et Magenta, et Bleu et Jaune. Le Nether s'oppose à la Surface, l'End au Nether, et la Surface à l'End."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "L'affinité que vous pouvez gagner en utilisant des esprits dans des diagrammes est limitée. Vous ne pouvez dépasser cette limite qu'en vous engageant de façon permanente via l'un des $(l:otherverse:rituals)trois grands rituels$(). Une fois cela fait, non seulement les esprits se déplaceront plus vite, mais vous commencerez à extraire des esprits supplémentaires des objets (et moins de l'esprit opposé). Vous pouvez porter votre affinité au maximum en utilisant le même type d'esprit pour les trois rituels."
+        }
+    ]
+}

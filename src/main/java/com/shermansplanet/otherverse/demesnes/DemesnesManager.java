@@ -21,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -75,67 +76,77 @@ public class DemesnesManager {
     }
 
     public enum DemesnePerk {
-        BASE_TELEPORT(172, 85, "Omnipresence", "When using your Sight, warp between any Demesne beacons you have named in an anvil by looking towards them and right-clicking. This works even through walls."),
-        BEACON_HIDE(89, 89, "Beam Hiding", "Ordinary beacons will still function even if their beams are blocked."),
-        BINDING(39, 172, "Mandatory Hospitality", "Bindings within the Demesne will only require 2/3 the influence. Choosing this perk again continues to reduce it by 2/3.", -1),
-        BLOCK_GEN(39, 39, "Material Ad Infinitum", "Each time you choose this perk, you declare the stone or log block above this beacon as a favored material. An unlimited supply of all these materials can then be extracted from any Demesne beacon in your Demesne via hopper, bound mob, or other means.", -1),
-        CAGE(68, 143, "Reinforced Bindings", "Powerful hostile mobs no longer drain their bindings in your Demesne."),
-        COLLAR(85, 172, "Positive Bindings", "You can give contracts to mobs you've tamed (such as wolves or horses) in your Demesne even if they're not bound."),
-        FLIGHT(126, 39, "Flight", "You gain creative flight in your Demesne."),
-        HOME(143, 68, "Escape Rope", "You can now use escape ropes to instantly teleport yourself back to your Demesne from anywhere, with a cooldown of 20 minutes. Choosing this perk again reduces the cooldown to 5 minutes, then 1 minute. You can read more about escape ropes in your Demesnes book.", 3),
-        IDOLS(39, 126, "Idol Hands", "All wooden or lapis idols in this Demesne now act as if they were diamond."),
-        MOB_REPOSITION(172, 126, "Spawn Consolidation", "If you put a spawn altar on top of a Demesne beacon, it will redirect all natural mob spawns in the bounds of your Demesne to spawn there instead. If there are multiple altars, a random one will be chosen."),
-        PORTAL(172, 39, "Portals", "You can create permanent portals that anyone can use to travel to and from your Demesne, even across dimensions. Read more about how to create these portals in your Demesnes book."),
-        PROTECTION(89, 122, "Protection", "You are immune to damage from falling, heat, cold, explosions, and water while within your Demesne. This also applies to anyone who can place blocks in your Demesne."),
-        RECOVERY(122, 122, "Recovery", "Your health and hunger replenish within your Demesne."),
-        SCHEMATIC(39, 85, "Living Architecture", "You can create diagrams that magically place blocks they are given, quickly copying and pasting large areas. Read more about these diagrams in your Demesnes book."),
-        SPAWN_SET(122, 89, "Sanctuary", "Spawns can be set in your Demesne, even if a bed would normally explode in this dimension."),
-        SPIRITS(126, 172, "Ultimate Shrine", "Each time you choose this perk, you declare the spirits in the hallow above this beacon as a favored type. Demesne beacons in your Demesne can now be repeatedly drained by hallows for a renewable supply of this spirit type.", -1),
-        TIME(172, 172, "Chronomancy", "If two Demesne beacons are aligned vertically with nothing between them, all random ticks in your Demesne will be concentrated into the range of heights between the beacons."),
-        TOOL_REPAIR(85, 39, "Hearth and Hone", "Tools in your inventory will now regain durability in your Demesne."),
-        VEIN_MINE(68, 68, "Mine What's Yours", "Tools can now break multiple blocks at once in your Demesne. Use the Implement key to toggle modes. Choosing this again will increase the number of blocks broken at once from 9 to 64.", 2),
-        WEATHER(143, 143, "Sky Painter", "Using dye on a Demesne beacon will shift the color of the sky in your Demesne (use dye repeatedly to shift more). Using a clock will shift the apparent time of day (shift-clicking will remove this effect)."),
+        BASE_TELEPORT(172, 85, "Omnipresence"),
+        BEACON_HIDE(89, 89, "Beam Hiding"),
+        BINDING(39, 172, "Mandatory Hospitality", -1),
+        BLOCK_GEN(39, 39, "Material Ad Infinitum", -1),
+        CAGE(68, 143, "Reinforced Bindings"),
+        COLLAR(85, 172, "Positive Bindings"),
+        FLIGHT(126, 39, "Flight"),
+        HOME(143, 68, "Escape Rope", 3),
+        IDOLS(39, 126, "Idol Hands"),
+        MOB_REPOSITION(172, 126, "Spawn Consolidation"),
+        PORTAL(172, 39, "Portals"),
+        PROTECTION(89, 122, "Protection"),
+        RECOVERY(122, 122, "Recovery"),
+        SCHEMATIC(39, 85, "Living Architecture"),
+        SPAWN_SET(122, 89, "Sanctuary"),
+        SPIRITS(126, 172, "Ultimate Shrine", -1),
+        TIME(172, 172, "Chronomancy"),
+        TOOL_REPAIR(85, 39, "Hearth and Hone"),
+        VEIN_MINE(68, 68, "Mine What's Yours", 2),
+        WEATHER(143, 143, "Sky Painter"),
 
-        SANCTION_FIGHT(108, 66, "Sanction: Violence", "Deal damage of any sort.", true),
-        SANCTION_BUILD(66, 108, "Sanction: Reshaping", "Place or destroy blocks", true),
-        SANCTION_INTERACT(108, 150, "Sanction: Utility", "Interact with blocks (chests, diagrams, doors, etc.)", true),
-        SANCTION_TAKE(150, 108, "Sanction: Avarice", "Pick up loose items.", true);
+        SANCTION_FIGHT(108, 66, "Sanction: Violence", true),
+        SANCTION_BUILD(66, 108, "Sanction: Reshaping", true),
+        SANCTION_INTERACT(108, 150, "Sanction: Utility", true),
+        SANCTION_TAKE(150, 108, "Sanction: Avarice", true);
 
         public final int x, y, maxValue;
-        public final String name, description;
+        // English name, used to match perks listed in the skipped_perks config
+        public final String name;
         public final List<Component> tooltip = new ArrayList<>();
         public final boolean isSanction;
 
-        private void constructTooltip() {
-            tooltip.add(Component.literal(name).withStyle(Style.EMPTY.withColor(0x90c833).withUnderlined(true)));
-            tooltip.add(Component.literal(description));
+        private String getTranslationKey() {
+            return "otherverse.demesne_perk." + name().toLowerCase(Locale.ROOT);
         }
 
-        DemesnePerk(int x, int y, String name, String description) {
+        public MutableComponent getDisplayName() {
+            return Component.translatable(getTranslationKey() + ".name");
+        }
+
+        public MutableComponent getWritName() {
+            return Component.translatable(getTranslationKey() + ".writ");
+        }
+
+        private void constructTooltip() {
+            tooltip.add(getDisplayName().withStyle(Style.EMPTY.withColor(0x90c833).withUnderlined(true)));
+            tooltip.add(Component.translatable(getTranslationKey() + ".description"));
+        }
+
+        DemesnePerk(int x, int y, String name) {
             this.x = x;
             this.y = y;
             this.name = name;
-            this.description = description;
             this.maxValue = 1;
             isSanction = false;
             constructTooltip();
         }
 
-        DemesnePerk(int x, int y, String name, String description, boolean isSanction) {
+        DemesnePerk(int x, int y, String name, boolean isSanction) {
             this.x = x;
             this.y = y;
             this.name = name;
-            this.description = description;
             this.maxValue = 1;
             this.isSanction = isSanction;
             constructTooltip();
         }
 
-        DemesnePerk(int x, int y, String name, String description, int maxChoices) {
+        DemesnePerk(int x, int y, String name, int maxChoices) {
             this.x = x;
             this.y = y;
             this.name = name;
-            this.description = description;
             this.maxValue = maxChoices;
             isSanction = false;
             constructTooltip();
@@ -332,7 +343,7 @@ public class DemesnesManager {
         }
         if (!demesne.hasSanction(DemesnePerk.SANCTION_INTERACT, owner)) {
 //            LOGGER.info("UNSANCTIONED");
-            owner.displayClientMessage(Component.literal("You don't have permission to open a portal to this Demesne."), true);
+            owner.displayClientMessage(Component.translatable("otherverse.demesne.portal_no_permission"), true);
             return false;
         }
         var cost = destLevelId == DiagramManager.getDimensionHash(level) ? 6 : 18;
@@ -465,7 +476,7 @@ public class DemesnesManager {
     public static void onTooltip(ItemTooltipEvent event) {
         var item = event.getItemStack();
         if (!item.is(OtherverseItems.WRIT.get())) return;
-        event.getToolTip().add(Component.literal("Use on another player to grant or revoke.")
+        event.getToolTip().add(Component.translatable("otherverse.tooltip.writ")
                 .withStyle(Style.EMPTY.withColor(0x888888)));
     }
 
@@ -523,11 +534,10 @@ public class DemesnesManager {
         item.shrink(1);
         if (item.isEmpty()) demesneOwner.getInventory().removeItem(item);
         demesneOwner.getInventory().setChanged();
-        var message = recipient.getGameProfile().getName() + (hasPermission ? " has been granted a " : " has lost the ")
-                + perk.name.replace("Sanction:", "Writ of")
-                + " for " + demesneOwner.getGameProfile().getName() + "'s Demesne";
-        recipient.displayClientMessage(Component.literal(message), false);
-        if (recipient != demesneOwner) demesneOwner.displayClientMessage(Component.literal(message), false);
+        var message = Component.translatable(hasPermission ? "otherverse.demesne.writ_granted" : "otherverse.demesne.writ_revoked",
+                recipient.getGameProfile().getName(), perk.getWritName(), demesneOwner.getGameProfile().getName());
+        recipient.displayClientMessage(message, false);
+        if (recipient != demesneOwner) demesneOwner.displayClientMessage(message, false);
     }
 
     @SubscribeEvent

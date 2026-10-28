@@ -1,0 +1,19 @@
+{
+    "name": "Bloqueurs de connexion",
+    "sortnum": 40,
+    "icon": "otherverse:connection_blocker",
+    "category": "otherverse:items",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": {
+                "item": "otherverse:connection_blocker"
+            },
+            "text": "Les bloqueurs de connexion sont de petites runes bien pratiques qui vous évitent d'être remarqué. Créez-en un en influençant du papier avec une carotte dorée, un œil d'araignée fermenté et de la puissance de n'importe quelle source. Plus vous fournissez de puissance au diagramme, plus le bloqueur de connexion sera durable."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Tant que vous tenez le bloqueur de connexion, les créatures hostiles vous ignoreront à moins que vous ne les blessiez. Chaque fois que vous échappez ainsi à leur attention, la page tressaille et perd de la durabilité.$(br2)Mais attention : lorsque vous ne le tenez plus, les connexions différées rebondiront, et toutes les créatures hostiles dans une vaste zone vous cibleront pendant la même durée que celle où vous teniez le bloqueur."
+        }
+    ]
+}

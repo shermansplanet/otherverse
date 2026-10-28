@@ -1,0 +1,33 @@
+{
+    "name": "Foyers",
+    "sortnum": 5,
+    "icon": "otherverse:chalk",
+    "category": "otherverse:diagrams",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Un $(bold)foyer$() est une partie d'un diagramme qui peut contenir un objet ou un bloc. Les $(bold)foyers d'objet$() se forment en utilisant n'importe quel objet sur une marque de craie, ce qui place l'objet dans le foyer. Utiliser de la craie sur une marque de craie crée un foyer d'objet vide qui acceptera les objets qu'on y jette."
+        },
+        {
+            "title": "Foyers d'objet",
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/chalk_2.png"
+            ],
+            "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les $(bold)foyers de bloc$() sont toutes les cases sans craie entièrement entourées de craie (au même niveau Y que le reste du diagramme). Un bloc placé dans une telle case, ou une créature qui y entre, se trouve dans le foyer de bloc."
+        },
+        {
+            "title": "Foyers de bloc",
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/chalk_3.png"
+            ],
+            "border": true,
+            "text": "Neuf foyers de bloc distincts."
+        }
+    ]
+}

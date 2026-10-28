@@ -162,7 +162,7 @@ public class BindingManager {
                 try {
                     int maxHp = (int) DefaultAttributes.getSupplier((EntityType<? extends LivingEntity>) entityType).getValue(Attributes.MAX_HEALTH);
                     int hp = (int) event.getItemStack().getTag().getCompound("mob_data").getCompound("EntityTag").getFloat("Health");
-                    event.getToolTip().add(Component.literal(hp + "/" + maxHp + " Health"));
+                    event.getToolTip().add(Component.translatable("otherverse.tooltip.idol_health", hp, maxHp));
                 } catch (Exception ignored) {
                 }
             }

@@ -1,0 +1,34 @@
+{
+    "name": "Armure typhlotique",
+    "sortnum": 40,
+    "icon": "otherverse:ruins_chestplate",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": "otherverse:ruins_helmet,otherverse:ruins_chestplate,otherverse:ruins_leggings,otherverse:ruins_boots",
+            "title": "Armure typhlotique",
+            "text": "La fourrure d'éteigneur et la membrane de banshee permettent de fabriquer un ensemble d'armure typhlotique. Chaque pièce de cette armure réduit de 25 % les dégâts au Soi et convertit 25 % de l'expérience perdue à la mort en une floraison de sculk."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/armor_bloom.png"
+            ],
+            "border": true,
+            "text": "À haut niveau, cela peut être... considérable."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Si vous vous rendez dans l'un des sombres gouffres interstitiels où les régions des Ruines se rejoignent et plongent dans le vide, vous pouvez accomplir un rituel spécial. Placez une pièce d'armure typhlotique dans un foyer d'objet, influencé par 21 de Soi et des reliquaires contenant 99 esprits de protection. L'armure sera imprégnée de Raccommodage et de Protection V (un niveau supérieur à ce que permet l'enchantement normal)."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/ruins_void.png"
+            ],
+            "border": true,
+            "text": "Vous saurez que vous êtes dans le Néant des Ruines quand la brume deviendra noire."
+        }
+    ]
+}

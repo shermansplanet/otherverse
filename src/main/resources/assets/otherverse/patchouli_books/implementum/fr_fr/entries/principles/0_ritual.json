@@ -1,0 +1,20 @@
+{
+    "name": "Accomplir le rituel",
+    "sortnum": 0,
+    "icon": "otherverse:chalk",
+    "category": "otherverse:principles",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Votre Instrument est une déclaration de qui vous êtes et de ce que vous faites, exprimée sous la forme d'un objet. Pour accomplir le rituel de l'Implementum, il suffit de dormir dans un lit influencé par l'Instrument choisi. À votre réveil, l'objet se liera à vous. Vous débloquerez aussi un nouvel emplacement de curio qui ne peut contenir qu'un Instrument."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Vous serez incapable de vous débarrasser de votre Instrument, même en mourant.$(br2)S'il est détruit - brisé, placé, vidé, mangé, etc. - vous pouvez utiliser la touche de l'Instrument (i par défaut) pour le régénérer au prix d'un peu de Soi.$(br2)Votre portée sera aussi augmentée lorsque vous tenez votre Instrument."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Lorsqu'il se régénère, votre Instrument redevient tel qu'il était au moment où vous l'avez revendiqué ; la plupart des Praticiens s'assurent donc que leur Instrument est en parfait état pour le rituel. Cependant, si vous prenez un Instrument endommagé à plus de 90 %, vous gagnez une affinité pour les Ruines, et pouvez vous y transporter en le brisant."
+        }
+    ]
+}

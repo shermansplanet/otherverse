@@ -1,0 +1,20 @@
+{
+    "name": "Liaisons positives",
+    "sortnum": 15,
+    "icon": "minecraft:lead",
+    "category": "otherverse:binding",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Lier une créature avec des choses opposées à sa nature (une liaison « négative ») est la méthode la plus efficace, mais il en existe une autre.$(br2)Une liaison « positive » fonctionne comme une liaison négative, mais utilise des influences qui soigneraient la créature, et nécessite $(bold)deux fois plus d'influence$() (6x la santé de la créature)."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les liaisons positives comptent aussi tous les esprits correspondant au type d'esprit de la créature dans chaque bloc d'une zone de 5x3x5 centrée sur le foyer de liaison (sans compter les esprits des reliquaires). Par exemple, un zombie (mort) peut être lié positivement même par un cercle vide s'il est entouré de suffisamment de blocs d'os et de crânes, et une abeille (air) veut beaucoup de blocs d'air vides. Voyez cela comme l'aménagement d'un habitat agréable."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les créatures liées positivement ayant plus de 20 PV drainent leurs influences de liaison ; elles ne sont peut-être pas là contre leur gré, mais elles exigent quand même un paiement pour leurs services et se fâcheront si vous ne pouvez pas payer. Contrairement aux liaisons négatives, cela ne se limite pas aux créatures capables d'attaquer, mais elles drainent leurs liaisons moins souvent. Elles ne regardent pour cela que les foyers du diagramme, en ignorant la partie « habitat » de leur liaison."
+        }
+    ]
+}

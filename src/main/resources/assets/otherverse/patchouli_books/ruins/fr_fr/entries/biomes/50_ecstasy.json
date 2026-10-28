@@ -1,0 +1,17 @@
+{
+    "name": "Extase",
+    "sortnum": 50,
+    "icon": "minecraft:honeycomb_block",
+    "category": "otherverse:biomes",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Extase",
+            "text": "L'Extase est aveuglante, pleine de hauteurs vertigineuses et dégoulinante de miel sucré. La force de vos sauts y est amplifiée et un saut en courant devient un grand bond, ce qui peut être une aubaine pour l'exploration avec le bon équipement, mais assez dangereux pour les imprudents."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "L'Extase abrite des abeilles typhlotiques appelées $(bold)bourdonnés$(), qui cherchent frénétiquement leur prochain repas. En raison de leur régime immatériel, leurs sens reposent sur l'expérience : elles ne peuvent vous détecter que dans un rayon égal à votre nombre de niveaux d'XP (avec un maximum de 33).$(br2)Leurs morsures drainent non seulement le Soi mais aussi des niveaux. Elles s'enfuient un moment après chaque morsure réussie."
+        }
+    ]
+}

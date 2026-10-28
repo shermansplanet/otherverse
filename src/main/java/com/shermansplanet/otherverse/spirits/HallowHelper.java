@@ -209,7 +209,7 @@ public class HallowHelper {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.FAIL);
             if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-            sp.sendSystemMessage(Component.literal("Sorry, you can't put hallows in a block that already contains something."));
+            sp.sendSystemMessage(Component.translatable("otherverse.hallow.block_occupied"));
             return;
         }
     }
@@ -324,8 +324,7 @@ public class HallowHelper {
         var entityData = BlockItem.getBlockEntityData(event.getItemStack());
         if (entityData != null && entityData.contains("spawn_altar_type")) {
             var entityType = ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse(entityData.getString("spawn_altar_type")));
-            event.getToolTip().add(Component.literal("Spawn type: ")
-                    .append(entityType.getDescription()));
+            event.getToolTip().add(Component.translatable("otherverse.tooltip.spawn_type", entityType.getDescription()));
         }
 
         if (tag == null || !tag.contains("hallow")) {
@@ -334,8 +333,8 @@ public class HallowHelper {
         CompoundTag hallowTag = tag.getCompound("hallow");
         int capacity = hallowTag.getInt("capacity");
         int count = hallowTag.getInt("spirit_count");
-        event.getToolTip().add(Component.literal(count + "/" + capacity + " "
-                + hallowTag.getString("spirit_type").replace("_", " ")));
+        event.getToolTip().add(Component.translatable("otherverse.tooltip.hallow_contents", count, capacity,
+                SpiritType.getDisplayName(hallowTag.getString("spirit_type"))));
     }
 
     public static void addTabletInfo(List<Component> toolTip, BlockPos referencePos, CompoundTag tag, Level level) {
@@ -343,13 +342,13 @@ public class HallowHelper {
         var linkedDimension = tag.getInt("linked_dimension");
         var data = DiagramManager.getOrCreateLevelData(linkedDimension, true);
         if (data.getPlacedItemTag(pos) == null) {
-            toolTip.add(Component.literal("Shrine not found!").withStyle(Style.EMPTY.withColor(0xaa4444)));
+            toolTip.add(Component.translatable("otherverse.tooltip.shrine_not_found").withStyle(Style.EMPTY.withColor(0xaa4444)));
             return;
         }
         var spiritLabel = tag.getString("spirit_type");
         var cc = getShrineSpiritCountAndCapacity(data, pos, Spirits.spiritsByLabel.get(spiritLabel));
         var inThisDimension = DiagramManager.getDimensionHash(level) == linkedDimension;
-        toolTip.add(Component.literal("Linked to a shrine at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + (inThisDimension ? " in this dimension" : " in another dimension")));
+        toolTip.add(Component.translatable(inThisDimension ? "otherverse.tooltip.linked_shrine.this_dimension" : "otherverse.tooltip.linked_shrine.other_dimension", pos.getX(), pos.getY(), pos.getZ()));
         var spiritCount = Component.literal(String.valueOf(cc.getFirst()));
         var efficiency = getEfficiency(referencePos, pos, inThisDimension);
         var defaultStyle = Style.EMPTY.withStrikethrough(false);
@@ -357,8 +356,8 @@ public class HallowHelper {
             spiritCount = spiritCount.withStyle(Style.EMPTY.withStrikethrough(true))
                     .append(Component.literal(String.valueOf(Math.round(efficiency * cc.getFirst()))).withStyle(defaultStyle));
         }
-        toolTip.add(spiritCount.append(Component.literal("/" + cc.getSecond() + " " + spiritLabel + " spirits").withStyle(defaultStyle)));
-        toolTip.add(Component.literal(Math.round(efficiency * 100) + "% efficiency"));
+        toolTip.add(spiritCount.append(Component.translatable("otherverse.tooltip.shrine_capacity", cc.getSecond(), SpiritType.getDisplayName(spiritLabel)).withStyle(defaultStyle)));
+        toolTip.add(Component.translatable("otherverse.tooltip.efficiency", Math.round(efficiency * 100)));
     }
 
     public static boolean tryHallow(ServerLevel level, ChalkCircle circle, Diagram diagram) {

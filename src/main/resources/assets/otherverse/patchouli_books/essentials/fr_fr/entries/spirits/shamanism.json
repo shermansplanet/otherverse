@@ -1,0 +1,16 @@
+{
+    "name": "Pour aller plus loin",
+    "sortnum": 10,
+    "icon": "patchouli:guide_book{'patchouli:book':'otherverse:shamanism'}",
+    "category": "otherverse:spirits",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Outre la transfusion, les différents types d'esprits ont des usages uniques et puissants. Pour en apprendre davantage sur l'exploitation des esprits, il vous faudra fabriquer un livre de Chamanisme."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "otherverse:shamanism"
+        }
+    ]
+}

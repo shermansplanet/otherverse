@@ -1,0 +1,29 @@
+{
+    "name": "Que sont les Ruines ?",
+    "sortnum": 10,
+    "icon": "minecraft:experience_bottle",
+    "category": "otherverse:ruins",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Que sont les Ruines ?",
+            "text": "Les Ruines sont une dimension qui brouille la frontière entre le physique et l'immatériel, entre le phénomène et la métaphore.$(br2)Elles recueillent les souvenirs oubliés, les échos d'émotions, les esprits disparus et autres immatéria produits par les autres mondes."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "otherverse:textures/gui/entries/ruins_1.png"
+            ],
+            "border": true,
+            "text": "Chaque zone des Ruines est façonnée par une émotion."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Les Praticiens se servent parfois des Ruines pour parcourir rapidement de grandes distances ; leur échelle est déformée comme celle du Nether et elles sont reliées à toutes les autres dimensions.$(br2)Parfois, nous les visitons pour tuer des bêtes typhlotiques, ou pour les lier et nous en servir afin de drainer le Soi d'autres créatures.$(br2)Parfois, nous élisons même domicile en ce lieu étrange."
+        },
+        {
+            "type": "patchouli:text",
+            "text": "Revendiquer votre Domaine dans un biome des Ruines ou prendre comme Familier la bête typhlotique correspondant à un biome rendra ce biome plus amical envers vous, et désamorcera ses dangers naturels.$(br2)$(italic)NOTE DE DÉVELOPPEMENT : Les Ruines sont encore en développement. Ce qui figure dans ce livre a été implémenté, mais les échos et l'Accueil ne sont pas encore présents."
+        }
+    ]
+}
